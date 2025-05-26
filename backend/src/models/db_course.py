@@ -2,6 +2,7 @@ from sqlalchemy import Boolean, Column, Integer, String, Text, DateTime, Foreign
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from ..db.database import Base
+from ..models import db_user as user_model
 
 
 class Course(Base):
@@ -10,6 +11,7 @@ class Course(Base):
     
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     session_id = Column(Integer, unique=True, index=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     title = Column(String(200), nullable=False)
     description = Column(Text)
     total_time_hours = Column(Integer, nullable=False)
