@@ -13,12 +13,25 @@
 # limitations under the License.
 
 import os
+
+from fastapi import UploadFile
 from google.genai import types
 
 
 def create_text_query(query: str) -> types.Content:
     """ Takes a string and returns a user query that can be sent to an agent """
     return types.Content(role="user", parts=[types.Part(text=query)])
+
+
+def create_doc_query(query: str, file: UploadFile) -> types.Content:
+    """ Takes a string and fastapi UploadFile object and returns a user query that can be sent to an agent """
+    return types.Content(role="user", parts=[
+        types.Part(text=query),
+        types.Part.from_bytes(
+            data=file.file.read(),
+            mime_type=file.content_type,
+        )
+    ])
 
 
 def load_instruction_from_file(

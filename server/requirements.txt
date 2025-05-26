@@ -1,0 +1,11 @@
+dotenv
+openai
+pydantic
+matplotlib
+google-adk
+PyQt6
+fastapi
+python-dotenv
+uvicorn
+aiohttp
+python-multipart

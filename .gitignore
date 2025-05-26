@@ -226,3 +226,7 @@ checkpoints/
 
 # Tailwind CSS
 *.css.map
+
+# Frontend
+frontend/*/node_modules
+frontend/*/dist

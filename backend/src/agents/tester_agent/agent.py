@@ -8,7 +8,7 @@ from google.adk.agents import LlmAgent
 from google.adk.runners import Runner
 from google.genai import types
 
-from backend.src.agents.utils import load_instruction_from_file
+from ..utils import load_instruction_from_file
 from .schema import Test
 
 

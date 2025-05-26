@@ -13,7 +13,8 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.get("/", response_model=List[user_schemas.User], dependencies=[Depends(auth.get_current_admin_user)])
+@router.get("/", response_model=List[user_schemas.User],
+            dependencies=[Depends(auth.get_current_admin_user)])
 async def read_users(
     skip: int = 0,
     limit: int = 100,

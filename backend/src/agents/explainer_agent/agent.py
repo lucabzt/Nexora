@@ -5,7 +5,7 @@ runner from adk and calls to visualizer agent into a simple run() method
 from google.adk.agents import LlmAgent
 from google.adk.runners import Runner
 
-from backend.src.agents.utils import load_instruction_from_file
+from ..utils import load_instruction_from_file   
 
 
 class ExplainerAgent:
