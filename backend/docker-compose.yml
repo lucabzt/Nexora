@@ -1,0 +1,17 @@
+
+services:
+  app:
+    build:
+      context: . # Build the image from the Dockerfile in the current directory
+      dockerfile: Dockerfile
+    container_name: my_fastapi_app
+    ports:
+      - "8000:8000" # Map host port 8000 to container port 8000
+    env_file:
+      - ./.env      # Load environment variables from the .env file in the project root
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

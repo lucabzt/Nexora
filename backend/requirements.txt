@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+mysql-connector-python  # Or psycopg2-binary for PostgreSQL, or remove if using SQLite
+pydantic[email]
+python-jose[cryptography]
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+python-dotenv
+email_validator
+python-multipart
