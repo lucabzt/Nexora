@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 from pydantic import BaseModel, Field
 
 
@@ -30,7 +30,13 @@ class Chapter(BaseModel):
     time_minutes: int
 
 
-class Course(BaseModel):
+class CourseInfo(BaseModel):
+    """Schema for a list of courses."""
+    course_id: int
+    title: str
+    description: str
+    session_id: int
+
+class Course(CourseInfo):
     """Schema for a course."""
     chapters: List[Chapter]
-    session_id: str

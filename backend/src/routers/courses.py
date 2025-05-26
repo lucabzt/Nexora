@@ -10,6 +10,7 @@ from datetime import datetime
 
 
 from ..schemas.course import (
+    CourseInfo,
     CourseRequest,
     Course as CourseSchema,
     Chapter as ChapterSchema,
@@ -257,18 +258,18 @@ async def create_course(
     
     return CourseSchema(
         chapters=chapters,
-        session_id=demo_course.session_id
+        session_id=str(demo_course.session_id)
     )
 
 
 
 
-@router.get("/", response_model=List[CourseSchema])
+@router.get("/", response_model=List[CourseInfo])
 async def get_user_courses(
         current_user: User = Depends(get_current_active_user),
         db: Session = Depends(get_db),
         skip: int = 0,
-        limit: int = 100
+        limit: int = 200
 ):
     """
     Get all courses belonging to the current user.
@@ -282,37 +283,8 @@ async def get_user_courses(
               .all())
     
     # Convert to response format with chapters
-    result = []
-    for course in courses:
-        chapters = []
-        for chapter in course.chapters:
-            mc_questions = [
-                MCQuestionSchema(
-                    question=q.question,
-                    answer_a=q.answer_a,
-                    answer_b=q.answer_b,
-                    answer_c=q.answer_c,
-                    answer_d=q.answer_d,
-                    correct_answer=q.correct_answer,
-                    explanation=q.explanation
-                ) for q in chapter.mc_questions
-            ]
-            
-            chapters.append(ChapterSchema(
-                index=chapter.index,
-                caption=chapter.caption,
-                summary=chapter.summary or "",
-                content=chapter.content,
-                mc_questions=mc_questions,
-                time_minutes=chapter.time_minutes
-            ))
-        
-        result.append(CourseSchema(
-            chapters=chapters,
-            session_id=course.session_id
-        ))
+    return [CourseInfo(course_id = course.id, description = course.description, title = course.title, session_id=course.session_id) for course in courses]
     
-    return result
 
 
 @router.get("/{course_id}", response_model=CourseSchema)
