@@ -11,6 +11,8 @@ from .schemas import token as token_schema
 from .utils import auth
 from .db.database import engine, get_db
 from .routers import users # Your existing users router
+from .routers import courses  # Add courses import
+
 
 # Create database tables
 user_model.Base.metadata.create_all(bind=engine)
@@ -36,6 +38,8 @@ api_router = APIRouter()
 
 # Include your existing routers under this api_router
 api_router.include_router(users.router)
+api_router.include_router(courses.router)
+
 # If you had other routers (e.g., items_router), you would include them here too:
 # api_router.include_router(items_router, prefix="/items", tags=["items"])
 

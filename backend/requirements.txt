@@ -9,3 +9,5 @@ bcrypt==4.0.1
 python-dotenv
 email_validator
 python-multipart
+google-adk
+google-genai
