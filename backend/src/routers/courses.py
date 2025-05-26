@@ -58,7 +58,7 @@ async def create_course(
     """
     
     # Generate a unique session_id (for now, just use timestamp + random)
-    session_id = int(datetime.now().timestamp() * 1000) + random.randint(1000, 9999)
+    session_id = (int(datetime.now().timestamp() * 1000) + random.randint(1000, 9999)) % 214748364
     
     # Create demo course based on query
     demo_course = Course(
