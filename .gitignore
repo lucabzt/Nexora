@@ -209,7 +209,6 @@ config.local.json
 local_settings.py
 
 # AI/ML specific
-models/
 checkpoints/
 *.pkl
 *.pickle
