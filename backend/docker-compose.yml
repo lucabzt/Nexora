@@ -1,19 +1,11 @@
-
 services:
   app:
-    build:
-      context: . # Build the image from the Dockerfile in the current directory
-      dockerfile: Dockerfile
-    container_name: my_app_container
+    container_name: nexora
+    image: m4rkus28/nexora:latest
     ports:
-      - "8000:8000" # Map host port 8000 to container port 8000
+      - "8127:8000"
     env_file:
-      - ./.env      # Load environment variables from the .env file in the project root
-    networks:
-      - app-network
+      - ./.env
+    restart: always
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
-
-networks:
-  app-network:
-    driver: bridge

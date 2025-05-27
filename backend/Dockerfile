@@ -58,4 +58,4 @@ EXPOSE 8000
 # For production, you might run uvicorn directly with more workers.
 # CMD ["python", "run_dev.py"]
 # Alternatively, for production with multiple workers:
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
