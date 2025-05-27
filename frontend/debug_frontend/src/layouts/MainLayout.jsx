@@ -13,9 +13,12 @@ import {
   Text // Ensure Text is imported
 } from '@mantine/core';
 import { 
-  IconSettings
-} from '@tabler/icons-react';
-import { IconSun, IconMoonStars, IconUser, IconLogout } from '@tabler/icons-react'; // Added IconLogout and IconUser
+  IconSettings,
+  IconSun, 
+  IconMoonStars, 
+  IconUser, 
+  IconLogout 
+} from '@tabler/icons-react'; // Added IconLogout and IconUser
 import { useMantineColorScheme } from '@mantine/core';
 import AppFooter from '../components/AppFooter';
 import { Link as RouterLink, useNavigate } from 'react-router-dom'; // Added useNavigate
@@ -64,30 +67,34 @@ function MainLayout() {
             </Title>
             
             <Group spacing="md">
-              {isAuthenticated && user ? (
+              {isAuthenticated ? (
                 <Menu shadow="md" width={200} position="bottom-end">
                   <Menu.Target>
                     <Group spacing="xs" sx={{ cursor: 'pointer' }}>
-                      <Avatar src={user.avatar_url} alt={user.username} radius="xl" size="sm" />
-                      <Text size="sm" fw={500}>
-                        {user.username}
-                      </Text>
+                      <Avatar src={user?.avatar_url || null} alt={user?.username || 'User'} radius="xl" size="sm" />
+                      {user && (
+                        <Text size="sm" fw={500}>
+                          {user.username}
+                        </Text>
+                      )}
                     </Group>
                   </Menu.Target>
                   <Menu.Dropdown>
                     <Menu.Item icon={<IconUser size={14} />} onClick={() => navigate('/')}>
                       Dashboard
                     </Menu.Item>
-                    <Menu.Item icon={<IconLogout size={14} />} onClick={handleLogout}>
-                      Logout
-                    </Menu.Item>
-                    <Menu.Item icon={<IconUser size={14} />} onClick={() => navigate('/')}>
-                      Dashboard
-                    </Menu.Item>
                     <Menu.Item icon={<IconSettings size={14} />} onClick={() => navigate('/settings')}>
                       Settings
                     </Menu.Item>
-                    
+                    <Menu.Item 
+                      icon={dark ? <IconSun size={14} /> : <IconMoonStars size={14} />} 
+                      onClick={() => toggleColorScheme()}
+                    >
+                      Toggle Theme
+                    </Menu.Item>
+                    <Menu.Item icon={<IconLogout size={14} />} onClick={handleLogout}>
+                      Logout
+                    </Menu.Item>
                   </Menu.Dropdown>
                 </Menu>
               ) : (
@@ -110,17 +117,9 @@ function MainLayout() {
                   >
                     Sign Up
                   </Button>
+                  {/* Theme toggle for non-authenticated users is removed from here */}
                 </>
               )}
-
-              <ActionIcon
-                variant="outline"
-                color={dark ? 'yellow' : 'blue'}
-                onClick={() => toggleColorScheme()}
-                title="Toggle color scheme"
-              >
-                {dark ? <IconSun size={18} /> : <IconMoonStars size={18} />}
-              </ActionIcon>
             </Group>
           </div>
         </Header>

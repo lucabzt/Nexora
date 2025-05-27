@@ -125,9 +125,6 @@ function AppLayout() {
             <Title order={3}>Nexora</Title>
             <Box sx={{ flexGrow: 1 }} /> {/* Spacer */} 
             <Group spacing="xs">
-              <ActionIcon variant="default" onClick={() => toggleColorScheme()} size={30}>
-                {dark ? <IconSun size={16} /> : <IconMoonStars size={16} />}
-              </ActionIcon>
               {user && (
                 <Menu shadow="md" width={200}>
                   <Menu.Target>
@@ -142,6 +139,12 @@ function AppLayout() {
                     <Menu.Label>Application</Menu.Label>
                     <Menu.Item icon={<IconSettings size={14} />} component={Link} to="/settings">
                       Settings
+                    </Menu.Item>
+                    <Menu.Item 
+                      icon={dark ? <IconSun size={14} /> : <IconMoonStars size={14} />} 
+                      onClick={() => toggleColorScheme()}
+                    >
+                      Toggle Theme
                     </Menu.Item>
                     <Menu.Item icon={<IconLogout size={14} />} onClick={handleLogout}>
                       Logout
