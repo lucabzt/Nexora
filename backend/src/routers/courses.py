@@ -248,17 +248,22 @@ async def create_course(
         ]
         
         chapters.append(ChapterSchema(
+            id=chapter.id,  # Add this
             index=chapter.index,
             caption=chapter.caption,
             summary=chapter.summary or "",
             content=chapter.content,
             mc_questions=mc_questions,
-            time_minutes=chapter.time_minutes
+            time_minutes=chapter.time_minutes,
+            is_completed=chapter.is_completed  # Add this
         ))
     
     return CourseSchema(
-        chapters=chapters,
-        session_id=str(demo_course.session_id)
+        course_id=demo_course.id,
+        title=demo_course.title,
+        description=demo_course.description or "",
+        session_id=demo_course.session_id,
+        chapters=chapters
     )
 
 
@@ -315,12 +320,14 @@ async def get_course_by_id(
         ]
         
         chapters.append(ChapterSchema(
+            id=chapter.id,  # Add this
             index=chapter.index,
             caption=chapter.caption,
             summary=chapter.summary or "",
             content=chapter.content,
             mc_questions=mc_questions,
-            time_minutes=chapter.time_minutes
+            time_minutes=chapter.time_minutes,
+            is_completed=chapter.is_completed  # Add this
         ))
     
     return CourseSchema(
@@ -359,12 +366,14 @@ async def get_course_chapters(
         ]
         
         chapters.append(ChapterSchema(
+            id=chapter.id,  # Add this
             index=chapter.index,
             caption=chapter.caption,
             summary=chapter.summary or "",
             content=chapter.content,
             mc_questions=mc_questions,
-            time_minutes=chapter.time_minutes
+            time_minutes=chapter.time_minutes,
+            is_completed=chapter.is_completed  # Add this
         ))
     
     return chapters
@@ -409,12 +418,14 @@ async def get_chapter_by_id(
     ]
     
     return ChapterSchema(
+        id=chapter.id,  # Add this
         index=chapter.index,
         caption=chapter.caption,
         summary=chapter.summary or "",
         content=chapter.content,
         mc_questions=mc_questions,
-        time_minutes=chapter.time_minutes
+        time_minutes=chapter.time_minutes,
+        is_completed=chapter.is_completed  # Add this
     )
 
 
