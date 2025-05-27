@@ -14,7 +14,9 @@ import {
   Box,
   Menu,
   useMantineTheme,
-  Avatar
+  Avatar,
+  ActionIcon,
+  Stack
 } from '@mantine/core';
 import { 
   IconHome2, 
@@ -22,9 +24,13 @@ import {
   IconBookmarks, 
   IconUser,
   IconLogout,
-  IconSettings
+  IconSettings,
+  IconSun,
+  IconMoonStars
 } from '@tabler/icons-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useMantineColorScheme } from '@mantine/core';
+import AppFooter from '../components/AppFooter';
 
 const MainLink = ({ icon, color, label, to }) => {
   const theme = useMantineTheme();
@@ -60,6 +66,8 @@ function AppLayout() {
   const [opened, setOpened] = useState(false);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const dark = colorScheme === 'dark';
   
   const links = [
     { icon: <IconHome2 size={18} />, color: 'blue', label: 'Dashboard', to: '/' },
@@ -76,6 +84,9 @@ function AppLayout() {
       styles={{
         main: {
           background: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
         },
       }}
       navbarOffsetBreakpoint="sm"
@@ -144,27 +155,51 @@ function AppLayout() {
         </Navbar>
       }
       header={
-        <Header height={60} p="md">
+        <Header height={{ base: 60, sm: 70 }} p="md">
           <div style={{ display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>
-            <Group>
+            <Group spacing="xs">
               <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
                 <Burger
                   opened={opened}
                   onClick={() => setOpened((o) => !o)}
                   size="sm"
                   color={theme.colors.gray[6]}
-                  mr="xl"
                 />
               </MediaQuery>
-              <Title order={2}>TeachAI Learning Platform</Title>
+              <Title 
+                order={2} 
+                size={{ base: 'h4', sm: 'h3' }}
+                sx={(theme) => ({
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                })}
+              >
+                Nexora
+              </Title>
             </Group>
             
-            <Text size="sm">Welcome, {user?.username || 'User'}</Text>
+            <Group spacing="xs">
+              <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
+                <Text size="sm">Welcome, {user?.username || 'User'}</Text>
+              </MediaQuery>
+              <ActionIcon
+                variant="outline"
+                color={dark ? 'yellow' : 'blue'}
+                onClick={() => toggleColorScheme()}
+                title="Toggle color scheme"
+              >
+                {dark ? <IconSun size={18} /> : <IconMoonStars size={18} />}
+              </ActionIcon>
+            </Group>
           </div>
         </Header>
       }
     >
-      <Outlet />
+      <Box sx={{ flex: 1 }}>
+        <Outlet />
+      </Box>
+      <AppFooter />
     </AppShell>
   );
 }

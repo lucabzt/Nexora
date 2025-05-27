@@ -31,14 +31,14 @@ jobs:
         working-directory: frontend/debug_frontend
 
 
-      - name: Clean remote target directory
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            rm -rf ${{ secrets.REMOTE_PATH }}/*
+      #- name: Clean remote target directory
+      #  uses: appleboy/ssh-action@v1.0.0
+      #  with:
+      #    host: ${{ secrets.SSH_HOST }}
+      #    username: ${{ secrets.SSH_USER }}
+      #    key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #    script: |
+      #      rm -rf ${{ secrets.REMOTE_PATH }}/*
 
       - name: Copy files over SSH
         uses: appleboy/scp-action@v0.1.7
@@ -48,3 +48,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "frontend/debug_frontend/dist/*"   # oder "build/*" – je nach Framework
           target: ${{ secrets.REMOTE_PATH }}
+          strip_components: 3

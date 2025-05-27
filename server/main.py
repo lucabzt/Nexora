@@ -30,7 +30,7 @@ app.add_middleware(
 
 load_dotenv()
 
-APP_NAME = "TeachAI"
+APP_NAME = "Nexora"
 session_service = InMemorySessionService()
 
 planner_agent = PlannerAgent(APP_NAME, session_service)

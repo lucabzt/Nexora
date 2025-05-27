@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { MantineProvider } from '@mantine/core';
+import { MantineProvider, ColorSchemeProvider } from '@mantine/core';
 import { AuthProvider } from './contexts/AuthContext';
 
 // Pages
@@ -13,47 +13,58 @@ import ChapterView from './pages/ChapterView';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AppLayout from './layouts/AppLayout';
+import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
+  const [colorScheme, setColorScheme] = useState('dark');
+  
+  const toggleColorScheme = (value) => {
+    setColorScheme(value || (colorScheme === 'dark' ? 'light' : 'dark'));
+  };
+
   return (
-    <MantineProvider withGlobalStyles withNormalizeCSS theme={{ 
-      colorScheme: 'dark',
-      primaryColor: 'cyan',
-      components: {
-        Button: {
-          styles: {
-            root: {
-              fontWeight: 600,
+    <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
+      <MantineProvider withGlobalStyles withNormalizeCSS theme={{ 
+        colorScheme: colorScheme,
+        primaryColor: 'cyan',
+        components: {
+          Button: {
+            styles: {
+              root: {
+                fontWeight: 600,
+              },
             },
           },
         },
-      },
-    }}>
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            
-            {/* Protected routes */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<AppLayout />}>
-                <Route index element={<Dashboard />} />
-                <Route path="create-course" element={<CreateCourse />} />
-                <Route path="courses/:courseId" element={<CourseView />} />
-                <Route path="courses/:courseId/chapters/:chapterId" element={<ChapterView />} />
+      }}>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              {/* Public routes with MainLayout */}
+              <Route element={<MainLayout />}>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
               </Route>
-            </Route>
-            
-            {/* Fallback route */}
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-        </BrowserRouter>
-        <ToastContainer position="top-right" autoClose={3000} />
-      </AuthProvider>
-    </MantineProvider>
+              
+              {/* Protected routes */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/" element={<AppLayout />}>
+                  <Route index element={<Dashboard />} />
+                  <Route path="create-course" element={<CreateCourse />} />
+                  <Route path="courses/:courseId" element={<CourseView />} />
+                  <Route path="courses/:courseId/chapters/:chapterId" element={<ChapterView />} />
+                </Route>
+              </Route>
+              
+              {/* Fallback route */}
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </BrowserRouter>
+          <ToastContainer position="top-right" autoClose={3000} />
+        </AuthProvider>
+      </MantineProvider>
+    </ColorSchemeProvider>
   );
 }
 
