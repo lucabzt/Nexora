@@ -9,7 +9,8 @@ import {
   Box,
   Button,
   Avatar, // Added Avatar
-  Menu // Added Menu
+  Menu,
+  Text // Ensure Text is imported
 } from '@mantine/core';
 import { IconSun, IconMoonStars, IconUser, IconLogout } from '@tabler/icons-react'; // Added IconLogout and IconUser
 import { useMantineColorScheme } from '@mantine/core';
@@ -65,7 +66,7 @@ function MainLayout() {
                   <Menu.Target>
                     <Group spacing="xs" sx={{ cursor: 'pointer' }}>
                       <Avatar src={user.avatar_url} alt={user.username} radius="xl" size="sm" />
-                      <Text size="sm" weight={500}>
+                      <Text size="sm" fw={500}>
                         {user.username}
                       </Text>
                     </Group>
