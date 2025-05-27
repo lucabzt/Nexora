@@ -16,7 +16,6 @@ import {
 import { IconAlertCircle } from '@tabler/icons-react';
 import { courseService } from '../api/courseService';
 
-
 function Dashboard() {
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
