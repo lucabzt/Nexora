@@ -339,7 +339,6 @@ async def get_course_by_id(
     )
 
 
-
 @router.get("/{course_id}/chapters", response_model=List[ChapterSchema])
 async def get_course_chapters(
         course_id: int,
