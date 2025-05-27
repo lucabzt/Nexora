@@ -14,7 +14,9 @@ import {
   Box,
   Menu,
   useMantineTheme,
-  Avatar
+  Avatar,
+  ActionIcon,
+  Footer
 } from '@mantine/core';
 import { 
   IconHome2, 
@@ -22,9 +24,12 @@ import {
   IconBookmarks, 
   IconUser,
   IconLogout,
-  IconSettings
+  IconSettings,
+  IconSun,
+  IconMoonStars
 } from '@tabler/icons-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useMantineColorScheme } from '@mantine/core';
 
 const MainLink = ({ icon, color, label, to }) => {
   const theme = useMantineTheme();
@@ -60,6 +65,10 @@ function AppLayout() {
   const [opened, setOpened] = useState(false);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const dark = colorScheme === 'dark';
+  
+  const currentYear = new Date().getFullYear();
   
   const links = [
     { icon: <IconHome2 size={18} />, color: 'blue', label: 'Dashboard', to: '/' },
@@ -143,6 +152,15 @@ function AppLayout() {
           </Navbar.Section>
         </Navbar>
       }
+      footer={
+        <Footer height={60} p="md">
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+            <Text size="sm" color="dimmed">
+              © {currentYear} TeachAI Learning Platform. All rights reserved.
+            </Text>
+          </Box>
+        </Footer>
+      }
       header={
         <Header height={60} p="md">
           <div style={{ display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>
@@ -159,7 +177,17 @@ function AppLayout() {
               <Title order={2}>TeachAI Learning Platform</Title>
             </Group>
             
-            <Text size="sm">Welcome, {user?.username || 'User'}</Text>
+            <Group>
+              <Text size="sm">Welcome, {user?.username || 'User'}</Text>
+              <ActionIcon
+                variant="outline"
+                color={dark ? 'yellow' : 'blue'}
+                onClick={() => toggleColorScheme()}
+                title="Toggle color scheme"
+              >
+                {dark ? <IconSun size={18} /> : <IconMoonStars size={18} />}
+              </ActionIcon>
+            </Group>
           </div>
         </Header>
       }
