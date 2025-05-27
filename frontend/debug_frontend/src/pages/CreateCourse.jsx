@@ -20,6 +20,7 @@ import { useForm } from '@mantine/form';
 import { toast } from 'react-toastify';
 import { courseService } from '../api/courseService';
 
+
 function CreateCourse() {
   const navigate = useNavigate();
   const [active, setActive] = useState(0);
