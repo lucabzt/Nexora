@@ -39,7 +39,7 @@ function MainLayout() {
                 textOverflow: 'ellipsis',
               })}
             >
-              TeachAI
+              Nexora
             </Title>
             
             <ActionIcon

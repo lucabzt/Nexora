@@ -17,7 +17,7 @@ function AppFooter() {
       })}
     >
       <Text size="sm" color="dimmed">
-        © {currentYear} TeachAI Learning Platform. All rights reserved.
+        © {currentYear} Nexora Learning Platform. All rights reserved.
       </Text>
     </Box>
   );

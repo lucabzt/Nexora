@@ -175,7 +175,7 @@ function AppLayout() {
                   textOverflow: 'ellipsis',
                 })}
               >
-                TeachAI
+                Nexora
               </Title>
             </Group>
             
