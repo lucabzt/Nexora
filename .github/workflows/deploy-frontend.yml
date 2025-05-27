@@ -42,10 +42,9 @@ jobs:
 
       - name: Copy files over SSH
         uses: appleboy/scp-action@v0.1.7
-        working-directory: frontend/debug_frontend
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "dist/*"   # oder "build/*" – je nach Framework
+          source: "frontend/debug_frontend/dist/*"   # oder "build/*" – je nach Framework
           target: ${{ secrets.REMOTE_PATH }}
