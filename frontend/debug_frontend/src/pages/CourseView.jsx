@@ -27,6 +27,7 @@ function CourseView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
