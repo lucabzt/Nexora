@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Added useEffect
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -18,11 +18,24 @@ import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
-  const [colorScheme, setColorScheme] = useState('dark');
+  const [colorScheme, setColorScheme] = useState(() => {
+    // Load saved theme from localStorage or default to 'dark'
+    return localStorage.getItem('mantine-color-scheme') || 'dark';
+  });
   
   const toggleColorScheme = (value) => {
-    setColorScheme(value || (colorScheme === 'dark' ? 'light' : 'dark'));
+    const nextColorScheme = value || (colorScheme === 'dark' ? 'light' : 'dark');
+    setColorScheme(nextColorScheme);
+    // Save theme to localStorage
+    localStorage.setItem('mantine-color-scheme', nextColorScheme);
   };
+
+  // Ensure localStorage is updated when the component mounts if it wasn't set before
+  useEffect(() => {
+    if (!localStorage.getItem('mantine-color-scheme')) {
+      localStorage.setItem('mantine-color-scheme', colorScheme);
+    }
+  }, [colorScheme]);
 
   return (
     <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
@@ -67,7 +80,7 @@ function App() {
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </BrowserRouter>
-          <ToastContainer position="top-right" autoClose={3000} />
+          <ToastContainer position="top-right" autoClose={3000} theme={colorScheme} />
         </AuthProvider>
       </MantineProvider>
     </ColorSchemeProvider>
