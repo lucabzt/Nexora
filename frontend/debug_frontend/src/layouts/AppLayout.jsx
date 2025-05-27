@@ -16,7 +16,7 @@ import {
   useMantineTheme,
   Avatar,
   ActionIcon,
-  Footer
+  Stack
 } from '@mantine/core';
 import { 
   IconHome2, 
@@ -30,6 +30,7 @@ import {
 } from '@tabler/icons-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useMantineColorScheme } from '@mantine/core';
+import AppFooter from '../components/AppFooter';
 
 const MainLink = ({ icon, color, label, to }) => {
   const theme = useMantineTheme();
@@ -68,8 +69,6 @@ function AppLayout() {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const dark = colorScheme === 'dark';
   
-  const currentYear = new Date().getFullYear();
-  
   const links = [
     { icon: <IconHome2 size={18} />, color: 'blue', label: 'Dashboard', to: '/' },
     { icon: <IconPlus size={18} />, color: 'teal', label: 'Create New Course', to: '/create-course' },
@@ -85,6 +84,9 @@ function AppLayout() {
       styles={{
         main: {
           background: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
         },
       }}
       navbarOffsetBreakpoint="sm"
@@ -152,33 +154,35 @@ function AppLayout() {
           </Navbar.Section>
         </Navbar>
       }
-      footer={
-        <Footer height={60} p="md">
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-            <Text size="sm" color="dimmed">
-              © {currentYear} TeachAI Learning Platform. All rights reserved.
-            </Text>
-          </Box>
-        </Footer>
-      }
       header={
-        <Header height={60} p="md">
+        <Header height={{ base: 60, sm: 70 }} p="md">
           <div style={{ display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>
-            <Group>
+            <Group spacing="xs">
               <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
                 <Burger
                   opened={opened}
                   onClick={() => setOpened((o) => !o)}
                   size="sm"
                   color={theme.colors.gray[6]}
-                  mr="xl"
                 />
               </MediaQuery>
-              <Title order={2}>TeachAI Learning Platform</Title>
+              <Title 
+                order={2} 
+                size={{ base: 'h4', sm: 'h3' }}
+                sx={(theme) => ({
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                })}
+              >
+                TeachAI
+              </Title>
             </Group>
             
-            <Group>
-              <Text size="sm">Welcome, {user?.username || 'User'}</Text>
+            <Group spacing="xs">
+              <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
+                <Text size="sm">Welcome, {user?.username || 'User'}</Text>
+              </MediaQuery>
               <ActionIcon
                 variant="outline"
                 color={dark ? 'yellow' : 'blue'}
@@ -192,7 +196,10 @@ function AppLayout() {
         </Header>
       }
     >
-      <Outlet />
+      <Box sx={{ flex: 1 }}>
+        <Outlet />
+      </Box>
+      <AppFooter />
     </AppShell>
   );
 }

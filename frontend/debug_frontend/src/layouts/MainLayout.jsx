@@ -6,42 +6,41 @@ import {
   Title,
   useMantineTheme,
   ActionIcon,
-  Footer,
-  Text,
   Box
 } from '@mantine/core';
 import { IconSun, IconMoonStars } from '@tabler/icons-react';
 import { useMantineColorScheme } from '@mantine/core';
+import AppFooter from '../components/AppFooter';
 
 function MainLayout() {
   const theme = useMantineTheme();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const dark = colorScheme === 'dark';
   
-  const currentYear = new Date().getFullYear();
-  
   return (
     <AppShell
       styles={{
         main: {
           background: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
         },
       }}
-      footer={
-        <Footer height={60} p="md">
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-            <Text size="sm" color="dimmed">
-              © {currentYear} TeachAI Learning Platform. All rights reserved.
-            </Text>
-          </Box>
-        </Footer>
-      }
       header={
-        <Header height={60} p="md">
+        <Header height={{ base: 60, sm: 70 }} p="md">
           <div style={{ display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>
-            <Group>
-              <Title order={2}>TeachAI Learning Platform</Title>
-            </Group>
+            <Title 
+              order={2} 
+              size={{ base: 'h4', sm: 'h3' }}
+              sx={(theme) => ({
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              })}
+            >
+              TeachAI
+            </Title>
             
             <ActionIcon
               variant="outline"
@@ -55,7 +54,10 @@ function MainLayout() {
         </Header>
       }
     >
-      <Outlet />
+      <Box sx={{ flex: 1 }}>
+        <Outlet />
+      </Box>
+      <AppFooter />
     </AppShell>
   );
 }
