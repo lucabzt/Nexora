@@ -7,17 +7,27 @@ import {
   useMantineTheme,
   ActionIcon,
   Box,
-  Button
+  Button,
+  Avatar, // Added Avatar
+  Menu // Added Menu
 } from '@mantine/core';
-import { IconSun, IconMoonStars, IconUser } from '@tabler/icons-react';
+import { IconSun, IconMoonStars, IconUser, IconLogout } from '@tabler/icons-react'; // Added IconLogout and IconUser
 import { useMantineColorScheme } from '@mantine/core';
 import AppFooter from '../components/AppFooter';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom'; // Added useNavigate
+import { useAuth } from '../contexts/AuthContext'; // Added useAuth
 
 function MainLayout() {
   const theme = useMantineTheme();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const dark = colorScheme === 'dark';
+  const { isAuthenticated, user, logout } = useAuth(); // Get auth state and user info
+  const navigate = useNavigate(); // Added for logout navigation
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
   
   return (
     <AppShell
@@ -50,24 +60,47 @@ function MainLayout() {
             </Title>
             
             <Group spacing="md">
-              <Button 
-                component={RouterLink} 
-                to="/login" 
-                variant="outline"
-                radius="md"
-              >
-                Log In
-              </Button>
-              
-              <Button 
-                component={RouterLink} 
-                to="/register" 
-                variant="filled"
-                radius="md"
-                color="teal"
-              >
-                Sign Up
-              </Button>
+              {isAuthenticated && user ? (
+                <Menu shadow="md" width={200} position="bottom-end">
+                  <Menu.Target>
+                    <Group spacing="xs" sx={{ cursor: 'pointer' }}>
+                      <Avatar src={user.avatar_url} alt={user.username} radius="xl" size="sm" />
+                      <Text size="sm" weight={500}>
+                        {user.username}
+                      </Text>
+                    </Group>
+                  </Menu.Target>
+                  <Menu.Dropdown>
+                    <Menu.Item icon={<IconUser size={14} />} onClick={() => navigate('/')}>
+                      Dashboard
+                    </Menu.Item>
+                    <Menu.Item icon={<IconLogout size={14} />} onClick={handleLogout}>
+                      Logout
+                    </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
+              ) : (
+                <>
+                  <Button 
+                    component={RouterLink} 
+                    to="/login" 
+                    variant="outline"
+                    radius="md"
+                  >
+                    Log In
+                  </Button>
+                  
+                  <Button 
+                    component={RouterLink} 
+                    to="/register" 
+                    variant="filled"
+                    radius="md"
+                    color="teal"
+                  >
+                    Sign Up
+                  </Button>
+                </>
+              )}
 
               <ActionIcon
                 variant="outline"
