@@ -26,7 +26,8 @@ import {
   IconLogout,
   IconSettings,
   IconSun,
-  IconMoonStars
+  IconMoonStars,
+  IconInfoCircle
 } from '@tabler/icons-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useMantineColorScheme } from '@mantine/core';
@@ -72,6 +73,7 @@ function AppLayout() {
   const links = [
     { icon: <IconHome2 size={18} />, color: 'blue', label: 'Dashboard', to: '/' },
     { icon: <IconPlus size={18} />, color: 'teal', label: 'Create New Course', to: '/create-course' },
+    { icon: <IconInfoCircle size={18} />, color: 'grape', label: 'About Nexora', to: '/home' },
   ];
 
   const handleLogout = () => {

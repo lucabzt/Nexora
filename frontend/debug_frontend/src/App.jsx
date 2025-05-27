@@ -12,6 +12,7 @@ import CourseView from './pages/CourseView';
 import ChapterView from './pages/ChapterView';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import LandingPage from './pages/LandingPage';
 import AppLayout from './layouts/AppLayout';
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -43,6 +44,7 @@ function App() {
             <Routes>
               {/* Public routes with MainLayout */}
               <Route element={<MainLayout />}>
+                <Route path="/home" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
               </Route>
@@ -54,8 +56,12 @@ function App() {
                   <Route path="create-course" element={<CreateCourse />} />
                   <Route path="courses/:courseId" element={<CourseView />} />
                   <Route path="courses/:courseId/chapters/:chapterId" element={<ChapterView />} />
+                  <Route path="home" element={<LandingPage />} />
                 </Route>
               </Route>
+              
+              {/* Redirect root path for non-authenticated users to home */}
+              <Route path="/" element={<Navigate to="/home" replace />} />
               
               {/* Fallback route */}
               <Route path="*" element={<Navigate to="/" />} />
