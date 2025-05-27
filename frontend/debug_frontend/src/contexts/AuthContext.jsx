@@ -1,11 +1,11 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import authService from '../api/authService';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUserState] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Load user from localStorage on initial render
@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
     const initAuth = () => {
       const storedUser = authService.getCurrentUser();
       if (storedUser) {
-        setUser(storedUser);
+        setUserState(storedUser);
       }
       setLoading(false);
     };
@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     try {
       const data = await authService.login(username, password);
-      setUser(data);
+      setUserState(data); // Use the internal setter
       return { success: true };
     } catch (error) {
       const message = 
@@ -53,14 +53,29 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Logout function
-  const logout = () => {
+  const logout = useCallback(() => {
     authService.logout();
-    setUser(null);
+    setUserState(null); // Use the internal setter
+    localStorage.removeItem('user'); // Ensure localStorage is also cleared on logout
     toast.info("You have been logged out");
-  };
+  }, []);
+
+  // Custom setUser function that also updates localStorage
+  const setUser = useCallback((newUser) => {
+    setUserState(newUser);
+    // Update localStorage whenever user state changes
+    if (newUser) {
+      // Ensure the full user object including ID is stored
+      localStorage.setItem('user', JSON.stringify(newUser));
+    } else {
+      localStorage.removeItem('user');
+    }
+  }, []);
+
 
   const value = {
     user,
+    setUser, // Expose the custom setUser
     loading,
     isAuthenticated: !!user,
     login,

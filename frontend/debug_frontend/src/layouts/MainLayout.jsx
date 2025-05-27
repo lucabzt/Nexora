@@ -12,6 +12,9 @@ import {
   Menu,
   Text // Ensure Text is imported
 } from '@mantine/core';
+import { 
+  IconSettings
+} from '@tabler/icons-react';
 import { IconSun, IconMoonStars, IconUser, IconLogout } from '@tabler/icons-react'; // Added IconLogout and IconUser
 import { useMantineColorScheme } from '@mantine/core';
 import AppFooter from '../components/AppFooter';
@@ -78,6 +81,13 @@ function MainLayout() {
                     <Menu.Item icon={<IconLogout size={14} />} onClick={handleLogout}>
                       Logout
                     </Menu.Item>
+                    <Menu.Item icon={<IconUser size={14} />} onClick={() => navigate('/')}>
+                      Dashboard
+                    </Menu.Item>
+                    <Menu.Item icon={<IconSettings size={14} />} onClick={() => navigate('/settings')}>
+                      Settings
+                    </Menu.Item>
+                    
                   </Menu.Dropdown>
                 </Menu>
               ) : (

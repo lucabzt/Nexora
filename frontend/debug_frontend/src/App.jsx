@@ -16,6 +16,7 @@ import LandingPage from './pages/LandingPage';
 import AppLayout from './layouts/AppLayout';
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import SettingsPage from './pages/SettingsPage';
 
 function App() {
   const [colorScheme, setColorScheme] = useState(() => {
@@ -69,15 +70,16 @@ function App() {
                   <Route path="create-course" element={<CreateCourse />} />
                   <Route path="courses/:courseId" element={<CourseView />} />
                   <Route path="courses/:courseId/chapters/:chapterId" element={<ChapterView />} />
-                  <Route path="home" element={<LandingPage />} />
+                  <Route path="settings" element={<SettingsPage />} /> {/* Corrected path & ensure it's within AppLayout */}
+                  {/* Add other protected routes here */}
                 </Route>
               </Route>
-              
+
               {/* Redirect root path for non-authenticated users to home */}
-              <Route path="/" element={<Navigate to="/home" replace />} />
-              
-              {/* Fallback route */}
-              <Route path="*" element={<Navigate to="/" />} />
+              {/* <Route path="/" element={<Navigate to="/home" replace />} /> */}
+              {/* Default redirect for any unmatched authenticated paths could be to dashboard or handled by AppLayout's index */}
+              {/* Fallback route - consider if this is needed or if AppLayout handles index properly */}
+              {/* <Route path="*" element={<Navigate to="/" />} /> */}
             </Routes>
           </BrowserRouter>
           <ToastContainer position="top-right" autoClose={3000} theme={colorScheme} />

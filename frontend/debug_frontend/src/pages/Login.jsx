@@ -26,7 +26,7 @@ function Login() {
     },
     validate: {
       username: (value) => !value ? 'Username is required' : null,
-      password: (value) => !value ? 'Password is required' : value.length < 4 ? 'Password must be at least 4 characters' : null,
+      password: (value) => !value ? 'Password is required' : value.length < 3 ? 'Password must be at least 3 characters' : null,
     },
   });
 

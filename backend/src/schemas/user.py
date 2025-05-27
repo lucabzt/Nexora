@@ -2,11 +2,12 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator # Make sure field_validator is imported
 from typing import Optional, List
 import re
-from ..config.settings import MIN_PASSWORD_LENGTH, REQUIRE_UPPERCASE, REQUIRE_LOWERCASE, REQUIRE_DIGIT, REQUIRE_SPECIAL_CHAR
+from ..config.settings import MIN_PASSWORD_LENGTH, REQUIRE_UPPERCASE, REQUIRE_LOWERCASE, REQUIRE_DIGIT, REQUIRE_SPECIAL_CHAR, SPECIAL_CHARACTERS_REGEX_PATTERN # Make sure SPECIAL_CHARACTERS_REGEX_PATTERN is imported
 
 class UserBase(BaseModel):
     username: str
     email: EmailStr
+    profile_image_base64: Optional[str] = None # Added for profile image
 
 class UserCreate(UserBase):
     password: str = Field(
@@ -43,6 +44,7 @@ class UserCreate(UserBase):
 class UserUpdate(BaseModel):
     username: Optional[str] = None
     email: Optional[EmailStr] = None
+    profile_image_base64: Optional[str] = None # Added for profile image
     password: Optional[str] = Field(
         default=None, # Password is optional on update
         description="New password (if changing) must meet complexity requirements."
@@ -75,10 +77,33 @@ class UserUpdate(BaseModel):
             raise ValueError(f"New password does not meet complexity requirements: {error_summary}.")
         return v
 
+class UserPasswordUpdate(BaseModel):
+    old_password: Optional[str] = None # Required for non-admins
+    new_password: str = Field(
+        ...,
+        description=f"New password must be at least {MIN_PASSWORD_LENGTH} characters long and meet complexity requirements."
+    )
+
+    @field_validator('new_password')
+    @classmethod
+    def password_complexity_checks(cls, v: str) -> str:
+        if len(v) < MIN_PASSWORD_LENGTH:
+            raise ValueError(f'Password must be at least {MIN_PASSWORD_LENGTH} characters long')
+        if REQUIRE_UPPERCASE and not any(char.isupper() for char in v):
+            raise ValueError('Password must contain at least one uppercase letter')
+        if REQUIRE_LOWERCASE and not any(char.islower() for char in v):
+            raise ValueError('Password must contain at least one lowercase letter')
+        if REQUIRE_DIGIT and not any(char.isdigit() for char in v):
+            raise ValueError('Password must contain at least one digit')
+        if REQUIRE_SPECIAL_CHAR and not re.search(SPECIAL_CHARACTERS_REGEX_PATTERN, v):
+            raise ValueError('Password must contain at least one special character')
+        return v
+
 class User(UserBase): # Your existing User schema for responses
     id: int
     is_active: bool
     is_admin: bool
+    profile_image_base64: Optional[str] = None # Added for profile image
 
     class Config:
         from_attributes = True
