@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -23,9 +24,12 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+        working-directory: frontend/debug_frontend
 
       - name: Build frontend
         run: npm run build
+        working-directory: frontend/debug_frontend
+
 
       - name: Clean remote target directory
         uses: appleboy/ssh-action@v1.0.0
@@ -38,6 +42,7 @@ jobs:
 
       - name: Copy files over SSH
         uses: appleboy/scp-action@v0.1.7
+        working-directory: frontend/debug_frontend
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
