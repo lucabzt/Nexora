@@ -151,7 +151,8 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user && !!user.access_token && !!user.id, // More robust check
     login,
     register,
-    logout
+    logout,
+    fetchAndSetFullUser // Expose fetchAndSetFullUser
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

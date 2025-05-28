@@ -8,10 +8,13 @@ import {
   Container, 
   Button, 
   Text, 
-  Anchor
+  Anchor,
+  Divider, // Import Divider
+  Box // Import Box for spacing if needed
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useAuth } from '../contexts/AuthContext';
+import authService from '../api/authService'; // Import authService
 
 function Register() {
   const [isLoading, setIsLoading] = useState(false);
@@ -45,6 +48,10 @@ function Register() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGoogleLogin = () => {
+    authService.redirectToGoogleOAuth();
   };
 
   return (
@@ -89,6 +96,12 @@ function Register() {
 
           <Button fullWidth type="submit" loading={isLoading}>
             Register
+          </Button>
+
+          <Divider label="Or sign up with" labelPosition="center" my="lg" />
+
+          <Button fullWidth variant="outline" onClick={handleGoogleLogin} mb="xl">
+            Sign up with Google
           </Button>
           
           <Text align="center" mt="md">

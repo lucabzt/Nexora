@@ -17,6 +17,8 @@ import AppLayout from './layouts/AppLayout';
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import SettingsPage from './pages/SettingsPage';
+import AdminDashboard from './pages/AdminDashboard';
+import OAuthCallbackPage from './pages/OAuthCallbackPage'; // Import the OAuth callback page
 
 function App() {
   const [colorScheme, setColorScheme] = useState(() => {
@@ -70,7 +72,9 @@ function App() {
                   <Route path="create-course" element={<CreateCourse />} />
                   <Route path="courses/:courseId" element={<CourseView />} />
                   <Route path="courses/:courseId/chapters/:chapterId" element={<ChapterView />} />
-                  <Route path="settings" element={<SettingsPage />} /> {/* Corrected path & ensure it's within AppLayout */}
+                  <Route path="settings" element={<SettingsPage />} />
+                  <Route path="admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+                  <Route path="oauth-callback" element={<OAuthCallbackPage />} /> {/* Add route for OAuth callback */}
                   {/* Add other protected routes here */}
                 </Route>
               </Route>

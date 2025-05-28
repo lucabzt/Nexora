@@ -9,10 +9,13 @@ import {
   Button, 
   Text, 
   Anchor,
-  Group
+  Group,
+  Divider, // Import Divider
+  Box // Import Box for spacing if needed
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useAuth } from '../contexts/AuthContext';
+import authService from '../api/authService'; // Import authService
 
 function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -44,6 +47,10 @@ function Login() {
     }
   };
 
+  const handleGoogleLogin = () => {
+    authService.redirectToGoogleOAuth();
+  };
+
   return (
     <Container size="xs" py="xl">
       <Title align="center" mb="lg">
@@ -70,6 +77,12 @@ function Login() {
 
           <Button fullWidth type="submit" loading={isLoading}>
             Sign in
+          </Button>
+
+          <Divider label="Or continue with" labelPosition="center" my="lg" />
+
+          <Button fullWidth variant="outline" onClick={handleGoogleLogin} mb="xl">
+            Sign in with Google
           </Button>
           
           <Text align="center" mt="md">
