@@ -128,7 +128,33 @@ class AgentService:
                 "time": topic['time']
             }
 
+            # TODO change to streaming
             response["chapters"].append(chapter)
+
+            # Save the chapter in db
+            chapter_db = crud.create_chapter(
+                db=db,
+                course_id=course_db.id,
+                index=idx,
+                caption=chapter['caption'],
+                summary=chapter['summary'],
+                content=chapter['content'],
+                time_minutes=chapter['time'],
+            )
+
+            # Save questions in db
+            for question in response_tester['questions']:
+                crud.create_question(
+                    db=db,
+                    chapter_id=chapter_db.id,
+                    question=question['question'],
+                    answer_a=question['answer_a'],
+                    answer_b=question['answer_b'],
+                    answer_c=question['answer_c'],
+                    answer_d=question['answer_d'],
+                    correct_answer=question['correct_answer'],
+                    explanation=question['explanation']
+                )
 
         return response
 

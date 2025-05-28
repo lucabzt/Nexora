@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Dict, Any, List
 
 from ..models.db_user import User
+from ..services.agent_service import AgentService
 from ..utils.auth import get_current_active_user
 from ..db.database import get_db
 import random
@@ -24,6 +25,7 @@ router = APIRouter(
     tags=["courses"],
     responses={404: {"description": "Not found"}},
 )
+agent_service = AgentService()
 
 
 async def _verify_course_ownership(course_id: str, user_id: int, db: Session) -> Course:
@@ -44,11 +46,22 @@ async def _verify_course_ownership(course_id: str, user_id: int, db: Session) ->
     return course
 
 
+@router.post("/create", response_model=CourseSchema)
+async def create_course(
+        course_request: CourseRequest,
+        current_user: User = Depends(get_current_active_user),
+        db: Session = Depends(get_db)
+):
+    """
+    This endpoint creates a new course based on a query and documents by the user
+    """
+    course_dict = agent_service.create_course(current_user.id, course_request, db)
+    return CourseRequest.model_validate(course_dict)
 
 
 # TESTESTETS, nur zum testen, später curs und session und so gleichzeitig erstellen
 @router.post("/new_demo", response_model=CourseSchema)
-async def create_course(
+async def create_course_demo(
         course_request: CourseRequest,
         current_user: User = Depends(get_current_active_user),
         db: Session = Depends(get_db)

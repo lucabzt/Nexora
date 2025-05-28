@@ -17,7 +17,7 @@ class Course(Base):
     __tablename__ = "courses"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    session_id = Column(String, unique=True, index=True, nullable=False)
+    session_id = Column(String(50), unique=True, index=True, nullable=False)
     user_id = Column(String(50), ForeignKey("users.id"), nullable=False)
     title = Column(String(200), nullable=False)
     description = Column(Text)

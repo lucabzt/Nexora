@@ -238,7 +238,7 @@ def get_questions_by_chapter_id(db: Session, chapter_id: int) -> List[MultipleCh
 def create_question(db: Session, chapter_id: int, question: str, answer_a: str,
                     answer_b: str, answer_c: str, answer_d: str, correct_answer: str,
                     explanation: str) -> MultipleChoiceQuestion:
-    """Create a new multiple choice question"""
+    """Create a new question"""
     db_question = MultipleChoiceQuestion(
         chapter_id=chapter_id,
         question=question,
