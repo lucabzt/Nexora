@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
+import uuid
 
 from .schemas import user as user_schema
 from .models import db_user as user_model
@@ -75,34 +76,39 @@ async def login_for_access_token(
         "is_admin": user.is_admin
     }
 
-@api_router.post("/register", response_model=user_schema.User, status_code=status.HTTP_201_CREATED, tags=["Authentication"]) # Corrected Tag
+
+@api_router.post("/register", response_model=user_schema.User, status_code=status.HTTP_201_CREATED,
+                 tags=["Authentication"])
 async def register_user(user_data: user_schema.UserCreate, db: Session = Depends(get_db)):
     # Check if username from incoming data (user_data.username) already exists in the DB
     db_user_by_username = db.query(user_model.User).filter(user_model.User.username == user_data.username).first()
     if db_user_by_username:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already registered")
-    
+
     # Check if email from incoming data (user_data.email) already exists in the DB
     db_user_by_email = db.query(user_model.User).filter(user_model.User.email == user_data.email).first()
     if db_user_by_email:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
-    
+
     hashed_password = auth.get_password_hash(user_data.password)
-    
+
+    # Generate a unique string ID
+    user_id = str(uuid.uuid4())
+
     # Create an instance of the SQLAlchemy model (user_model.User)
-    new_db_user = user_model.User( # Renamed from new_user for clarity
+    new_db_user = user_model.User(
+        id=user_id,  # Explicitly set the ID
         username=user_data.username,
         email=user_data.email,
         hashed_password=hashed_password,
-        is_admin=False # Ensure new users are NOT admins by default
+        is_admin=False
     )
-    
+
     db.add(new_db_user)
     db.commit()
     db.refresh(new_db_user)
-    
-    return new_db_user
 
+    return new_db_user
 @api_router.get("/users/me", response_model=user_schema.User, tags=["users"]) # Moved /users/me here
 async def read_users_me(current_user: user_model.User = Depends(auth.get_current_active_user)):
     return current_user

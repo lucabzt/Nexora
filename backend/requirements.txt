@@ -12,3 +12,4 @@ python-multipart
 google-adk
 python-dotenv
 python-multipart
+types-SQLAlchemy

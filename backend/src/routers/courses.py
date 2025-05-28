@@ -26,7 +26,7 @@ router = APIRouter(
 )
 
 
-async def _verify_course_ownership(course_id: int, user_id: int, db: Session) -> Course:
+async def _verify_course_ownership(course_id: str, user_id: int, db: Session) -> Course:
     """
     Verify that a course belongs to the current user.
     Returns the course if valid, raises HTTPException if not found or unauthorized.
@@ -338,6 +338,7 @@ async def get_course_by_id(
         chapters=chapters
     )
 
+# -------- CHAPTERS ----------
 @router.get("/{course_id}/chapters", response_model=List[ChapterSchema])
 async def get_course_chapters(
         course_id: int,
@@ -428,85 +429,6 @@ async def get_chapter_by_id(
     )
 
 
-
-@router.get("/{course_id}/quizzes", response_model=List[Dict[str, Any]])
-async def get_all_course_quizzes(
-        course_id: int,
-        current_user: User = Depends(get_current_active_user),
-        db: Session = Depends(get_db)
-):
-    """
-    Get all quiz questions from all chapters in a course.
-    Returns questions grouped by chapter for better organization.
-    Only accessible if the course belongs to the current user.
-    """
-    # First verify course ownership
-    course = await _verify_course_ownership(course_id, current_user.id, db)
-    
-    # Get all chapters with their questions, ordered by chapter index
-    chapters_with_questions = []
-    
-    for chapter in sorted(course.chapters, key=lambda x: x.index):
-        if chapter.mc_questions:  # Only include chapters that have questions
-            chapter_quiz = {
-                "chapter_id": chapter.id,
-                "chapter_index": chapter.index,
-                "chapter_caption": chapter.caption,
-                "chapter_summary": chapter.summary or "",
-                "questions": [
-                    {
-                        "question_id": q.id,
-                        "question": q.question,
-                        "answer_a": q.answer_a,
-                        "answer_b": q.answer_b,
-                        "answer_c": q.answer_c,
-                        "answer_d": q.answer_d,
-                        "correct_answer": q.correct_answer,
-                        "explanation": q.explanation
-                    } for q in chapter.mc_questions
-                ]
-            }
-            chapters_with_questions.append(chapter_quiz)
-    
-    return chapters_with_questions
-
-
-@router.get("/{course_id}/quizzes/flat", response_model=List[Dict[str, Any]])
-async def get_all_course_quizzes_flat(
-        course_id: int,
-        current_user: User = Depends(get_current_active_user),
-        db: Session = Depends(get_db)
-):
-    """
-    Get all quiz questions from a course as a flat list.
-    Each question includes chapter context information.
-    Only accessible if the course belongs to the current user.
-    """
-    # First verify course ownership
-    course = await _verify_course_ownership(course_id, current_user.id, db)
-    
-    # Get all questions from all chapters as a flat list
-    all_questions = []
-    
-    for chapter in sorted(course.chapters, key=lambda x: x.index):
-        for question in chapter.mc_questions:
-            question_with_context = {
-                "question_id": question.id,
-                "chapter_id": chapter.id,
-                "chapter_index": chapter.index,
-                "chapter_caption": chapter.caption,
-                "question": question.question,
-                "answer_a": question.answer_a,
-                "answer_b": question.answer_b,
-                "answer_c": question.answer_c,
-                "answer_d": question.answer_d,
-                "correct_answer": question.correct_answer,
-                "explanation": question.explanation
-            }
-            all_questions.append(question_with_context)
-    
-    return all_questions
-
 @router.patch("/{course_id}/chapters/{chapter_id}/complete")
 async def mark_chapter_complete(
         course_id: int,
@@ -542,3 +464,6 @@ async def mark_chapter_complete(
         "chapter_id": chapter.id,
         "is_completed": chapter.is_completed
     }
+
+
+# -------- FILES ----------

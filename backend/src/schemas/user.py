@@ -75,8 +75,8 @@ class UserUpdate(BaseModel):
             raise ValueError(f"New password does not meet complexity requirements: {error_summary}.")
         return v
 
-class User(UserBase): # Your existing User schema for responses
-    id: int
+class User(UserBase):
+    id: str
     is_active: bool
     is_admin: bool
 
