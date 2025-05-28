@@ -8,12 +8,10 @@ from pydantic import BaseModel
 class Document(BaseModel):
     """Document to upload"""
     file: UploadFile
-    course_id: int
 
 class Image(BaseModel):
     """Image to upload"""
     file: UploadFile
-    course_id: int
 
 
 class DocumentInfo(BaseModel):

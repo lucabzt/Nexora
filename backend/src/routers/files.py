@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from typing import List
@@ -88,12 +88,11 @@ async def verify_image_ownership(image_id: int, user_id: int, db: Session) -> Im
 
 @router.post("/documents", response_model=DocumentInfo)
 async def upload_document(
-        document: DocumentSchema,
+        file: UploadFile = File(...),
         current_user: User = Depends(get_current_active_user),
         db: Session = Depends(get_db)
 ):
     """Upload a document (PDF, TXT, JSON, CSV, DOC, DOCX)."""
-    file = document.file
     # Validate file type
     if not validate_file_type(file.filename, file.content_type, ALLOWED_DOCUMENT_TYPES):
         raise HTTPException(
@@ -121,7 +120,6 @@ async def upload_document(
     # Create document record
     document = Document(
         user_id=current_user.id,
-        course_id=document.course_id,
         filename=file.filename,
         content_type=file.content_type,
         file_data=file_data,
@@ -233,7 +231,6 @@ async def upload_image(
     # Create image record
     image = Image(
         user_id=current_user.id,
-        course_id=image.course_id,
         filename=file.filename,
         content_type=file.content_type,
         image_data=image_data,

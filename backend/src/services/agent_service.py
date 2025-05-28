@@ -51,7 +51,7 @@ class AgentService:
 
         # retrieve documents from database
         documents = crud.get_documents_by_ids(db, request.document_ids)
-        images = crud.get_images_by_ids(db, request.image_ids)
+        images = crud.get_images_by_ids(db, request.picture_ids)
 
         # get a short course title and description from the quick agent TODO add the document context here somehow
         info_query = create_text_query(f"""
@@ -71,6 +71,13 @@ class AgentService:
             total_time_hours=request.time_hours,
             status=CourseStatus.CREATING
         )
+
+        # bind documents to this course
+        # TODO this is a bit hacky as its a circular dependency basically. Find better solution
+        for doc in documents:
+            crud.update_document(db, doc.id, course_id=course_db.id)
+        for img in images:
+            crud.update_image(db, img.id, course_id=course_db.id)
 
         # query for the planner agent
         planner_query = f"""
