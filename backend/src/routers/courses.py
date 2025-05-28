@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from typing import Dict, Any, List
 
@@ -46,17 +47,31 @@ async def _verify_course_ownership(course_id: str, user_id: int, db: Session) ->
     return course
 
 
-@router.post("/create", response_model=CourseSchema)
-async def create_course(
+
+@router.post("/create")
+async def create_course_streaming(
         course_request: CourseRequest,
         current_user: User = Depends(get_current_active_user),
         db: Session = Depends(get_db)
 ):
     """
-    This endpoint creates a new course based on a query and documents by the user
+    Create a new course with streaming response.
+    Returns a stream of JSON objects in the format:
+    {"type": "course_info", "data": {...}}
+    {"type": "chapter", "data": {...}}
+    {"type": "complete", "data": {}}
+    {"type": "error", "data": {"message": "..."}}
     """
-    course_dict = await agent_service.create_course(current_user.id, course_request, db)
-    return CourseSchema.model_validate(course_dict)
+    return StreamingResponse(
+        agent_service.create_course(current_user.id, course_request, db),
+        # TODO look into this (vibe code)
+        media_type="application/x-ndjson",  # Newline Delimited JSON
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",  # Disable nginx buffering
+        }
+    )
 
 
 # TESTESTETS, nur zum testen, später course und session und so gleichzeitig erstellen

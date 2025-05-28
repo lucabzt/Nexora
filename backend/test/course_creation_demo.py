@@ -1,12 +1,11 @@
 """
-Course creation demo that uploads a document and creates a course with it.
-This demo creates a course using the testfile.txt document.
+Updated course creation demo with streaming support.
 """
 
 import requests
 import json
-import os
 from pprint import pprint
+import time
 
 # Configuration
 BASE_URL = "http://localhost:8000/api"
@@ -16,36 +15,6 @@ TEST_USER = {
     "password": "testpass123"
 }
 
-def create_testfile():
-    """Create a test file if it doesn't exist"""
-    testfile_path = "/home/lucabozzetti/Code/TeachAI/backend/test/testfile.txt"
-    if not os.path.exists(testfile_path):
-        print("📝 Creating testfile.txt...")
-        with open(testfile_path, "w") as f:
-            f.write("""This is a test document for course creation.
-
-Course Content Guidelines:
-- Start with fundamentals
-- Include practical examples  
-- Provide clear explanations
-- Add interactive exercises
-- Build complexity gradually
-
-Python Programming Topics:
-- Variables and data types
-- Control structures (if/else, loops)
-- Functions and modules
-- Object-oriented programming
-- Error handling and debugging
-- Working with files and data
-- Popular libraries (requests, pandas, etc.)
-
-The course should be engaging and hands-on, allowing students to practice coding as they learn.
-""")
-        print("✅ testfile.txt created")
-    else:
-        print("ℹ️  testfile.txt already exists")
-    return testfile_path
 
 def register_user():
     """Register a test user"""
@@ -62,6 +31,7 @@ def register_user():
         print(f"❌ Failed to register user: {response.status_code}")
         print(response.text)
         return False
+
 
 def login_user():
     """Login and get auth token"""
@@ -84,127 +54,140 @@ def login_user():
         return None
 
 
-def upload_document(token, file_path):
-    """Upload the test document"""
-    print(f"\n📤 Uploading document: {file_path}")
-
-    headers = {"Authorization": f"Bearer {token}"}
-
-    try:
-        with open(file_path, "rb") as file:
-            files = {"file": (os.path.basename(file_path), file, "text/plain")}
-
-            response = requests.post(
-                f"{BASE_URL}/files/documents",
-                headers=headers,
-                files=files
-            )
-
-        if response.status_code == 200:
-            doc_data = response.json()
-            doc_id = doc_data["id"]
-            print(f"✅ Document uploaded successfully with ID: {doc_id}")
-            print(f"   Filename: {doc_data['filename']}")
-            print(f"   Content Type: {doc_data['content_type']}")
-            return doc_id
-        else:
-            print(f"❌ Failed to upload document: {response.status_code}")
-            print("Response:")
-            try:
-                error_data = response.json()
-                pprint(error_data)
-            except:
-                print(response.text)
-            return None
-
-    except FileNotFoundError:
-        print(f"❌ File not found: {file_path}")
-        return None
-    except Exception as e:
-        print(f"❌ Error uploading file: {e}")
-        return None
-
-def create_course_with_document(token, document_id):
-    """Create the actual course with the uploaded document"""
-    print("\n📚 Creating course with document...")
+def create_course_streaming(token):
+    """Create a course using the streaming endpoint"""
+    print("\n📚 Creating course with streaming...")
 
     headers = {"Authorization": f"Bearer {token}"}
 
     course_data = {
-        "query": "",
-        "time_hours": 1,
-        "document_ids": [document_id],
+        "query": "I want to learn Python programming from basics to advanced concepts",
+        "time_hours": 3,
+        "document_ids": [5],
+        "picture_ids": []
     }
 
-    response = requests.post(f"{BASE_URL}/courses/create", json=course_data, headers=headers)
+    print("🚀 Starting streaming request...")
+    start_time = time.time()
 
-    if response.status_code == 200:
-        print("✅ Course created successfully with document!\n")
+    try:
+        response = requests.post(
+            f"{BASE_URL}/courses/create",
+            json=course_data,
+            headers=headers,
+            stream=True  # Enable streaming
+        )
 
-        course = response.json()
-
-        # Print course info
-        print("=" * 60)
-        print(f"📖 COURSE: {course.get('title', 'N/A')}")
-        print("=" * 60)
-        print(f"📝 Description: {course.get('description', 'N/A')}")
-        print(f"🗂️  Session ID: {course.get('session_id', 'N/A')}")
-        print(f"📊 Total Chapters: {len(course.get('chapters', []))}")
-        print(f"📄 Document Used: testfile.txt (ID: {document_id})")
-
-        # Print chapters
-        for i, chapter in enumerate(course.get('chapters', []), 1):
-            print(f"\n{'─' * 40}")
-            print(f"📚 CHAPTER {i}: {chapter.get('caption', 'N/A')}")
-            print(f"{'─' * 40}")
-            print(f"⏱️  Time: {chapter.get('time_minutes', 0)} minutes")
-            print(f"📋 Summary: {chapter.get('summary', 'N/A')}")
-            print(f"❓ Questions: {len(chapter.get('mc_questions', []))}")
-
-            # Print first few lines of content
-            content = chapter.get('content', '')
-            if content:
-                content_lines = content.split('\n')[:3]
-                print(f"📄 Content preview:")
-                for line in content_lines:
-                    if line.strip():
-                        print(f"   {line}")
-
-            # Print one sample question
-            questions = chapter.get('mc_questions', [])
-            if questions:
-                q = questions[0]
-                print(f"\n🤔 Sample Question:")
-                print(f"   Q: {q.get('question', 'N/A')}")
-                print(f"   A) {q.get('answer_a', 'N/A')}")
-                print(f"   B) {q.get('answer_b', 'N/A')}")
-                print(f"   C) {q.get('answer_c', 'N/A')}")
-                print(f"   D) {q.get('answer_d', 'N/A')}")
-                print(f"   ✅ Correct: {q.get('correct_answer', 'N/A').upper()}")
-
-        print(f"\n{'=' * 60}")
-        print("🎉 Course creation with document test completed successfully!")
-        print(f"{'=' * 60}")
-
-        return course.get('course_id')
-
-    else:
-        print(f"❌ Failed to create course: {response.status_code}")
-        print("Response:")
-        try:
-            error_data = response.json()
-            pprint(error_data)
-        except:
+        if response.status_code != 200:
+            print(f"❌ Request failed: {response.status_code}")
             print(response.text)
-        return None
+            return
+
+        print("✅ Stream started successfully!\n")
+
+        # Initialize variables to track the course
+        course_info = None
+        chapters = []
+        chapter_count = 0
+
+        # Process the stream line by line
+        for line in response.iter_lines():
+            if line:
+                try:
+                    # Parse the JSON chunk
+                    chunk = json.loads(line.decode('utf-8'))
+                    chunk_type = chunk.get("type")
+                    data = chunk.get("data", {})
+
+                    if chunk_type == "course_info":
+                        course_info = data
+                        print("📖 COURSE CREATED")
+                        print("=" * 60)
+                        print(f"🆔 Course ID: {course_info['course_id']}")
+                        print(f"📚 Title: {course_info['title']}")
+                        print(f"📝 Description: {course_info['description']}")
+                        print(f"🗂️  Session ID: {course_info['session_id']}")
+                        print(f"⏰ Total Time: {course_info['total_time_hours']} hours")
+                        print("=" * 60)
+                        print("📋 Creating chapters...")
+                        print()
+
+                    elif chunk_type == "chapter":
+                        chapter_count += 1
+                        chapters.append(data)
+
+                        print(f"{'─' * 40}")
+                        print(f"📚 CHAPTER {chapter_count}: {data['caption']}")
+                        print(f"{'─' * 40}")
+                        print(f"⏱️  Time: {data['time_minutes']} minutes")
+                        print(f"❓ Questions: {len(data['mc_questions'])}")
+
+                        # Print first few lines of content
+                        content_lines = data['content'].split('\n')[:3]
+                        print(f"📄 Content preview:")
+                        for line in content_lines:
+                            if line.strip():
+                                print(f"   {line[:80]}{'...' if len(line) > 80 else ''}")
+
+                        # Print one sample question
+                        if data['mc_questions']:
+                            q = data['mc_questions'][0]
+                            print(f"\n🤔 Sample Question:")
+                            print(f"   Q: {q['question'][:60]}{'...' if len(q['question']) > 60 else ''}")
+                            print(f"   A) {q['answer_a'][:40]}{'...' if len(q['answer_a']) > 40 else ''}")
+                            print(f"   B) {q['answer_b'][:40]}{'...' if len(q['answer_b']) > 40 else ''}")
+                            print(f"   ✅ Correct: {q['correct_answer'].upper()}")
+
+                        elapsed = time.time() - start_time
+                        print(f"⏰ Elapsed: {elapsed:.1f}s")
+                        print()
+
+                    elif chunk_type == "complete":
+                        total_time = time.time() - start_time
+                        print(f"{'=' * 60}")
+                        print("🎉 COURSE CREATION COMPLETED!")
+                        print(f"📊 Total Chapters: {len(chapters)}")
+                        print(f"⏰ Total Time: {total_time:.1f} seconds")
+                        print(f"🆔 Course ID: {course_info['course_id'] if course_info else 'N/A'}")
+                        print(f"{'=' * 60}")
+                        break
+
+                    elif chunk_type == "error":
+                        print(f"❌ ERROR: {data.get('message', 'Unknown error')}")
+                        break
+
+                    else:
+                        print(f"⚠️  Unknown chunk type: {chunk_type}")
+
+                except json.JSONDecodeError as e:
+                    print(f"❌ Failed to parse JSON chunk: {e}")
+                    print(f"Raw line: {line}")
+                except Exception as e:
+                    print(f"❌ Error processing chunk: {e}")
+
+        print("\n📊 FINAL SUMMARY:")
+        if course_info:
+            print(f"Course '{course_info['title']}' created with {len(chapters)} chapters")
+
+            # Calculate total questions
+            total_questions = sum(len(ch['mc_questions']) for ch in chapters)
+            total_time_minutes = sum(ch['time_minutes'] for ch in chapters)
+
+            print(f"📝 Total Questions: {total_questions}")
+            print(f"⏰ Total Study Time: {total_time_minutes} minutes ({total_time_minutes/60:.1f} hours)")
+        else:
+            print("❌ Course creation failed - no course info received")
+
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Network error: {e}")
+    except Exception as e:
+        print(f"❌ Unexpected error: {e}")
+
 
 def main():
     """Main test function"""
-    print("🚀 Starting Create Course with Document Test")
+    print("🚀 Starting Course Creation Streaming Test")
     print("=" * 50)
-
-    # Step 0: Create test file
-    testfile_path = create_testfile()
 
     # Step 1: Register user
     if not register_user():
@@ -215,20 +198,13 @@ def main():
     if not token:
         return
 
-    # Step 4: Upload document
-    document_id = upload_document(token, testfile_path)
-    if not document_id:
-        return
+    # Step 3: Create course with streaming
+    create_course_streaming(token)
 
-    # Step 5: Create real course with document
-    course_id = create_course_with_document(token, document_id)
-    if not course_id:
-        return
+    # Optional: Also test synchronous endpoint for comparison
+    # Uncomment the line below to compare performance
+    # create_course_sync(token)
 
-    print(f"\n🎊 SUCCESS! Course created with document.")
-    print(f"   Course ID: {course_id}")
-    print(f"   Document ID: {document_id}")
-    print(f"   Test file: {testfile_path}")
 
 if __name__ == "__main__":
     main()
