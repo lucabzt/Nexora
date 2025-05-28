@@ -4,18 +4,17 @@ It is used for small requests like generating a course description.
 It also handles session creation itself, which sets it apart from the other agents.
 """
 import json
+from typing import Dict, Any
 
 from google.adk.agents import LlmAgent
 from google.adk.runners import Runner
 from google.genai import types
-
-from server.main import session_service
 from .schema import CourseInfo
 from ..utils import load_instruction_from_file
 
 
 class InfoAgent:
-    def __init__(self, app_name: str):
+    def __init__(self, app_name: str, session_service,):
         # Create the planner agent
         info_agent = LlmAgent(
             name="info_agent",

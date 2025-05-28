@@ -2,6 +2,7 @@
 This file defines the service that coordinates the interaction between all the agents
 """
 import json
+import uuid
 
 from sqlalchemy.orm import Session
 from ..db import crud
@@ -28,7 +29,7 @@ class AgentService:
         self.planner_agent = PlannerAgent(self.app_name, self.session_service)
         self.explainer_agent = ExplainerAgent(self.app_name, self.session_service)
         self.tester_agent = TesterAgent(self.app_name, self.session_service)
-        self.info_agent = InfoAgent(self.app_name)
+        self.info_agent = InfoAgent(self.app_name, self.session_service)
 
 
     async def create_course(self, user_id: str, request: CourseRequest, db: Session):
@@ -125,7 +126,7 @@ class AgentService:
                 "summary": json.dumps(topic['content'], indent=2),
                 "content": response_explainer['explanation'],
                 "mc_questions": response_tester['questions'],
-                "time": topic['time']
+                "time_minutes": topic['time']
             }
 
             # TODO change to streaming
@@ -139,8 +140,9 @@ class AgentService:
                 caption=chapter['caption'],
                 summary=chapter['summary'],
                 content=chapter['content'],
-                time_minutes=chapter['time'],
+                time_minutes=chapter['time_minutes'],
             )
+            chapter["id"] = chapter_db.id
 
             # Save questions in db
             for question in response_tester['questions']:

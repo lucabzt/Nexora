@@ -39,6 +39,6 @@ class CourseInfo(BaseModel):
     description: str
     session_id: int
 
-class Course(CourseInfo):
+class Course(BaseModel):
     """Schema for a course."""
     chapters: List[Chapter]

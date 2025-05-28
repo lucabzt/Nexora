@@ -55,8 +55,8 @@ async def create_course(
     """
     This endpoint creates a new course based on a query and documents by the user
     """
-    course_dict = agent_service.create_course(current_user.id, course_request, db)
-    return CourseRequest.model_validate(course_dict)
+    course_dict = await agent_service.create_course(current_user.id, course_request, db)
+    return CourseSchema.model_validate(course_dict)
 
 
 # TESTESTETS, nur zum testen, später curs und session und so gleichzeitig erstellen
