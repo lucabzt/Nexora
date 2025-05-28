@@ -1,8 +1,10 @@
-from fastapi import FastAPI, Depends, HTTPException, status, APIRouter # Import APIRouter
+from fastapi import FastAPI, Depends, HTTPException, status, APIRouter, Request # Ensure Request is imported
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
+import secrets # Added for generating random passwords/suffixes
 
 from .schemas import user as user_schema
 from .models import db_user as user_model
@@ -17,6 +19,15 @@ user_model.Base.metadata.create_all(bind=engine)
 
 # Create the main app instance
 app = FastAPI(title="User Management API", root_path="/api")
+
+# Add SessionMiddleware - THIS MUST BE ADDED
+# Generate a random secret key for session middleware (ensure this is consistent if you have multiple instances or restart often, consider moving to settings)
+# For production, you'd want to set this from an environment variable or a config file.
+SESSION_SECRET_KEY = secrets.token_hex(32)
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=SESSION_SECRET_KEY
+)
 
 # CORS Configuration (remains the same)
 origins = [
@@ -49,17 +60,15 @@ async def login_for_access_token(
     db: Session = Depends(get_db)
 ):
     user = auth.authenticate_user(db, form_data.username, form_data.password)
-    if not user:
+    if not user: # This check should come first
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Inactive user",
-        )
+        
+    if not getattr(user, 'is_active', False): # Use getattr for safety, though direct access should work
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
     
     access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = auth.create_access_token(
@@ -145,48 +154,82 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         )
 
     email = user_info.get("email")
-    # Optional: Get username from email or name
-    username = user_info.get("name", email.split("@")[0])
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email not found in Google user info."
+        )
+        
+    name = user_info.get("name")
+    picture_url = user_info.get("picture")
 
     db_user = db.query(UserModel).filter(UserModel.email == email).first()
 
     if not db_user:
-        # Create a new user if they don't exist
-        # For simplicity, we're creating a user without a password. 
-        # You might want to handle this differently, e.g., prompt for a password
-        # or generate a random one and mark the account as needing password reset.
-        new_user = UserModel(
-            username=username, # Consider how to handle username conflicts if not using email
+        # Create a new user
+        # Determine initial username from name or email prefix
+        if name:
+            # Simple conversion: lowercase, replace spaces with dots, take first 40 chars
+            base_username = name.lower().replace(" ", ".")[:40]
+        else:
+            base_username = email.split("@")[0][:40]
+
+        # Ensure username uniqueness
+        username_candidate = base_username
+        # Limit username length to fit DB schema (String(50))
+        # Max length for base_username part to allow for suffix like ".abc123" (7 chars)
+        max_len_for_base_with_suffix = 50 - 8 
+        
+        # Ensure base_username is not too long if we need to add a suffix
+        if len(username_candidate) > max_len_for_base_with_suffix:
+            username_candidate = username_candidate[:max_len_for_base_with_suffix]
+
+        final_username = username_candidate
+        # Check for collision and append suffix if needed
+        while db.query(UserModel).filter(UserModel.username == final_username).first():
+            suffix = secrets.token_hex(3) # 6-character hex string
+            final_username = f"{username_candidate}.{suffix}" 
+            # Ensure the generated username does not exceed 50 chars
+            if len(final_username) > 50:
+                # If it's too long even with suffix, truncate the base part more aggressively
+                # This is a fallback, ideally the initial truncation is enough
+                base_part_len = 50 - len(suffix) - 1 # -1 for the dot
+                final_username = f"{username_candidate[:base_part_len]}.{suffix}"
+
+
+        random_password = secrets.token_urlsafe(16)
+        hashed_password = auth.get_password_hash(random_password)
+        
+        db_user = UserModel(
             email=email,
-            hashed_password="", # No password for OAuth users, or handle differently
+            username=final_username,
+            hashed_password=hashed_password,
+            profile_image_base64=picture_url, # Storing URL in this field
             is_active=True,
-            # is_admin can be set based on your logic, default to False
+            is_admin=False 
         )
-        db.add(new_user)
+        db.add(db_user)
         db.commit()
-        db.refresh(new_user)
-        db_user = new_user
+        db.refresh(db_user)
     
-    if not db_user.is_active:
+    if not getattr(db_user, 'is_active', False): # Use getattr for safety
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="Inactive user"
+            detail="User is inactive."
         )
 
     access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = auth.create_access_token(
-        data={"sub": db_user.username, "user_id": db_user.id, "is_admin": db_user.is_admin},
+        data={"sub": db_user.username, "user_id": db_user.id, "is_admin": db_user.is_admin, "email": db_user.email},
         expires_delta=access_token_expires,
     )
     
-    # Redirect to frontend with token, or return token directly
-    # This example returns the token directly, similar to the /token endpoint
-    # You might want to redirect to a frontend URL with the token in a query parameter
     return {
         "access_token": access_token,
         "token_type": "bearer",
         "user_id": db_user.id,
         "username": db_user.username,
+        "email": db_user.email,
         "is_admin": db_user.is_admin
     }
 
