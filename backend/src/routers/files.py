@@ -198,12 +198,11 @@ async def delete_document(
 
 @router.post("/images", response_model=ImageInfo)
 async def upload_image(
-        image: ImageSchema,
+        file: UploadFile = File(...),
         current_user: User = Depends(get_current_active_user),
         db: Session = Depends(get_db)
 ):
     """Upload an image (JPEG, PNG, GIF, WebP)."""
-    file = image.file
     # Validate file type
     if not validate_file_type(file.filename, file.content_type, ALLOWED_IMAGE_TYPES):
         raise HTTPException(

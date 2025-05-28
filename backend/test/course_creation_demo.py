@@ -201,10 +201,5 @@ def main():
     # Step 3: Create course with streaming
     create_course_streaming(token)
 
-    # Optional: Also test synchronous endpoint for comparison
-    # Uncomment the line below to compare performance
-    # create_course_sync(token)
-
-
 if __name__ == "__main__":
     main()
