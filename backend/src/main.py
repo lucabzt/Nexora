@@ -107,8 +107,8 @@ async def register_user(user_data: user_schema.UserCreate, db: Session = Depends
 
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from authlib.integrations.starlette_client import OAuth, OAuthError
-from ..config import settings
-from ..models.db_user import User as UserModel
+from .config import settings
+from .models.db_user import User as UserModel
 
 oauth = OAuth()
 oauth.register(
