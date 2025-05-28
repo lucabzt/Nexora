@@ -196,7 +196,6 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
                 base_part_len = 50 - len(suffix) - 1 # -1 for the dot
                 final_username = f"{username_candidate[:base_part_len]}.{suffix}"
 
-
         random_password = secrets.token_urlsafe(16)
         hashed_password = auth.get_password_hash(random_password)
         
