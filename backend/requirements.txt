@@ -13,3 +13,4 @@ google-adk
 python-dotenv
 python-multipart
 Authlib
+itsdangerous

@@ -29,6 +29,7 @@ app.add_middleware(
     secret_key=SESSION_SECRET_KEY
 )
 
+
 # CORS Configuration (remains the same)
 origins = [
     "http://localhost:3000",
