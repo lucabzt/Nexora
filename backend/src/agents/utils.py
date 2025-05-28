@@ -13,9 +13,12 @@
 # limitations under the License.
 
 import os
+from typing import List
 
 from fastapi import UploadFile
 from google.genai import types
+
+from backend.src.models.db_file import Document, Image
 
 
 def create_text_query(query: str) -> types.Content:
@@ -23,15 +26,20 @@ def create_text_query(query: str) -> types.Content:
     return types.Content(role="user", parts=[types.Part(text=query)])
 
 
-def create_doc_query(query: str, file: UploadFile) -> types.Content:
+def create_docs_query(query: str, docs: List[Document], images: List[Image]) -> types.Content:
     """ Takes a string and fastapi UploadFile object and returns a user query that can be sent to an agent """
-    return types.Content(role="user", parts=[
-        types.Part(text=query),
-        types.Part.from_bytes(
-            data=file.file.read(),
-            mime_type=file.content_type,
-        )
-    ])
+    parts = [types.Part(text=query)]
+    for doc in docs:
+        parts.append(types.Part.from_bytes(
+            data=doc.file_data,
+            mime_type=doc.content_type,
+        ))
+    for image in images:
+        parts.append(types.Part.from_bytes(
+            data=image.image_data,
+            mime_type=image.content_type,
+        ))
+    return types.Content(role="user", parts=parts)
 
 
 def load_instruction_from_file(

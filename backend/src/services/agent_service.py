@@ -13,7 +13,7 @@ from ..agents.planner_agent import PlannerAgent
 from ..agents.explainer_agent import ExplainerAgent
 from ..agents.info_agent.agent import InfoAgent
 from ..agents.tester_agent import TesterAgent
-from ..agents.utils import create_text_query
+from ..agents.utils import create_text_query, create_docs_query
 from ..models.db_course import CourseStatus
 from ..schemas.course import CourseRequest
 
@@ -49,10 +49,17 @@ class AgentService:
         )
         session_id = session.id
 
+        # retrieve documents from database
+        documents = crud.get_documents_by_ids(db, request.document_ids)
+        images = crud.get_images_by_ids(db, request.image_ids)
+
         # get a short course title and description from the quick agent TODO add the document context here somehow
         info_query = create_text_query(f"""
         The following is the user query for creating a course / learning path:
         {request.query}
+        The users uploaded the following documents:
+        {[doc.filename for doc in documents]}
+        {[img.filename for img in images]}
         """)
         info_response = await self.info_agent.run(user_id, session_id, info_query)
         course_db = crud.create_course(
@@ -72,7 +79,7 @@ class AgentService:
                         Question (System): How many hours do you want to invest?
                         Answer (User): {request.time_hours}
                     """
-        content = create_text_query(planner_query)
+        content = create_docs_query(planner_query, documents, images)
 
         # Query the planner agent (returns a dict)
         response_planner = await self.planner_agent.run(

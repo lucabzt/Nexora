@@ -59,7 +59,7 @@ async def create_course(
     return CourseSchema.model_validate(course_dict)
 
 
-# TESTESTETS, nur zum testen, später curs und session und so gleichzeitig erstellen
+# TESTESTETS, nur zum testen, später course und session und so gleichzeitig erstellen
 @router.post("/new_demo", response_model=CourseSchema)
 async def create_course_demo(
         course_request: CourseRequest,
