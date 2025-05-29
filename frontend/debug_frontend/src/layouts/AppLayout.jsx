@@ -26,11 +26,11 @@ import {
   IconLogout,
   IconSettings,
   IconSun,
-  IconMoonStars
+  IconMoonStars,
+  IconInfoCircle
 } from '@tabler/icons-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useMantineColorScheme } from '@mantine/core';
-import AppFooter from '../components/AppFooter';
 
 const MainLink = ({ icon, color, label, to }) => {
   const theme = useMantineTheme();
@@ -72,134 +72,92 @@ function AppLayout() {
   const links = [
     { icon: <IconHome2 size={18} />, color: 'blue', label: 'Dashboard', to: '/' },
     { icon: <IconPlus size={18} />, color: 'teal', label: 'Create New Course', to: '/create-course' },
+    { icon: <IconInfoCircle size={18} />, color: 'grape', label: 'About Nexora', to: '/home' },
+    { icon: <IconSettings size={18} />, color: 'gray', label: 'Settings', to: '/settings' }
+
   ];
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
-  
+
   return (
     <AppShell
       styles={{
         main: {
-          background: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
+          background: dark ? theme.colors.dark[8] : theme.colors.gray[0],
           display: 'flex',
           flexDirection: 'column',
           minHeight: '100vh',
         },
       }}
       navbarOffsetBreakpoint="sm"
+      asideOffsetBreakpoint="sm"
       navbar={
-        <Navbar p="md" hiddenBreakpoint="sm" hidden={!opened} width={{ sm: 200, lg: 250 }}>
+        <Navbar p="md" hiddenBreakpoint="sm" hidden={!opened} width={{ sm: 200, lg: 300 }}>
           <Navbar.Section grow mt="md">
-            {links.map((link, index) => (
-              <MainLink 
+            {links.map((link) => (
+              <MainLink
                 {...link}
-                key={index}
+                key={link.label}
               />
             ))}
           </Navbar.Section>
           <Navbar.Section>
-            <Box
-              sx={(theme) => ({
-                paddingTop: theme.spacing.sm,
-                borderTop: `1px solid ${
-                  theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]
-                }`,
-              })}
-            >
-              <Menu position="top" withArrow>
-                <Menu.Target>
-                  <UnstyledButton
-                    sx={(theme) => ({
-                      display: 'block',
-                      width: '100%',
-                      padding: theme.spacing.xs,
-                      borderRadius: theme.radius.sm,
-                      color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.black,
-                      '&:hover': {
-                        backgroundColor:
-                          theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
-                      },
-                    })}
-                  >
-                    <Group>
-                      <Avatar color="cyan" radius="xl">{user?.username?.charAt(0).toUpperCase()}</Avatar>
-                      <Box sx={{ flex: 1 }}>
-                        <Text size="sm" weight={500}>
-                          {user?.username || 'User'}
-                        </Text>
-                        <Text color="dimmed" size="xs">
-                          {user?.is_admin ? 'Administrator' : 'User'}
-                        </Text>
-                      </Box>
-                    </Group>
-                  </UnstyledButton>
-                </Menu.Target>
-
-                <Menu.Dropdown>
-                  <Menu.Label>Account</Menu.Label>
-                  <Menu.Item icon={<IconSettings size={14} />}>Settings</Menu.Item>
-                  <Menu.Item 
-                    color="red" 
-                    icon={<IconLogout size={14} />}
-                    onClick={handleLogout}
-                  >
-                    Logout
-                  </Menu.Item>
-                </Menu.Dropdown>
-              </Menu>
-            </Box>
+            <MainLink icon={<IconLogout size={18} />} color="red" label="Logout" to="/login" onClick={handleLogout} />
           </Navbar.Section>
         </Navbar>
       }
       header={
-        <Header height={{ base: 60, sm: 70 }} p="md">
-          <div style={{ display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>
+        <Header height={{ base: 60, md: 70 }} p="md">
+          <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+            <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
+              <Burger
+                opened={opened}
+                onClick={() => setOpened((o) => !o)}
+                size="sm"
+                color={theme.colors.gray[6]}
+                mr="xl"
+              />
+            </MediaQuery>
+
+            <Title order={3}>Nexora</Title>
+            <Box sx={{ flexGrow: 1 }} /> {/* Spacer */} 
             <Group spacing="xs">
-              <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
-                <Burger
-                  opened={opened}
-                  onClick={() => setOpened((o) => !o)}
-                  size="sm"
-                  color={theme.colors.gray[6]}
-                />
-              </MediaQuery>
-              <Title 
-                order={2} 
-                size={{ base: 'h4', sm: 'h3' }}
-                sx={(theme) => ({
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                })}
-              >
-                Nexora
-              </Title>
-            </Group>
-            
-            <Group spacing="xs">
-              <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
-                <Text size="sm">Welcome, {user?.username || 'User'}</Text>
-              </MediaQuery>
-              <ActionIcon
-                variant="outline"
-                color={dark ? 'yellow' : 'blue'}
-                onClick={() => toggleColorScheme()}
-                title="Toggle color scheme"
-              >
-                {dark ? <IconSun size={18} /> : <IconMoonStars size={18} />}
-              </ActionIcon>
+              {user && (
+                <Menu shadow="md" width={200}>
+                  <Menu.Target>
+                    <UnstyledButton>
+                      <Group spacing="xs">
+                        <Avatar src={user.profile_image_base64} alt={user.username} radius="xl" size="md" />
+                        <Text size="sm" weight={500}>{user.username}</Text>
+                      </Group>
+                    </UnstyledButton>
+                  </Menu.Target>
+                  <Menu.Dropdown>
+                    <Menu.Label>Application</Menu.Label>
+                    <Menu.Item icon={<IconSettings size={14} />} component={Link} to="/settings">
+                      Settings
+                    </Menu.Item>
+                    <Menu.Item 
+                      icon={dark ? <IconSun size={14} /> : <IconMoonStars size={14} />} 
+                      onClick={() => toggleColorScheme()}
+                    >
+                      Toggle Theme
+                    </Menu.Item>
+                    <Menu.Item icon={<IconLogout size={14} />} onClick={handleLogout}>
+                      Logout
+                    </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
+              )}
             </Group>
           </div>
         </Header>
       }
     >
-      <Box sx={{ flex: 1 }}>
-        <Outlet />
-      </Box>
-      <AppFooter />
+      <Outlet />
     </AppShell>
   );
 }

@@ -1,9 +1,11 @@
-from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy import Boolean, Column, Integer, String, Text # Added Text
 from ..db.database import Base
+from sqlalchemy.dialects.mysql import LONGTEXT
+
+
 
 class User(Base):
     __tablename__ = "users"
-
     id = Column(String(50), primary_key=True, index=True)
     username = Column(String(50), unique=True, index=True, nullable=False)
     email = Column(String(100), unique=True, index=True, nullable=False)

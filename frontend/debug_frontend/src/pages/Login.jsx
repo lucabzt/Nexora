@@ -9,10 +9,13 @@ import {
   Button, 
   Text, 
   Anchor,
-  Group
+  Group,
+  Divider, // Import Divider
+  Box // Import Box for spacing if needed
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useAuth } from '../contexts/AuthContext';
+import authService from '../api/authService'; // Import authService
 
 function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +29,7 @@ function Login() {
     },
     validate: {
       username: (value) => !value ? 'Username is required' : null,
-      password: (value) => !value ? 'Password is required' : value.length < 4 ? 'Password must be at least 4 characters' : null,
+      password: (value) => !value ? 'Password is required' : value.length < 3 ? 'Password must be at least 3 characters' : null,
     },
   });
 
@@ -42,6 +45,10 @@ function Login() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGoogleLogin = () => {
+    authService.redirectToGoogleOAuth();
   };
 
   return (
@@ -70,6 +77,12 @@ function Login() {
 
           <Button fullWidth type="submit" loading={isLoading}>
             Sign in
+          </Button>
+
+          <Divider label="Or continue with" labelPosition="center" my="lg" />
+
+          <Button fullWidth variant="outline" onClick={handleGoogleLogin} mb="xl">
+            Sign in with Google
           </Button>
           
           <Text align="center" mt="md">

@@ -7,11 +7,13 @@ class Token(BaseModel):
     token_type: str
     user_id: str
     username: str
+    email: str # Added email
     is_admin: bool
 
 class TokenData(BaseModel):
     username: Optional[str] = None
     user_id: Optional[str] = None
+    email: Optional[str] = None # Added email
     is_admin: Optional[bool] = None
 
 class LoginForm(BaseModel):

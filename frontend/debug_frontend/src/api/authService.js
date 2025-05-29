@@ -45,6 +45,12 @@ class AuthService {
       return {};
     }
   }
+
+  // New method for Google OAuth
+  redirectToGoogleOAuth() {
+    // The backend URL that initiates the Google OAuth flow
+    window.location.href = `${API_URL}/login/google`;
+  }
 }
 
 export default new AuthService();

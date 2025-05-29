@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Added useEffect
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -12,16 +12,32 @@ import CourseView from './pages/CourseView';
 import ChapterView from './pages/ChapterView';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import LandingPage from './pages/LandingPage';
 import AppLayout from './layouts/AppLayout';
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import SettingsPage from './pages/SettingsPage';
+import OAuthCallbackPage from './pages/OAuthCallbackPage'; // Import the OAuth callback page
 
 function App() {
-  const [colorScheme, setColorScheme] = useState('dark');
+  const [colorScheme, setColorScheme] = useState(() => {
+    // Load saved theme from localStorage or default to 'dark'
+    return localStorage.getItem('mantine-color-scheme') || 'dark';
+  });
   
   const toggleColorScheme = (value) => {
-    setColorScheme(value || (colorScheme === 'dark' ? 'light' : 'dark'));
+    const nextColorScheme = value || (colorScheme === 'dark' ? 'light' : 'dark');
+    setColorScheme(nextColorScheme);
+    // Save theme to localStorage
+    localStorage.setItem('mantine-color-scheme', nextColorScheme);
   };
+
+  // Ensure localStorage is updated when the component mounts if it wasn't set before
+  useEffect(() => {
+    if (!localStorage.getItem('mantine-color-scheme')) {
+      localStorage.setItem('mantine-color-scheme', colorScheme);
+    }
+  }, [colorScheme]);
 
   return (
     <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
@@ -43,8 +59,10 @@ function App() {
             <Routes>
               {/* Public routes with MainLayout */}
               <Route element={<MainLayout />}>
+                <Route path="/home" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/auth/google/callback" element={<OAuthCallbackPage />} /> {/* Moved OAuth callback route here */}
               </Route>
               
               {/* Protected routes */}
@@ -54,14 +72,20 @@ function App() {
                   <Route path="create-course" element={<CreateCourse />} />
                   <Route path="courses/:courseId" element={<CourseView />} />
                   <Route path="courses/:courseId/chapters/:chapterId" element={<ChapterView />} />
+                  <Route path="settings" element={<SettingsPage />} />
+                  {/* <Route path="auth/google/callback" element={<OAuthCallbackPage />} /> Removed from here */}
+                  {/* Add other protected routes here */}
                 </Route>
               </Route>
-              
-              {/* Fallback route */}
-              <Route path="*" element={<Navigate to="/" />} />
+
+              {/* Redirect root path for non-authenticated users to home */}
+              {/* <Route path="/" element={<Navigate to="/home" replace />} /> */}
+              {/* Default redirect for any unmatched authenticated paths could be to dashboard or handled by AppLayout's index */}
+              {/* Fallback route - consider if this is needed or if AppLayout handles index properly */}
+              {/* <Route path="*" element={<Navigate to="/" />} /> */}
             </Routes>
           </BrowserRouter>
-          <ToastContainer position="top-right" autoClose={3000} />
+          <ToastContainer position="top-right" autoClose={3000} theme={colorScheme} />
         </AuthProvider>
       </MantineProvider>
     </ColorSchemeProvider>

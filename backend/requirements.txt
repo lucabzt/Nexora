@@ -1,4 +1,4 @@
-fastapi
+fastapi[all]
 uvicorn[standard]
 sqlalchemy
 mysql-connector-python  # Or psycopg2-binary for PostgreSQL, or remove if using SQLite
@@ -12,4 +12,6 @@ python-multipart
 google-adk
 python-dotenv
 python-multipart
+Authlib
+itsdangerous
 types-SQLAlchemy
