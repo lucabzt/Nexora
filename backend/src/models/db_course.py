@@ -1,22 +1,30 @@
-from sqlalchemy import Boolean, Column, Integer, String, Text, DateTime, ForeignKey
+import enum
+from sqlalchemy import Boolean, Column, Integer, String, Text, DateTime, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from ..db.database import Base
 from ..models import db_user as user_model
 
 
+class CourseStatus(enum.Enum):
+    CREATING = "creating"
+    UPDATING = "updating"
+    FINISHED = "finished"
+
+
 class Course(Base):
     """Main course table containing all course information."""
     __tablename__ = "courses"
-    
+
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    session_id = Column(Integer, unique=True, index=True, nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    session_id = Column(String(50), unique=True, index=True, nullable=False)
+    user_id = Column(String(50), ForeignKey("users.id"), nullable=False)
     title = Column(String(200), nullable=False)
     description = Column(Text)
     total_time_hours = Column(Integer, nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    status = Column(Enum(CourseStatus), nullable=False, default=CourseStatus.CREATING)
+
     # Relationships
     chapters = relationship("Chapter", back_populates="course", cascade="all, delete-orphan")
 

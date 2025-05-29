@@ -26,9 +26,9 @@ async def read_users(
     users = db.query(user_model.User).offset(skip).limit(limit).all()
     return users
 
-@router.get("/{user_id}", response_model=user_schemas.User)
+@router.get("/{user_id:str}", response_model=user_schemas.User)
 async def read_user(
-    user_id: str, # Changed from int to str
+    user_id: str,
     db: Session = Depends(get_db),
     current_user: user_model.User = Depends(auth.get_current_active_user)
 ):
@@ -44,9 +44,9 @@ async def read_user(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
 
-@router.put("/{user_id}", response_model=user_schemas.User)
+@router.put("/{user_id:str}", response_model=user_schemas.User)
 async def update_user(
-    user_id: str, # Changed from int to str
+    user_id: str,
     user_update: user_schemas.UserUpdate,
     db: Session = Depends(get_db),
     current_user: user_model.User = Depends(auth.get_current_active_user)
@@ -117,9 +117,9 @@ async def change_password(
     return db_user
 
 
-@router.delete("/{user_id}", response_model=user_schemas.User)
+@router.delete("/{user_id:str}", response_model=user_schemas.User, dependencies=[Depends(auth.get_current_admin_user)])
 async def delete_user(
-    user_id: str, # Changed from int to str
+    user_id: str,
     db: Session = Depends(get_db),
     current_user: user_model.User = Depends(auth.get_current_admin_user) # Ensure only admin can delete
 ):
