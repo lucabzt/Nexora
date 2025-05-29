@@ -55,7 +55,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
-        user_id: int = payload.get("user_id")
+        user_id: str = payload.get("user_id")
         is_admin: bool = payload.get("is_admin", False)
         if username is None or user_id is None:
             raise credentials_exception

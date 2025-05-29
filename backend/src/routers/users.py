@@ -28,7 +28,7 @@ async def read_users(
 
 @router.get("/{user_id}", response_model=user_schemas.User)
 async def read_user(
-    user_id: int,
+    user_id: str, # Changed from int to str
     db: Session = Depends(get_db),
     current_user: user_model.User = Depends(auth.get_current_active_user)
 ):
@@ -46,7 +46,7 @@ async def read_user(
 
 @router.put("/{user_id}", response_model=user_schemas.User)
 async def update_user(
-    user_id: int,
+    user_id: str, # Changed from int to str
     user_update: user_schemas.UserUpdate,
     db: Session = Depends(get_db),
     current_user: user_model.User = Depends(auth.get_current_active_user)
@@ -87,7 +87,7 @@ async def update_user(
 
 @router.put("/{user_id}/change_password", response_model=user_schemas.User)
 async def change_password(
-    user_id: int,
+    user_id: str, # Changed from int to str
     password_data: user_schemas.UserPasswordUpdate, # Use a dedicated schema for password change
     db: Session = Depends(get_db),
     current_user: user_model.User = Depends(auth.get_current_active_user)
@@ -119,7 +119,7 @@ async def change_password(
 
 @router.delete("/{user_id}", response_model=user_schemas.User)
 async def delete_user(
-    user_id: int,
+    user_id: str, # Changed from int to str
     db: Session = Depends(get_db),
     current_user: user_model.User = Depends(auth.get_current_admin_user) # Ensure only admin can delete
 ):

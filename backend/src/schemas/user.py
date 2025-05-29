@@ -100,7 +100,7 @@ class UserPasswordUpdate(BaseModel):
         return v
 
 class User(UserBase): # Your existing User schema for responses
-    id: int
+    id: str
     is_active: bool
     is_admin: bool
     profile_image_base64: Optional[str] = None # Added for profile image

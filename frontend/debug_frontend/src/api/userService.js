@@ -28,6 +28,19 @@ api.interceptors.request.use(
 // api.interceptors.response.use(...);
 
 const userService = {
+  async getMe() {
+    try {
+      // The 'api' instance is configured with baseURL '/api/users'
+      // and automatically includes the auth token.
+      // So, a GET request to '/me' will hit '/api/users/me'.
+      const response = await api.get('/me');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching current user (/me):', error.response || error);
+      throw error;
+    }
+  },
+
   async getUser(userId) {
     try {
       const response = await api.get(`/${userId}`);

@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, status, APIRouter, Request # Ensure Request is imported
+from fastapi.responses import RedirectResponse # Add this
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
@@ -45,6 +46,11 @@ app.add_middleware(
 
 # Create a root router for the /api prefix
 api_router = APIRouter()
+
+# Define /users/me BEFORE including users.router to ensure correct route matching
+@api_router.get("/users/me", response_model=user_schema.User, tags=["users"])
+async def read_users_me(current_user: user_model.User = Depends(auth.get_current_active_user)):
+    return current_user
 
 # Include your existing routers under this api_router
 api_router.include_router(users.router)
@@ -138,9 +144,11 @@ async def login_google(request: Request):
 
 @api_router.get("/google/callback")
 async def google_callback(request: Request, db: Session = Depends(get_db)):
+    print("Google callback received")
     try:
         token = await oauth.google.authorize_access_token(request)
     except OAuthError as error:
+        print(f"OAuthError: {error}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f'Could not validate credentials: {error.error}',
@@ -149,6 +157,7 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
     
     user_info = token.get('userinfo')
     if not user_info:
+        print("No user info found in token")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Could not fetch user info from Google."
@@ -156,6 +165,7 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
 
     email = user_info.get("email")
     if not email:
+        print("Email not found in user info")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email not found in Google user info."
@@ -165,6 +175,7 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
     picture_url = user_info.get("picture")
 
     db_user = db.query(UserModel).filter(UserModel.email == email).first()
+
 
     if not db_user:
         # Create a new user
@@ -201,10 +212,10 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         hashed_password = auth.get_password_hash(random_password)
         
         db_user = UserModel(
+            id=secrets.token_hex(16),  # Generate a random ID for the user
             email=email,
             username=final_username,
             hashed_password=hashed_password,
-            profile_image_base64=picture_url, # Storing URL in this field
             is_active=True,
             is_admin=False 
         )
@@ -213,6 +224,7 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         db.refresh(db_user)
     
     if not getattr(db_user, 'is_active', False): # Use getattr for safety
+        print("User is inactive")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, 
             detail="User is inactive."
@@ -224,20 +236,25 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         expires_delta=access_token_expires,
     )
     
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user_id": db_user.id,
-        "username": db_user.username,
-        "email": db_user.email,
-        "is_admin": db_user.is_admin
-    }
+    # OLD RETURN JSON:
+    # return {{
+    #     "access_token": access_token,
+    #     "token_type": "bearer",
+    #     "user_id": db_user.id,
+    #     "username": db_user.username,
+    #     "email": db_user.email,
+    #     "is_admin": db_user.is_admin
+    # }}
 
+    # NEW RETURN: Redirect to frontend with token in fragment
+    frontend_base_url = "http://localhost:3000"  # Assuming frontend runs on port 3000
+    frontend_callback_path = "/auth/google/callback"
 
+    redirect_url_with_fragment = f"{frontend_base_url}{frontend_callback_path}#access_token={access_token}&token_type=bearer"
+    print(f"Redirecting to: {redirect_url_with_fragment}")
+    
+    return RedirectResponse(url=redirect_url_with_fragment)
 
-@api_router.get("/users/me", response_model=user_schema.User, tags=["users"]) # Moved /users/me here
-async def read_users_me(current_user: user_model.User = Depends(auth.get_current_active_user)):
-    return current_user
 
 
 # Include the api_router in the main app

@@ -62,6 +62,7 @@ function App() {
                 <Route path="/home" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/auth/google/callback" element={<OAuthCallbackPage />} /> {/* Moved OAuth callback route here */}
               </Route>
               
               {/* Protected routes */}
@@ -72,7 +73,7 @@ function App() {
                   <Route path="courses/:courseId" element={<CourseView />} />
                   <Route path="courses/:courseId/chapters/:chapterId" element={<ChapterView />} />
                   <Route path="settings" element={<SettingsPage />} />
-                  <Route path="oauth-callback" element={<OAuthCallbackPage />} /> {/* Add route for OAuth callback */}
+                  {/* <Route path="auth/google/callback" element={<OAuthCallbackPage />} /> Removed from here */}
                   {/* Add other protected routes here */}
                 </Route>
               </Route>
