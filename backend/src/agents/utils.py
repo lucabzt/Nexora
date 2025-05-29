@@ -18,7 +18,7 @@ from typing import List
 from fastapi import UploadFile
 from google.genai import types
 
-from backend.src.models.db_file import Document, Image
+from ..models.db_file import Document, Image
 
 
 def create_text_query(query: str) -> types.Content:
