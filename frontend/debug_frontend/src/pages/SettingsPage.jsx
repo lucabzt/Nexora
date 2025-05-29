@@ -59,18 +59,36 @@ function SettingsPage() {
   });
 
   useEffect(() => {
+    // Update form values from user context
     if (user) {
-      if (!generalForm.values.username && !generalForm.values.email) {
-        generalForm.setValues({
-          username: user.username || '',
-          email: user.email || '',
-        });
-      }
-      if (!profileImageFile && !previewImage) {
-        setPreviewImage(user.profile_image_base64 || null);
-      }
+      generalForm.setValues({
+        username: user.username || '',
+        email: user.email || '',
+      });
     }
-  }, [user, profileImageFile, previewImage, generalForm]);
+
+    // Handle preview image logic
+    if (profileImageFile) { // A new local file is selected, this takes precedence for preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result); // This is a data URI
+      };
+      reader.readAsDataURL(profileImageFile);
+    } else if (user && user.profile_image_base64) { // No local file, but user has an image in context (from DB)
+      const rawBase64FromDB = user.profile_image_base64;
+      // Convert raw base64 string from DB to a data URI. Assuming JPEG as a common default.
+      // A more robust solution would involve storing/retrieving the MIME type from the backend.
+      if (rawBase64FromDB && !rawBase64FromDB.startsWith('data:image')) {
+        setPreviewImage(`data:image/jpeg;base64,${rawBase64FromDB}`);
+      } else if (rawBase64FromDB) { // It might already be a data URI (less likely with current backend)
+        setPreviewImage(rawBase64FromDB);
+      } else {
+        setPreviewImage(null);
+      }
+    } else { // No local file, and no image in user context (or no user)
+      setPreviewImage(null);
+    }
+  }, [user, profileImageFile, generalForm]); // Added generalForm to dependency array
 
   const handleFileChange = (file) => {
     if (file) {
