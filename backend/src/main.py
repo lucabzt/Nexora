@@ -268,5 +268,3 @@ app.include_router(api_router)
 @app.get("/")
 async def root():
     return {"message": "Welcome to the User Management API. API endpoints are under /api"}
-
-
