@@ -15,6 +15,13 @@ from .utils import auth
 from .db.database import engine, get_db
 from .routers import users,courses # Your existing users router
 
+
+from fastapi import APIRouter, Depends, HTTPException, status, Request
+from authlib.integrations.starlette_client import OAuth, OAuthError
+from .config import settings
+from .models.db_user import User as UserModel
+
+
 # Create database tables
 user_model.Base.metadata.create_all(bind=engine)
 
@@ -121,10 +128,6 @@ async def register_user(user_data: user_schema.UserCreate, db: Session = Depends
     return new_db_user
 
 
-from fastapi import APIRouter, Depends, HTTPException, status, Request
-from authlib.integrations.starlette_client import OAuth, OAuthError
-from .config import settings
-from .models.db_user import User as UserModel
 
 oauth = OAuth()
 oauth.register(
@@ -247,7 +250,7 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
     # }}
 
     # NEW RETURN: Redirect to frontend with token in fragment
-    frontend_base_url = "http://localhost:3000"  # Assuming frontend runs on port 3000
+    frontend_base_url = settings.FRONTEND_BASE_URL  # Assuming frontend runs on port 3000
     frontend_callback_path = "/auth/google/callback"
 
     redirect_url_with_fragment = f"{frontend_base_url}{frontend_callback_path}#access_token={access_token}&token_type=bearer"
