@@ -12,3 +12,4 @@ class User(Base):
     hashed_password = Column(String(100), nullable=False)
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False) # Added for admin role
+    profile_image_base64 = Column(LONGTEXT, nullable=True) # New field for profile image

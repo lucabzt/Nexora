@@ -7,6 +7,8 @@ from sqlalchemy.orm import Session
 from datetime import timedelta
 import secrets # Added for generating random passwords/suffixes
 import uuid
+import requests # Add requests for fetching image
+import base64 # Add base64 for encoding image
 
 from .schemas import user as user_schema
 from .models import db_user as user_model
@@ -184,6 +186,18 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
 
     db_user = db.query(UserModel).filter(UserModel.email == email).first()
 
+    profile_image_base64_data = None
+    if picture_url:
+        try:
+            response = requests.get(picture_url)
+            response.raise_for_status() # Raise an exception for bad status codes
+            profile_image_base64_data = base64.b64encode(response.content).decode('utf-8')
+        except requests.exceptions.RequestException as e:
+            print(f"Could not download image from {picture_url}: {e}")
+            # Decide how to handle this: proceed without an image, or raise an error
+            # For now, let's proceed without an image
+            profile_image_base64_data = None
+
 
     if not db_user:
         # Create a new user
@@ -224,12 +238,23 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
             email=email,
             username=final_username,
             hashed_password=hashed_password,
+            # profile_image_base64=profile_image_base64_data, # Store base64 data
             is_active=True,
             is_admin=False 
         )
+        if profile_image_base64_data: # Only set if image was successfully fetched
+            setattr(db_user, 'profile_image_base64', profile_image_base64_data)
+
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
+    else: # Existing user, update profile image if it changed or was not set
+        # Check if the current image in DB is different from the new one, or if DB has no image
+        current_db_image = getattr(db_user, 'profile_image_base64', None)
+        if profile_image_base64_data and current_db_image != profile_image_base64_data:
+            setattr(db_user, 'profile_image_base64', profile_image_base64_data)
+            db.commit()
+            db.refresh(db_user)
     
     if not getattr(db_user, 'is_active', False): # Use getattr for safety
         print("User is inactive")
