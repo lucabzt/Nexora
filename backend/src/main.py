@@ -128,12 +128,14 @@ async def register_user(user_data: user_schema.UserCreate, db: Session = Depends
         username=user_data.username,
         email=user_data.email,
         hashed_password=hashed_password,
-        is_admin=False
+        is_admin=False,
+        is_active=True,  # Default to active
     )
 
     db.add(new_db_user)
     db.commit()
     db.refresh(new_db_user)
+    return new_db_user
 
 
 oauth = OAuth()
