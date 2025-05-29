@@ -91,11 +91,81 @@ export const courseService = {
     }
   },
 
-  // Create a demo course
+  // Create a demo course (deprecated, use createCourse instead)
   createDemoCourse: async (data) => {
     try {
       const response = await api.post('/courses/new_demo', data);
       return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Create a course with streaming response
+  createCourse: async (data, onProgress) => {
+    try {
+      const response = await api.post('/courses/create', data, {
+        responseType: 'text',
+        onDownloadProgress: (progressEvent) => {
+          const responseText = progressEvent.currentTarget.response;
+          if (responseText && typeof onProgress === 'function') {
+            // Split by newlines and parse each line as JSON
+            const lines = responseText.split('\n').filter(line => line.trim());
+            
+            // Process only the last line to avoid duplicate processing
+            if (lines.length > 0) {
+              try {
+                const lastLine = lines[lines.length - 1];
+                const data = JSON.parse(lastLine);
+                onProgress(data);
+              } catch (e) {
+                console.error('Error parsing streaming data:', e);
+              }
+            }
+          }
+        }
+      });
+      
+      // The full response text contains all JSON objects
+      const lines = response.data.split('\n').filter(line => line.trim());
+      const parsedResponses = lines.map(line => JSON.parse(line));
+      return parsedResponses;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Upload a document and get document ID
+  uploadDocument: async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await api.post('/files/documents', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      return response.data; // Contains document ID and other info
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Upload an image and get image ID
+  uploadImage: async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await api.post('/files/images', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      return response.data; // Contains image ID and other info
     } catch (error) {
       throw error;
     }
