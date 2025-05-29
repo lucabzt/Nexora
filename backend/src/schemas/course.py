@@ -38,7 +38,7 @@ class CourseInfo(BaseModel):
     course_id: int
     title: str
     description: str
-    session_id: int
+    session_id: str
 
 class Course(BaseModel):
     """Schema for a course."""

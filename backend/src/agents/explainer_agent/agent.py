@@ -13,7 +13,7 @@ class ExplainerAgent:
         # Create the planner agent
         explainer_agent = LlmAgent(
             name="explainer_agent",
-            model="gemini-2.5-flash-preview-05-20",
+            model="gemini-2.0-flash",
             description="Agent for creating engaging and simple explanations for complex topics",
             instruction=load_instruction_from_file("explainer_agent/instructions.txt"),
         )

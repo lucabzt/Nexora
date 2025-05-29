@@ -17,7 +17,7 @@ class TesterAgent:
         # Create the planner agent
         tester_agent = LlmAgent(
             name="tester_agent",
-            model="gemini-2.5-flash-preview-05-20",
+            model="gemini-2.0-flash",
             description="Agent for testing the user on studied material",
             output_schema=Test,
             instruction=load_instruction_from_file("tester_agent/instructions.txt"),

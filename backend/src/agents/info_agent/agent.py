@@ -18,7 +18,7 @@ class InfoAgent:
         # Create the planner agent
         info_agent = LlmAgent(
             name="info_agent",
-            model="gemini-1.5-flash-8b-latest",
+            model="gemini-1.5-flash-8b",
             output_schema=CourseInfo,
             description="Agent for creating a small info for a course",
             instruction=load_instruction_from_file("info_agent/instructions.txt"),
