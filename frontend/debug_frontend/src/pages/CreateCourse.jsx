@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Container, 
@@ -16,7 +16,9 @@ import {
   Loader,
   Progress,
   Card,
-  List
+  List,
+  Badge,
+  SimpleGrid
 } from '@mantine/core';
 import { IconUpload, IconAlertCircle, IconCheck, IconPhoto, IconFileText } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
@@ -85,46 +87,31 @@ function CreateCourse() {
     } finally {
       setIsUploading(false);
     }
-  };
-
-  // Handle streaming progress updates
+  };  // Handle streaming progress updates
   const handleStreamProgress = (data) => {
+    console.log('Streaming progress:', data); // Debug log
+    
     if (data.type === 'course_info') {
       setCourseInfo(data.data);
-      setStreamingProgress({
-        status: 'Received course info',
-        progress: 10,
-      });
+      // Immediately redirect to course view
+      navigate(`/courses/${data.data.course_id}?creating=true`);
     } else if (data.type === 'chapter') {
+      // These updates will be handled by the CourseView component
       setChapters(prev => [...prev, data.data]);
-      // Calculate progress based on chapters received
-      // This is an approximation since we don't know the total chapters in advance
-      const progress = Math.min(10 + (chapters.length + 1) * 15, 90);
-      setStreamingProgress({
-        status: `Received chapter ${chapters.length + 1}`,
-        progress,
-      });
     } else if (data.type === 'complete') {
-      setStreamingProgress({
-        status: 'Course creation complete!',
-        progress: 100,
-      });
-      
-      // Navigate to the course page if we have course info
-      if (courseInfo) {
-        setTimeout(() => {
-          navigate(`/courses/${courseInfo.course_id}`);
-        }, 1000);
-      }
+      // Course creation is complete - CourseView will handle final updates
+      console.log('Course creation completed');
     } else if (data.type === 'error') {
+      console.error('Streaming error:', data.data);
       setError(data.data.message || 'An error occurred during course creation');
       setStreamingProgress({
-        status: 'Error',
+        status: 'Error occurred during course creation',
         progress: 0,
+        phase: 'error'
       });
+      setIsSubmitting(false);
     }
   };
-
   const handleSubmit = async () => {
     if (form.validate().hasErrors) {
       return;
@@ -144,6 +131,12 @@ function CreateCourse() {
       const documentIds = uploadedDocuments.map(doc => doc.id);
       const imageIds = uploadedImages.map(img => img.id);
 
+      // Show preparation status
+      setStreamingProgress({
+        status: 'Preparing course materials and connecting to AI agents...',
+        progress: 8,
+      });
+
       // Create course with streaming response
       await courseService.createCourse({
         query: form.values.query,
@@ -158,7 +151,6 @@ function CreateCourse() {
       setError('Failed to create course. Please try again.');
       toast.error('Failed to create course');
       setStreamingProgress(null);
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -191,8 +183,7 @@ function CreateCourse() {
   return (
     <Container size="md" py="xl">
       <Title order={1} mb="lg">Create a New Learning Course</Title>
-      
-      {streamingProgress ? (
+        {streamingProgress ? (
         <Paper radius="md" p="xl" withBorder>
           <Title order={3} mb="md">Creating Your Course</Title>
           
@@ -202,9 +193,18 @@ function CreateCourse() {
             size="lg" 
             radius="xl" 
             color={streamingProgress.progress === 100 ? 'green' : 'blue'}
+            animate={streamingProgress.progress > 0 && streamingProgress.progress < 100}
           />
           
-          <Text align="center" mb="xl">{streamingProgress.status}</Text>
+          <Text align="center" mb="xl" size="lg" weight={500}>
+            {streamingProgress.status}
+          </Text>
+          
+          {streamingProgress.progress > 0 && streamingProgress.progress < 100 && (
+            <Text color="dimmed" size="sm" align="center" mb="md">
+              This may take a few minutes. Our AI is crafting personalized content for your course.
+            </Text>
+          )}
           
           {courseInfo && (
             <Card shadow="sm" p="lg" mt="md" mb="md" withBorder>
@@ -216,15 +216,41 @@ function CreateCourse() {
           
           {chapters.length > 0 && (
             <>
-              <Title order={4} mt="xl" mb="md">Chapters Created: {chapters.length}</Title>
-              <List>
+              <Title order={4} mt="xl" mb="md">
+                Chapters Created: {chapters.length} 
+                {courseInfo?.total_time_hours && 
+                  ` (Expected: ~${Math.max(3, Math.ceil(courseInfo.total_time_hours * 1.5))})`
+                }
+              </Title>
+              
+              <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
                 {chapters.map((chapter, idx) => (
-                  <List.Item key={chapter.id} icon={<IconCheck size={16} color="green" />}>
-                    {chapter.caption} ({chapter.time_minutes} min) - {chapter.mc_questions?.length || 0} questions
-                  </List.Item>
+                  <Card key={chapter.id || idx} p="sm" mb="xs" withBorder radius="md">
+                    <Group position="apart" mb="xs">
+                      <Text weight={500} size="sm">{chapter.caption}</Text>
+                      <Group spacing="xs">
+                        <Badge size="sm">{chapter.time_minutes} min</Badge>
+                        <Badge size="sm" color="green">{chapter.mc_questions?.length || 0} questions</Badge>
+                      </Group>
+                    </Group>
+                    <Text size="xs" color="dimmed" lineClamp={1}>
+                      {chapter.summary}
+                    </Text>
+                  </Card>
                 ))}
-              </List>
+              </div>
             </>
+          )}
+          
+          {streamingProgress.progress === 100 && (
+            <Button 
+              fullWidth 
+              color="green" 
+              mt="xl"
+              onClick={() => navigate(`/courses/${courseInfo.course_id}`)}
+            >
+              Go to Course
+            </Button>
           )}
           
           {error && (

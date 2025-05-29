@@ -291,6 +291,8 @@ async def create_course_demo(
         title=demo_course.title,
         description=demo_course.description or "",
         session_id=demo_course.session_id,
+        status="finished",  # Demo courses are immediately finished
+        total_time_hours=demo_course.total_time_hours,
         chapters=chapters
     )
 
@@ -315,11 +317,9 @@ async def get_user_courses(
               .limit(limit)
               .all())
     
-    # Convert to response format with chapters
-    return [CourseInfo(course_id = course.id, description = course.description, title = course.title, session_id=course.session_id) for course in courses]
+    return [CourseInfo(course_id = course.id, description = course.description, title = course.title, session_id=course.session_id, status=course.status) for course in courses]
+
     
-
-
 @router.get("/{course_id}", response_model=CourseSchema)
 async def get_course_by_id(
         course_id: int,
@@ -363,6 +363,8 @@ async def get_course_by_id(
         title=course.title,
         description=course.description or "",
         session_id=course.session_id,
+        status=course.status.value,  # Convert enum to string
+        total_time_hours=course.total_time_hours,
         chapters=chapters
     )
 

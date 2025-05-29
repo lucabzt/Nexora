@@ -99,38 +99,70 @@ export const courseService = {
     } catch (error) {
       throw error;
     }
-  },
-
-  // Create a course with streaming response
+  },  // Create a course with streaming response
   createCourse: async (data, onProgress) => {
     try {
-      const response = await api.post('/courses/create', data, {
+      let lastProcessedLength = 0; // Track the length of the processed part of the stream
+      
+      await api.post('/courses/create', data, {
         responseType: 'text',
+        timeout: 300000, // 5 minute timeout for course creation
         onDownloadProgress: (progressEvent) => {
           const responseText = progressEvent.currentTarget.response;
           if (responseText && typeof onProgress === 'function') {
-            // Split by newlines and parse each line as JSON
-            const lines = responseText.split('\n').filter(line => line.trim());
+            const newData = responseText.substring(lastProcessedLength);
+            // Split by newlines and filter out empty lines
+            const lines = newData.split('\\n').filter(line => line.trim());
             
-            // Process only the last line to avoid duplicate processing
-            if (lines.length > 0) {
+            lines.forEach(line => { // Process each new line
               try {
-                const lastLine = lines[lines.length - 1];
-                const data = JSON.parse(lastLine);
-                onProgress(data);
+                const parsedData = JSON.parse(line);
+                onProgress(parsedData);
               } catch (e) {
-                console.error('Error parsing streaming data:', e);
+                console.error('Error parsing streaming data:', e, 'Line:', line);
+                if (typeof onProgress === 'function') {
+                  onProgress({
+                    type: 'error',
+                    data: {
+                      message: `Error parsing streaming data for line: ${line}`
+                    }
+                  });
+                }
               }
-            }
+            });
+            lastProcessedLength = responseText.length; // Update processed length
           }
         }
       });
       
-      // The full response text contains all JSON objects
-      const lines = response.data.split('\n').filter(line => line.trim());
-      const parsedResponses = lines.map(line => JSON.parse(line));
-      return parsedResponses;
+      return true; // Success indicator
     } catch (error) {
+      console.error('Course creation error:', error);
+      
+      // Handle different types of errors
+      let errorMessage = 'Course creation failed';
+      
+      if (error.code === 'ECONNABORTED') {
+        errorMessage = 'Course creation timed out. Please try again.';
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Authentication failed. Please log in again.';
+      } else if (error.response?.status >= 500) {
+        errorMessage = 'Server error. Please try again later.';
+      } else if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      // Handle streaming errors
+      if (typeof onProgress === 'function') {
+        onProgress({
+          type: 'error',
+          data: {
+            message: errorMessage
+          }
+        });
+      }
       throw error;
     }
   },

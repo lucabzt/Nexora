@@ -11,9 +11,10 @@ import {
   Badge,
   Loader,
   Alert,
-  Box
+  Box,
+  Progress
 } from '@mantine/core';
-import { IconAlertCircle } from '@tabler/icons-react';
+import { IconAlertCircle, IconClock, IconCheck, IconBook } from '@tabler/icons-react';
 import { courseService } from '../api/courseService';
 
 function Dashboard() {
@@ -39,6 +40,19 @@ function Dashboard() {
 
     fetchCourses();
   }, []);
+  // Helper function to get status badge color and icon
+  const getStatusInfo = (status) => {
+    switch (status) {
+      case 'creating':
+        return { color: 'blue', icon: IconClock, label: 'Creating' };
+      case 'finished':
+        return { color: 'green', icon: IconCheck, label: 'Finished' };
+      case 'updating':
+        return { color: 'orange', icon: IconClock, label: 'Updating' };
+      default:
+        return { color: 'gray', icon: IconBook, label: 'Learning' };
+    }
+  };
 
   return (
     <Container size="lg" py="xl">
@@ -84,35 +98,60 @@ function Dashboard() {
 
       {!loading && !error && courses.length > 0 && (
         <Grid>
-          {courses.map((course) => (
-            <Grid.Col key={course.course_id} xs={12} sm={6} md={4}>
-              <Card shadow="sm" padding="lg" radius="md" withBorder>
-                <Card.Section withBorder inheritPadding py="xs">
-                  <Badge color="cyan" variant="outline">
-                    Session ID: {course.session_id}
-                  </Badge>
-                </Card.Section>
+          {courses.map((course) => {
+            const statusInfo = getStatusInfo(course.status);
+            const StatusIcon = statusInfo.icon;
+            
+            return (
+              <Grid.Col key={course.course_id} xs={12} sm={6} md={4}>
+                <Card shadow="sm" padding="lg" radius="md" withBorder>
+                  <Card.Section withBorder inheritPadding py="xs">
+                    <Group position="apart">
+                      <Badge color="cyan" variant="outline" size="sm">
+                        Session: {course.session_id}
+                      </Badge>
+                      <Badge 
+                        color={statusInfo.color} 
+                        variant="filled" 
+                        leftSection={<StatusIcon size={12} />}
+                      >
+                        {statusInfo.label}
+                      </Badge>
+                    </Group>
+                  </Card.Section>
 
-                <Title order={3} mt="md" mb="xs">
-                  {course.title}
-                </Title>
+                  <Title order={3} mt="md" mb="xs">
+                    {course.title}
+                  </Title>
 
-                <Text size="sm" color="dimmed" lineClamp={3}>
-                  {course.description}
-                </Text>
+                  <Text size="sm" color="dimmed" lineClamp={3} mb="md">
+                    {course.description}
+                  </Text>
 
-                <Button
-                  variant="light"
-                  color="blue"
-                  fullWidth
-                  mt="md"
-                  onClick={() => navigate(`/courses/${course.course_id}`)}
-                >
-                  Continue Learning
-                </Button>
-              </Card>
-            </Grid.Col>
-          ))}
+                  {/* Time information */}
+                  {course.total_time_hours && (
+                    <Text size="xs" color="dimmed" mb="md">
+                      Est. time: {course.total_time_hours} hours
+                    </Text>
+                  )}
+
+                  <Button
+                    variant="light"
+                    color={course.status === 'creating' ? 'blue' : 'teal'}
+                    fullWidth
+                    mt="auto"
+                    onClick={() => navigate(
+                      course.status === 'creating' 
+                        ? `/courses/${course.course_id}?creating=true`
+                        : `/courses/${course.course_id}`
+                    )}
+                  >
+                    {course.status === 'creating' ? 'View Creation Progress' : 'Continue Learning'}
+                  </Button>
+                </Card>
+              </Grid.Col>
+            );
+          })}
         </Grid>
       )}
     </Container>
