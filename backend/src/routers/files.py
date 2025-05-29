@@ -39,7 +39,7 @@ ALLOWED_IMAGE_TYPES = {
 }
 
 # File size limits (in bytes)
-MAX_DOCUMENT_SIZE = 10 * 1024 * 1024  # 10 MB TODO find suitable limit
+MAX_DOCUMENT_SIZE = 30 * 1024 * 1024  # 30 MB TODO find suitable limit
 MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5 MB
 
 
