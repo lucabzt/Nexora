@@ -207,8 +207,8 @@ export const courseService = {
             if (newData.length === 0) {
               console.log('[Streaming] No new data in this chunk. Skipping further processing for this event.');
             } else {
-              console.log('[Streaming] Splitting newData by actual newline character \'\\n\'');
-              const lines = newData.split('\\n').filter(line => line.trim());
+              console.log('[Streaming] Splitting newData by actual newline character \'\\\\n\'');
+              const lines = newData.split('\\n').filter(line => line.trim() !== ''); // Corrected filter
               console.log('[Streaming] Number of new lines found:', lines.length, 'Lines (first 3):', lines.slice(0,3).map(l => l.substring(0,100) + (l.length > 100 ? '...' : '')));
               
               let processedAnyLine = false;
@@ -218,8 +218,22 @@ export const courseService = {
                   console.log(`[Streaming] Line ${index} is empty or whitespace. Skipping.`);
                   return;
                 }
+                // --- Start Enhanced Line Debugging ---
+                console.log(`[Streaming] Detailed debug for line ${index}:`);
+                console.log(`[Streaming]   Raw line: "${line}"`);
+                console.log(`[Streaming]   Line length: ${line.length}`);
+                if (line.length > 0) {
+                  console.log(`[Streaming]   Char codes (first 10): ${Array.from(line.substring(0, 10)).map(c => c.charCodeAt(0)).join(', ')}`);
+                }
+                const trimmedLine = line.trim();
+                console.log(`[Streaming]   Trimmed line: "${trimmedLine}"`);
+                console.log(`[Streaming]   Trimmed line length: ${trimmedLine.length}`);
+                if (trimmedLine.length > 0) {
+                  console.log(`[Streaming]   Trimmed char codes (first 10): ${Array.from(trimmedLine.substring(0, 10)).map(c => c.charCodeAt(0)).join(', ')}`);
+                }
+                // --- End Enhanced Line Debugging ---
                 try {
-                  const parsedData = JSON.parse(line);
+                  const parsedData = JSON.parse(trimmedLine); // Use trimmedLine for parsing
                   console.log(`[Streaming] Successfully parsed JSON for line ${index}:`, parsedData);
                   if (typeof onProgress === 'function') {
                     onProgress(parsedData);
@@ -229,7 +243,9 @@ export const courseService = {
                     console.warn(`[Streaming] onProgress is not a function. Cannot process parsed data for line ${index}.`);
                   }
                 } catch (e) {
-                  console.error('[Streaming] Error parsing JSON from line:', e, 'Problematic Line:', line);
+                  console.error('[Streaming] Error parsing JSON from line:', e, 
+                                'Problematic Trimmed Line (stringified):', JSON.stringify(trimmedLine), 
+                                'Original Line:', line);
                   if (typeof onProgress === 'function') {
                     onProgress({
                       type: 'error',
