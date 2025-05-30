@@ -12,9 +12,10 @@ import {
   Loader,
   Alert,
   Box,
-  Progress
+  Progress,
+  ActionIcon
 } from '@mantine/core';
-import { IconAlertCircle, IconClock, IconCheck, IconBook } from '@tabler/icons-react';
+import { IconAlertCircle, IconClock, IconCheck, IconBook, IconTrash } from '@tabler/icons-react';
 import { courseService } from '../api/courseService';
 
 function Dashboard() {
@@ -22,6 +23,21 @@ function Dashboard() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const handleDelete = async (courseId) => {
+    if (!window.confirm('Are you sure you want to permanently delete this course? This action cannot be undone.')) {
+      return;
+    }
+    try {
+      await courseService.deleteCourse(courseId);
+      setCourses(prevCourses => prevCourses.filter(course => course.course_id !== courseId));
+      // Optional: Show a success notification
+    } catch (err) {
+      setError(`Failed to delete course. ${err.message || ''}`);
+      console.error('Error deleting course:', err);
+      // Optional: Show an error notification
+    }
+  };
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -107,9 +123,6 @@ function Dashboard() {
                 <Card shadow="sm" padding="lg" radius="md" withBorder>
                   <Card.Section withBorder inheritPadding py="xs">
                     <Group position="apart">
-                      <Badge color="cyan" variant="outline" size="sm">
-                        Session: {course.session_id}
-                      </Badge>
                       <Badge 
                         color={statusInfo.color} 
                         variant="filled" 
@@ -117,6 +130,17 @@ function Dashboard() {
                       >
                         {statusInfo.label}
                       </Badge>
+                      <ActionIcon 
+                        color="red" 
+                        variant="subtle"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(course.course_id);
+                        }}
+                        title="Delete course"
+                      >
+                        <IconTrash size={16} />
+                      </ActionIcon>
                     </Group>
                   </Card.Section>
 
@@ -148,6 +172,7 @@ function Dashboard() {
                   >
                     {course.status === 'creating' ? 'View Creation Progress' : 'Continue Learning'}
                   </Button>
+
                 </Card>
               </Grid.Col>
             );

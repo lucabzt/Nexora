@@ -99,7 +99,24 @@ export const courseService = {
     } catch (error) {
       throw error;
     }
-  },  // Create a course with streaming response
+  },
+
+  // Delete a course by ID
+  deleteCourse: async (courseId) => {
+    try {
+      const response = await api.delete(`/courses/${courseId}`);
+      // Check for 204 No Content or other success statuses without a body
+      if (response.status === 204) {
+        return { message: 'Course deleted successfully' };
+      }
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting course ${courseId}:`, error.response || error);
+      throw error;
+    }
+  },
+
+  // Create a course with streaming response
   createCourse: async (data, onProgress) => {
     try {
       let lastProcessedLength = 0; // Track the length of the processed part of the stream
