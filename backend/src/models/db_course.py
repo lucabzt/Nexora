@@ -27,6 +27,8 @@ class Course(Base):
 
     # Relationships
     chapters = relationship("Chapter", back_populates="course", cascade="all, delete-orphan")
+    documents = relationship("Document", foreign_keys="Document.course_id", cascade="all, delete-orphan")
+    images = relationship("Image", foreign_keys="Image.course_id", cascade="all, delete-orphan")
 
 
 class Chapter(Base):
