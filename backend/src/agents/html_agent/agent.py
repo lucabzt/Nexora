@@ -1,27 +1,24 @@
 """
-This defines a PlannerAgent class which wraps the event handling and runner from adk into a simple run() method
+This is the agent to create the main content of the course.
+It creates html slides that contain explanations and visualizations.
 """
-import json
-from typing import Dict, Any
-
+from google.adk import Runner
 from google.adk.agents import LlmAgent
-from google.adk.runners import Runner
-from google.genai import types
 
 from ..agent import StructuredAgent
 from ..utils import load_instruction_from_file
-from .schema import LearningPath
+from .schema import HtmlSlides
 
 
-class PlannerAgent(StructuredAgent):
+class HtmlAgent(StructuredAgent):
     def __init__(self, app_name: str, session_service):
-        # Create the planner agent
-        planner_agent = LlmAgent(
-            name="planner_agent",
-            model="gemini-2.0-flash",
+        # Create the html agent
+        html_agent = LlmAgent(
+            name="html_agent",
+            model="gemini-2.5-flash-preview-05-20",
             description="Agent for planning Learning Paths and Courses",
-            output_schema=LearningPath,
-            instruction=load_instruction_from_file("planner_agent/instructions.txt"),
+            output_schema=HtmlSlides,
+            instruction=load_instruction_from_file("html_agent/instructions.txt"),
             disallow_transfer_to_parent=True,
             disallow_transfer_to_peers=True
         )
@@ -30,7 +27,8 @@ class PlannerAgent(StructuredAgent):
         self.app_name = app_name
         self.session_service = session_service
         self.runner = Runner(
-            agent=planner_agent,
+            agent=html_agent,
             app_name=self.app_name,
             session_service=self.session_service,
         )
+
