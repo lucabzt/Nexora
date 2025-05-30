@@ -26,10 +26,20 @@ import { useAuth } from '../contexts/AuthContext'; // Added useAuth
 
 function MainLayout() {
   const theme = useMantineTheme();
+  const navigate = useNavigate();
+  const { user, logout, isAuthenticated } = useAuth(); // Ensure isAuthenticated is destructured
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const dark = colorScheme === 'dark';
-  const { isAuthenticated, user, logout } = useAuth(); // Get auth state and user info
-  const navigate = useNavigate(); // Added for logout navigation
+
+  // Logic to determine avatar source
+  let avatarSrc = null;
+  if (user && user.profile_image_base64) {
+    if (user.profile_image_base64.startsWith('data:image')) {
+      avatarSrc = user.profile_image_base64;
+    } else {
+      avatarSrc = `data:image/jpeg;base64,${user.profile_image_base64}`;
+    }
+  }
 
   const handleLogout = () => {
     logout();
@@ -67,11 +77,20 @@ function MainLayout() {
             </Title>
             
             <Group spacing="md">
-              {isAuthenticated ? (
+              {isAuthenticated && user ? ( // Added user check for safety
                 <Menu shadow="md" width={200} position="bottom-end">
                   <Menu.Target>
                     <Group spacing="xs" sx={{ cursor: 'pointer' }}>
-                      <Avatar src={user?.avatar_url || null} alt={user?.username || 'User'} radius="xl" size="sm" />
+                      <Avatar
+                        key={avatarSrc || user.id}
+                        src={avatarSrc}
+                        alt={user.username || 'User'}
+                        radius="xl"
+                        size="sm"
+                        color="cyan" // Added color for consistency if image fails
+                      >
+                        {!avatarSrc && user.username ? user.username.substring(0, 2).toUpperCase() : (!avatarSrc ? <IconUser size={14} /> : null)}
+                      </Avatar>
                       {user && (
                         <Text size="sm" fw={500}>
                           {user.username}

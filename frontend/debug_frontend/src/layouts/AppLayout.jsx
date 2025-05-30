@@ -67,6 +67,16 @@ function AppLayout() {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const dark = colorScheme === 'dark';
   
+  // Logic to determine avatar source
+  let avatarSrc = null;
+  if (user && user.profile_image_base64) {
+    if (user.profile_image_base64.startsWith('data:image')) {
+      avatarSrc = user.profile_image_base64;
+    } else {
+      avatarSrc = `data:image/jpeg;base64,${user.profile_image_base64}`;
+    }
+  }
+
   const mainLinksData = [
     { icon: <IconHome2 size={18} />, color: 'blue', label: 'Dashboard', to: '/' },
     { icon: <IconPlus size={18} />, color: 'teal', label: 'Create New Course', to: '/create-course' },
@@ -115,14 +125,14 @@ function AppLayout() {
                      <UnstyledButton> 
                     <Group spacing="xs"> 
                       <Avatar
-                        key={user.profile_image_base64 || user.id}
-                        src={user.profile_image_base64 ? `data:image/jpeg;base64,${user.profile_image_base64}` : null}
+                        key={avatarSrc || (user ? user.id : 'app-layout-avatar')}
+                        src={avatarSrc}
                         radius="xl"
                         alt={user.username || 'User avatar'}
                         color="cyan"
                         style={{ cursor: 'pointer' }}
                       >
-                        {!user.profile_image_base64 && user.username ? user.username.substring(0, 2).toUpperCase() : <IconUser size={18} />}
+                        {!avatarSrc && user.username ? user.username.substring(0, 2).toUpperCase() : (!avatarSrc ? <IconUser size={18} /> : null)}
                       </Avatar>
                       <Text size="sm" weight={500}>{user.username}</Text>
                      </Group>
