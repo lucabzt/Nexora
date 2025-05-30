@@ -5,6 +5,7 @@ from ..models.db_user import User
 from ..models.db_course import Course, Chapter, MultipleChoiceQuestion, CourseStatus
 
 
+
 ############### USERS
 def get_user_by_id(db: Session, user_id: str) -> Optional[User]:
     """Get user by ID"""
