@@ -1,9 +1,32 @@
+// frontend/magic_patterns/src/pages/HomePage.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BrainIcon, BarChartIcon, UserIcon, CheckIcon, StarIcon, ArrowRightIcon } from 'lucide-react';
-import FeatureCard from '../components/FeatureCard';
+import { BrainIcon, BarChartIcon, UserIcon, CheckIcon, StarIcon, BookOpenIcon } from 'lucide-react';
+import FeatureCard from '../components/FeatureCard.jsx';
+
 const HomePage = () => {
-  return <div className="w-full">
+  return (
+    <div className="w-full">
+      {/* Navigation for home page */}
+      <nav className="border-b border-gray-200 bg-white shadow-sm">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center">
+            <div className="flex items-center">
+              <BookOpenIcon className="mr-2 h-8 w-8 text-teal-500" />
+              <span className="text-xl font-bold text-gray-800">Nexora</span>
+            </div>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Link to="/login" className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+              Sign In
+            </Link>
+            <Link to="/login" className="rounded-md bg-teal-500 px-4 py-2 text-sm font-medium text-white hover:bg-teal-600">
+              Get Started
+            </Link>
+          </div>
+        </div>
+      </nav>
+
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Hero Section */}
         <div className="mb-16 grid items-center gap-8 md:grid-cols-2">
@@ -18,33 +41,55 @@ const HomePage = () => {
               schedule.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link to="/create" className="rounded-md bg-teal-500 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-teal-600">
+              <Link to="/login" className="rounded-md bg-teal-500 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-teal-600">
                 Get Started
               </Link>
-              <button className="rounded-md border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50">
-                Log In
-              </button>
+              <Link to="/login" className="rounded-md border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+                Sign In
+              </Link>
             </div>
           </div>
           <div className="rounded-lg border border-gray-200 bg-white p-2 shadow-md">
-            <img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Next-gen learning, powered by AI" className="h-auto w-full rounded-md" />
+            <img
+              src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Next-gen learning, powered by AI"
+              className="h-auto w-full rounded-md"
+            />
             <p className="mt-2 text-center text-sm text-gray-500">
               Next-gen learning, powered by AI
             </p>
           </div>
         </div>
+
         {/* How it works section */}
         <div className="mb-16">
           <h2 className="mb-8 text-center text-3xl font-bold text-gray-900">
             How Nexora Transforms Your Learning
           </h2>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <FeatureCard icon={BrainIcon} title="Personalized Curriculum" description="AI-generated content tailored specifically to your goals and learning style." />
-            <FeatureCard icon={BarChartIcon} title="Progress Tracking" description="Monitor your learning journey with detailed progress analytics and insights." />
-            <FeatureCard icon={UserIcon} title="Adaptive Learning" description="Content difficulty adjusts based on your performance and comprehension." />
-            <FeatureCard icon={CheckIcon} title="Interactive Quizzes" description="Test your knowledge with smart quizzes that reinforce your understanding." />
+            <FeatureCard
+              icon={BrainIcon}
+              title="Personalized Curriculum"
+              description="AI-generated content tailored specifically to your goals and learning style."
+            />
+            <FeatureCard
+              icon={BarChartIcon}
+              title="Progress Tracking"
+              description="Monitor your learning journey with detailed progress analytics and insights."
+            />
+            <FeatureCard
+              icon={UserIcon}
+              title="Adaptive Learning"
+              description="Content difficulty adjusts based on your performance and comprehension."
+            />
+            <FeatureCard
+              icon={CheckIcon}
+              title="Interactive Quizzes"
+              description="Test your knowledge with smart quizzes that reinforce your understanding."
+            />
           </div>
         </div>
+
         {/* Detailed How It Works */}
         <div className="mb-16">
           <h2 className="mb-8 text-center text-3xl font-bold text-gray-900">
@@ -83,6 +128,7 @@ const HomePage = () => {
             </div>
           </div>
         </div>
+
         {/* Testimonials */}
         <div className="mb-16 rounded-xl bg-gradient-to-br from-teal-50 to-white p-8">
           <h2 className="mb-8 text-center text-3xl font-bold text-gray-900">
@@ -91,11 +137,9 @@ const HomePage = () => {
           <div className="grid gap-6 md:grid-cols-3">
             <div className="rounded-lg bg-white p-6 shadow-sm">
               <div className="mb-2 flex text-yellow-400">
-                <StarIcon className="h-5 w-5 fill-current" />
-                <StarIcon className="h-5 w-5 fill-current" />
-                <StarIcon className="h-5 w-5 fill-current" />
-                <StarIcon className="h-5 w-5 fill-current" />
-                <StarIcon className="h-5 w-5 fill-current" />
+                {[...Array(5)].map((_, i) => (
+                  <StarIcon key={i} className="h-5 w-5 fill-current" />
+                ))}
               </div>
               <p className="mb-4 text-gray-600">
                 "Nexora helped me master complex topics at my own pace. The AI
@@ -111,11 +155,9 @@ const HomePage = () => {
             </div>
             <div className="rounded-lg bg-white p-6 shadow-sm">
               <div className="mb-2 flex text-yellow-400">
-                <StarIcon className="h-5 w-5 fill-current" />
-                <StarIcon className="h-5 w-5 fill-current" />
-                <StarIcon className="h-5 w-5 fill-current" />
-                <StarIcon className="h-5 w-5 fill-current" />
-                <StarIcon className="h-5 w-5 fill-current" />
+                {[...Array(5)].map((_, i) => (
+                  <StarIcon key={i} className="h-5 w-5 fill-current" />
+                ))}
               </div>
               <p className="mb-4 text-gray-600">
                 "The personalized curriculum made learning efficient and
@@ -131,11 +173,9 @@ const HomePage = () => {
             </div>
             <div className="rounded-lg bg-white p-6 shadow-sm">
               <div className="mb-2 flex text-yellow-400">
-                <StarIcon className="h-5 w-5 fill-current" />
-                <StarIcon className="h-5 w-5 fill-current" />
-                <StarIcon className="h-5 w-5 fill-current" />
-                <StarIcon className="h-5 w-5 fill-current" />
-                <StarIcon className="h-5 w-5 fill-current" />
+                {[...Array(5)].map((_, i) => (
+                  <StarIcon key={i} className="h-5 w-5 fill-current" />
+                ))}
               </div>
               <p className="mb-4 text-gray-600">
                 "The AI-powered quizzes and assessments helped me track my
@@ -151,6 +191,7 @@ const HomePage = () => {
             </div>
           </div>
         </div>
+
         {/* CTA Section */}
         <div className="rounded-lg bg-teal-50 p-8 text-center">
           <h2 className="mb-4 text-2xl font-bold text-gray-900">
@@ -159,11 +200,12 @@ const HomePage = () => {
           <p className="mb-6 text-gray-600">
             Create your personalized learning journey in minutes.
           </p>
-          <Link to="/create" className="inline-block rounded-md bg-teal-500 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-teal-600">
+          <Link to="/login" className="inline-block rounded-md bg-teal-500 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-teal-600">
             Get Started for Free
           </Link>
         </div>
       </div>
+
       {/* Footer */}
       <footer className="border-t border-gray-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -173,21 +215,9 @@ const HomePage = () => {
                 Product
               </h3>
               <ul className="mt-4 space-y-4">
-                <li>
-                  <a href="#" className="text-base text-gray-500 hover:text-gray-900">
-                    Features
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-base text-gray-500 hover:text-gray-900">
-                    Pricing
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-base text-gray-500 hover:text-gray-900">
-                    API
-                  </a>
-                </li>
+                <li><a href="#" className="text-base text-gray-500 hover:text-gray-900">Features</a></li>
+                <li><a href="#" className="text-base text-gray-500 hover:text-gray-900">Pricing</a></li>
+                <li><a href="#" className="text-base text-gray-500 hover:text-gray-900">API</a></li>
               </ul>
             </div>
             <div>
@@ -195,21 +225,9 @@ const HomePage = () => {
                 Company
               </h3>
               <ul className="mt-4 space-y-4">
-                <li>
-                  <a href="#" className="text-base text-gray-500 hover:text-gray-900">
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-base text-gray-500 hover:text-gray-900">
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-base text-gray-500 hover:text-gray-900">
-                    Careers
-                  </a>
-                </li>
+                <li><a href="#" className="text-base text-gray-500 hover:text-gray-900">About</a></li>
+                <li><a href="#" className="text-base text-gray-500 hover:text-gray-900">Blog</a></li>
+                <li><a href="#" className="text-base text-gray-500 hover:text-gray-900">Careers</a></li>
               </ul>
             </div>
             <div>
@@ -217,21 +235,9 @@ const HomePage = () => {
                 Support
               </h3>
               <ul className="mt-4 space-y-4">
-                <li>
-                  <a href="#" className="text-base text-gray-500 hover:text-gray-900">
-                    Help Center
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-base text-gray-500 hover:text-gray-900">
-                    Contact
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-base text-gray-500 hover:text-gray-900">
-                    Privacy
-                  </a>
-                </li>
+                <li><a href="#" className="text-base text-gray-500 hover:text-gray-900">Help Center</a></li>
+                <li><a href="#" className="text-base text-gray-500 hover:text-gray-900">Contact</a></li>
+                <li><a href="#" className="text-base text-gray-500 hover:text-gray-900">Privacy</a></li>
               </ul>
             </div>
             <div>
@@ -239,21 +245,9 @@ const HomePage = () => {
                 Connect
               </h3>
               <ul className="mt-4 space-y-4">
-                <li>
-                  <a href="#" className="text-base text-gray-500 hover:text-gray-900">
-                    Twitter
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-base text-gray-500 hover:text-gray-900">
-                    LinkedIn
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-base text-gray-500 hover:text-gray-900">
-                    GitHub
-                  </a>
-                </li>
+                <li><a href="#" className="text-base text-gray-500 hover:text-gray-900">Twitter</a></li>
+                <li><a href="#" className="text-base text-gray-500 hover:text-gray-900">LinkedIn</a></li>
+                <li><a href="#" className="text-base text-gray-500 hover:text-gray-900">GitHub</a></li>
               </ul>
             </div>
           </div>
@@ -264,6 +258,8 @@ const HomePage = () => {
           </div>
         </div>
       </footer>
-    </div>;
+    </div>
+  );
 };
+
 export default HomePage;
