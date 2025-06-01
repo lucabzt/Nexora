@@ -2,7 +2,7 @@ import enum
 from sqlalchemy import Boolean, Column, Integer, String, Text, DateTime, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from ..db.database import Base
+from backend.src.db.database import Base
 from ..models import db_user as user_model
 
 

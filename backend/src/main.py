@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status, APIRouter, Request # Ensure Request is imported
+from fastapi import FastAPI  # Ensure Request is imported
 from fastapi.responses import RedirectResponse # Add this
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
@@ -10,19 +10,19 @@ import uuid
 import requests # Add requests for fetching image
 import base64 # Add base64 for encoding image
 
-from .schemas import user as user_schema
-from .models import db_user as user_model
-from .schemas import token as token_schema
+from .api.schemas import user as user_schema
+from .db.models import db_user as user_model
+from .api.schemas import token as token_schema
 
 from .utils import auth
 from .db.database import engine, get_db
-from .routers import users,courses,files # Your existing users router
-
+from .api.routers import users, files # Your existing users router
+from .api.routers import courses
 
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from authlib.integrations.starlette_client import OAuth, OAuthError
 from .config import settings
-from .models.db_user import User as UserModel
+from .db.models.db_user import User as UserModel
 
 
 # Create database tables

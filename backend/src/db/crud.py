@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_
+from sqlalchemy import and_
 from typing import List, Optional, Dict
-from ..models.db_user import User
-from ..models.db_course import Course, Chapter, MultipleChoiceQuestion, CourseStatus
+from backend.src.db.models.db_user import User
+from backend.src.db.models.db_course import Course, Chapter, MultipleChoiceQuestion, CourseStatus
 
 
 
@@ -312,7 +312,7 @@ def delete_questions_by_chapter(db: Session, chapter_id: int) -> int:
 
 
 ############### DOCUMENTS
-from ..models.db_file import Document, Image
+from backend.src.db.models.db_file import Document, Image
 def get_document_by_id(db: Session, document_id: int) -> Optional[Document]:
     """Get document by ID"""
     return db.query(Document).filter(Document.id == document_id).first()

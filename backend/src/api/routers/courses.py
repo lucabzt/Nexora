@@ -1,26 +1,22 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
-from typing import Dict, Any, List
+from typing import List
 
-from ..models.db_user import User
-from ..services.agent_service import AgentService
-from ..utils.auth import get_current_active_user
-from ..db.database import get_db
-from ..db import crud
-import random
-from datetime import datetime
+from backend.src.db.models.db_user import User
+from backend.src.services.agent_service import AgentService
+from backend.src.utils.auth import get_current_active_user
+from backend.src.db.database import get_db
+from backend.src.db import crud
 
-
-from ..schemas.course import (
+from backend.src.api.schemas.course import (
     CourseInfo,
     CourseRequest,
     Course as CourseSchema,
     Chapter as ChapterSchema,
     MultipleChoiceQuestion as MCQuestionSchema
 )
-from ..models.db_course import Course, Chapter, MultipleChoiceQuestion
-
+from backend.src.db.models.db_course import Course, Chapter
 
 router = APIRouter(
     prefix="/courses",

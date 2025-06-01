@@ -2,7 +2,6 @@
 This file defines the service that coordinates the interaction between all the agents
 """
 import json
-import uuid
 
 from sqlalchemy.orm import Session
 from ..db import crud
@@ -14,8 +13,8 @@ from ..agents.explainer_agent import ExplainerAgent
 from ..agents.info_agent.agent import InfoAgent
 from ..agents.tester_agent import TesterAgent
 from ..agents.utils import create_text_query, create_docs_query
-from ..models.db_course import CourseStatus
-from ..schemas.course import CourseRequest
+from backend.src.db.models.db_course import CourseStatus
+from backend.src.api.schemas import CourseRequest
 
 
 class AgentService:

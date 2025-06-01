@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, LargeBinary, DateTime, ForeignKe
 from sqlalchemy.dialects.mysql import LONGBLOB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from ..db.database import Base
+from backend.src.db.database import Base
 
 
 class Document(Base):

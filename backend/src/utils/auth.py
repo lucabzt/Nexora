@@ -8,9 +8,8 @@ from sqlalchemy.orm import Session
 
 
 # Import the SQLAlchemy User model module correctly
-from ..models import db_user as user_model # Use a consistent alias for the SQLAlchemy model module
+from ..db.models import db_user as user_model
 # Import Pydantic schemas (only TokenData is directly used here)
-from ..schemas import token as token_schema # Alias for Pydantic token schemas
 from ..db.database import get_db
 
 # Configuration
