@@ -35,7 +35,7 @@ class StandardAgent(ABC):
                     # Assuming text response in the first part
                     return {
                         "status": "success",
-                        "explanation": event.content.parts[0].text
+                        "explanation": event.content.parts[0].text # TODO rename to output/content
                     }
                 elif event.actions and event.actions.escalate:  # Handle potential errors/escalations
                     return {

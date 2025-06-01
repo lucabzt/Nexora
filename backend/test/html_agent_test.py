@@ -4,8 +4,8 @@ from backend.src.agents.html_agent.agent import HtmlAgent
 from backend.src.agents.utils import create_text_query
 
 prompt = """
-    "slide 1": ["an explanation of variables in python"], 
-    "slide 2": ["a visual explanation of the taylor series"],
+    Game Theory Basics
+[ "Define game theory and its applications", "Introduce the concept of a game, players, and strategies", "Explain different types of games: cooperative vs. non-cooperative, symmetric vs. asymmetric, zero-sum vs. non-zero-sum", "Illustrate with examples like the Prisoner's Dilemma and Rock-Paper-Scissors" ]
 """
 
 async def main():
@@ -27,6 +27,13 @@ async def main():
         content=create_text_query(prompt),
         debug=True
     )
+
+    if response:
+        # Use json.dumps to correctly handle escapes, then strip the outer quotes
+        # Or just replace the newline escapes if you know that's the main issue
+        clean_html_string = response['explanation'].replace('\\n', '\n').replace('\\"', '"')
+        print(clean_html_string)
+        print("-" * 30)
 
     print(response)
 

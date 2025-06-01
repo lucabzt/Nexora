@@ -1,0 +1,67 @@
+
+A chart can be included in a slide by adding a canvas element with the data-chart attribute set to the desired chart type.
+
+The chart can be configured within the canvas body by a JSON string embedded into an HTML comment.
+
+<canvas data-chart="line" >
+<!--
+{
+ "data": {
+  "labels": ["January"," February"," March"," April"," May"," June"," July"],
+  "datasets":[
+   {
+    "data":[65,59,80,81,56,55,40],
+    "label":"My first dataset","backgroundColor":"rgba(20,220,220,.8)"
+   },
+   {
+    "data":[28,48,40,19,86,27,90],
+    "label":"My second dataset","backgroundColor":"rgba(220,120,120,.8)"
+   }
+  ]
+ }
+}
+-->
+</canvas>
+
+It is possible to provide the chart data by comma separated values and use the JSON string within the HTML comment to configure the chart layout.
+
+<canvas class="stretch" data-chart="line">
+My first dataset, 65, 59, 80, 81, 56, 55, 40
+<!-- This is a comment that will be ignored -->
+My second dataset, 28, 48, 40, 19, 86, 27, 90
+<!--
+{
+ "data" : {
+  "labels" : ["Enero", "Febrero", "Marzo", "Avril", "Mayo", "Junio", "Julio"],
+  "datasets" : [{ "borderColor": "#0f0", "borderDash": ["5","10"] }, { "borderColor": "#0ff" } ]
+ }
+}
+-->
+</canvas>
+
+The layout configuration provided in chart parameter (see Configuration) will be used by default and only those parameters that are specified in a JSON string are used to overwrite the default values. If no JSON string is provided to configure the chart layout the default configuration is used. Note, that if no labels for the data points are provided by a JSON string, the plugin expects that the first row provides table headers.
+
+<canvas data-chart="line">
+Month, January, February, March, April, May, June, July
+My first dataset, 65, 59, 80, 81, 56, 55, 40
+My second dataset, 28, 48, 40, 19, 86, 27, 90
+</canvas>
+
+You can also use the "options" key the same way as in chart.js.
+another chart.js examples:
+type: 'bar',
+    data: {
+      labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+      datasets: [{
+        label: '# of Votes',
+        data: [12, 19, 3, 5, 2, 3],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }

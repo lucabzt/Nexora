@@ -42,10 +42,12 @@ def create_docs_query(query: str, docs: List[Document], images: List[Image]) -> 
     return types.Content(role="user", parts=parts)
 
 
+# ------- Loading system instructions for agents -------
+
 def load_instruction_from_file(
     filename: str, default_instruction: str = "Default instruction."
 ) -> str:
-    """Reads instruction text from a file relative to this script."""
+    """Reads instruction text from a single file relative to this script."""
     instruction = default_instruction
     try:
         # Construct path relative to the current script file (__file__)
@@ -58,3 +60,30 @@ def load_instruction_from_file(
     except Exception as e:
         print(f"ERROR loading instruction file {filepath}: {e}. Using default.")
     return instruction
+
+
+def load_instructions_from_files(filenames: List[str], separator: str = "\n\n---\n\n") -> str:
+    """
+    Loads and combines multiple instruction files into a single string.
+
+    Args:
+        filenames: List of file paths relative to the calling script
+        separator: String to separate content from different files
+
+    Returns:
+        Combined instruction string
+    """
+    combined_instructions = []
+
+    for filename in filenames:
+        try:
+            filepath = os.path.join(os.path.dirname(__file__), filename)
+            with open(filepath, "r", encoding="utf-8") as f:
+                content = f.read().strip()
+                combined_instructions.append(f"# {os.path.basename(filename)}\n\n{content}")
+        except FileNotFoundError:
+            print(f"WARNING: Instruction file not found: {filepath}")
+        except Exception as e:
+            print(f"ERROR loading instruction file {filepath}: {e}")
+
+    return separator.join(combined_instructions)
