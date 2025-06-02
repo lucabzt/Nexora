@@ -125,7 +125,7 @@ async def handle_oauth_callback(request: Request, db: Session, website: str = "g
             email = primary_emails[0] if primary_emails else None
         name = user_info.get("name") or user_info.get("login")
         picture_url = user_info.get("avatar_url")
-    else:
+    elif website == "google":
         user_info = token.get('userinfo')
         if not user_info or not user_info.get("email"):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
@@ -133,7 +133,9 @@ async def handle_oauth_callback(request: Request, db: Session, website: str = "g
         email = user_info["email"]
         name = user_info.get("name")
         picture_url = user_info.get("picture")
-
+    else:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Unsupported OAuth provider: {website}")
 
     # Check if the user already exists in the database
     db_user = db.query(UserModel).filter(UserModel.email == email).first()

@@ -46,8 +46,10 @@ async def update_user(
     db: Session = Depends(get_db),
     current_user: user_model.User = Depends(auth.get_current_active_user)
 ):
-    """Update a user's profile. Admins can update any user,
-      regular users can only update their own profile."""
+    """
+    Update a user's profile. Admins can update any user,
+    regular users can only update their own profile.
+    """
     return user_service.update_user(db, user_id, user_update, current_user)
 
 @router.put("/{user_id}/change_password", response_model=user_schemas.User)
@@ -57,7 +59,10 @@ async def change_password(
     db: Session = Depends(get_db),
     current_user: user_model.User = Depends(auth.get_current_active_user)
 ):
-    """Change a user's password."""
+    """
+    Change a user's password.
+    Admins can change any user's password, regular users can only change their own password.
+    """
     return user_service.change_password(db, user_id, password_data, current_user)
 
 @router.delete("/{user_id:str}", response_model=user_schemas.User, dependencies=[Depends(auth.get_current_admin_user)])
