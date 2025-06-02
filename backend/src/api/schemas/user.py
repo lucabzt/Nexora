@@ -2,7 +2,7 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator # Make sure field_validator is imported
 from typing import Optional, List
 import re
-from backend.src.config.settings import MIN_PASSWORD_LENGTH, REQUIRE_UPPERCASE, REQUIRE_LOWERCASE, REQUIRE_DIGIT, REQUIRE_SPECIAL_CHAR, SPECIAL_CHARACTERS_REGEX_PATTERN # Make sure SPECIAL_CHARACTERS_REGEX_PATTERN is imported
+from ...config.settings import MIN_PASSWORD_LENGTH, REQUIRE_UPPERCASE, REQUIRE_LOWERCASE, REQUIRE_DIGIT, REQUIRE_SPECIAL_CHAR, SPECIAL_CHARACTERS_REGEX_PATTERN # Make sure SPECIAL_CHARACTERS_REGEX_PATTERN is imported
 
 class UserBase(BaseModel):
     username: str

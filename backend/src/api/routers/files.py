@@ -4,14 +4,14 @@ from sqlalchemy.orm import Session
 from typing import List
 import io
 
-from backend.src.db.models.db_user import User
-from backend.src.utils.auth import get_current_active_user
-from backend.src.db.database import get_db
-from backend.src.api.schemas.file import (
+from ...db.models.db_user import User
+from ...utils.auth import get_current_active_user
+from ...db.database import get_db
+from ...api.schemas.file import (
     DocumentInfo,
     ImageInfo
 )
-from backend.src.db.models.db_file import Document, Image
+from ...db.models.db_file import Document, Image
 
 router = APIRouter(
     prefix="/files",

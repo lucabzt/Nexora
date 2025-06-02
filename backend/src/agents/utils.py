@@ -17,7 +17,7 @@ from typing import List
 
 from google.genai import types
 
-from backend.src.db.models.db_file import Document, Image
+from ..db.models.db_file import Document, Image
 
 
 def create_text_query(query: str) -> types.Content:
