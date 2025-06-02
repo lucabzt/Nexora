@@ -127,7 +127,7 @@ async def handle_google_callback(request: Request, db: Session):
 
     # Check if the user already exists in the database
     if not db_user:
-        logger.info(f"Creating new user for Google OAuth login: {email} ({name})")
+        logger.info("Creating new user for Google OAuth login: %s (%s)", email, name)
         # If the user does not exist, create a new user
         base_username = (name.lower().replace(" ", ".")[:40] if name else email.split("@")[0][:40])
         username_candidate = base_username[:42]
@@ -150,7 +150,7 @@ async def handle_google_callback(request: Request, db: Session):
             profile_image_base64=profile_image_base64_data,
         )
     else:
-        logger.info(f"Use existung user {db_user.username} from database for Google OAuth login.")
+        logger.info("Use existung user %s from database for Google OAuth login.", db_user.username)
         # If the user exists, update their details if necessary
         if profile_image_base64_data and getattr(db_user, 'profile_image_base64',
                                                 None) != profile_image_base64_data:
@@ -173,6 +173,6 @@ async def handle_google_callback(request: Request, db: Session):
     frontend_base_url = oauth.frontend_base_url
     redirect_url_with_fragment = f"{frontend_base_url}#access_token={access_token}&token_type=bearer&expires_in={security.ACCESS_TOKEN_EXPIRE_MINUTES * 60}"
 
-    logger.info(f"Redirecting to frontend: {redirect_url_with_fragment}")
+    print("Redirecting to frontend: %s", redirect_url_with_fragment)
 
     return RedirectResponse(url=redirect_url_with_fragment)
