@@ -20,6 +20,10 @@ from ..db.models.db_user import User as UserModel
 from ..api.schemas import token as token_schema
 from ..api.schemas import user as user_schema
 
+from logging import Logger
+
+logger = Logger(__name__)
+
 async def login_user(form_data: OAuth2PasswordRequestForm, db: Session) -> token_schema.Token:
     """Authenticates a user and returns an access token."""
     if not form_data.username or not form_data.password:
@@ -123,6 +127,7 @@ async def handle_google_callback(request: Request, db: Session):
 
     # Check if the user already exists in the database
     if not db_user:
+        logger.info(f"Creating new user for Google OAuth login: {email} ({name})")
         # If the user does not exist, create a new user
         base_username = (name.lower().replace(" ", ".")[:40] if name else email.split("@")[0][:40])
         username_candidate = base_username[:42]
@@ -145,6 +150,7 @@ async def handle_google_callback(request: Request, db: Session):
             profile_image_base64=profile_image_base64_data,
         )
     else:
+        logger.info(f"Use existung user {db_user.username} from database for Google OAuth login.")
         # If the user exists, update their details if necessary
         if profile_image_base64_data and getattr(db_user, 'profile_image_base64',
                                                 None) != profile_image_base64_data:
@@ -166,4 +172,7 @@ async def handle_google_callback(request: Request, db: Session):
     # Redirect to the frontend with the access token
     frontend_base_url = oauth.frontend_base_url
     redirect_url_with_fragment = f"{frontend_base_url}#access_token={access_token}&token_type=bearer&expires_in={security.ACCESS_TOKEN_EXPIRE_MINUTES * 60}"
+
+    logger.info(f"Redirecting to frontend: {redirect_url_with_fragment}")
+
     return RedirectResponse(url=redirect_url_with_fragment)
