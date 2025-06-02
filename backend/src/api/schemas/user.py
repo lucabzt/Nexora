@@ -5,11 +5,13 @@ import re
 from ...config.settings import MIN_PASSWORD_LENGTH, REQUIRE_UPPERCASE, REQUIRE_LOWERCASE, REQUIRE_DIGIT, REQUIRE_SPECIAL_CHAR, SPECIAL_CHARACTERS_REGEX_PATTERN # Make sure SPECIAL_CHARACTERS_REGEX_PATTERN is imported
 
 class UserBase(BaseModel):
+    """Base model for user data, used for both creation and updates."""
     username: str
     email: EmailStr
     profile_image_base64: Optional[str] = None # Added for profile image
 
 class UserCreate(UserBase):
+    """Model for creating a new user."""
     password: str = Field(
         ..., # Ellipsis means the field is required
         # min_length=MIN_PASSWORD_LENGTH, # This will be implicitly checked by our validator too
@@ -19,6 +21,7 @@ class UserCreate(UserBase):
     @field_validator('password')
     @classmethod
     def password_complexity_checks(cls, v: str) -> str:
+        """Validate password complexity requirements."""
         # Pydantic's Field(min_length=...) would handle this,
         # but we include it here for a unified error message if preferred.
         if len(v) < MIN_PASSWORD_LENGTH:
@@ -32,7 +35,7 @@ class UserCreate(UserBase):
         if REQUIRE_DIGIT and not re.search(r"\d", v):
             errors.append("must contain at least one digit")
         if REQUIRE_SPECIAL_CHAR and not re.search(SPECIAL_CHARACTERS_REGEX_PATTERN, v):
-            errors.append(f"must contain at least one special character (e.g., !@#$%)")
+            errors.append("must contain at least one special character (e.g., !@#$%)")
         
         if errors:
             # Pydantic expects a ValueError to be raised for validation failures
@@ -42,6 +45,7 @@ class UserCreate(UserBase):
         return v
 
 class UserUpdate(BaseModel):
+    """Model for updating an existing user."""
     username: Optional[str] = None
     email: Optional[EmailStr] = None
     profile_image_base64: Optional[str] = None # Added for profile image
@@ -55,6 +59,7 @@ class UserUpdate(BaseModel):
     @field_validator('password')
     @classmethod
     def update_password_complexity_checks(cls, v: Optional[str]) -> Optional[str]:
+        """Validate new password complexity requirements."""
         if v is None: # If password is not being updated, skip validation
             return v
         
@@ -70,7 +75,7 @@ class UserUpdate(BaseModel):
         if REQUIRE_DIGIT and not re.search(r"\d", v):
             errors.append("must contain at least one digit")
         if REQUIRE_SPECIAL_CHAR and not re.search(SPECIAL_CHARACTERS_REGEX_PATTERN, v):
-            errors.append(f"must contain at least one special character (e.g., !@#$%)")
+            errors.append("must contain at least one special character (e.g., !@#$%)")
         
         if errors:
             error_summary = "; ".join(errors)
@@ -79,6 +84,7 @@ class UserUpdate(BaseModel):
 
       
 class UserPasswordUpdate(BaseModel):
+    """Model for updating a user's password."""
     old_password: Optional[str] = None # Required for non-admins
     new_password: str = Field(
         ...,
@@ -88,6 +94,7 @@ class UserPasswordUpdate(BaseModel):
     @field_validator('new_password')
     @classmethod
     def password_complexity_checks(cls, v: str) -> str:
+        """Validate new password complexity requirements."""
         if len(v) < MIN_PASSWORD_LENGTH:
             raise ValueError(f'Password must be at least {MIN_PASSWORD_LENGTH} characters long')
         if REQUIRE_UPPERCASE and not any(char.isupper() for char in v):
@@ -100,8 +107,9 @@ class UserPasswordUpdate(BaseModel):
             raise ValueError('Password must contain at least one special character')
         return v
 
-      
+
 class User(UserBase):
+    """Model representing a user in the system."""
     id: str
     is_active: bool
     is_admin: bool
@@ -109,3 +117,4 @@ class User(UserBase):
 
     class Config:
         from_attributes = True
+
