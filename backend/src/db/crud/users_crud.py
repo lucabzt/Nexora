@@ -1,17 +1,18 @@
 from sqlalchemy.orm import Session
 from ..models.db_user import User
+from typing import Optional
 
-def get_user_by_id(db: Session, user_id: str):
+def get_user_by_id(db: Session, user_id: str) -> Optional[User]:
     """Retrieve a user by their ID."""
     return db.query(User).filter(User.id == user_id).first()
 
 
-def get_user_by_username(db: Session, username: str):
+def get_user_by_username(db: Session, username: str) -> Optional[User]:
     """Retrieve a user by their username."""
     return db.query(User).filter(User.username == username).first()
 
 
-def get_user_by_email(db: Session, email: str):
+def get_user_by_email(db: Session, email: str) -> Optional[User]:
     """Retrieve a user by their email."""
     return db.query(User).filter(User.email == email).first()
 

@@ -13,7 +13,9 @@ from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from ..db.crud import user_crud as user_crud
+from ..db.crud import users_crud as users_crud
+from ..db.crud import users_crud as users_crud
+from .user_service import register_user, update_profile_image
 from ..core import security
 from ..utils.oauth import get_google_oauth_client
 from ..db.models.db_user import User as UserModel
@@ -27,7 +29,7 @@ async def login_user(form_data: OAuth2PasswordRequestForm, db: Session) -> token
                             detail="Username and password are required")
 
     # Check if the user exists and verify the password
-    user = user_crud.get_user_by_username(db, form_data.username)
+    user = users_crud.get_user_by_username(db, form_data.username)
 
     if not user or not security.verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
@@ -52,24 +54,7 @@ async def login_user(form_data: OAuth2PasswordRequestForm, db: Session) -> token
     )
 
 async def register_user(user_data, db: Session):
-    """Registers a new user and returns the created user object."""
-
-    # Check if the username or email already exists
-    if user_crud.get_user_by_username(db, user_data.username):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Username already registered")
-    if user_crud.get_user_by_email(db, user_data.email):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Email already registered")
-
-    # Create a new user with hashed password
-    hashed_password = security.get_password_hash(user_data.password)
-    user_id = str(uuid.uuid4())
-
-    # Save the user to the database
-    user = user_crud.create_user(db, user_id, user_data.username,
-                                 user_data.email, hashed_password)
-    return user
+    return register_user(user_data, db)
 
 async def handle_google_callback(request: Request, db: Session):
     """Handles the callback from Google OAuth after user authentication."""
@@ -122,7 +107,7 @@ async def handle_google_callback(request: Request, db: Session):
         hashed_password = security.get_password_hash(random_password)
 
         # Create a new user with the provided details
-        db_user = user_crud.create_user(
+        db_user = users_crud.create_user(
             db,
             secrets.token_hex(16),
             final_username,
@@ -136,7 +121,7 @@ async def handle_google_callback(request: Request, db: Session):
         # If the user exists, update their details if necessary
         if profile_image_base64_data and getattr(db_user, 'profile_image_base64',
                                                 None) != profile_image_base64_data:
-            db_user = user_crud.update_user_profile_image(db, db_user, profile_image_base64_data)
+            update_profile_image(db, db_user, profile_image_base64_data)
 
 
     if not db_user or not db_user.is_active: # type: ignore
