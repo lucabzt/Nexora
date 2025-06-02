@@ -13,7 +13,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from ..db.crud import user as user_crud
+from ..db.crud import user_crud as user_crud
 from ..core import security
 from ..utils.oauth import get_google_oauth_client
 from ..db.models.db_user import User as UserModel

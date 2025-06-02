@@ -116,5 +116,5 @@ class User(UserBase):
     profile_image_base64: Optional[str] = None # Added for profile image
 
     class Config:
-    """Pydantic configuration."""
         from_attributes = True
+
