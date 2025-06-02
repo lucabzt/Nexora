@@ -57,11 +57,19 @@ function Login() {
   };
 
   return (
-    <Container size="xs" py="xl">
+    <Container
+      size="xs"
+      py="xl"
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+      }}
+    >
       <Title align="center" mb="lg">
         Welcome Back
       </Title>
-
       <Paper withBorder shadow="md" p={30} radius="md" mt="xl">
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <TextInput

@@ -62,7 +62,16 @@ function Register() {
 
 
   return (
-    <Container size="xs" py="xl">
+    <Container
+      size="xs"
+      py="xl"
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+      }}
+    >
       <Title align="center" mb="lg">
         Create Account
       </Title>
