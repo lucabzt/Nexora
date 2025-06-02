@@ -4,6 +4,7 @@ services:
     image: m4rkus28/nexora:latest
     ports:
       - "8127:8000"
+      - "3306:3306"
     env_file:
       - ./.env
     restart: always
