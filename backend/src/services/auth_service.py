@@ -20,7 +20,7 @@ from ..utils.oauth import oauth
 from ..db.models.db_user import User as UserModel
 from ..api.schemas import token as token_schema
 from ..api.schemas import user as user_schema
-
+from ..config import settings as settings
 
 logger = Logger(__name__)
 
@@ -172,7 +172,10 @@ async def handle_oauth_callback(request: Request, db: Session, website: str = "g
     )
 
     # Redirect to the frontend with the access token
-    frontend_base_url = oauth.frontend_base_url
+    frontend_base_url = settings.FRONTEND_BASE_URL
+    if not frontend_base_url:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail="Frontend base URL is not configured.")
     redirect_url_with_fragment = f"{frontend_base_url}#access_token={access_token}&token_type=bearer&expires_in={security.ACCESS_TOKEN_EXPIRE_MINUTES * 60}"
 
     return RedirectResponse(url=redirect_url_with_fragment)
