@@ -165,8 +165,5 @@ async def handle_google_callback(request: Request, db: Session):
 
     # Redirect to the frontend with the access token
     frontend_base_url = oauth.frontend_base_url
-    frontend_callback_path = "/auth/google/callback"
-    redirect_url_with_fragment = f"{frontend_base_url}{frontend_callback_path}\
-                                    #access_token={access_token}&token_type=bearer\
-                                    &expires_in={security.ACCESS_TOKEN_EXPIRE_MINUTES * 60}"
+    redirect_url_with_fragment = f"{frontend_base_url}#access_token={access_token}&token_type=bearer&expires_in={security.ACCESS_TOKEN_EXPIRE_MINUTES * 60}"
     return RedirectResponse(url=redirect_url_with_fragment)
