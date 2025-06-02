@@ -3,7 +3,7 @@ from sqlalchemy import Boolean, Column, Integer, String, Text, DateTime, Foreign
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from ...db.database import Base
-from ..models import db_user as user_model
+from . import db_user as user_model
 
 
 class CourseStatus(enum.Enum):
