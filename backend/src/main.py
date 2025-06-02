@@ -44,6 +44,7 @@ app.add_middleware(
 # Define /users/me BEFORE including users.router to ensure correct route matching
 @app.get("/users/me", response_model=user_schema.User, tags=["users"])
 async def read_users_me(current_user: user_model.User = Depends(auth.get_current_active_user)):
+    """Get the current logged-in user's details."""
     return current_user
 
 # Include your existing routers under this api_router
@@ -56,4 +57,5 @@ app.include_router(auth_router.api_router)
 # The root path "/" is now outside the /api prefix
 @app.get("/")
 async def root():
+    """Status endpoint for the API."""
     return {"message": "Welcome to the User Management API. API endpoints are under /api"}
