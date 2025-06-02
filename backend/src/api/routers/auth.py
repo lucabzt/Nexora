@@ -50,7 +50,7 @@ async def login_google(request: Request):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Google OAuth client is not configured."
         )
-    redirect_uri = oauth.redirect_uri
+    redirect_uri = oauth.google.redirect_uri
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 
@@ -74,7 +74,7 @@ async def login_github(request: Request):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="github OAuth client is not configured."
         )
-    redirect_uri = oauth.redirect_uri
+    redirect_uri = oauth.github.redirect_uri
     return await oauth.github.authorize_redirect(request, redirect_uri)
 
 
