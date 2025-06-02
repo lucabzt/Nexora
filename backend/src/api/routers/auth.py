@@ -1,24 +1,25 @@
+"""
+Authentication Router
+"""
 import base64
-from datetime import timedelta
+import secrets  # Added for generating random passwords/suffixes
 import uuid
+from datetime import timedelta
+
+import requests  # Add requests for fetching image
+from authlib.integrations.starlette_client import OAuth, OAuthError
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from typing import List
-from authlib.integrations.starlette_client import OAuth, OAuthError
-import requests # Add requests for fetching image
-import secrets # Added for generating random passwords/suffixes
 
-
-from ..schemas import user as user_schema # For Pydantic models
-from ..schemas import token as token_schema
-from ...db.models import db_user as user_model
-from ...utils import auth
-from ...db.database import get_db
 from ...config import settings
+from ...db.database import get_db
+from ...db.models import db_user as user_model
 from ...db.models.db_user import User as UserModel
-
+from ...utils import auth
+from ..schemas import token as token_schema
+from ..schemas import user as user_schema  # For Pydantic models
 
 api_router = APIRouter(
     prefix="", # Später /auth ???
@@ -43,6 +44,7 @@ async def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
+    """Authenticate user and return access token."""
     user = auth.authenticate_user(db, form_data.username, form_data.password)
     if not user: # This check should come first
         raise HTTPException(
@@ -73,6 +75,7 @@ async def login_for_access_token(
 @api_router.post("/register", response_model=user_schema.User, status_code=status.HTTP_201_CREATED,
                  tags=["Authentication"])
 async def register_user(user_data: user_schema.UserCreate, db: Session = Depends(get_db)):
+    """Register a new user."""
     # Check if username from incoming data (user_data.username) already exists in the DB
     db_user_by_username = db.query(user_model.User).filter(user_model.User.username == user_data.username).first()
     if db_user_by_username:
@@ -107,6 +110,7 @@ async def register_user(user_data: user_schema.UserCreate, db: Session = Depends
 
 @api_router.get("/login/google")
 async def login_google(request: Request):
+    """Redirect to Google OAuth for user authentication."""
     if oauth.google is None:
         raise RuntimeError("Google OAuth client not registered")
     redirect_uri = settings.GOOGLE_REDIRECT_URI
@@ -115,6 +119,7 @@ async def login_google(request: Request):
 
 @api_router.get("/google/callback")
 async def google_callback(request: Request, db: Session = Depends(get_db)):
+    """Handle the callback from Google OAuth after user authentication."""
     print("Google callback received")
     if oauth.google is None:
         raise RuntimeError("Google OAuth client not registered")
@@ -152,7 +157,7 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
     profile_image_base64_data = None
     if picture_url:
         try:
-            response = requests.get(picture_url)
+            response = requests.get(picture_url, timeout=10)  # Set a timeout for the request
             response.raise_for_status() # Raise an exception for bad status codes
             profile_image_base64_data = base64.b64encode(response.content).decode('utf-8')
         except requests.exceptions.RequestException as e:
@@ -175,8 +180,8 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         username_candidate = base_username
         # Limit username length to fit DB schema (String(50))
         # Max length for base_username part to allow for suffix like ".abc123" (7 chars)
-        max_len_for_base_with_suffix = 50 - 8 
-        
+        max_len_for_base_with_suffix = 50 - 8
+
         # Ensure base_username is not too long if we need to add a suffix
         if len(username_candidate) > max_len_for_base_with_suffix:
             username_candidate = username_candidate[:max_len_for_base_with_suffix]
@@ -185,7 +190,7 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         # Check for collision and append suffix if needed
         while db.query(UserModel).filter(UserModel.username == final_username).first():
             suffix = secrets.token_hex(3) # 6-character hex string
-            final_username = f"{username_candidate}.{suffix}" 
+            final_username = f"{username_candidate}.{suffix}"
             # Ensure the generated username does not exceed 50 chars
             if len(final_username) > 50:
                 # If it's too long even with suffix, truncate the base part more aggressively
