@@ -1,29 +1,16 @@
+import secrets  # Added for generating random passwords/suffixes
+
 from fastapi import FastAPI  # Ensure Request is imported
-from fastapi.responses import RedirectResponse # Add this
+from fastapi import Depends
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
-from datetime import timedelta
-import secrets # Added for generating random passwords/suffixes
-import uuid
-import requests # Add requests for fetching image
-import base64 # Add base64 for encoding image
 
-from .api.schemas import user as user_schema
-from .db.models import db_user as user_model
-from .api.schemas import token as token_schema
-
-from .utils import auth
-from .db.database import engine, get_db
-from .api.routers import users, files # Your existing users router
-from .api.routers import courses
 from .api.routers import auth as auth_router
-
-from fastapi import APIRouter, Depends, HTTPException, status, Request
-from .config import settings
-from .db.models.db_user import User as UserModel
-
+from .api.routers import courses, files, users  # Your existing users router
+from .api.schemas import user as user_schema
+from .db.database import engine
+from .db.models import db_user as user_model
+from .utils import auth
 
 # Create database tables
 user_model.Base.metadata.create_all(bind=engine)
