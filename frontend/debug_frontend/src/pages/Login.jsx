@@ -16,6 +16,7 @@ import {
 import { useForm } from '@mantine/form';
 import { useAuth } from '../contexts/AuthContext';
 import authService from '../api/authService'; // Import authService
+import { IconBrandGoogle, IconBrandGithub } from '@tabler/icons-react';
 
 function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -85,12 +86,24 @@ function Login() {
 
           <Divider label="Or continue with" labelPosition="center" my="lg" />
 
-          <Button fullWidth variant="outline" onClick={handleGoogleLogin} mb="xl">
-            Sign in with Google
-          </Button>
-          <Button fullWidth variant="outline" onClick={handleGithubLogin} mb="xl">
-            Sign in with Github
-          </Button>
+          <Group position="center" spacing="md" mb="xl">
+            <Button 
+              variant="outline" 
+              onClick={handleGoogleLogin} 
+              px="md"
+              style={{ width: 48, height: 48, padding: 0 }}
+            >
+              <IconBrandGoogle size={24} />
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleGithubLogin} 
+              px="md"
+              style={{ width: 48, height: 48, padding: 0 }}
+            >
+              <IconBrandGithub size={24} />
+            </Button>
+          </Group>
           
           <Text align="center" mt="md">
             Don't have an account?{' '}

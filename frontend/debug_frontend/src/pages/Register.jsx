@@ -10,11 +10,13 @@ import {
   Text, 
   Anchor,
   Divider, // Import Divider
-  Box // Import Box for spacing if needed
+  Box, // Import Box for spacing if needed
+  Group // Import Group for button grouping
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useAuth } from '../contexts/AuthContext';
 import authService from '../api/authService'; // Import authService
+import { IconBrandGoogle, IconBrandGithub } from '@tabler/icons-react';
 
 function Register() {
   const [isLoading, setIsLoading] = useState(false);
@@ -105,12 +107,24 @@ function Register() {
 
           <Divider label="Or sign up with" labelPosition="center" my="lg" />
 
-          <Button fullWidth variant="outline" onClick={handleGoogleLogin} mb="xl">
-            Sign up with Google
-          </Button>
-          <Button fullWidth variant="outline" onClick={handleGithubLogin} mb="xl">
-            Sign up with Github
-          </Button>
+          <Group position="center" spacing="md" mb="xl">
+            <Button
+              variant="outline"
+              onClick={handleGoogleLogin}
+              px="md"
+              style={{ width: 48, height: 48, padding: 0 }}
+            >
+              <IconBrandGoogle size={24} />
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleGithubLogin}
+              px="md"
+              style={{ width: 48, height: 48, padding: 0 }}
+            >
+              <IconBrandGithub size={24} />
+            </Button>
+          </Group>
           <Text align="center" mt="md">
             Already have an account?{' '}
             <Anchor component={Link} to="/login">
