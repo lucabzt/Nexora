@@ -13,8 +13,8 @@ from ..agents.explainer_agent import ExplainerAgent
 from ..agents.info_agent.agent import InfoAgent
 from ..agents.tester_agent import TesterAgent
 from ..agents.utils import create_text_query, create_docs_query
-from backend.src.db.models.db_course import CourseStatus
-from backend.src.api.schemas.course import CourseRequest
+from ..db.models.db_course import CourseStatus
+from ..api.schemas.course import CourseRequest
 
 
 class AgentService:

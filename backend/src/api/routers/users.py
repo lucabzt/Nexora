@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 
-from backend.src.api.schemas import user as user_schemas # For Pydantic models
-from backend.src.db.models import db_user as user_model
+from ..schemas import user as user_schemas # For Pydantic models
+from ...db.models import db_user as user_model
 from backend.src.utils import auth
 from backend.src.db.database import get_db
 
