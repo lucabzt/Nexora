@@ -1,6 +1,8 @@
+"""CRUD operations for user management in the database."""
+from typing import Optional
+
 from sqlalchemy.orm import Session
 from ..models.db_user import User
-from typing import Optional
 
 def get_user_by_id(db: Session, user_id: str) -> Optional[User]:
     """Retrieve a user by their ID."""
@@ -45,3 +47,28 @@ def update_user_profile_image(db: Session, user: User, profile_image_base64: str
     db.commit()
     db.refresh(user)
     return user
+
+def get_users(db: Session, skip: int = 0, limit: int = 100):
+    """Retrieve users with pagination."""
+    return db.query(User).offset(skip).limit(limit).all()
+
+def update_user(db: Session, db_user: User, update_data: dict):
+    """Update an existing user's information."""
+    for key, value in update_data.items():
+        setattr(db_user, key, value)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def change_user_password(db: Session, db_user: User, hashed_password: str):
+    """Change an existing user's password."""
+    setattr(db_user, "hashed_password", hashed_password)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def delete_user(db: Session, db_user: User):
+    """Delete a user from the database."""
+    db.delete(db_user)
+    db.commit()
+    return db_user
