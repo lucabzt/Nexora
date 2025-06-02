@@ -246,7 +246,7 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
     frontend_base_url = settings.FRONTEND_BASE_URL  # Assuming frontend runs on port 3000
     frontend_callback_path = "/auth/google/callback"
 
-    redirect_url_with_fragment = f"{frontend_base_url}{frontend_callback_path}#access_token={access_token}&token_type=bearer"
+    redirect_url_with_fragment = f"{frontend_base_url}{frontend_callback_path}#access_token={access_token}&token_type=bearer&expires_in={auth.ACCESS_TOKEN_EXPIRE_MINUTES * 60}"
     print(f"Redirecting to: {redirect_url_with_fragment}")
     
     return RedirectResponse(url=redirect_url_with_fragment)
