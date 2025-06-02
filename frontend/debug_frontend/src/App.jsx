@@ -62,7 +62,7 @@ function App() {
                 <Route path="/home" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/google/callback" element={<OAuthCallbackPage />} /> {/* Moved OAuth callback route here */}
+                <Route path="/oauth/callback" element={<OAuthCallbackPage />} /> {/* Moved OAuth callback route here */}
               </Route>
               
               {/* Protected routes */}

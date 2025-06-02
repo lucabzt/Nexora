@@ -108,13 +108,34 @@ async def handle_oauth_callback(request: Request, db: Session, website: str = "g
                             detail="Could not validate credentials") from error
 
     # Fetch user info from the token
-    user_info = token.get('userinfo')
-    if not user_info or not user_info.get("email"):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=f"Could not fetch user info from {website}.")
-    email = user_info["email"]
-    name = user_info.get("name")
-    picture_url = user_info.get("picture")
+    if website == "github":
+        # GitHub: fetch user info using the access token
+        access_token = token.get("access_token")
+        headers = {"Authorization": f"token {access_token}"}
+        user_response = requests.get("https://api.github.com/user", headers=headers, timeout=10)
+        user_response.raise_for_status()
+        user_info = user_response.json()
+        # Fetch email separately if not public
+        email = user_info.get("email")
+        if not email:
+            emails_response = requests.get("https://api.github.com/user/emails", headers=headers, timeout=10)
+            emails_response.raise_for_status()
+            emails = emails_response.json()
+            primary_emails = [e["email"] for e in emails if e.get("primary") and e.get("verified")]
+            email = primary_emails[0] if primary_emails else None
+        name = user_info.get("name") or user_info.get("login")
+        picture_url = user_info.get("avatar_url")
+    else:
+        user_info = token.get('userinfo')
+        if not user_info or not user_info.get("email"):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=f"Could not fetch user info from {website}.")
+        email = user_info["email"]
+        name = user_info.get("name")
+        picture_url = user_info.get("picture")
+
+
+    # Check if the user already exists in the database
     db_user = db.query(UserModel).filter(UserModel.email == email).first()
     profile_image_base64_data = None
 
