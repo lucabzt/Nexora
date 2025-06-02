@@ -4,7 +4,9 @@ This file defines the service that coordinates the interaction between all the a
 import json
 
 from sqlalchemy.orm import Session
-from ..db import crud
+from ..db.crud import (
+    user, chapters, documents, images, questions, courses
+)
 
 from google.adk.sessions import InMemorySessionService
 

@@ -1,0 +1,9 @@
+[IMPORTS]
+# List of modules that can be imported at any level, not just the top level
+# one.
+allow-any-import-level=yes
+
+
+
+[FORMAT]
+max-line-length=150
