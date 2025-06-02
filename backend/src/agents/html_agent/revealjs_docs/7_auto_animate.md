@@ -1,10 +1,4 @@
-# Auto-Animate | reveal.js
-
-**Source:** https://revealjs.com/auto-animate/
-
----
-
-# Auto-Animate 4.0.0
+# Auto-Animate
 
 reveal.js can automatically animate elements across slides. All you need to do is add `data-auto-animate` to two adjacent slide `<section>` elements and Auto-Animate will animate all matching elements between the two.
 
@@ -19,41 +13,9 @@ Here's a simple example to give you a better idea of how it can be used.
 </section>
 ```
 
-# Auto-Animate
-
-# Auto-Animate
-
-Resume presentation
-
-Auto-Animate
-
 This example uses the `margin-top` property to move the element but internally reveal.js will use a CSS transform to ensure smooth movement. This same approach to animation works with most animatable CSS properties meaning you can transition things like `position`, `font-size`, `line-height`, `color`, `background-color`, `padding` and `margin`.
 
-### [Anchor](https://revealjs.com/auto-animate/\#movement-animations) Movement Animations
-
-Animations are not limited to changes in style. Auto-Animate can also be used to automatically move elements into their new position as content is added, removed or rearranged on a slide. All without a single line of inline CSS.
-
-```html
-<section data-auto-animate>
-  <h1>Implicit</h1>
-</section>
-<section data-auto-animate>
-  <h1>Implicit</h1>
-  <h1>Animation</h1>
-</section>
-```
-
-# Implicit
-
-# Implicit
-
-# Animation
-
-Resume presentation
-
-Implicit
-
-## [Anchor](https://revealjs.com/auto-animate/\#how-elements-are-matched) How Elements are Matched
+## How Elements are Matched
 
 When you navigate between two auto-animated slides we'll do our best to automatically find matching elements in the two slides. For text, we consider it a match if both the text contents and node type are identical. For images, videos and iframes we compare the `src` attribute. We also take into account the order in which the element appears in the DOM.
 
@@ -70,10 +32,8 @@ Here's an example where we've given both blocks a matching ID since automatic ma
 </section>
 ```
 
-Resume presentation
 
-
-## [Anchor](https://revealjs.com/auto-animate/\#auto-animate-id-%26-restart) Auto-Animate Id & Restart
+## Auto-Animate Id & Restart
 
 When you want separate groups of auto-animated slides right next to each other you can use the `data-auto-animate-id` and `data-auto-animate-restart` attributes.
 
@@ -102,23 +62,8 @@ Another way to control auto-animate is the `data-auto-animate-restart` attribute
 </section>
 ```
 
-# Group A
 
-# Group A
-
-# Group B
-
-# Group B
-
-# Group C
-
-# Group C
-
-Resume presentation
-
-Group A
-
-## [Anchor](https://revealjs.com/auto-animate/\#example%3A-animating-between-code-blocks) Example: Animating Between Code Blocks
+## Example: Animating Between Code Blocks
 
 We support animations between code blocks. Make sure that the code block has `data-line-numbers` enabled and that all blocks have a matching `data-id` value.
 
@@ -156,42 +101,7 @@ We support animations between code blocks. Make sure that the code block has `da
 </section>
 ```
 
-```hljs yaml
-
-let planets = [\
-  { name: 'mars', diameter: 6779 },\
-]
-```
-
-```hljs yaml
-
-let planets = [\
-  { name: 'mars', diameter: 6779 },\
-  { name: 'earth', diameter: 12742 },\
-  { name: 'jupiter', diameter: 139820 }\
-]
-```
-
-```hljs xquery
-
-let circumferenceReducer = ( c, planet ) => {
-  return c + planet.diameter * Math.PI;
-}
-
-let planets = [\
-  { name: 'mars', diameter: 6779 },\
-  { name: 'earth', diameter: 12742 },\
-  { name: 'jupiter', diameter: 139820 }\
-]
-
-let c = planets.reduce( circumferenceReducer, 0 )
-```
-
-Resume presentation
-
-let planets = \[ { name: 'mars' , diameter: 6779 }, \]
-
-## [Anchor](https://revealjs.com/auto-animate/\#example%3A-animating-between-lists) Example: Animating Between Lists
+##  Example: Animating Between Lists
 
 We match list items individually to let you animate new items being added or removed.
 
@@ -213,17 +123,3 @@ We match list items individually to let you animate new items being added or rem
   </ul>
 </section>
 ```
-
-- Mercury
-- Jupiter
-- Mars
-
-- Mercury
-- Earth
-- Jupiter
-- Saturn
-- Mars
-
-Resume presentation
-
-Mercury Jupiter Mars

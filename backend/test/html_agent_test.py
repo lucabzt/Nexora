@@ -4,8 +4,7 @@ from backend.src.agents.html_agent.agent import HtmlAgent
 from backend.src.agents.utils import create_text_query
 
 prompt = """
-    Game Theory Basics
-[ "Define game theory and its applications", "Introduce the concept of a game, players, and strategies", "Explain different types of games: cooperative vs. non-cooperative, symmetric vs. asymmetric, zero-sum vs. non-zero-sum", "Illustrate with examples like the Prisoner's Dilemma and Rock-Paper-Scissors" ]
+    intro to discrete probability theory
 """
 
 async def main():

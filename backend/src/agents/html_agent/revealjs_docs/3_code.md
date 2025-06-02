@@ -18,67 +18,6 @@ HTML will be escaped by default. To avoid this, add `data-noescape` to the `<cod
 </section>
 ```
 
-## Line Numbers & Highlights
-
-You can enable line numbers by adding `data-line-numbers` to your `<code>` tags. If you want to highlight specific lines you can provide a comma separated list of line numbers using the same attribute. For example, in the following example lines 3 and 8-10 are highlighted:
-
-```html
-<pre><code data-line-numbers="3,8-10">
-<table>
-  <tr>
-    <td>Apples</td>
-    <td>$1</td>
-    <td>7</td>
-  </tr>
-  <tr>
-    <td>Oranges</td>
-    <td>$2</td>
-    <td>18</td>
-  </tr>
-</table>
-</code></pre>
-```
-
-#### Line Number Offset 4.2.0
-
-You can offset the line number if you want to showcase a excerpt of a longer set of code. In the example below, we set `data-ln-start-from="7"` to make the line numbers start from 7.
-
-```html
-<pre><code data-line-numbers data-ln-start-from="7">
-<tr>
-  <td>Oranges</td>
-  <td>$2</td>
-  <td>18</td>
-</tr>
-</code></pre>
-```
-
-## Step-by-step Highlights
-
-You can step through multiple code highlights on the same code block. Delimit each of your highlight steps with the `|` character. For example `data-line-numbers="1|2-3|4,6-10"` will produce three steps. It will start by highlighting line 1, next step is lines 2-3, and finally line 4 and 6 through 10.
-
-```html
-<pre><code data-line-numbers="3-5|8-10|13-15">
-<table>
-  <tr>
-    <td>Apples</td>
-    <td>$1</td>
-    <td>7</td>
-  </tr>
-  <tr>
-    <td>Oranges</td>
-    <td>$2</td>
-    <td>18</td>
-  </tr>
-  <tr>
-    <td>Kiwi</td>
-    <td>$3</td>
-    <td>1</td>
-  </tr>
-</table>
-</code></pre>
-```
-
 ## Language selection
 
 By default, highlight.js tries to automatically detect which language is used in the code snippet. It is however possible to overwrite this by adding a `language-XXX` attribute.

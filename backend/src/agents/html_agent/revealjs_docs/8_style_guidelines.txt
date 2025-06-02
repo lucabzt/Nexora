@@ -1,5 +1,0 @@
-* Keep text on each slide minimal otherwise it will overflow.
-* On the title / first page, please use h2. On each subsequent page use h3.
-* Use only one heading per page
-* The default background (if you input no background) is beige so use dark / colorful elements.
-* Please do NOT overwrite the font-size parameter with css
