@@ -11,7 +11,7 @@ oauth.register(
     client_secret=settings.GOOGLE_CLIENT_SECRET,
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={'scope': 'openid email profile'},
-    redirect_uri=settings.GOOGLE_REDIRECT_URI
+    #redirect_uri=settings.GOOGLE_REDIRECT_URI
 )
 
 # GitHub OAuth registration
@@ -23,5 +23,6 @@ oauth.register(
     authorize_url='https://github.com/login/oauth/authorize',
     api_base_url='https://api.github.com/',
     client_kwargs={'scope': 'read:user user:email'},
-    redirect_uri=settings.GITHUB_REDIRECT_URI
+    #redirect_uri=settings.GITHUB_REDIRECT_URI
 )
+

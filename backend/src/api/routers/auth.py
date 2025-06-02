@@ -9,6 +9,8 @@ from ...db.database import get_db
 from ...services import auth_service
 from ..schemas import token as token_schema, user as user_schema
 from ...utils.oauth import oauth
+from ...config import settings
+
 
 api_router = APIRouter(
     prefix="",
@@ -50,8 +52,7 @@ async def login_google(request: Request):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Google OAuth client is not configured."
         )
-    redirect_uri = oauth.google.redirect_uri
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+    return await oauth.google.authorize_redirect(request, settings.GOOGLE_REDIRECT_URI)
 
 
 @api_router.get("/google/callback")
@@ -74,8 +75,7 @@ async def login_github(request: Request):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="github OAuth client is not configured."
         )
-    redirect_uri = oauth.github.redirect_uri
-    return await oauth.github.authorize_redirect(request, redirect_uri)
+    return await oauth.github.authorize_redirect(request, settings.GITHUB_REDIRECT_URI)
 
 
 @api_router.get("/github/callback")
