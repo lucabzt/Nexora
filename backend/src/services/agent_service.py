@@ -2,10 +2,10 @@
 This file defines the service that coordinates the interaction between all the agents
 """
 import json
-import uuid
 
 from sqlalchemy.orm import Session
-from ..db import crud
+from ..db.crud import chapters_crud, documents_crud, images_crud, questions_crud, courses_crud
+
 
 from google.adk.sessions import InMemorySessionService
 
@@ -14,8 +14,8 @@ from ..agents.explainer_agent import ExplainerAgent
 from ..agents.info_agent.agent import InfoAgent
 from ..agents.tester_agent import TesterAgent
 from ..agents.utils import create_text_query, create_docs_query
-from ..models.db_course import CourseStatus
-from ..schemas.course import CourseRequest
+from ..db.models.db_course import CourseStatus
+from ..api.schemas.course import CourseRequest
 
 
 class AgentService:
@@ -56,21 +56,21 @@ class AgentService:
         session_id = session.id
 
         # retrieve documents from database
-        documents = crud.get_documents_by_ids(db, request.document_ids)
-        images = crud.get_images_by_ids(db, request.picture_ids)
+        docs = documents_crud.get_documents_by_ids(db, request.document_ids)
+        images = images_crud.get_images_by_ids(db, request.picture_ids)
 
         # get a short course title and description from the quick agent
         info_query = create_text_query(f"""
                     The following is the user query for creating a course / learning path:
                     {request.query}
                     The users uploaded the following documents:
-                    {[doc.filename for doc in documents]}
+                    {[doc.filename for doc in docs]}
                     {[img.filename for img in images]}
                     """)
         info_response = await self.info_agent.run(user_id, session_id, info_query)
 
         # Create course in database
-        course_db = crud.create_course(
+        course_db = courses_crud.create_course(
             db=db,
             session_id=session_id,
             user_id=user_id,
@@ -81,10 +81,10 @@ class AgentService:
         )
 
         # bind documents to this course
-        for doc in documents:
-            crud.update_document(db, doc.id, course_id=course_db.id)
+        for doc in docs:
+            documents_crud.update_document(db, int(doc.id), course_id=course_db.id)
         for img in images:
-            crud.update_image(db, img.id, course_id=course_db.id)
+            images_crud.update_image(db, int(img.id), course_id=course_db.id)
 
         # Stream the course info first
         course_info = {
@@ -104,7 +104,7 @@ class AgentService:
                                     Question (System): How many hours do you want to invest?
                                     Answer (User): {request.time_hours}
                                 """
-        content = create_docs_query(planner_query, documents, images)
+        content = create_docs_query(planner_query, docs, images)
 
         # Query the planner agent (returns a dict)
         response_planner = await self.planner_agent.run(
@@ -146,7 +146,7 @@ class AgentService:
             )
 
             # Save the chapter in db first
-            chapter_db = crud.create_chapter(
+            chapter_db = chapters_crud.create_chapter(
                 db=db,
                 course_id=course_db.id,
                 index=idx + 1,
@@ -159,9 +159,9 @@ class AgentService:
             # Save questions in db
             question_objects = []
             for question in response_tester['questions']:
-                q = crud.create_question(
+                q = questions_crud.create_question(
                     db=db,
-                    chapter_id=chapter_db.id,
+                    chapter_id=int(chapter_db.id),
                     question=question['question'],
                     answer_a=question['answer_a'],
                     answer_b=question['answer_b'],
@@ -196,12 +196,11 @@ class AgentService:
             yield json.dumps({"type": "chapter", "data": chapter_data}) + "\n"
 
         # Update course status to finished
-        crud.update_course_status(db, course_db.id, CourseStatus.FINISHED)
+        courses_crud.update_course_status(db, course_db.id, CourseStatus.FINISHED)
 
         # Send completion signal
         yield json.dumps({"type": "complete", "data": {}}) + "\n"
 
 
 
-    
-    
+

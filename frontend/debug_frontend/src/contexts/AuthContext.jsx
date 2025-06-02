@@ -5,6 +5,8 @@ import { toast } from 'react-toastify'; // Ensure toast is imported
 
 const AuthContext = createContext();
 
+
+
 export const AuthProvider = ({ children }) => {
   const [user, setUserState] = useState(null);
   const [loading, setLoading] = useState(true);

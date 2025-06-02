@@ -3,7 +3,7 @@ import sys
 import os
 import argparse
 
-# Add the parent directory (project root) to sys.path to allow importing app modules
+# Add the parent directory (project root) to sys.path to allow importing app modules.
 # This assumes the script is in a subdirectory like 'scripts/'
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 

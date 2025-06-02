@@ -1,0 +1,28 @@
+* Keep text on each slide minimal otherwise it will overflow.
+* The background of the slide is beige so please do not use yellow/orange font color
+
+## Container and Font Size (Very Important)
+* The content you are producing MUST fit into a container of size 864px x 630px otherwise it will look really ugly
+* Also lines, especially headings should not be so long that the text wraps (will happen after 5-6 words)
+* Please use cqh as a measure for font size. Your default font sizes are:
+   .reveal section p {
+    font-size: 3.5cqh;
+  }
+  .reveal section li {
+    font-size: 3.5cqh;
+  }
+
+  .reveal section h1 {
+    font-size: 10cqh;
+    text-shadow: 0 0 0 #000;
+  }
+
+  .reveal section h2 {
+    font-size: 8cqh;
+  }
+
+  .reveal section h3 {
+    font-size: 6cqh;
+  }
+
+ Add font-size parameter to your text if you want to defer from these default values, otherwise don't
