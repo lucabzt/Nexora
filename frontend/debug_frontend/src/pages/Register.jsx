@@ -54,6 +54,11 @@ function Register() {
     authService.redirectToGoogleOAuth();
   };
 
+    const handleGithubLogin = () => {
+    authService.redirectToGithubOAuth();
+  };
+
+
   return (
     <Container size="xs" py="xl">
       <Title align="center" mb="lg">
@@ -103,7 +108,9 @@ function Register() {
           <Button fullWidth variant="outline" onClick={handleGoogleLogin} mb="xl">
             Sign up with Google
           </Button>
-          
+          <Button fullWidth variant="outline" onClick={handleGithubLogin} mb="xl">
+            Sign up with Github
+          </Button>
           <Text align="center" mt="md">
             Already have an account?{' '}
             <Anchor component={Link} to="/login">

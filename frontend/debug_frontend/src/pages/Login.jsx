@@ -51,6 +51,10 @@ function Login() {
     authService.redirectToGoogleOAuth();
   };
 
+  const handleGithubLogin = () => {
+    authService.redirectToGithubOAuth();
+  };
+
   return (
     <Container size="xs" py="xl">
       <Title align="center" mb="lg">
@@ -83,6 +87,9 @@ function Login() {
 
           <Button fullWidth variant="outline" onClick={handleGoogleLogin} mb="xl">
             Sign in with Google
+          </Button>
+          <Button fullWidth variant="outline" onClick={handleGithubLogin} mb="xl">
+            Sign in with Github
           </Button>
           
           <Text align="center" mt="md">

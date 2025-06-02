@@ -7,6 +7,7 @@ import uuid
 import base64
 import requests
 from datetime import timedelta
+from logging import Logger
 
 from fastapi import HTTPException, status, Request
 from fastapi.responses import RedirectResponse
@@ -15,12 +16,11 @@ from sqlalchemy.orm import Session
 
 from ..db.crud import users_crud as users_crud
 from ..core import security
-from ..utils.oauth import get_google_oauth_client
+from ..utils.oauth import oauth
 from ..db.models.db_user import User as UserModel
 from ..api.schemas import token as token_schema
 from ..api.schemas import user as user_schema
 
-from logging import Logger
 
 logger = Logger(__name__)
 
@@ -87,20 +87,22 @@ async def register_user(user_data: user_schema.UserCreate, db: Session):
         profile_image_base64 = user_data.profile_image_base64,
     )
 
-async def handle_google_callback(request: Request, db: Session):
-    """Handles the callback from Google OAuth after user authentication."""
+
+async def handle_oauth_callback(request: Request, db: Session, website: str = "google"):
+    """Handles the callback from OAuth after user authentication."""
 
     # Get the OAuth client
-    oauth = get_google_oauth_client()
-    if not oauth.google:
+    oauth_client = getattr(oauth, website, None)
+
+    if not oauth_client:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Google OAuth client is not configured."
+            detail=website + "OAuth client is not configured."
         )
 
     # Authorize access token from Google
     try:
-        token = await oauth.google.authorize_access_token(request)
+        token = await oauth_client.authorize_access_token(request)
     except Exception as error:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Could not validate credentials") from error
@@ -109,7 +111,7 @@ async def handle_google_callback(request: Request, db: Session):
     user_info = token.get('userinfo')
     if not user_info or not user_info.get("email"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Could not fetch user info from Google.")
+                            detail=f"Could not fetch user info from {website}.")
     email = user_info["email"]
     name = user_info.get("name")
     picture_url = user_info.get("picture")
@@ -127,7 +129,7 @@ async def handle_google_callback(request: Request, db: Session):
 
     # Check if the user already exists in the database
     if not db_user:
-        logger.info("Creating new user for Google OAuth login: %s (%s)", email, name)
+        logger.info(f"Creating new user for {website} OAuth login: %s (%s)", email, name)
         # If the user does not exist, create a new user
         base_username = (name.lower().replace(" ", ".")[:40] if name else email.split("@")[0][:40])
         username_candidate = base_username[:42]
@@ -150,7 +152,7 @@ async def handle_google_callback(request: Request, db: Session):
             profile_image_base64=profile_image_base64_data,
         )
     else:
-        logger.info("Use existung user %s from database for Google OAuth login.", db_user.username)
+        logger.info(f"Use existung user %s from database for {website} OAuth login.", db_user.username)
         # If the user exists, update their details if necessary
         if profile_image_base64_data and getattr(db_user, 'profile_image_base64',
                                                 None) != profile_image_base64_data:
@@ -174,3 +176,4 @@ async def handle_google_callback(request: Request, db: Session):
     redirect_url_with_fragment = f"{frontend_base_url}#access_token={access_token}&token_type=bearer&expires_in={security.ACCESS_TOKEN_EXPIRE_MINUTES * 60}"
 
     return RedirectResponse(url=redirect_url_with_fragment)
+

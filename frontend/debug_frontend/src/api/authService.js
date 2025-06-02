@@ -51,6 +51,11 @@ class AuthService {
     // The backend URL that initiates the Google OAuth flow
     window.location.href = `${API_URL}/login/google`;
   }
+
+  redirectToGithubOAuth() {
+    // The backend URL that initiates the Google OAuth flow
+    window.location.href = `${API_URL}/login/github`;
+  }
 }
 
 export default new AuthService();
