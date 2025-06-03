@@ -62,7 +62,7 @@ function MainLayout() {
           <div style={{ display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>
             <Title 
               order={2} 
-              size={{ base: 'h4', sm: 'h3' }}
+              size={{ base: 'h5', sm: 'h4' }}
               component={Link}
               to="/home"
               sx={(theme) => ({
