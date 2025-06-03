@@ -133,11 +133,32 @@ async def handle_oauth_callback(request: Request, db: Session, website: str = "g
         email = user_info["email"]
         name = user_info.get("name")
         picture_url = user_info.get("picture")
+    elif website == "discord":
+        access_token = token.get("access_token")
+        headers = {"Authorization": f"Bearer {access_token}"}
+        user_response = requests.get("https://discord.com/api/users/@me", headers=headers, timeout=10)
+        user_response.raise_for_status()
+        user_info = user_response.json()
+        email = user_info.get("email")
+        name = user_info.get("username")
+        # Discord avatar URL construction
+        avatar = user_info.get("avatar")
+        user_id = user_info.get("id")
+        if avatar and user_id:
+            picture_url = f"https://cdn.discordapp.com/avatars/{user_id}/{avatar}.png"
+        else:
+            picture_url = None
+        if not email:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=f"Could not fetch user info from {website}.")
     else:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"Unsupported OAuth provider: {website}")
 
     # Check if the user already exists in the database
+    if not email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Could not fetch user email from {website}.")
     db_user = db.query(UserModel).filter(UserModel.email == email).first()
     profile_image_base64_data = None
 
@@ -154,7 +175,7 @@ async def handle_oauth_callback(request: Request, db: Session, website: str = "g
     if not db_user:
         logger.info(f"Creating new user for {website} OAuth login: %s (%s)", email, name)
         # If the user does not exist, create a new user
-        base_username = (name.lower().replace(" ", ".")[:40] if name else email.split("@")[0][:40])
+        base_username = (name.lower().replace(" ", ".")[:40] if name else (email.split("@")[0][:40] if email else "user"))
         username_candidate = base_username[:42]
         final_username = username_candidate
         while db.query(UserModel).filter(UserModel.username == final_username).first():

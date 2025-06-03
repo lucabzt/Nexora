@@ -56,6 +56,11 @@ class AuthService {
     // The backend URL that initiates the Google OAuth flow
     window.location.href = `${API_URL}/login/github`;
   }
+
+  redirectToDiscordOAuth() {
+    // The backend URL that initiates the Discord OAuth flow
+    window.location.href = `${API_URL}/login/discord`;
+  }
 }
 
 export default new AuthService();

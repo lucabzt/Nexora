@@ -86,3 +86,25 @@ async def github_callback(request: Request, db: Session = Depends(get_db)):
     return await auth_service.handle_oauth_callback(request, db, website="github")
 
 
+@api_router.get("/login/discord")
+async def login_discord(request: Request):
+    """
+    Redirects the user to Discord OAuth for authentication.
+    This endpoint initiates the OAuth flow by redirecting to Discord's authorization URL.
+    """
+    if not oauth.discord:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Discord OAuth client is not configured."
+        )
+    return await oauth.discord.authorize_redirect(request, settings.DISCORD_REDIRECT_URI)
+
+
+@api_router.get("/discord/callback")
+async def discord_callback(request: Request, db: Session = Depends(get_db)):
+    """
+    Handles the callback from Discord OAuth after user authentication.
+    """
+    return await auth_service.handle_oauth_callback(request, db, website="discord")
+
+

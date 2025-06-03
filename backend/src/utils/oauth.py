@@ -26,3 +26,14 @@ oauth.register(
     #redirect_uri=settings.GITHUB_REDIRECT_URI
 )
 
+# Discord OAuth registration
+oauth.register(
+    name='discord',
+    client_id=settings.DISCORD_CLIENT_ID,
+    client_secret=settings.DISCORD_CLIENT_SECRET,
+    access_token_url='https://discord.com/api/oauth2/token',
+    authorize_url='https://discord.com/api/oauth2/authorize',
+    api_base_url='https://discord.com/api/',
+    client_kwargs={'scope': 'identify email'},
+)
+

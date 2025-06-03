@@ -18,6 +18,18 @@ import { useAuth } from '../contexts/AuthContext';
 import authService from '../api/authService'; // Import authService
 import { IconBrandGoogle, IconBrandGithub } from '@tabler/icons-react';
 
+// Use Discord GIF icon from lordicon
+const DiscordIcon = (props) => (
+  <img
+    src="https://media.lordicon.com/icons/wired/flat/2566-logo-discord.gif"
+    alt="Discord"
+    width={24}
+    height={24}
+    style={{ display: 'block' }}
+    {...props}
+  />
+);
+
 function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -55,6 +67,11 @@ function Login() {
   const handleGithubLogin = () => {
     authService.redirectToGithubOAuth();
   };
+
+  const handleDiscordLogin = () => {
+    authService.redirectToDiscordOAuth();
+  };
+
 
   return (
     <Container
@@ -110,6 +127,14 @@ function Login() {
               style={{ width: 48, height: 48, padding: 0 }}
             >
               <IconBrandGithub size={24} />
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleDiscordLogin}
+              px="md"
+              style={{ width: 48, height: 48, padding: 0 }}
+            >
+              <DiscordIcon />
             </Button>
           </Group>
           
