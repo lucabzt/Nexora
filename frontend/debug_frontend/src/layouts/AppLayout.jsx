@@ -37,7 +37,7 @@ import {
   IconSparkles
 } from '@tabler/icons-react';
 
-const MainLink = ({ icon, color, label, to, isActive }) => {
+const MainLink = ({ icon, color, label, to, isActive, collapsed }) => {
   const navigate = useNavigate();
   const theme = useMantineTheme();
   
@@ -50,7 +50,7 @@ const MainLink = ({ icon, color, label, to, isActive }) => {
         // Make menu items higher and all the same size
         minHeight: 60,
         height: 64,
-        padding: `16px 16px 16px 16px`, // more left and right padding
+        padding: collapsed ? `16px 0` : `16px 16px 16px 16px`, // Adjust padding when collapsed
         borderRadius: theme.radius.md,
         marginBottom: theme.spacing.xs,
         color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.black,
@@ -65,7 +65,7 @@ const MainLink = ({ icon, color, label, to, isActive }) => {
         overflow: 'hidden',
       })}
     >
-      <Group spacing={18} sx={{ position: 'relative', zIndex: 1, height: '100%', flexWrap: 'nowrap' }}>
+      <Group spacing={collapsed ? 0 : 18} position={collapsed ? "center" : "left"} sx={{ position: 'relative', zIndex: 1, height: '100%', flexWrap: 'nowrap' }}>
         <ThemeIcon 
           color={color} 
           variant="light" 
@@ -73,32 +73,36 @@ const MainLink = ({ icon, color, label, to, isActive }) => {
           sx={{
             background: `linear-gradient(135deg, ${theme.colors[color][6]}20, ${theme.colors[color][4]}10)`,
             border: `1px solid ${theme.colors[color][6]}30`,
-            marginLeft: 4, // extra space left of icon
-            marginRight: 8, // extra space right of icon
+            marginLeft: collapsed ? 0 : 4, // Adjust margins when collapsed
+            marginRight: collapsed ? 0 : 8,
           }}
         >
           {icon}
         </ThemeIcon>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Text size="md" weight={600} mb={2} sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</Text>
-          <Box 
-            sx={{ 
-              height: 3, 
-              background: `linear-gradient(90deg, ${theme.colors[color][6]}, ${theme.colors[color][4]})`,
-              borderRadius: 2,
-              width: isActive ? '100%' : '0%',
-              transition: 'width 0.3s ease',
-            }} 
+        {!collapsed && (
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Text size="md" weight={600} mb={2} sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</Text>
+            <Box 
+              sx={{ 
+                height: 3, 
+                background: `linear-gradient(90deg, ${theme.colors[color][6]}, ${theme.colors[color][4]})`,
+                borderRadius: 2,
+                width: isActive ? '100%' : '0%',
+                transition: 'width 0.3s ease',
+              }} 
+            />
+          </Box>
+        )}
+        {!collapsed && (
+          <IconChevronRight 
+            size={18} 
+            style={{ 
+              opacity: 0.6,
+              transition: 'transform 0.2s ease',
+              marginLeft: 8
+            }}
           />
-        </Box>
-        <IconChevronRight 
-          size={18} 
-          style={{ 
-            opacity: 0.6,
-            transition: 'transform 0.2s ease',
-            marginLeft: 8
-          }}
-        />
+        )}
       </Group>
     </UnstyledButton>
   );
@@ -106,7 +110,7 @@ const MainLink = ({ icon, color, label, to, isActive }) => {
 
 function AppLayout() {
   const theme = useMantineTheme();
-  const [opened, setOpened] = useState(false);
+  const [opened, setOpened] = useState(true); // Default to open for better UX
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
@@ -132,12 +136,12 @@ function AppLayout() {
     { icon: <IconInfoCircle size={18} />, color: 'indigo', label: 'Statistics', to: '/statistics' },
     { icon: <IconInfoCircle size={18} />, color: 'grape', label: 'About Nexora', to: '/home' },
   ];
-
   const mainLinksComponents = mainLinksData.map((link) => (
     <MainLink 
       {...link} 
       key={link.label} 
       isActive={currentPath === link.to}
+      collapsed={!opened}
     />
   ));
 
@@ -341,12 +345,10 @@ function AppLayout() {
             </Group>
           </div>
         </Header>
-      }      navbar={
-        <Navbar 
-          p="md" 
+      }      navbar={        <Navbar 
+          p={opened ? "md" : "xs"}
           hiddenBreakpoint="sm" 
-          hidden={!opened} 
-          width={{ sm: 250, lg: 300 }}
+          width={{ sm: opened ? 250 : 80, lg: opened ? 300 : 80 }}
           sx={(theme) => ({
             background: dark 
               ? `linear-gradient(180deg, ${theme.colors.dark[7]} 0%, ${theme.colors.dark[8]} 100%)`
@@ -355,6 +357,7 @@ function AppLayout() {
             boxShadow: dark 
               ? `4px 0 12px ${theme.colors.dark[9]}30`
               : `4px 0 12px ${theme.colors.gray[3]}20`,
+            transition: 'width 0.3s ease, padding 0.3s ease',
           })}
         >
           <Navbar.Section>
@@ -369,8 +372,7 @@ function AppLayout() {
                 marginBottom: theme.spacing.lg,
                 backdropFilter: 'blur(8px)',
               })}
-            >
-              <Group spacing="sm" mb="xs">
+            >              <Group spacing="sm" mb="xs" position={!opened ? "center" : "left"}>
                 <ThemeIcon 
                   size="lg" 
                   variant="gradient" 
@@ -379,10 +381,12 @@ function AppLayout() {
                 >
                   <IconSparkles size={20} />
                 </ThemeIcon>
-                <Box>
-                  <Text size="sm" weight={600} mb={2}>Navigation</Text>
-                  <Text size="xs" color="dimmed">Choose your destination</Text>
-                </Box>
+                {opened && (
+                  <Box>
+                    <Text size="sm" weight={600} mb={2}>Navigation</Text>
+                    <Text size="xs" color="dimmed">Choose your destination</Text>
+                  </Box>
+                )}
               </Group>
             </Paper>
           </Navbar.Section>
@@ -404,16 +408,23 @@ function AppLayout() {
                 borderRadius: theme.radius.md,
                 textAlign: 'center',
               })}
-            >
-              <Text size="xs" color="dimmed" mb="xs">
-                Powered by AI
-              </Text>
-              <Group spacing="xs" position="center">
-                <IconSparkles size={16} color={theme.colors.violet[5]} />
-                <Text size="xs" weight={500} color={theme.colors.violet[6]}>
-                  Nexora Learning
-                </Text>
-              </Group>
+            >              {opened ? (
+                <>
+                  <Text size="xs" color="dimmed" mb="xs">
+                    Powered by AI
+                  </Text>
+                  <Group spacing="xs" position="center">
+                    <IconSparkles size={16} color={theme.colors.violet[5]} />
+                    <Text size="xs" weight={500} color={theme.colors.violet[6]}>
+                      Nexora Learning
+                    </Text>
+                  </Group>
+                </>
+              ) : (
+                <Group position="center">
+                  <IconSparkles size={20} color={theme.colors.violet[5]} />
+                </Group>
+              )}
             </Paper>
           </Navbar.Section>
         </Navbar>
