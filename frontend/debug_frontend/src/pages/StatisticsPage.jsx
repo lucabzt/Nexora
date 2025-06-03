@@ -200,9 +200,8 @@ function StatisticsPage() {
   }
 
   const { userEngagement } = stats;
-
   return (
-    <Container fluid>
+    <Container fluid sx={{ maxWidth: '1200px', margin: '0 auto' }}>
       <Title order={2} mb="lg">Learning Statistics & Analytics</Title>
       
       {/* Key Metrics Section */}
@@ -252,298 +251,240 @@ function StatisticsPage() {
         />
       </SimpleGrid>
       
-      {/* Tabs for different time periods */}
-      <Tabs defaultValue="daily" mt="xl">
-        <Tabs.List>
+      {/* Tabs for different time periods */}      <Tabs defaultValue="daily" mt="xl" styles={{
+        tabsList: {
+          borderBottom: `1px solid ${isDark ? theme.colors.dark[4] : theme.colors.gray[3]}`,
+        },
+        tab: {
+          fontWeight: 500,
+          height: 38,
+          backgroundColor: 'transparent',
+          '&[data-active]': {
+            borderColor: theme.colors.blue[isDark ? 5 : 7],
+          },
+        },
+        panel: {
+          width: '100%',
+        }
+      }}>
+        <Tabs.List grow>
           <Tabs.Tab value="daily" icon={<IconChartBar size={16} />}>Daily Progress</Tabs.Tab>
           <Tabs.Tab value="weekly" icon={<IconChartLine size={16} />}>Weekly Stats</Tabs.Tab>
           <Tabs.Tab value="monthly" icon={<IconCalendar size={16} />}>Monthly Trends</Tabs.Tab>
           <Tabs.Tab value="subjects" icon={<IconChartPie size={16} />}>Subject Analysis</Tabs.Tab>
-        </Tabs.List>
-
-        <Tabs.Panel value="daily" pt="md">
-          <Grid>
-            <Grid.Col span={12}>
-              <Paper p="md" radius="md" withBorder sx={{ 
-                height: 400, 
-                borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
-                backgroundColor: isDark ? theme.colors.dark[7] : theme.white
-              }}>
-                <Title order={3} mb="md">Today's Learning Activity</Title>
-                <Box sx={{ height: 300 }}>
-                  <Line 
-                    data={stats.dailyProgress} 
-                    options={chartOptions}
-                  />
-                </Box>
-              </Paper>
-            </Grid.Col>
-          </Grid>
-          
-          <Grid mt="md">
-            <Grid.Col md={6}>
-              <Paper p="md" radius="md" withBorder sx={{ 
-                height: 300, 
-                borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
-                backgroundColor: isDark ? theme.colors.dark[7] : theme.white
-              }}>
-                <Group position="apart" mb="lg">
-                  <Title order={3}>Quiz Performance</Title>
-                  <Badge size="lg" color="green">{userEngagement.averageScore}% avg score</Badge>
-                </Group>
-                <Box sx={{ height: 200 }}>
-                  <RingProgress
-                    sections={[
-                      { value: userEngagement.quizzesPassed / userEngagement.quizzesAttempted * 100, color: 'green' },
-                    ]}
-                    label={
-                      <Text size="xl" align="center" weight={700}>
-                        {(userEngagement.quizzesPassed / userEngagement.quizzesAttempted * 100).toFixed(0)}%
-                      </Text>
-                    }
-                  />
-                </Box>
-              </Paper>
-            </Grid.Col>
+        </Tabs.List>        {/* Fixed size wrapper to prevent layout shifts */}
+        <Box sx={{ 
+          minHeight: 800, 
+          width: '100%',
+          maxWidth: '100%', 
+          margin: '0 auto',
+          position: 'relative'
+        }}>
+          <Tabs.Panel value="daily" pt="md">
+            <Grid>
+              <Grid.Col span={12}>
+                <Paper p="md" radius="md" withBorder sx={{ 
+                  height: 400, 
+                  borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
+                  backgroundColor: isDark ? theme.colors.dark[7] : theme.white
+                }}>
+                  <Title order={3} mb="md">Today's Learning Activity</Title>
+                  <Box sx={{ height: 300 }}>
+                    <Line 
+                      data={stats.dailyProgress} 
+                      options={chartOptions}
+                    />
+                  </Box>
+                </Paper>
+              </Grid.Col>
+            </Grid>
             
-            <Grid.Col md={6}>
-              <Paper p="md" radius="md" withBorder sx={{ 
-                height: 300, 
-                borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
-                backgroundColor: isDark ? theme.colors.dark[7] : theme.white
-              }}>
-                <Title order={3} mb="lg">Active Hours Today</Title>
-                <Box sx={{ height: 200 }}>
-                  <PolarArea 
-                    data={{
-                      labels: ['Morning', 'Afternoon', 'Evening', 'Night'],
-                      datasets: [
-                        {
-                          label: 'Hours Spent',
-                          data: [3.5, 2.1, 1.8, 0.5],
-                          backgroundColor: [
-                            'rgba(255, 206, 86, 0.7)',
-                            'rgba(75, 192, 192, 0.7)',
-                            'rgba(153, 102, 255, 0.7)',
-                            'rgba(255, 159, 64, 0.7)'
-                          ],
-                        },
-                      ],
-                    }}
-                  />
-                </Box>
-              </Paper>
-            </Grid.Col>
-          </Grid>
-        </Tabs.Panel>
+            <Grid mt="md">
+              <Grid.Col md={6}>
+                <Paper p="md" radius="md" withBorder sx={{ 
+                  height: 300, 
+                  borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
+                  backgroundColor: isDark ? theme.colors.dark[7] : theme.white
+                }}>
+                  <Group position="apart" mb="lg">
+                    <Title order={3}>Quiz Performance</Title>
+                    <Badge size="lg" color="green">{userEngagement.averageScore}% avg score</Badge>
+                  </Group>
+                  <Box sx={{ height: 200 }}>
+                    <RingProgress
+                      sections={[
+                        { value: userEngagement.quizzesPassed / userEngagement.quizzesAttempted * 100, color: 'green' },
+                      ]}
+                      label={
+                        <Text size="xl" align="center" weight={700}>
+                          {(userEngagement.quizzesPassed / userEngagement.quizzesAttempted * 100).toFixed(0)}%
+                        </Text>
+                      }
+                    />
+                  </Box>
+                </Paper>
+              </Grid.Col>
+              
+              <Grid.Col md={6}>
+                <Paper p="md" radius="md" withBorder sx={{ 
+                  height: 300, 
+                  borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
+                  backgroundColor: isDark ? theme.colors.dark[7] : theme.white
+                }}>
+                  <Title order={3} mb="lg">Active Hours Today</Title>
+                  <Box sx={{ height: 200 }}>
+                    <PolarArea 
+                      data={{
+                        labels: ['Morning', 'Afternoon', 'Evening', 'Night'],
+                        datasets: [
+                          {
+                            label: 'Hours Spent',
+                            data: [3.5, 2.1, 1.8, 0.5],
+                            backgroundColor: [
+                              'rgba(255, 206, 86, 0.7)',
+                              'rgba(75, 192, 192, 0.7)',
+                              'rgba(153, 102, 255, 0.7)',
+                              'rgba(255, 159, 64, 0.7)'
+                            ],
+                          },
+                        ],
+                      }}
+                    />
+                  </Box>
+                </Paper>
+              </Grid.Col>
+            </Grid>
+          </Tabs.Panel>
 
-        <Tabs.Panel value="weekly" pt="md">
-          <Grid>
-            <Grid.Col span={12}>
-              <Paper p="md" radius="md" withBorder sx={{ 
-                height: 400, 
-                borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
-                backgroundColor: isDark ? theme.colors.dark[7] : theme.white
-              }}>
-                <Title order={3} mb="md">Weekly Learning Progress</Title>
-                <Box sx={{ height: 300 }}>
-                  <Bar 
-                    data={stats.weeklyStats} 
-                    options={weeklyChartOptions}
-                  />
-                </Box>
-              </Paper>
-            </Grid.Col>
-            <Grid.Col md={6} mt="md">
+          <Tabs.Panel value="weekly" pt="md">
+            <Grid>
+              <Grid.Col span={12}>                <Paper p="md" radius="md" withBorder sx={{ 
+                  height: 400, 
+                  borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
+                  backgroundColor: isDark ? theme.colors.dark[7] : theme.white
+                }}>                  <Title order={3} mb="md">Weekly Learning Progress</Title>
+                  <Box sx={{ 
+                    height: 300, 
+                    maxWidth: '100%', 
+                    overflow: 'hidden'
+                  }}>
+                    <Bar 
+                      data={stats.weeklyStats} 
+                      options={{
+                        ...weeklyChartOptions,
+                        responsive: true,
+                        maintainAspectRatio: true,
+                      }}
+                    />
+                  </Box>
+                </Paper>
+              </Grid.Col>
+              <Grid.Col md={6} mt="md">
+                <Paper p="md" radius="md" withBorder sx={{ 
+                  height: 300, 
+                  borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
+                  backgroundColor: isDark ? theme.colors.dark[7] : theme.white
+                }}>
+                  <Title order={3} mb="md">Weekly Engagement</Title>
+                  <Box sx={{ height: 200 }}>
+                    <Radar
+                      data={{
+                        labels: ['Quizzes', 'Reading', 'Videos', 'Practice', 'Discussion', 'Review'],
+                        datasets: [
+                          {
+                            label: 'This Week',
+                            data: [65, 78, 55, 70, 40, 50],
+                            backgroundColor: 'rgba(53, 162, 235, 0.2)',
+                            borderColor: 'rgb(53, 162, 235)',
+                            pointBackgroundColor: 'rgb(53, 162, 235)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgb(53, 162, 235)'
+                          },
+                          {
+                            label: 'Last Week',
+                            data: [50, 65, 40, 60, 35, 45],
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgb(255, 99, 132)',
+                            pointBackgroundColor: 'rgb(255, 99, 132)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgb(255, 99, 132)'
+                          }
+                        ],
+                      }}
+                    />
+                  </Box>
+                </Paper>
+              </Grid.Col>
+              <Grid.Col md={6} mt="md">
+                <Paper p="md" radius="md" withBorder sx={{ 
+                  height: 300, 
+                  borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
+                  backgroundColor: isDark ? theme.colors.dark[7] : theme.white
+                }}>
+                  <Title order={3} mb="md">Course Activity</Title>
+                  <Box sx={{ height: 200, display: 'flex', justifyContent: 'center' }}>
+                    <Doughnut 
+                      data={{
+                        labels: ['Active Courses', 'Completed This Week', 'On Hold'],
+                        datasets: [
+                          {
+                            data: [3, 1, 2],
+                            backgroundColor: [
+                              'rgba(75, 192, 192, 0.7)',
+                              'rgba(153, 102, 255, 0.7)',
+                              'rgba(255, 159, 64, 0.7)'
+                            ],
+                            borderColor: [
+                              'rgb(75, 192, 192)',
+                              'rgb(153, 102, 255)',
+                              'rgb(255, 159, 64)'
+                            ],
+                            borderWidth: 1
+                          }
+                        ]
+                      }}
+                      options={doughnutOptions}
+                    />
+                  </Box>
+                </Paper>
+              </Grid.Col>
+            </Grid>
+          </Tabs.Panel>
+
+          <Tabs.Panel value="monthly" pt="md">
+            <Paper p="md" radius="md" withBorder sx={{ 
+              height: 400, 
+              borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
+              backgroundColor: isDark ? theme.colors.dark[7] : theme.white
+            }}>
+              <Title order={3} mb="md">Monthly Learning Progress</Title>
+              <Box sx={{ height: 300 }}>
+                <Bar 
+                  data={stats.monthlyProgress} 
+                  options={chartOptions}
+                />
+              </Box>
+            </Paper>
+            <SimpleGrid cols={2} mt="md" spacing="lg" breakpoints={[{ maxWidth: 'sm', cols: 1 }]}>
               <Paper p="md" radius="md" withBorder sx={{ 
                 height: 300, 
                 borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
                 backgroundColor: isDark ? theme.colors.dark[7] : theme.white
               }}>
-                <Title order={3} mb="md">Weekly Engagement</Title>
+                <Title order={3} mb="md">Monthly Learning Hours</Title>
                 <Box sx={{ height: 200 }}>
-                  <Radar
+                  <Line 
                     data={{
-                      labels: ['Quizzes', 'Reading', 'Videos', 'Practice', 'Discussion', 'Review'],
+                      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                       datasets: [
                         {
-                          label: 'This Week',
-                          data: [65, 78, 55, 70, 40, 50],
-                          backgroundColor: 'rgba(53, 162, 235, 0.2)',
+                          label: 'Hours Studied',
+                          data: [12, 15, 10, 14, 18, 20, 17, 12, 15, 19, 22, 16],
                           borderColor: 'rgb(53, 162, 235)',
-                          pointBackgroundColor: 'rgb(53, 162, 235)',
-                          pointBorderColor: '#fff',
-                          pointHoverBackgroundColor: '#fff',
-                          pointHoverBorderColor: 'rgb(53, 162, 235)'
-                        },
-                        {
-                          label: 'Last Week',
-                          data: [50, 65, 40, 60, 35, 45],
-                          backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                          borderColor: 'rgb(255, 99, 132)',
-                          pointBackgroundColor: 'rgb(255, 99, 132)',
-                          pointBorderColor: '#fff',
-                          pointHoverBackgroundColor: '#fff',
-                          pointHoverBorderColor: 'rgb(255, 99, 132)'
-                        }
-                      ],
-                    }}
-                  />
-                </Box>
-              </Paper>
-            </Grid.Col>
-            <Grid.Col md={6} mt="md">
-              <Paper p="md" radius="md" withBorder sx={{ 
-                height: 300, 
-                borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
-                backgroundColor: isDark ? theme.colors.dark[7] : theme.white
-              }}>
-                <Title order={3} mb="md">Course Activity</Title>
-                <Box sx={{ height: 200, display: 'flex', justifyContent: 'center' }}>
-                  <Doughnut 
-                    data={{
-                      labels: ['Active Courses', 'Completed This Week', 'On Hold'],
-                      datasets: [
-                        {
-                          data: [3, 1, 2],
-                          backgroundColor: [
-                            'rgba(75, 192, 192, 0.7)',
-                            'rgba(153, 102, 255, 0.7)',
-                            'rgba(255, 159, 64, 0.7)'
-                          ],
-                          borderColor: [
-                            'rgb(75, 192, 192)',
-                            'rgb(153, 102, 255)',
-                            'rgb(255, 159, 64)'
-                          ],
-                          borderWidth: 1
-                        }
-                      ]
-                    }}
-                    options={doughnutOptions}
-                  />
-                </Box>
-              </Paper>
-            </Grid.Col>
-          </Grid>
-        </Tabs.Panel>
-
-        <Tabs.Panel value="monthly" pt="md">
-          <Paper p="md" radius="md" withBorder sx={{ 
-            height: 400, 
-            borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
-            backgroundColor: isDark ? theme.colors.dark[7] : theme.white
-          }}>
-            <Title order={3} mb="md">Monthly Learning Progress</Title>
-            <Box sx={{ height: 300 }}>
-              <Bar 
-                data={stats.monthlyProgress} 
-                options={chartOptions}
-              />
-            </Box>
-          </Paper>
-          <SimpleGrid cols={2} mt="md" spacing="lg" breakpoints={[{ maxWidth: 'sm', cols: 1 }]}>
-            <Paper p="md" radius="md" withBorder sx={{ 
-              height: 300, 
-              borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
-              backgroundColor: isDark ? theme.colors.dark[7] : theme.white
-            }}>
-              <Title order={3} mb="md">Monthly Learning Hours</Title>
-              <Box sx={{ height: 200 }}>
-                <Line 
-                  data={{
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                    datasets: [
-                      {
-                        label: 'Hours Studied',
-                        data: [12, 15, 10, 14, 18, 20, 17, 12, 15, 19, 22, 16],
-                        borderColor: 'rgb(53, 162, 235)',
-                        backgroundColor: 'rgba(53, 162, 235, 0.5)',
-                        tension: 0.3
-                      }
-                    ]
-                  }}
-                  options={chartOptions}
-                />
-              </Box>
-            </Paper>
-            <Paper p="md" radius="md" withBorder sx={{ 
-              height: 300, 
-              borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
-              backgroundColor: isDark ? theme.colors.dark[7] : theme.white
-            }}>
-              <Title order={3} mb="md">Achievement Growth</Title>
-              <Box sx={{ height: 200 }}>
-                <Line 
-                  data={{
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                    datasets: [
-                      {
-                        label: 'Achievements',
-                        data: [5, 7, 4, 8, 10, 13, 11, 9, 12, 15, 18, 14],
-                        borderColor: 'rgb(255, 99, 132)',
-                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                        tension: 0.3
-                      }
-                    ]
-                  }}
-                  options={chartOptions}
-                />
-              </Box>
-            </Paper>
-          </SimpleGrid>
-        </Tabs.Panel>
-
-        <Tabs.Panel value="subjects" pt="md">
-          <Grid>
-            <Grid.Col md={6}>
-              <Paper p="md" radius="md" withBorder sx={{ 
-                height: 400, 
-                borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
-                backgroundColor: isDark ? theme.colors.dark[7] : theme.white
-              }}>
-                <Title order={3} mb="md">Subject Distribution</Title>
-                <Box sx={{ height: 340, display: 'flex', justifyContent: 'center' }}>
-                  <Doughnut 
-                    data={stats.subjectDistribution}
-                    options={{
-                      ...doughnutOptions,
-                      plugins: {
-                        ...doughnutOptions.plugins,
-                        legend: {
-                          ...doughnutOptions.plugins.legend,
-                          position: 'bottom'
-                        }
-                      }
-                    }}
-                  />
-                </Box>
-              </Paper>
-            </Grid.Col>
-            <Grid.Col md={6}>
-              <Paper p="md" radius="md" withBorder sx={{ 
-                height: 400,
-                borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
-                backgroundColor: isDark ? theme.colors.dark[7] : theme.white
-              }}>
-                <Title order={3} mb="md">Performance by Subject</Title>
-                <Box sx={{ height: 340 }}>
-                  <Bar 
-                    data={{
-                      labels: ['Mathematics', 'Programming', 'Languages', 'Science', 'History', 'Arts'],
-                      datasets: [
-                        {
-                          label: 'Average Score (%)',
-                          data: [82, 95, 76, 88, 70, 85],
-                          backgroundColor: [
-                            'rgba(255, 99, 132, 0.7)',
-                            'rgba(54, 162, 235, 0.7)',
-                            'rgba(255, 206, 86, 0.7)',
-                            'rgba(75, 192, 192, 0.7)',
-                            'rgba(153, 102, 255, 0.7)',
-                            'rgba(255, 159, 64, 0.7)'
-                          ],
-                          borderWidth: 1
+                          backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                          tension: 0.3
                         }
                       ]
                     }}
@@ -551,52 +492,137 @@ function StatisticsPage() {
                   />
                 </Box>
               </Paper>
-            </Grid.Col>
-          </Grid>
-          <SimpleGrid cols={3} mt="md" spacing="lg" breakpoints={[
-            { maxWidth: 'md', cols: 2 },
-            { maxWidth: 'xs', cols: 1 }
-          ]}>
-            {['Mathematics', 'Programming', 'Languages'].map((subject) => (
-              <Paper key={subject} p="md" radius="md" withBorder sx={{ 
+              <Paper p="md" radius="md" withBorder sx={{ 
+                height: 300, 
                 borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
                 backgroundColor: isDark ? theme.colors.dark[7] : theme.white
               }}>
-                <Group position="apart">
-                  <Text weight={700} size="lg">{subject}</Text>
-                  <Badge color={subject === 'Programming' ? 'green' : 'blue'}>
-                    {subject === 'Programming' ? 'Excellent' : 'Good'}
-                  </Badge>
-                </Group>
-                <Divider my="sm" />
-                <Group>
-                  <IconBooks size={18} />
-                  <Text size="sm">
-                    {subject === 'Programming' ? '4 courses completed' : 
-                     subject === 'Mathematics' ? '2 courses completed' : 
-                     '1 course completed'}
-                  </Text>
-                </Group>
-                <Group mt="xs">
-                  <IconTrophy size={18} />
-                  <Text size="sm">
-                    {subject === 'Programming' ? '95% average score' : 
-                     subject === 'Mathematics' ? '82% average score' : 
-                     '76% average score'}
-                  </Text>
-                </Group>
-                <Group mt="xs">
-                  <IconClock size={18} />
-                  <Text size="sm">
-                    {subject === 'Programming' ? '19 hours spent' : 
-                     subject === 'Mathematics' ? '12 hours spent' : 
-                     '8 hours spent'}
-                  </Text>
-                </Group>
+                <Title order={3} mb="md">Achievement Growth</Title>
+                <Box sx={{ height: 200 }}>
+                  <Line 
+                    data={{
+                      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                      datasets: [
+                        {
+                          label: 'Achievements',
+                          data: [5, 7, 4, 8, 10, 13, 11, 9, 12, 15, 18, 14],
+                          borderColor: 'rgb(255, 99, 132)',
+                          backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                          tension: 0.3
+                        }
+                      ]
+                    }}
+                    options={chartOptions}
+                  />
+                </Box>
               </Paper>
-            ))}
-          </SimpleGrid>
-        </Tabs.Panel>
+            </SimpleGrid>
+          </Tabs.Panel>
+
+          <Tabs.Panel value="subjects" pt="md">
+            <Grid>
+              <Grid.Col md={6}>
+                <Paper p="md" radius="md" withBorder sx={{ 
+                  height: 400, 
+                  borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
+                  backgroundColor: isDark ? theme.colors.dark[7] : theme.white
+                }}>
+                  <Title order={3} mb="md">Subject Distribution</Title>
+                  <Box sx={{ height: 340, display: 'flex', justifyContent: 'center' }}>
+                    <Doughnut 
+                      data={stats.subjectDistribution}
+                      options={{
+                        ...doughnutOptions,
+                        plugins: {
+                          ...doughnutOptions.plugins,
+                          legend: {
+                            ...doughnutOptions.plugins.legend,
+                            position: 'bottom'
+                          }
+                        }
+                      }}
+                    />
+                  </Box>
+                </Paper>
+              </Grid.Col>
+              <Grid.Col md={6}>
+                <Paper p="md" radius="md" withBorder sx={{ 
+                  height: 400,
+                  borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
+                  backgroundColor: isDark ? theme.colors.dark[7] : theme.white
+                }}>
+                  <Title order={3} mb="md">Performance by Subject</Title>
+                  <Box sx={{ height: 340 }}>
+                    <Bar 
+                      data={{
+                        labels: ['Mathematics', 'Programming', 'Languages', 'Science', 'History', 'Arts'],
+                        datasets: [
+                          {
+                            label: 'Average Score (%)',
+                            data: [82, 95, 76, 88, 70, 85],
+                            backgroundColor: [
+                              'rgba(255, 99, 132, 0.7)',
+                              'rgba(54, 162, 235, 0.7)',
+                              'rgba(255, 206, 86, 0.7)',
+                              'rgba(75, 192, 192, 0.7)',
+                              'rgba(153, 102, 255, 0.7)',
+                              'rgba(255, 159, 64, 0.7)'
+                            ],
+                            borderWidth: 1
+                          }
+                        ]
+                      }}
+                      options={chartOptions}
+                    />
+                  </Box>
+                </Paper>
+              </Grid.Col>
+            </Grid>
+            <SimpleGrid cols={3} mt="md" spacing="lg" breakpoints={[
+              { maxWidth: 'md', cols: 2 },
+              { maxWidth: 'xs', cols: 1 }
+            ]}>
+              {['Mathematics', 'Programming', 'Languages'].map((subject) => (
+                <Paper key={subject} p="md" radius="md" withBorder sx={{ 
+                  borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
+                  backgroundColor: isDark ? theme.colors.dark[7] : theme.white
+                }}>
+                  <Group position="apart">
+                    <Text weight={700} size="lg">{subject}</Text>
+                    <Badge color={subject === 'Programming' ? 'green' : 'blue'}>
+                      {subject === 'Programming' ? 'Excellent' : 'Good'}
+                    </Badge>
+                  </Group>
+                  <Divider my="sm" />
+                  <Group>
+                    <IconBooks size={18} />
+                    <Text size="sm">
+                      {subject === 'Programming' ? '4 courses completed' : 
+                       subject === 'Mathematics' ? '2 courses completed' : 
+                       '1 course completed'}
+                    </Text>
+                  </Group>
+                  <Group mt="xs">
+                    <IconTrophy size={18} />
+                    <Text size="sm">
+                      {subject === 'Programming' ? '95% average score' : 
+                       subject === 'Mathematics' ? '82% average score' : 
+                       '76% average score'}
+                    </Text>
+                  </Group>
+                  <Group mt="xs">
+                    <IconClock size={18} />
+                    <Text size="sm">
+                      {subject === 'Programming' ? '19 hours spent' : 
+                       subject === 'Mathematics' ? '12 hours spent' : 
+                       '8 hours spent'}
+                    </Text>
+                  </Group>
+                </Paper>
+              ))}
+            </SimpleGrid>
+          </Tabs.Panel>
+        </Box>
       </Tabs>
     </Container>
   );
