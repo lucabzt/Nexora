@@ -114,8 +114,9 @@ function ChapterView() {
       setMarkingComplete(false);
     }
   };
-    // Update toolbar width when plotter opens/closes
+  // Update toolbar width when plotter opens/closes
   useEffect(() => {
+    // Set a sensible toolbar width when open (500px) but maintain enough width for the toggle button (40px) when closed
     setToolbarWidth(plotterOpen ? 500 : 40);
   }, [plotterOpen]);
   return (
@@ -307,8 +308,7 @@ function ChapterView() {
           </>
         )}      </Container>
       
-      {/* Collapsible Plotter Panel with Resizable Splitter */}
-      <Resizable
+      {/* Collapsible Plotter Panel with Resizable Splitter */}      <Resizable
         style={{
           position: 'fixed',
           top: 70, /* Match the header height (70px for md size) */
@@ -323,8 +323,12 @@ function ChapterView() {
             ? '-2px 0 10px rgba(0, 0, 0, 0.3)' 
             : '-2px 0 10px rgba(0, 0, 0, 0.1)')
             : 'none',
+          transition: plotterOpen ? 'none' : 'width 0.3s ease', // Only animate when closing
         }}
-        size={{ width: plotterOpen ? toolbarWidth : 40, height: 'calc(100vh - 70px)' }}
+        size={{ 
+          width: plotterOpen ? toolbarWidth : 40, 
+          height: 'calc(100vh - 70px)' 
+        }}
         minWidth={40}
         maxWidth={800}
         enable={{
@@ -355,8 +359,7 @@ function ChapterView() {
         handleClasses={{
           left: 'splitter-handle-left'
         }}
-      >
-        {/* Toggle button for the plotter panel */}
+      >        {/* Toggle button for the plotter panel */}
         <div style={{ 
           position: 'absolute', 
           top: '20px', 
@@ -369,7 +372,12 @@ function ChapterView() {
             color="blue"
             onClick={() => setPlotterOpen(!plotterOpen)}
             style={{ 
-              borderRadius: '0 4px 4px 0'
+              borderRadius: '0 4px 4px 0',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
             }}
           >
             {plotterOpen 
