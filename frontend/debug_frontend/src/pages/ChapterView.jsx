@@ -18,12 +18,14 @@ import {
   Badge,
   Collapse,
   ActionIcon,
-  useMantineTheme
+  useMantineTheme,
+  Burger
 } from '@mantine/core';
-import { IconAlertCircle, IconBookmark, IconQuestionMark, IconChartLine, IconChevronLeft } from '@tabler/icons-react';
+import { IconAlertCircle, IconBookmark, IconQuestionMark, IconChartLine, IconChevronLeft, IconMenu2 } from '@tabler/icons-react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'react-toastify';
 import { courseService } from '../api/courseService';
+import { Resizable } from 're-resizable';
 
 function ChapterView() {
   const theme = useMantineTheme();
@@ -38,6 +40,8 @@ function ChapterView() {
   const [quizScore, setQuizScore] = useState(0);
   const [markingComplete, setMarkingComplete] = useState(false);
   const [plotterOpen, setPlotterOpen] = useState(false);
+  const [navbarOpen, setNavbarOpen] = useState(true);
+  const [toolbarWidth, setToolbarWidth] = useState(plotterOpen ? 500 : 40);
 
   useEffect(() => {
     const fetchChapter = async () => {
@@ -110,10 +114,66 @@ function ChapterView() {
       setMarkingComplete(false);
     }
   };
-  
+    // Update toolbar width when plotter opens/closes
+  useEffect(() => {
+    setToolbarWidth(plotterOpen ? 500 : 40);
+  }, [plotterOpen]);
   return (
-    <div style={{ display: 'flex' }}>
-      <Container size="lg" py="xl" style={{ flexGrow: 1 }}>
+    <div style={{ 
+      display: 'flex',
+      position: 'relative',
+      width: '100%',
+      height: '100vh'
+    }}>
+      {/* Fixed navbar sidebar - controlled by navbarOpen */}
+      <div style={{ 
+        position: 'fixed', 
+        top: 70, // Header height
+        left: 0, 
+        bottom: 0,
+        width: navbarOpen ? 250 : 0,
+        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+        borderRight: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]}`,
+        overflow: 'hidden',
+        transition: 'width 0.3s ease',
+        zIndex: 150
+      }}>
+        {/* Navbar content can be added here */}
+        <Box p="md" style={{ opacity: navbarOpen ? 1 : 0, transition: 'opacity 0.3s ease' }}>
+          <Title order={4} mb="md">Navigation</Title>
+          {/* Add navigation items here */}
+        </Box>
+      </div>
+      
+      {/* Navbar toggle button - fixed position */}
+      <div style={{ 
+        position: 'fixed', 
+        top: 80, 
+        left: navbarOpen ? 260 : 10, 
+        zIndex: 200,
+        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+        border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]}`,
+        borderRadius: theme.radius.md,
+        padding: 4,
+        transition: 'left 0.3s ease'
+      }}>
+        <Burger
+          opened={navbarOpen}
+          onClick={() => setNavbarOpen(o => !o)}
+          size="sm"
+          color={theme.colors.blue[6]}
+        />
+      </div>
+
+      {/* Main content - dynamically positioned between navbar and toolbar */}
+      <Container size="lg" py="xl" style={{ 
+        flexGrow: 1,
+        marginLeft: navbarOpen ? 250 : 0,
+        marginRight: plotterOpen ? toolbarWidth : 0,
+        maxWidth: '100%',
+        transition: 'margin 0.3s ease',
+        width: `calc(100% - ${navbarOpen ? 250 : 0}px - ${plotterOpen ? toolbarWidth : 0}px)`,
+      }}>
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
             <Loader size="lg" />
@@ -245,21 +305,64 @@ function ChapterView() {
               )}
             </Group>
           </>
-        )}
-      </Container>      {/* Collapsible Plotter Panel - Fixed Position */}
-      <div style={{ 
-        position: 'fixed',
-        top: 70, /* Match the header height (70px for md size) */
-        right: 0,
-        borderLeft: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : '#e9ecef'}`,
-        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : '#f8f9fa',
-        transition: 'width 0.3s ease',
-        width: plotterOpen ? '500px' : '40px',
-        overflow: 'hidden',
-        height: 'calc(100vh - 70px)', /* Adjust height to account for header */
-        zIndex: 100
-      }}>
-        <div style={{ position: 'absolute', top: '20px', left: '0', zIndex: 10 }}>
+        )}      </Container>
+      
+      {/* Collapsible Plotter Panel with Resizable Splitter */}
+      <Resizable
+        style={{
+          position: 'fixed',
+          top: 70, /* Match the header height (70px for md size) */
+          right: 0,
+          borderLeft: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : '#e9ecef'}`,
+          backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : '#f8f9fa',
+          overflow: 'hidden',
+          height: 'calc(100vh - 70px)', /* Adjust height to account for header */
+          zIndex: 100,
+          display: 'flex',
+          boxShadow: plotterOpen ? (theme.colorScheme === 'dark' 
+            ? '-2px 0 10px rgba(0, 0, 0, 0.3)' 
+            : '-2px 0 10px rgba(0, 0, 0, 0.1)')
+            : 'none',
+        }}
+        size={{ width: plotterOpen ? toolbarWidth : 40, height: 'calc(100vh - 70px)' }}
+        minWidth={40}
+        maxWidth={800}
+        enable={{
+          top: false,
+          right: false,
+          bottom: false,
+          left: plotterOpen,
+          topRight: false,
+          bottomRight: false,
+          bottomLeft: false,
+          topLeft: false,
+        }}
+        onResizeStop={(e, direction, ref, d) => {
+          setToolbarWidth(toolbarWidth + d.width);
+        }}
+        handleStyles={{
+          left: {
+            width: '6px',
+            left: '0',
+            height: '100%',
+            cursor: 'col-resize',
+            backgroundColor: theme.colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+            '&:hover': {
+              backgroundColor: theme.colorScheme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
+            },
+          }
+        }}
+        handleClasses={{
+          left: 'splitter-handle-left'
+        }}
+      >
+        {/* Toggle button for the plotter panel */}
+        <div style={{ 
+          position: 'absolute', 
+          top: '20px', 
+          left: '0', 
+          zIndex: 10 
+        }}>
           <ActionIcon
             size="lg"
             variant="filled"
@@ -275,18 +378,21 @@ function ChapterView() {
           </ActionIcon>
         </div>
 
+        {/* Plotter panel content */}
         <div style={{ 
           opacity: plotterOpen ? 1 : 0,
           transition: 'opacity 0.3s ease',
           padding: '20px',
           paddingLeft: '40px',
           height: '100%',
+          width: '100%',
           overflow: 'auto'
         }}>
           <Title order={3} mb="md">GeoGebra Plotter</Title>
           <Text size="sm" color="dimmed" mb="md">
             Use this interactive GeoGebra plotter to visualize mathematical concepts.
-          </Text>          <iframe 
+          </Text>
+          <iframe 
             src="https://www.geogebra.org/graphing?lang=en" 
             title="GeoGebra Graphing Calculator"
             style={{ 
@@ -298,7 +404,7 @@ function ChapterView() {
             allowFullScreen
           ></iframe>
         </div>
-      </div>
+      </Resizable>
     </div>
   );
 }
