@@ -4,7 +4,7 @@ import axios from 'axios';
 const API_BASE = '/api/notes';
 
 export async function getNotes(courseId, chapterId) {
-  const res = await axios.get(`${API_BASE}?courseId=${courseId}&chapterId=${chapterId}`);
+  const res = await axios.get(`${API_BASE}/?courseId=${courseId}&chapterId=${chapterId}`);
   return res.data;
 }
 
