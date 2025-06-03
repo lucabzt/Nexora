@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { Outlet, Link as RouterLink, useNavigate } from 'react-router-dom';
 import { 
   AppShell, 
   Navbar, 
@@ -9,14 +9,14 @@ import {
   Title,
   UnstyledButton,
   Group,
-  useMantineTheme,
   Text,
   ThemeIcon,
   Box,
   Menu,
   Avatar,
   useMantineColorScheme,
-  Button
+  Button,
+  useMantineTheme
 } from '@mantine/core';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -31,7 +31,6 @@ import {
 } from '@tabler/icons-react';
 
 const MainLink = ({ icon, color, label, to }) => {
-  const theme = useMantineTheme();
   const navigate = useNavigate();
   
   return (
@@ -116,8 +115,27 @@ function AppLayout() {
               />
             </MediaQuery>
 
-            <Title order={3}>Nexora</Title>
-            <Box sx={{ flexGrow: 1 }} /> {/* Spacer */} 
+            <Title
+              order={1}
+              size="2.5rem"
+              component={RouterLink}
+              to={user ? "/" : "/home"}
+              sx={(theme) => ({
+                textDecoration: 'none',
+                color: theme.colorScheme === 'dark' ? theme.white : theme.black,
+                fontWeight: 900,
+                letterSpacing: '-1px',
+                transition: 'color 0.2s',
+                '&:hover': {
+                  color: theme.colors.violet[5],
+                  textDecoration: 'none',
+                  cursor: 'pointer',
+                },
+              })}
+            >
+              Nexora
+            </Title>
+            <Box sx={{ flexGrow: 1 }} /> {/* Spacer */}
             <Group spacing="xs">
               {user ? (
                 <Menu shadow="md" width={220}>
