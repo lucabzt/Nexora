@@ -160,7 +160,7 @@ function LandingPage() {
               <Box className={classes.heroImage} style={styles}>
                 <Image
                   radius="md"
-                  src="https://miro.medium.com/v2/resize:fit:1400/1*4lGF8anK0wxikAXvb-Il8g.png"
+                  src="https://images.unsplash.com/photo-1523240795612-9a054b0db644"
                   alt="AI Learning Illustration"
                   caption="Next-gen learning, powered by AI"
                 />
@@ -266,7 +266,7 @@ function LandingPage() {
                 <div style={styles}>
                   <Image
                     radius="md"
-                    src="https://miro.medium.com/v2/resize:fit:1024/1*bKeRR2aHSXWuqumB9vrYOg.jpeg"
+                    src="https://images.unsplash.com/photo-1695473507908-ff60e604c113"
                     alt="How Nexora Works"
                   />
                 </div>
