@@ -21,10 +21,12 @@ import ReactMarkdown from 'react-markdown';
 import { toast } from 'react-toastify';
 import { courseService } from '../api/courseService';
 import ToolbarContainer from '../components/tools/ToolbarContainer';
+import { useToolbar } from '../contexts/ToolbarContext';
 
 function ChapterView() {
   const { courseId, chapterId } = useParams(); // This should be the actual DB ID now
   const navigate = useNavigate();
+  const { toolbarOpen, toolbarWidth } = useToolbar(); // Get toolbar state from context
   const [chapter, setChapter] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -33,6 +35,12 @@ function ChapterView() {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState(0);
   const [markingComplete, setMarkingComplete] = useState(false);
+  // Effect to handle resize when toolbar changes
+  useEffect(() => {
+    // This will trigger a re-render when toolbar state changes
+    console.log("Toolbar state changed:", { open: toolbarOpen, width: toolbarWidth });
+    // We could add additional logic here if needed
+  }, [toolbarOpen, toolbarWidth]);
 
   useEffect(() => {
     const fetchChapter = async () => {
@@ -103,23 +111,26 @@ function ChapterView() {
       console.error('Error marking chapter complete:', error);
     } finally {
       setMarkingComplete(false);
-    }
-  };  return (
+    }  };  // Calculate container width and positioning based on toolbar state  // Calculate container width and positioning based on toolbar state
+  const sidebarWidth = toolbarOpen ? toolbarWidth : 40;
+  
+  return (
     <div style={{ 
       display: 'flex',
       position: 'relative',
       width: '100%',
       height: 'calc(100vh - 70px)', // Adjust for header height
       marginTop: 0
-    }}>
-      {/* Main content with dynamic positioning */}
+    }}>      {/* Main content with dynamic positioning - centered in available space */}
       <Container size="lg" py="xl" style={{ 
         flexGrow: 1,
-        maxWidth: '100%',
-        transition: 'margin 0.3s ease, padding 0.3s ease',
-        width: '100%', // Take full width
-        margin: '0', // Reset margin
-        paddingRight: '60px' // Add padding for the toolbar toggle
+        maxWidth: `calc(100% - ${sidebarWidth}px)`, // Limit max width to available space
+        width: `calc(100% - ${sidebarWidth}px)`, // Use calculated width
+        transition: 'all 0.3s ease',
+        marginRight: `${sidebarWidth}px`, // Keep space for toolbar
+        paddingLeft: '20px', // Add padding on left
+        paddingRight: '20px', // Add padding on right
+        overflow: 'auto' // Allow content to scroll if needed
       }}>
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>

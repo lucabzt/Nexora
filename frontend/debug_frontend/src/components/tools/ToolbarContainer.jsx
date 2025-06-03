@@ -4,37 +4,53 @@ import { IconChartLine, IconMessage, IconChevronLeft } from '@tabler/icons-react
 import { Resizable } from 're-resizable';
 import GeoGebraPlotter from './GeoGebraPlotter';
 import ChatTool from './ChatTool';
-import { TOOL_ICONS } from './ToolUtils';
+import { useToolbar } from '../../contexts/ToolbarContext';
+import { TOOL_TABS } from './ToolUtils';
+import './Toolbar.css';
 
 /**
  * ToolbarContainer component
  * Container for interactive learning tools with a resizable sidebar
  */
-function ToolbarContainer({ courseId, chapterId }) {
-  const theme = useMantineTheme();
-  const [toolbarOpen, setToolbarOpen] = useState(false);
-  const [toolbarWidth, setToolbarWidth] = useState(500);
-  const [activeTab, setActiveTab] = useState('plotter'); // Use direct string
-  useEffect(() => {
+function ToolbarContainer({ courseId, chapterId }) {  
+  const theme = useMantineTheme();  
+  const { toolbarOpen, setToolbarOpen, toolbarWidth, setToolbarWidth } = useToolbar();
+  const [activeTab, setActiveTab] = useState(TOOL_TABS.PLOTTER); // Use constant for tab value
+    useEffect(() => {
     // Only change width if toolbar is open
     // When closed, we maintain the previous width in state but display at 40px
-    console.log('Current active tab:', activeTab);
-    console.log('TOOL_ICONS values:', TOOL_ICONS);
-  }, [toolbarOpen, activeTab]);
+    if (!toolbarOpen) {
+      // We don't change the actual stored width, just the display
+      console.log('Toolbar closed, maintaining width at:', toolbarWidth);
+    } else {
+      // Ensure width is at least 500px when opened
+      if (toolbarWidth <= 40) {
+        setToolbarWidth(500);
+      }
+      console.log('Toolbar open with width:', toolbarWidth);
+    }
+  }, [toolbarOpen, toolbarWidth, setToolbarWidth]);
 
   const handleToggleToolbar = () => {
     setToolbarOpen(!toolbarOpen);
-  };
-  const handleTabChange = (value) => {
+  };  const handleTabChange = (value) => {
+    console.log('Tab change requested:', value);
     setActiveTab(value);
+    
+    // Always ensure toolbar is open when changing tabs
     if (!toolbarOpen) {
       setToolbarOpen(true);
     }
-    console.log('Changed tab to:', value); // For debugging
+    
+    // Make sure we're using the correct tab value
+    if (value !== TOOL_TABS.PLOTTER && value !== TOOL_TABS.CHAT) {
+      console.warn('Unknown tab value:', value);
+    } else {
+      console.log('Changed tab to:', value); 
+    }
   };
 
-  return (
-    <Resizable
+  return (    <Resizable
       style={{
         position: 'fixed',
         top: 70, /* Match the header height (70px for md size) */
@@ -66,10 +82,20 @@ function ToolbarContainer({ courseId, chapterId }) {
         topRight: false,
         bottomRight: false,
         bottomLeft: false,
-        topLeft: false,
+        topLeft: false,      }}        onResizeStart={() => {
+        // Set a resize class on body to disable transitions during resize
+        document.body.classList.add('resizing-toolbar');
       }}
-      onResizeStop={(e, direction, ref, d) => {
-        setToolbarWidth(toolbarWidth + d.width);
+      onResize={() => {
+        // Do nothing during resize to prevent erratic behavior
+        // We'll only update at the end of resize
+      }}
+      onResizeStop={(e, direction, ref) => {
+        // Update width once at the end of resizing to prevent erratic behavior
+        const newWidth = Math.max(40, Math.min(800, parseInt(ref.style.width, 10)));
+        setToolbarWidth(newWidth);
+        document.body.classList.remove('resizing-toolbar');
+        console.log('Toolbar width updated to:', newWidth);
       }}
       handleStyles={{
         left: {
@@ -114,9 +140,8 @@ function ToolbarContainer({ courseId, chapterId }) {
               ? '-2px 0 5px rgba(0, 0, 0, 0.3)' 
               : '-2px 0 5px rgba(0, 0, 0, 0.1)')
           }}
-        >          {toolbarOpen 
-            ? <IconChevronLeft size={20} /> 
-            : activeTab === 'plotter' ? <IconChartLine size={20} /> : <IconMessage size={20} />}
+        >          {toolbarOpen            ? <IconChevronLeft size={20} /> 
+            : activeTab === TOOL_TABS.PLOTTER ? <IconChartLine size={20} /> : <IconMessage size={20} />}
         </ActionIcon>        {toolbarOpen && (
           <Tabs 
             value={activeTab} 
@@ -129,39 +154,37 @@ function ToolbarContainer({ courseId, chapterId }) {
               zIndex: 11
             }}
           >
-            <Tabs.List>              <Tabs.Tab 
-                value="plotter" 
+            <Tabs.List>                <Tabs.Tab 
+                value={TOOL_TABS.PLOTTER}
                 icon={<IconChartLine size={16} />}
                 sx={{
                   borderRadius: '0 4px 4px 0',
                   marginBottom: '5px'
                 }}
-                onClick={() => handleTabChange('plotter')}
               />
               <Tabs.Tab 
-                value="chat" 
+                value={TOOL_TABS.CHAT}
                 icon={<IconMessage size={16} />}
                 sx={{
                   borderRadius: '0 4px 4px 0'
                 }}
-                onClick={() => handleTabChange('chat')}
               />
             </Tabs.List>
           </Tabs>
-        )}
-      </Box>
-
-      {/* Tool Content Area */}
-      <div style={{
+        )}</Box>      
+      
+      {/* Tool Content Area */}        <div style={{
         width: '100%',
         height: '100%',
         overflow: 'hidden',
-        position: 'relative'
-      }}>        {activeTab === TOOL_ICONS.PLOTTER && (
+        position: 'relative',
+        paddingTop: '40px', // Add space for the toggle button
+        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : '#f8f9fa',
+      }}>{activeTab === TOOL_TABS.PLOTTER && (
           <GeoGebraPlotter isOpen={toolbarOpen} />
         )}
         
-        {activeTab === TOOL_ICONS.CHAT && (
+        {activeTab === TOOL_TABS.CHAT && (
           <ChatTool 
             isOpen={toolbarOpen} 
             courseId={courseId} 

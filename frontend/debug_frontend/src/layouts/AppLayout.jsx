@@ -48,8 +48,8 @@ const MainLink = ({ icon, color, label, to, isActive, collapsed }) => {
         display: 'block',
         width: '100%',
         // Make menu items higher and all the same size
-        minHeight: 60,
-        height: 64,
+        minHeight: 32,
+        height: 48,
         padding: collapsed ? `16px 0` : `16px 16px 16px 16px`, // Adjust padding when collapsed
         borderRadius: theme.radius.md,
         marginBottom: theme.spacing.xs,

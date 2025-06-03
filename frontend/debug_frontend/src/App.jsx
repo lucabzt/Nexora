@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { MantineProvider, ColorSchemeProvider } from '@mantine/core';
 import { AuthProvider } from './contexts/AuthContext';
+import { ToolbarProvider } from './contexts/ToolbarContext';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -53,11 +54,11 @@ function App() {
               },
             },
           },
-        },
-      }}>
+        },      }}>
         <AuthProvider>
-          <BrowserRouter>
-            <Routes>
+          <ToolbarProvider>
+            <BrowserRouter>
+              <Routes>
               {/* Public routes with MainLayout */}
               <Route element={<MainLayout />}>
                 <Route path="/home" element={<LandingPage />} />
@@ -88,6 +89,7 @@ function App() {
             </Routes>
           </BrowserRouter>
           <ToastContainer position="top-right" autoClose={3000} theme={colorScheme} />
+        </ToolbarProvider>
         </AuthProvider>
       </MantineProvider>
     </ColorSchemeProvider>
