@@ -145,35 +145,48 @@ function ChapterView() {
           {/* Add navigation items here */}
         </Box>
       </div>
-      
-      {/* Navbar toggle button - fixed position */}
+        {/* Navbar toggle button - fixed position */}
       <div style={{ 
         position: 'fixed', 
         top: 80, 
         left: navbarOpen ? 260 : 10, 
         zIndex: 200,
-        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
-        border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]}`,
-        borderRadius: theme.radius.md,
-        padding: 4,
-        transition: 'left 0.3s ease'
+        transition: 'left 0.3s ease',
+        boxShadow: !navbarOpen ? (theme.colorScheme === 'dark' 
+          ? '0 2px 5px rgba(0, 0, 0, 0.3)' 
+          : '0 2px 5px rgba(0, 0, 0, 0.1)')
+          : 'none'
       }}>
-        <Burger
-          opened={navbarOpen}
+        <ActionIcon
+          size="lg"
+          variant="filled"
+          color="blue"
           onClick={() => setNavbarOpen(o => !o)}
-          size="sm"
-          color={theme.colors.blue[6]}
-        />
-      </div>
-
-      {/* Main content - dynamically positioned between navbar and toolbar */}
+          style={{ 
+            borderRadius: navbarOpen ? '50%' : '4px',
+            width: '40px',
+            height: '40px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}
+        >
+          <Burger
+            opened={navbarOpen}
+            size="sm"
+            color={theme.white}
+          />
+        </ActionIcon>
+      </div>{/* Main content - dynamically positioned between navbar and toolbar */}
       <Container size="lg" py="xl" style={{ 
         flexGrow: 1,
         marginLeft: navbarOpen ? 250 : 0,
-        marginRight: plotterOpen ? toolbarWidth : 0,
+        marginRight: plotterOpen ? toolbarWidth : 40,
+        paddingLeft: navbarOpen ? 20 : 60,
+        paddingRight: plotterOpen ? 20 : 60,
         maxWidth: '100%',
-        transition: 'margin 0.3s ease',
-        width: `calc(100% - ${navbarOpen ? 250 : 0}px - ${plotterOpen ? toolbarWidth : 0}px)`,
+        transition: 'margin 0.3s ease, padding 0.3s ease',
+        width: `calc(100% - ${navbarOpen ? 250 : 0}px - ${plotterOpen ? toolbarWidth : 40}px)`,
       }}>
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
@@ -323,7 +336,7 @@ function ChapterView() {
             ? '-2px 0 10px rgba(0, 0, 0, 0.3)' 
             : '-2px 0 10px rgba(0, 0, 0, 0.1)')
             : 'none',
-          transition: plotterOpen ? 'none' : 'width 0.3s ease', // Only animate when closing
+          transition: 'width 0.3s ease', // Always animate for consistency
         }}
         size={{ 
           width: plotterOpen ? toolbarWidth : 40, 
@@ -359,12 +372,12 @@ function ChapterView() {
         handleClasses={{
           left: 'splitter-handle-left'
         }}
-      >        {/* Toggle button for the plotter panel */}
-        <div style={{ 
+      >        {/* Toggle button for the plotter panel */}        <div style={{ 
           position: 'absolute', 
           top: '20px', 
           left: '0', 
-          zIndex: 10 
+          zIndex: 10,
+          boxShadow: !plotterOpen ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
         }}>
           <ActionIcon
             size="lg"
@@ -377,24 +390,27 @@ function ChapterView() {
               height: '40px',
               display: 'flex',
               justifyContent: 'center',
-              alignItems: 'center'
+              alignItems: 'center',
+              boxShadow: !plotterOpen ? (theme.colorScheme === 'dark' 
+                ? '-2px 0 5px rgba(0, 0, 0, 0.3)' 
+                : '-2px 0 5px rgba(0, 0, 0, 0.1)')
+                : 'none'
             }}
           >
             {plotterOpen 
               ? <IconChevronLeft size={20} /> 
               : <IconChartLine size={20} />}
           </ActionIcon>
-        </div>
-
-        {/* Plotter panel content */}
+        </div>        {/* Plotter panel content */}
         <div style={{ 
           opacity: plotterOpen ? 1 : 0,
           transition: 'opacity 0.3s ease',
-          padding: '20px',
-          paddingLeft: '40px',
+          padding: plotterOpen ? '20px' : '0',
+          paddingLeft: plotterOpen ? '50px' : '0',
           height: '100%',
           width: '100%',
-          overflow: 'auto'
+          overflow: 'auto',
+          pointerEvents: plotterOpen ? 'auto' : 'none'  // Prevent interaction when collapsed
         }}>
           <Title order={3} mb="md">GeoGebra Plotter</Title>
           <Text size="sm" color="dimmed" mb="md">
