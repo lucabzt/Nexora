@@ -145,7 +145,7 @@ function ToolbarContainer({ courseId, chapterId }) {
         </ActionIcon>        {toolbarOpen && (
           <Tabs 
             value={activeTab} 
-            onChange={handleTabChange} 
+            onTabChange={handleTabChange} 
             orientation="vertical"
             sx={{ 
               position: 'absolute',
