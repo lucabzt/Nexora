@@ -24,8 +24,8 @@ const DiscordIcon = (props) => (
   <img
     src={discordGif}
     alt="Discord"
-    width={24}
-    height={24}
+    width={32}
+    height={32}
     style={{ display: 'block' }}
     {...props}
   />
