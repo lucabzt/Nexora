@@ -25,6 +25,7 @@ export function ToolbarProvider({ children }) {
     setToolbarOpen
   };
 
+  
   return (
     <ToolbarContext.Provider value={value}>
       {children}

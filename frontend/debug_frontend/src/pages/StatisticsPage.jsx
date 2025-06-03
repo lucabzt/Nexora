@@ -357,98 +357,117 @@ function StatisticsPage() {
           </Tabs.Panel>
 
           <Tabs.Panel value="weekly" pt="md">
-            <Grid>
-              <Grid.Col span={12}>                <Paper p="md" radius="md" withBorder sx={{ 
-                  height: 400, 
+            <Grid align="center" justify="center">
+              <Grid.Col md={6} sm={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <Paper p="md" radius="md" withBorder sx={{ 
+                  height: 300, // Match other chart heights
+                  width: '100%',
+                  maxWidth: 600,
+                  margin: '0 auto',
                   borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
-                  backgroundColor: isDark ? theme.colors.dark[7] : theme.white
-                }}>                  <Title order={3} mb="md">Weekly Learning Progress</Title>
-                  <Box sx={{ 
-                    height: 300, 
-                    maxWidth: '100%', 
-                    overflow: 'hidden'
-                  }}>
+                  backgroundColor: isDark ? theme.colors.dark[7] : theme.white,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}>
+                  <Title order={3} mb="md">Weekly Learning Progress</Title>
+                  <Box sx={{ height: 200, width: '100%' }}>
                     <Bar 
                       data={stats.weeklyStats} 
                       options={{
                         ...weeklyChartOptions,
                         responsive: true,
-                        maintainAspectRatio: true,
+                        maintainAspectRatio: false,
                       }}
                     />
                   </Box>
                 </Paper>
               </Grid.Col>
-              <Grid.Col md={6} mt="md">
-                <Paper p="md" radius="md" withBorder sx={{ 
-                  height: 300, 
-                  borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
-                  backgroundColor: isDark ? theme.colors.dark[7] : theme.white
-                }}>
-                  <Title order={3} mb="md">Weekly Engagement</Title>
-                  <Box sx={{ height: 200 }}>
-                    <Radar
-                      data={{
-                        labels: ['Quizzes', 'Reading', 'Videos', 'Practice', 'Discussion', 'Review'],
-                        datasets: [
-                          {
-                            label: 'This Week',
-                            data: [65, 78, 55, 70, 40, 50],
-                            backgroundColor: 'rgba(53, 162, 235, 0.2)',
-                            borderColor: 'rgb(53, 162, 235)',
-                            pointBackgroundColor: 'rgb(53, 162, 235)',
-                            pointBorderColor: '#fff',
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: 'rgb(53, 162, 235)'
-                          },
-                          {
-                            label: 'Last Week',
-                            data: [50, 65, 40, 60, 35, 45],
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                            borderColor: 'rgb(255, 99, 132)',
-                            pointBackgroundColor: 'rgb(255, 99, 132)',
-                            pointBorderColor: '#fff',
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: 'rgb(255, 99, 132)'
-                          }
-                        ],
-                      }}
-                    />
-                  </Box>
-                </Paper>
-              </Grid.Col>
-              <Grid.Col md={6} mt="md">
-                <Paper p="md" radius="md" withBorder sx={{ 
-                  height: 300, 
-                  borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
-                  backgroundColor: isDark ? theme.colors.dark[7] : theme.white
-                }}>
-                  <Title order={3} mb="md">Course Activity</Title>
-                  <Box sx={{ height: 200, display: 'flex', justifyContent: 'center' }}>
-                    <Doughnut 
-                      data={{
-                        labels: ['Active Courses', 'Completed This Week', 'On Hold'],
-                        datasets: [
-                          {
-                            data: [3, 1, 2],
-                            backgroundColor: [
-                              'rgba(75, 192, 192, 0.7)',
-                              'rgba(153, 102, 255, 0.7)',
-                              'rgba(255, 159, 64, 0.7)'
+              <Grid.Col md={6} sm={12}>
+                <Grid gutter="lg">
+                  <Grid.Col span={12} md={12} sm={12}>
+                    <Paper p="md" radius="md" withBorder sx={{ 
+                      height: 140, 
+                      borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
+                      backgroundColor: isDark ? theme.colors.dark[7] : theme.white,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      marginBottom: 12
+                    }}>
+                      <Title order={3} mb="md" size="h5">Weekly Engagement</Title>
+                      <Box sx={{ height: 80, width: '100%' }}>
+                        <Radar
+                          data={{
+                            labels: ['Quizzes', 'Reading', 'Videos', 'Practice', 'Discussion', 'Review'],
+                            datasets: [
+                              {
+                                label: 'This Week',
+                                data: [65, 78, 55, 70, 40, 50],
+                                backgroundColor: 'rgba(53, 162, 235, 0.2)',
+                                borderColor: 'rgb(53, 162, 235)',
+                                pointBackgroundColor: 'rgb(53, 162, 235)',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: 'rgb(53, 162, 235)'
+                              },
+                              {
+                                label: 'Last Week',
+                                data: [50, 65, 40, 60, 35, 45],
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                borderColor: 'rgb(255, 99, 132)',
+                                pointBackgroundColor: 'rgb(255, 99, 132)',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: 'rgb(255, 99, 132)'
+                              }
                             ],
-                            borderColor: [
-                              'rgb(75, 192, 192)',
-                              'rgb(153, 102, 255)',
-                              'rgb(255, 159, 64)'
-                            ],
-                            borderWidth: 1
-                          }
-                        ]
-                      }}
-                      options={doughnutOptions}
-                    />
-                  </Box>
-                </Paper>
+                          }}
+                          options={{ ...chartOptions, maintainAspectRatio: false }}
+                        />
+                      </Box>
+                    </Paper>
+                  </Grid.Col>
+                  <Grid.Col span={12} md={12} sm={12}>
+                    <Paper p="md" radius="md" withBorder sx={{ 
+                      height: 140, 
+                      borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
+                      backgroundColor: isDark ? theme.colors.dark[7] : theme.white,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      alignItems: 'center'
+                    }}>
+                      <Title order={3} mb="md" size="h5">Course Activity</Title>
+                      <Box sx={{ height: 80, width: '100%', display: 'flex', justifyContent: 'center' }}>
+                        <Doughnut 
+                          data={{
+                            labels: ['Active Courses', 'Completed This Week', 'On Hold'],
+                            datasets: [
+                              {
+                                data: [3, 1, 2],
+                                backgroundColor: [
+                                  'rgba(75, 192, 192, 0.7)',
+                                  'rgba(153, 102, 255, 0.7)',
+                                  'rgba(255, 159, 64, 0.7)'
+                                ],
+                                borderColor: [
+                                  'rgb(75, 192, 192)',
+                                  'rgb(153, 102, 255)',
+                                  'rgb(255, 159, 64)'
+                                ],
+                                borderWidth: 1
+                              }
+                            ]
+                          }}
+                          options={doughnutOptions}
+                        />
+                      </Box>
+                    </Paper>
+                  </Grid.Col>
+                </Grid>
               </Grid.Col>
             </Grid>
           </Tabs.Panel>
