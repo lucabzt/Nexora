@@ -145,15 +145,16 @@ function AppLayout() {
     logout();
     navigate('/login');
   };
-
-  return (
-    <AppShell
+  return (    <AppShell
       styles={{
         main: {
           background: dark ? theme.colors.dark[8] : theme.colors.gray[0],
           display: 'flex',
           flexDirection: 'column',
           minHeight: '100vh',
+          width: '100%',
+          paddingRight: 0, // Remove default padding to account for the right toolbar
+          overflowX: 'hidden',
         },
       }}
       navbarOffsetBreakpoint="sm"
@@ -170,23 +171,24 @@ function AppLayout() {
               ? `0 4px 12px ${theme.colors.dark[9]}50`
               : `0 4px 12px ${theme.colors.gray[3]}30`,
           })}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-            <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
-              <Burger
-                opened={opened}
-                onClick={() => setOpened((o) => !o)}
-                size="sm"
-                color={theme.colors.gray[6]}
-                mr="xl"
-                sx={{
-                  transition: 'transform 0.2s ease',
-                  '&:hover': {
-                    transform: 'scale(1.05)',
-                  },
-                }}
-              />
-            </MediaQuery>
+        >          <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+            <Burger
+              opened={opened}
+              onClick={() => setOpened((o) => !o)}
+              size="sm"
+              color={theme.colors.gray[6]}
+              mr="xl"
+              sx={{
+                transition: 'transform 0.2s ease',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                },
+                display: 'flex', // Ensure it's always visible
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+              aria-label="Toggle navigation"
+            />
 
             <Group spacing="xs">
               <IconSparkles 

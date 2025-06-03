@@ -18,10 +18,9 @@ import {
   Badge,
   Collapse,
   ActionIcon,
-  useMantineTheme,
-  Burger
+  useMantineTheme
 } from '@mantine/core';
-import { IconAlertCircle, IconBookmark, IconQuestionMark, IconChartLine, IconChevronLeft, IconMenu2 } from '@tabler/icons-react';
+import { IconAlertCircle, IconBookmark, IconQuestionMark, IconChartLine, IconChevronLeft } from '@tabler/icons-react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'react-toastify';
 import { courseService } from '../api/courseService';
@@ -35,12 +34,10 @@ function ChapterView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('content');
-  const [quizAnswers, setQuizAnswers] = useState({});
-  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [quizAnswers, setQuizAnswers] = useState({});  const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState(0);
   const [markingComplete, setMarkingComplete] = useState(false);
   const [plotterOpen, setPlotterOpen] = useState(false);
-  const [navbarOpen, setNavbarOpen] = useState(true);
   const [toolbarWidth, setToolbarWidth] = useState(plotterOpen ? 500 : 40);
 
   useEffect(() => {
@@ -118,75 +115,22 @@ function ChapterView() {
   useEffect(() => {
     // Set a sensible toolbar width when open (500px) but maintain enough width for the toggle button (40px) when closed
     setToolbarWidth(plotterOpen ? 500 : 40);
-  }, [plotterOpen]);
-  return (
+  }, [plotterOpen]);  return (
     <div style={{ 
       display: 'flex',
       position: 'relative',
       width: '100%',
-      height: '100vh'
+      height: 'calc(100vh - 70px)', // Adjust for header height
+      marginTop: 0
     }}>
-      {/* Fixed navbar sidebar - controlled by navbarOpen */}
-      <div style={{ 
-        position: 'fixed', 
-        top: 70, // Header height
-        left: 0, 
-        bottom: 0,
-        width: navbarOpen ? 250 : 0,
-        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
-        borderRight: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]}`,
-        overflow: 'hidden',
-        transition: 'width 0.3s ease',
-        zIndex: 150
-      }}>
-        {/* Navbar content can be added here */}
-        <Box p="md" style={{ opacity: navbarOpen ? 1 : 0, transition: 'opacity 0.3s ease' }}>
-          <Title order={4} mb="md">Navigation</Title>
-          {/* Add navigation items here */}
-        </Box>
-      </div>
-        {/* Navbar toggle button - fixed position */}
-      <div style={{ 
-        position: 'fixed', 
-        top: 80, 
-        left: navbarOpen ? 260 : 10, 
-        zIndex: 200,
-        transition: 'left 0.3s ease',
-        boxShadow: !navbarOpen ? (theme.colorScheme === 'dark' 
-          ? '0 2px 5px rgba(0, 0, 0, 0.3)' 
-          : '0 2px 5px rgba(0, 0, 0, 0.1)')
-          : 'none'
-      }}>
-        <ActionIcon
-          size="lg"
-          variant="filled"
-          color="blue"
-          onClick={() => setNavbarOpen(o => !o)}
-          style={{ 
-            borderRadius: navbarOpen ? '50%' : '4px',
-            width: '40px',
-            height: '40px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center'
-          }}
-        >
-          <Burger
-            opened={navbarOpen}
-            size="sm"
-            color={theme.white}
-          />
-        </ActionIcon>
-      </div>{/* Main content - dynamically positioned between navbar and toolbar */}
-      <Container size="lg" py="xl" style={{ 
+      {/* Main content - dynamically positioned with plotter panel */}      <Container size="lg" py="xl" style={{ 
         flexGrow: 1,
-        marginLeft: navbarOpen ? 250 : 0,
-        marginRight: plotterOpen ? toolbarWidth : 40,
-        paddingLeft: navbarOpen ? 20 : 60,
         paddingRight: plotterOpen ? 20 : 60,
         maxWidth: '100%',
         transition: 'margin 0.3s ease, padding 0.3s ease',
-        width: `calc(100% - ${navbarOpen ? 250 : 0}px - ${plotterOpen ? toolbarWidth : 40}px)`,
+        width: `calc(100% - ${plotterOpen ? toolbarWidth : 40}px)`,
+        margin: '0 auto', // Center content horizontally
+        marginRight: plotterOpen ? toolbarWidth : 40 // Adjust for toolbar width
       }}>
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
