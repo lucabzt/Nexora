@@ -14,31 +14,25 @@ import {
   Box,
   Loader,
   Paper,
-  Divider,
   Badge,
-  Collapse,
-  ActionIcon,
-  useMantineTheme
 } from '@mantine/core';
-import { IconAlertCircle, IconBookmark, IconQuestionMark, IconChartLine, IconChevronLeft } from '@tabler/icons-react';
+import { IconAlertCircle, IconBookmark, IconQuestionMark } from '@tabler/icons-react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'react-toastify';
 import { courseService } from '../api/courseService';
-import { Resizable } from 're-resizable';
+import ToolbarContainer from '../components/tools/ToolbarContainer';
 
 function ChapterView() {
-  const theme = useMantineTheme();
   const { courseId, chapterId } = useParams(); // This should be the actual DB ID now
   const navigate = useNavigate();
   const [chapter, setChapter] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('content');
-  const [quizAnswers, setQuizAnswers] = useState({});  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [quizAnswers, setQuizAnswers] = useState({});
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState(0);
   const [markingComplete, setMarkingComplete] = useState(false);
-  const [plotterOpen, setPlotterOpen] = useState(false);
-  const [toolbarWidth, setToolbarWidth] = useState(plotterOpen ? 500 : 40);
 
   useEffect(() => {
     const fetchChapter = async () => {
@@ -110,12 +104,7 @@ function ChapterView() {
     } finally {
       setMarkingComplete(false);
     }
-  };
-  // Update toolbar width when plotter opens/closes
-  useEffect(() => {
-    // Set a sensible toolbar width when open (500px) but maintain enough width for the toggle button (40px) when closed
-    setToolbarWidth(plotterOpen ? 500 : 40);
-  }, [plotterOpen]);  return (
+  };  return (
     <div style={{ 
       display: 'flex',
       position: 'relative',
@@ -123,14 +112,14 @@ function ChapterView() {
       height: 'calc(100vh - 70px)', // Adjust for header height
       marginTop: 0
     }}>
-      {/* Main content - dynamically positioned with plotter panel */}      <Container size="lg" py="xl" style={{ 
+      {/* Main content with dynamic positioning */}
+      <Container size="lg" py="xl" style={{ 
         flexGrow: 1,
-        paddingRight: plotterOpen ? 20 : 60,
         maxWidth: '100%',
         transition: 'margin 0.3s ease, padding 0.3s ease',
-        width: `calc(100% - ${plotterOpen ? toolbarWidth : 40}px)`,
+        width: 'calc(100% - 40px)', // Account for at least the width of the toolbar toggle button
         margin: '0 auto', // Center content horizontally
-        marginRight: plotterOpen ? toolbarWidth : 40 // Adjust for toolbar width
+        marginRight: '40px' // Minimum space for toolbar toggle
       }}>
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
@@ -265,114 +254,8 @@ function ChapterView() {
           </>
         )}      </Container>
       
-      {/* Collapsible Plotter Panel with Resizable Splitter */}      <Resizable
-        style={{
-          position: 'fixed',
-          top: 70, /* Match the header height (70px for md size) */
-          right: 0,
-          borderLeft: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : '#e9ecef'}`,
-          backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : '#f8f9fa',
-          overflow: 'hidden',
-          height: 'calc(100vh - 70px)', /* Adjust height to account for header */
-          zIndex: 100,
-          display: 'flex',
-          boxShadow: plotterOpen ? (theme.colorScheme === 'dark' 
-            ? '-2px 0 10px rgba(0, 0, 0, 0.3)' 
-            : '-2px 0 10px rgba(0, 0, 0, 0.1)')
-            : 'none',
-          transition: 'width 0.3s ease', // Always animate for consistency
-        }}
-        size={{ 
-          width: plotterOpen ? toolbarWidth : 40, 
-          height: 'calc(100vh - 70px)' 
-        }}
-        minWidth={40}
-        maxWidth={800}
-        enable={{
-          top: false,
-          right: false,
-          bottom: false,
-          left: plotterOpen,
-          topRight: false,
-          bottomRight: false,
-          bottomLeft: false,
-          topLeft: false,
-        }}
-        onResizeStop={(e, direction, ref, d) => {
-          setToolbarWidth(toolbarWidth + d.width);
-        }}
-        handleStyles={{
-          left: {
-            width: '6px',
-            left: '0',
-            height: '100%',
-            cursor: 'col-resize',
-            backgroundColor: theme.colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
-            '&:hover': {
-              backgroundColor: theme.colorScheme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
-            },
-          }
-        }}
-        handleClasses={{
-          left: 'splitter-handle-left'
-        }}
-      >        {/* Toggle button for the plotter panel */}        <div style={{ 
-          position: 'absolute', 
-          top: '20px', 
-          left: '0', 
-          zIndex: 10,
-          boxShadow: !plotterOpen ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
-        }}>
-          <ActionIcon
-            size="lg"
-            variant="filled"
-            color="blue"
-            onClick={() => setPlotterOpen(!plotterOpen)}
-            style={{ 
-              borderRadius: '0 4px 4px 0',
-              width: '40px',
-              height: '40px',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              boxShadow: !plotterOpen ? (theme.colorScheme === 'dark' 
-                ? '-2px 0 5px rgba(0, 0, 0, 0.3)' 
-                : '-2px 0 5px rgba(0, 0, 0, 0.1)')
-                : 'none'
-            }}
-          >
-            {plotterOpen 
-              ? <IconChevronLeft size={20} /> 
-              : <IconChartLine size={20} />}
-          </ActionIcon>
-        </div>        {/* Plotter panel content */}
-        <div style={{ 
-          opacity: plotterOpen ? 1 : 0,
-          transition: 'opacity 0.3s ease',
-          padding: plotterOpen ? '20px' : '0',
-          paddingLeft: plotterOpen ? '50px' : '0',
-          height: '100%',
-          width: '100%',
-          overflow: 'auto',
-          pointerEvents: plotterOpen ? 'auto' : 'none'  // Prevent interaction when collapsed
-        }}>
-          <Title order={3} mb="md">GeoGebra Plotter</Title>
-          <Text size="sm" color="dimmed" mb="md">
-            Use this interactive GeoGebra plotter to visualize mathematical concepts.
-          </Text>
-          <iframe 
-            src="https://www.geogebra.org/graphing?lang=en" 
-            title="GeoGebra Graphing Calculator"
-            style={{ 
-              width: '100%', 
-              height: 'calc(100vh - 220px)', /* Adjusted for header + panel title/description */
-              border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : '#e9ecef'}`,
-              borderRadius: '4px'
-            }}
-            allowFullScreen
-          ></iframe>
-        </div>
-      </Resizable>
+      {/* Toolbar Container with all interactive tools */}
+      <ToolbarContainer courseId={courseId} chapterId={chapterId} />
     </div>
   );
 }
