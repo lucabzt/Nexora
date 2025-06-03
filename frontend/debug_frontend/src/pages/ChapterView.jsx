@@ -181,7 +181,6 @@ function ChapterView() {
                   </div>
                 </Paper>
               </Tabs.Panel>
-
               <Tabs.Panel value="quiz" pt="xs">
                 <Paper shadow="xs" p="md" withBorder>
                   {quizSubmitted && (
