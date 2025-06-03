@@ -117,9 +117,9 @@ function ChapterView() {
         flexGrow: 1,
         maxWidth: '100%',
         transition: 'margin 0.3s ease, padding 0.3s ease',
-        width: 'calc(100% - 40px)', // Account for at least the width of the toolbar toggle button
-        margin: '0 auto', // Center content horizontally
-        marginRight: '40px' // Minimum space for toolbar toggle
+        width: '100%', // Take full width
+        margin: '0', // Reset margin
+        paddingRight: '60px' // Add padding for the toolbar toggle
       }}>
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>

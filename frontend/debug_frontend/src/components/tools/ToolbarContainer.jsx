@@ -14,22 +14,23 @@ function ToolbarContainer({ courseId, chapterId }) {
   const theme = useMantineTheme();
   const [toolbarOpen, setToolbarOpen] = useState(false);
   const [toolbarWidth, setToolbarWidth] = useState(500);
-  const [activeTab, setActiveTab] = useState(TOOL_ICONS.PLOTTER);
-
+  const [activeTab, setActiveTab] = useState('plotter'); // Use direct string
   useEffect(() => {
     // Only change width if toolbar is open
     // When closed, we maintain the previous width in state but display at 40px
-  }, [toolbarOpen]);
+    console.log('Current active tab:', activeTab);
+    console.log('TOOL_ICONS values:', TOOL_ICONS);
+  }, [toolbarOpen, activeTab]);
 
   const handleToggleToolbar = () => {
     setToolbarOpen(!toolbarOpen);
   };
-
   const handleTabChange = (value) => {
     setActiveTab(value);
     if (!toolbarOpen) {
       setToolbarOpen(true);
     }
+    console.log('Changed tab to:', value); // For debugging
   };
 
   return (
@@ -113,12 +114,10 @@ function ToolbarContainer({ courseId, chapterId }) {
               ? '-2px 0 5px rgba(0, 0, 0, 0.3)' 
               : '-2px 0 5px rgba(0, 0, 0, 0.1)')
           }}
-        >
-          {toolbarOpen          ? <IconChevronLeft size={20} /> 
-            : activeTab === TOOL_ICONS.PLOTTER ? <IconChartLine size={20} /> : <IconMessage size={20} />}
-        </ActionIcon>
-
-        {toolbarOpen && (
+        >          {toolbarOpen 
+            ? <IconChevronLeft size={20} /> 
+            : activeTab === 'plotter' ? <IconChartLine size={20} /> : <IconMessage size={20} />}
+        </ActionIcon>        {toolbarOpen && (
           <Tabs 
             value={activeTab} 
             onChange={handleTabChange} 
@@ -131,19 +130,21 @@ function ToolbarContainer({ courseId, chapterId }) {
             }}
           >
             <Tabs.List>              <Tabs.Tab 
-                value={TOOL_ICONS.PLOTTER} 
+                value="plotter" 
                 icon={<IconChartLine size={16} />}
                 sx={{
                   borderRadius: '0 4px 4px 0',
                   marginBottom: '5px'
                 }}
+                onClick={() => handleTabChange('plotter')}
               />
               <Tabs.Tab 
-                value={TOOL_ICONS.CHAT} 
+                value="chat" 
                 icon={<IconMessage size={16} />}
                 sx={{
                   borderRadius: '0 4px 4px 0'
                 }}
+                onClick={() => handleTabChange('chat')}
               />
             </Tabs.List>
           </Tabs>
