@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { ActionIcon, Box, Tabs, useMantineTheme } from '@mantine/core';
-import { IconChartLine, IconMessage, IconChevronLeft } from '@tabler/icons-react';
+import { IconChartLine, IconMessage, IconChevronLeft, IconNote } from '@tabler/icons-react';
 import { Resizable } from 're-resizable';
 import GeoGebraPlotter from './GeoGebraPlotter';
 import ChatTool from './ChatTool';
+import NotesTool from './NotesTool';
 import { useToolbar } from '../../contexts/ToolbarContext';
 import { TOOL_TABS } from './ToolUtils';
 import './Toolbar.css';
@@ -43,7 +44,7 @@ function ToolbarContainer({ courseId, chapterId }) {
     }
     
     // Make sure we're using the correct tab value
-    if (value !== TOOL_TABS.PLOTTER && value !== TOOL_TABS.CHAT) {
+    if (value !== TOOL_TABS.PLOTTER && value !== TOOL_TABS.CHAT && value !== TOOL_TABS.NOTES) {
       console.warn('Unknown tab value:', value);
     } else {
       console.log('Changed tab to:', value); 
@@ -156,17 +157,28 @@ function ToolbarContainer({ courseId, chapterId }) {
           >
             <Tabs.List>                <Tabs.Tab 
                 value={TOOL_TABS.PLOTTER}
-                icon={<IconChartLine size={16} />}
+                icon={<IconChartLine size={20} />}
                 sx={{
                   borderRadius: '0 4px 4px 0',
-                  marginBottom: '5px'
+                  marginTop: '15px',
+                  marginBottom: '15px'
                 }}
               />
               <Tabs.Tab 
                 value={TOOL_TABS.CHAT}
-                icon={<IconMessage size={16} />}
+                icon={<IconMessage size={20} />}
                 sx={{
-                  borderRadius: '0 4px 4px 0'
+                  borderRadius: '0 4px 4px 0',
+                   marginBottom: '15px'
+
+                }}
+              />
+              <Tabs.Tab 
+                value={TOOL_TABS.NOTES}
+                icon={<IconNote size={20} />}
+                sx={{
+                  borderRadius: '0 4px 4px 0',
+                  marginBottom: '15px'
                 }}
               />
             </Tabs.List>
@@ -190,6 +202,10 @@ function ToolbarContainer({ courseId, chapterId }) {
             courseId={courseId} 
             chapterId={chapterId} 
           />
+        )}
+        
+        {activeTab === TOOL_TABS.NOTES && (
+          <NotesTool isOpen={toolbarOpen} courseId={courseId} chapterId={chapterId} />
         )}
       </div>
     </Resizable>

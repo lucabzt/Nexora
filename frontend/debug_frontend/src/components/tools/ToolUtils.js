@@ -27,6 +27,7 @@ export const getToolContainerStyle = (isOpen) => ({
 export const TOOL_TABS = {
   PLOTTER: 'plotter',
   CHAT: 'chat',
+  NOTES: 'notes', // Added Notes tab
 };
 
 // Default header styles
