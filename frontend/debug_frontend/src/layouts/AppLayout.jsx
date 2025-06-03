@@ -47,7 +47,10 @@ const MainLink = ({ icon, color, label, to, isActive }) => {
       sx={(theme) => ({
         display: 'block',
         width: '100%',
-        padding: `${theme.spacing.md}px ${theme.spacing.lg}px`,
+        // Make menu items higher and all the same size
+        minHeight: 60,
+        height: 64,
+        padding: `16px 16px 16px 16px`, // more left and right padding
         borderRadius: theme.radius.md,
         marginBottom: theme.spacing.xs,
         color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.black,
@@ -60,28 +63,9 @@ const MainLink = ({ icon, color, label, to, isActive }) => {
         transition: 'all 0.2s ease',
         position: 'relative',
         overflow: 'hidden',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: `linear-gradient(135deg, ${theme.colors[color][6]}15, ${theme.colors[color][4]}05)`,
-          opacity: isActive ? 1 : 0,
-          transition: 'opacity 0.2s ease',
-        },
-        '&:hover': {
-          backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[1],
-          border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]}`,
-          transform: 'translateX(4px)',
-          '&::before': {
-            opacity: 1,
-          },
-        },
       })}
     >
-      <Group spacing="md" sx={{ position: 'relative', zIndex: 1 }}>
+      <Group spacing={18} sx={{ position: 'relative', zIndex: 1, height: '100%', flexWrap: 'nowrap' }}>
         <ThemeIcon 
           color={color} 
           variant="light" 
@@ -89,27 +73,30 @@ const MainLink = ({ icon, color, label, to, isActive }) => {
           sx={{
             background: `linear-gradient(135deg, ${theme.colors[color][6]}20, ${theme.colors[color][4]}10)`,
             border: `1px solid ${theme.colors[color][6]}30`,
+            marginLeft: 4, // extra space left of icon
+            marginRight: 8, // extra space right of icon
           }}
         >
           {icon}
         </ThemeIcon>
-        <Box sx={{ flex: 1 }}>
-          <Text size="sm" weight={500} mb={2}>{label}</Text>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Text size="md" weight={600} mb={2} sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</Text>
           <Box 
             sx={{ 
-              height: 2, 
+              height: 3, 
               background: `linear-gradient(90deg, ${theme.colors[color][6]}, ${theme.colors[color][4]})`,
-              borderRadius: 1,
+              borderRadius: 2,
               width: isActive ? '100%' : '0%',
               transition: 'width 0.3s ease',
             }} 
           />
         </Box>
         <IconChevronRight 
-          size={16} 
+          size={18} 
           style={{ 
             opacity: 0.6,
             transition: 'transform 0.2s ease',
+            marginLeft: 8
           }}
         />
       </Group>
@@ -141,8 +128,9 @@ function AppLayout() {
   const mainLinksData = [
     { icon: <IconHome2 size={18} />, color: 'blue', label: 'Dashboard', to: '/' },
     { icon: <IconPlus size={18} />, color: 'teal', label: 'Create New Course', to: '/create-course' },
-    { icon: <IconInfoCircle size={18} />, color: 'grape', label: 'About Nexora', to: '/home' },
-    { icon: <IconSettings size={18} />, color: 'gray', label: 'Settings', to: '/settings' }
+    { icon: <IconSettings size={18} />, color: 'gray', label: 'Settings', to: '/settings' },
+    { icon: <IconInfoCircle size={18} />, color: 'grape', label: 'About Nexora', to: '/home' }
+
   ];
 
   const mainLinksComponents = mainLinksData.map((link) => (
