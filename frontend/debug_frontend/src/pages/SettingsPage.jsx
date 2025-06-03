@@ -57,14 +57,20 @@ function SettingsPage() {
         value !== values.new_password ? 'Passwords do not match' : null,
     },
   });
-
   useEffect(() => {
-    // Update form values from user context
+    // Update form values from user context, but only when component mounts or user object changes
     if (user) {
-      generalForm.setValues({
-        username: user.username || '',
-        email: user.email || '',
-      });
+      // Only update the form if the form values are empty or if they're different from the user context
+      // This prevents overwriting user input during typing
+      const currentUsername = generalForm.values.username;
+      const currentEmail = generalForm.values.email;
+      
+      if (!currentUsername || (currentUsername !== user.username && currentUsername === '')) {
+        generalForm.setFieldValue('username', user.username || '');
+      }
+      if (!currentEmail || (currentEmail !== user.email && currentEmail === '')) {
+        generalForm.setFieldValue('email', user.email || '');
+      }
     }
 
     // Handle preview image logic
@@ -88,7 +94,8 @@ function SettingsPage() {
     } else { // No local file, and no image in user context (or no user)
       setPreviewImage(null);
     }
-  }, [user, profileImageFile, generalForm]); // Added generalForm to dependency array
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, profileImageFile]); // Removed generalForm from dependencies to prevent form reset during typing
 
   const handleFileChange = (file) => {
     if (file) {
