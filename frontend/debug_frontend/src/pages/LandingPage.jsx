@@ -266,7 +266,7 @@ function LandingPage() {
                 <div style={styles}>
                   <Image
                     radius="md"
-                    src="https://images.unsplash.com/photo-1473649085228-583485e6e4d7"
+                    src="https://images.unsplash.com/photo-1695473507908-ff60e604c113"
                     alt="How Nexora Works"
                   />
                 </div>
