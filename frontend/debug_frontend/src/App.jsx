@@ -17,6 +17,7 @@ import AppLayout from './layouts/AppLayout';
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import SettingsPage from './pages/SettingsPage';
+import StatisticsPage from './pages/StatisticsPage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage'; // Import the OAuth callback page
 
 function App() {
@@ -73,6 +74,7 @@ function App() {
                   <Route path="courses/:courseId" element={<CourseView />} />
                   <Route path="courses/:courseId/chapters/:chapterId" element={<ChapterView />} />
                   <Route path="settings" element={<SettingsPage />} />
+                  <Route path="statistics" element={<StatisticsPage />} />
                   {/* <Route path="auth/google/callback" element={<OAuthCallbackPage />} /> Removed from here */}
                   {/* Add other protected routes here */}
                 </Route>
