@@ -14,6 +14,7 @@ function GeoGebraPlotter({ isOpen }) {
     overflow: 'auto'
   };
 
+  
   return (
     <div style={containerStyle}>
       <Title order={3} mb="md">GeoGebra Plotter</Title>
