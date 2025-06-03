@@ -17,11 +17,12 @@ import { useForm } from '@mantine/form';
 import { useAuth } from '../contexts/AuthContext';
 import authService from '../api/authService'; // Import authService
 import { IconBrandGoogle, IconBrandGithub } from '@tabler/icons-react';
+import discordGif from '../assets/wired-flat-2566-logo-discord-hover-wink.gif'; // Import local Discord GIF
 
-// Use Discord GIF icon from lordicon
+// Use Discord GIF icon from local asset
 const DiscordIcon = (props) => (
   <img
-    src="https://media.lordicon.com/icons/wired/flat/2566-logo-discord.gif"
+    src={discordGif}
     alt="Discord"
     width={24}
     height={24}

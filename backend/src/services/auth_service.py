@@ -100,7 +100,7 @@ async def handle_oauth_callback(request: Request, db: Session, website: str = "g
             detail=website + "OAuth client is not configured."
         )
 
-    # Authorize access token from Google
+    # Authorize access token from 
     try:
         token = await oauth_client.authorize_access_token(request)
     except Exception as error:
