@@ -117,13 +117,13 @@ function AppLayout() {
 
             <Title
               order={1}
-              size="2.5rem"
+              size="1.6rem"
               component={RouterLink}
               to={user ? "/" : "/home"}
               sx={(theme) => ({
                 textDecoration: 'none',
                 color: theme.colorScheme === 'dark' ? theme.white : theme.black,
-                fontWeight: 900,
+                fontWeight: 800,
                 letterSpacing: '-1px',
                 transition: 'color 0.2s',
                 '&:hover': {

@@ -59,13 +59,15 @@ function MainLayout() {
       }}
       header={
         <Header height={{ base: 70, sm: 80 }} p="md">
-          <div style={{ display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>
+          <div style={{  display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>
             <Title 
               order={2} 
-              size={{ base: 'h5', sm: 'h4' }}
+              size="1.6rem"
               component={Link}
               to="/home"
+              
               sx={(theme) => ({
+                fontWeight: 800,
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
