@@ -282,23 +282,46 @@ function AdminView() {
       </Box>
 
       <Paper shadow="xs" p="md" mb="md">
-        <Group position="apart" mb="md">
+        <Group
+          mb="md"
+          sx={(theme) => ({
+            flexDirection: 'column',
+            alignItems: 'stretch',
+            [theme.fn.largerThan('sm')]: {
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            },
+          })}
+        >
           <TextInput
-            placeholder={t('searchPlaceholder')}
-            icon={<IconSearch size="0.9rem" />}
+            placeholder={t('search.placeholder')}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ width: '300px' }}
+            onChange={(event) => setSearchTerm(event.currentTarget.value)}
+            icon={<IconSearch size={16} />}
+            sx={(theme) => ({ 
+              flexGrow: 1, 
+              [theme.fn.smallerThan('sm')]: { 
+                marginRight: 0, 
+                marginBottom: theme.spacing.sm 
+              },
+              [theme.fn.largerThan('sm')]: {
+                marginRight: theme.spacing.md,
+              }
+            })}
           />
-          <Group>
-            <Button 
-              leftIcon={<IconRefresh size="1rem" />}
-              onClick={fetchUsers}
-              variant="outline"
-            >
-              {t('buttons.refresh')}
-            </Button>
-          </Group>
+          <Button 
+            leftIcon={<IconRefresh size={16} />} 
+            onClick={fetchUsers} 
+            variant="outline" 
+            sx={(theme) => ({
+              [theme.fn.smallerThan('sm')]: {
+                width: '100%',
+              }
+            })}
+          >
+            {t('buttons.refresh')}
+          </Button>
         </Group>
 
         <Tabs value={activeTab} onTabChange={setActiveTab} mb="md">
@@ -324,82 +347,83 @@ function AdminView() {
             <Skeleton height={40} mb="sm" />
           </>
         ) : (
-          <Table striped highlightOnHover>
-            <thead>
-              <tr>
-                <th>{t('table.header.username')}</th>
-                <th>{t('table.header.email')}</th>
-                <th>{t('table.header.status')}</th>
-                <th>{t('table.header.role')}</th>
-                <th>{t('table.header.actions')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((user) => (
-                  <tr key={user.id}>
-                    <td>{user.username}</td>
-                    <td>{user.email}</td>
-                    <td>
-                      <Badge
-                        color={user.is_active ? 'green' : 'red'}
-                        variant="light"
-                      >
-                        {user.is_active ? t('table.status.active') : t('table.status.inactive')}
-                      </Badge>
-                    </td>
-                    <td>
-                      <Badge
-                        color={user.is_admin ? 'violet' : 'blue'}
-                        variant="light"
-                      >
-                        {user.is_admin ? t('table.role.admin') : t('table.role.user')}
-                      </Badge>
-                    </td>
-                    <td>
-                      <Group spacing="xs">
-                        <Tooltip label={t('table.actions.editUser')}>
-                          <ActionIcon 
-                            color="blue" 
-                            onClick={() => openEditModal(user)}
-                            disabled={user.id === currentUser.id}
-                          >
-                            <IconEdit size="1rem" />
-                          </ActionIcon>
-                        </Tooltip>
-                        
-                        <Tooltip label={t('table.actions.changePassword')}>
-                          <ActionIcon 
-                            color="yellow" 
-                            onClick={() => openPasswordModal(user)}
-                            disabled={user.id === currentUser.id}
-                          >
-                            <IconLock size="1rem" />
-                          </ActionIcon>
-                        </Tooltip>
-                        
-                        <Tooltip label={t('table.actions.deleteUser')}>
-                          <ActionIcon 
-                            color="red" 
-                            onClick={() => openDeleteModal(user)}
-                            disabled={user.id === currentUser.id}
-                          >
-                            <IconTrash size="1rem" />
-                          </ActionIcon>
-                        </Tooltip>
-                      </Group>
+          <Box sx={{ overflowX: 'auto' }}>
+            <Table striped highlightOnHover withBorder withColumnBorders verticalSpacing="sm" sx={{ minWidth: 700 }}>
+              <thead>
+                <tr>
+                  <th>{t('table.header.username')}</th>
+                  <th>{t('table.header.email')}</th>
+                  <th>{t('table.header.status')}</th>
+                  <th>{t('table.header.role')}</th>
+                  <th>{t('table.header.actions')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUsers.length > 0 ? (
+                  filteredUsers.map((user) => (
+                    <tr key={user.id}>
+                      <td>{user.username}</td>
+                      <td>{user.email}</td>
+                      <td>
+                        <Badge
+                          color={user.is_active ? 'green' : 'red'}
+                          variant="light"
+                        >
+                          {user.is_active ? t('table.status.active') : t('table.status.inactive')}
+                        </Badge>
+                      </td>
+                      <td>
+                        <Badge
+                          color={user.is_admin ? 'violet' : 'blue'}
+                          variant="light"
+                        >
+                          {user.is_admin ? t('table.role.admin') : t('table.role.user')}
+                        </Badge>
+                      </td>
+                      <td>
+                        <Group spacing="xs">
+                          <Tooltip label={t('table.actions.editUser')}>
+                            <ActionIcon 
+                              color="blue" 
+                              onClick={() => openEditModal(user)}
+                              disabled={user.id === currentUser.id && user.is_admin} // Prevent admin from de-editing self if they are the one being edited
+                            >
+                              <IconEdit size="1rem" />
+                            </ActionIcon>
+                          </Tooltip>
+                          
+                          <Tooltip label={t('table.actions.changePassword')}>
+                            <ActionIcon 
+                              color="yellow" 
+                              onClick={() => openPasswordModal(user)}
+                            >
+                              <IconLock size="1rem" />
+                            </ActionIcon>
+                          </Tooltip>
+                          
+                          <Tooltip label={t('table.actions.deleteUser')}>
+                            <ActionIcon 
+                              color="red" 
+                              onClick={() => openDeleteModal(user)}
+                              disabled={user.id === currentUser.id} // Prevent self-deletion
+                            >
+                              <IconTrash size="1rem" />
+                            </ActionIcon>
+                          </Tooltip>
+                        </Group>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} style={{ textAlign: 'center', padding: '20px 0' }}>
+                      {t('table.noUsersFound')}
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '20px 0' }}>
-                    {t('table.noUsersFound')}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
+                )}
+              </tbody>
+            </Table>
+          </Box>
         )}
       </Paper>
 
