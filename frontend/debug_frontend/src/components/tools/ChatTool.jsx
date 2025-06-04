@@ -184,7 +184,6 @@ function ChatTool({ isOpen, courseId, chapterId }) {
           borderRadius: theme.radius.sm,
           padding: theme.spacing.md,
           backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
-          height: 'calc(100vh - 250px)'
         }}
       >
         <Stack spacing="md">

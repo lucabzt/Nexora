@@ -71,7 +71,7 @@ function NotesTool({ courseId, chapterId, isOpen }) {
   };
 
   return (
-    <Box sx={getToolContainerStyle(isOpen)} style={{ height: '100%', overflowY: 'auto' }}>
+    <Box sx={{ ...getToolContainerStyle(isOpen), flexGrow: 1 }} style={{ overflowY: 'auto' }}>
       {isOpen && (
         <>
           <Text weight={500} mb="sm">Notizen zu diesem Kapitel</Text>

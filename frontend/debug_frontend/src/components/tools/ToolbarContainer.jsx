@@ -235,7 +235,11 @@ function ToolbarContainer({ courseId, chapterId }) {
         position: 'relative',
         paddingTop: '40px', // Add space for the toggle button
         backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : '#f8f9fa',
-      }}>{activeTab === TOOL_TABS.PLOTTER && (
+        display: 'flex',
+        flexDirection: 'column',
+        flexGrow: 1,
+      }}> 
+        {activeTab === TOOL_TABS.PLOTTER && (
           <GeoGebraPlotter isOpen={toolbarOpen} />
         )}
         
