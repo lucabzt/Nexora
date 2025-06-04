@@ -1,4 +1,5 @@
 import { Text, Box } from '@mantine/core';
+import LanguageSelector from '../components/LanguageSelector'; // Import LanguageSelector
 
 function AppFooter() {
   const currentYear = new Date().getFullYear();
@@ -16,6 +17,8 @@ function AppFooter() {
         }`,
       })}
     >
+      <LanguageSelector />
+      
       <Text size="sm" color="dimmed">
         © {currentYear} Nexora Learning Platform. All rights reserved. {' | '}
         <a href="/impressum" style={{ color: 'inherit', textDecoration: 'underline', margin: '0 8px' }}>Impressum</a>

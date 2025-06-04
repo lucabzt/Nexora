@@ -23,7 +23,6 @@ import {
 import AppFooter from '../components/AppFooter';
 import { Link as RouterLink, useNavigate } from 'react-router-dom'; // Added useNavigate
 import { useAuth } from '../contexts/AuthContext'; // Added useAuth
-import LanguageSelector from '../components/LanguageSelector'; // Import LanguageSelector
 import { useTranslation } from 'react-i18next'; // Import useTranslation hook
 
 function MainLayout() {
@@ -80,7 +79,6 @@ function MainLayout() {
               {t('app.title')}
             </Title>
               <Group spacing="md">
-              <LanguageSelector />
               <ActionIcon
                 variant="outline"
                 color={dark ? 'yellow' : 'teal'}
