@@ -1,0 +1,9 @@
+{
+  "title": "Admin-Dashboard",
+  "users": "Benutzer",
+  "courses": "Kurse",
+  "settings": "Einstellungen",
+  "accessDeniedTitle": "Zugriff verweigert",
+  "accessDeniedMessage": "Sie haben keine Berechtigung, diese Seite anzuzeigen. Sie werden in Kürze weitergeleitet.",
+  "closeAlert": "Warnung schließen"
+}

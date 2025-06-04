@@ -30,7 +30,7 @@ function MainLayout() {
   const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuth(); // Ensure isAuthenticated is destructured
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
-  const { t } = useTranslation(); // Initialize translation hook
+  const { t } = useTranslation(['app', 'navigation']); // Initialize translation hook for app and navigation namespaces
   const dark = colorScheme === 'dark';
 
   // Logic to determine avatar source
@@ -83,7 +83,7 @@ function MainLayout() {
                 variant="outline"
                 color={dark ? 'yellow' : 'teal'}
                 onClick={() => toggleColorScheme()}
-                title="Toggle color scheme"
+                title={t('app:colorSchemeToggleTitle', 'Toggle color scheme')}
                 size="lg"
                 radius="md"
               >
@@ -96,7 +96,7 @@ function MainLayout() {
                       <Avatar
                         key={avatarSrc || user.id}
                         src={avatarSrc}
-                        alt={user.username || 'User'}
+                        alt={user.username || t('navigation:userAvatarFallbackAlt', 'User')}
                         radius="xl"
                         size="sm"
                         color="cyan" // Added color for consistency if image fails

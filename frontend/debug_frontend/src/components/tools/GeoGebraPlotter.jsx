@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
  * An interactive plotter for math visualization
  */
 function GeoGebraPlotter({ isOpen }) {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation('geoGebraPlotter');
   const theme = useMantineTheme();
   
   const containerStyle = {
@@ -19,13 +19,13 @@ function GeoGebraPlotter({ isOpen }) {
   
   return (
     <div style={containerStyle}>
-      <Title order={3} mb="md">{t('geoGebraPlotter.title')}</Title>
+      <Title order={3} mb="md">{t('title')}</Title>
       <Text size="sm" color="dimmed" mb="md">
-        {t('geoGebraPlotter.description')}
+        {t('description')}
       </Text>
       <iframe 
         src={`https://www.geogebra.org/graphing?lang=${i18n.language}`} 
-        title={t('geoGebraPlotter.iframeTitle')}
+        title={t('iframeTitle')}
         style={{ 
           width: '100%', 
           height: 'calc(100vh - 220px)', /* Adjusted for header + panel title/description */

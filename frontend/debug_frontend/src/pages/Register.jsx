@@ -18,13 +18,15 @@ import { useAuth } from '../contexts/AuthContext';
 import authService from '../api/authService'; // Import authService
 import { IconBrandGoogle, IconBrandGithub } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+
+const { t } = useTranslation('auth');
 import discordGif from '../assets/wired-flat-2566-logo-discord-hover-wink.gif'; // Import local Discord GIF
 
 // Use Discord GIF icon from local asset
 const DiscordIcon = (props) => (
   <img
     src={discordGif}
-    alt="Discord"
+    alt={t('discordAltText')}
     width={32}
     height={32}
     style={{ display: 'block' }}
@@ -36,7 +38,7 @@ function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { register, login } = useAuth();
-  const { t } = useTranslation();
+  
 
   const form = useForm({
     initialValues: {
@@ -46,12 +48,12 @@ function Register() {
       confirmPassword: '',
     },
     validate: {
-      username: (value) => !value ? t('auth.usernameRequired') : 
-                          value.length < 3 ? t('auth.usernameLength', 'Username must be at least 3 characters') : null,
-      email: (value) => !/^\S+@\S+$/.test(value) ? t('auth.emailInvalid', 'Invalid email address') : null,
-      password: (value) => !value ? t('auth.passwordRequired') : 
-                           value.length < 3 ? t('auth.passwordLength') : null,
-      confirmPassword: (value, values) => value !== values.password ? t('auth.passwordsDoNotMatch', 'Passwords do not match') : null,
+      username: (value) => !value ? t('usernameRequired') : 
+                          value.length < 3 ? t('usernameLength', 'Username must be at least 3 characters') : null,
+      email: (value) => !/^\S+@\S+$/.test(value) ? t('emailInvalid', 'Invalid email address') : null,
+      password: (value) => !value ? t('passwordRequired') : 
+                           value.length < 3 ? t('passwordLength') : null,
+      confirmPassword: (value, values) => value !== values.password ? t('passwordsDoNotMatch', 'Passwords do not match') : null,
     },
   });
 
@@ -99,48 +101,48 @@ function Register() {
         justifyContent: 'center',
       }}
     >      <Title align="center" mb="lg">
-        {t('auth.registerTitle')}
+        {t('registerTitle')}
       </Title>
 
       <Paper withBorder shadow="md" p={30} radius="md" mt="xl">
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <TextInput
-            label={t('auth.username')}
-            placeholder={t('auth.usernamePlaceholder')}
+            label={t('username')}
+            placeholder={t('usernamePlaceholder')}
             required
             {...form.getInputProps('username')}
             mb="md"
           />
 
           <TextInput
-            label={t('auth.email')}
-            placeholder={t('auth.emailPlaceholder', 'Your email')}
+            label={t('email')}
+            placeholder={t('emailPlaceholder', 'Your email')}
             required
             {...form.getInputProps('email')}
             mb="md"
           />
 
           <PasswordInput
-            label={t('auth.password')}
-            placeholder={t('auth.passwordPlaceholder')}
+            label={t('password')}
+            placeholder={t('passwordPlaceholder')}
             required
             {...form.getInputProps('password')}
             mb="md"
           />
 
           <PasswordInput
-            label={t('auth.confirmPassword')}
-            placeholder={t('auth.confirmPasswordPlaceholder', 'Confirm your password')}
+            label={t('confirmPassword')}
+            placeholder={t('confirmPasswordPlaceholder', 'Confirm your password')}
             required
             {...form.getInputProps('confirmPassword')}
             mb="xl"
           />
 
           <Button fullWidth type="submit" loading={isLoading}>
-            {t('auth.signUp')}
+            {t('signUp')}
           </Button>
 
-          <Divider label={t('auth.continueWith')} labelPosition="center" my="lg" />
+          <Divider label={t('continueWith')} labelPosition="center" my="lg" />
 
           <Group position="center" spacing="md" mb="xl">
             <Button
@@ -168,9 +170,9 @@ function Register() {
               <DiscordIcon />
             </Button>
           </Group>          <Text align="center" mt="md">
-            {t('auth.haveAccount')}{' '}
+            {t('haveAccount')}{' '}
             <Anchor component={Link} to="/login">
-              {t('auth.signIn')}
+              {t('signIn')}
             </Anchor>
           </Text>
         </form>

@@ -47,7 +47,7 @@ import {
 import { courseService } from '../api/courseService';
 
 function Dashboard() {
-  const { t } = useTranslation();
+  const { t } = useTranslation('dashboard');
   const navigate = useNavigate();
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
@@ -62,7 +62,7 @@ function Dashboard() {
   });
 
   const handleDelete = async (courseId) => {
-    if (!window.confirm(t('dashboard.deleteCourseConfirmation'))) {
+    if (!window.confirm(t('deleteCourseConfirmation'))) {
       return;
     }
     try {
@@ -70,7 +70,7 @@ function Dashboard() {
       setCourses(prevCourses => prevCourses.filter(course => course.course_id !== courseId));
       // Optional: Show a success notification
     } catch (err) {
-      setError(t('dashboard.deleteCourseError', { message: err.message || '' }));
+      setError(t('deleteCourseError', { message: err.message || '' }));
       console.error('Error deleting course:', err);
       // Optional: Show an error notification
     }
@@ -84,7 +84,7 @@ function Dashboard() {
         setCourses(coursesData);
         setError(null);
       } catch (error) {
-        setError(t('dashboard.loadCoursesError'));
+        setError(t('loadCoursesError'));
         console.error('Error fetching courses:', error);
       } finally {
         setLoading(false);
@@ -97,13 +97,13 @@ function Dashboard() {
   const getStatusInfo = (status) => {
     switch (status) {
       case 'creating':
-        return { color: 'blue', icon: IconClock, label: t('dashboard.status.creating') };
+        return { color: 'blue', icon: IconClock, label: t('status.creating') };
       case 'finished':
-        return { color: 'green', icon: IconCheck, label: t('dashboard.status.finished') };
+        return { color: 'green', icon: IconCheck, label: t('status.finished') };
       case 'updating':
-        return { color: 'orange', icon: IconClock, label: t('dashboard.status.updating') };
+        return { color: 'orange', icon: IconClock, label: t('status.updating') };
       default:
-        return { color: 'gray', icon: IconBook, label: t('dashboard.status.learning') };
+        return { color: 'gray', icon: IconBook, label: t('status.learning') };
     }
   };
   // Function to generate a placeholder image URL with a specific theme
@@ -132,8 +132,8 @@ function Dashboard() {
       <Box mb="xl">
         <Group position="apart" mb="md">
           <Box>
-            <Title order={1} mb={5}>{t('dashboard.myLearningJourney')}</Title>
-            <Text color="dimmed" size="lg">{t('dashboard.motivationalMessage')}</Text>
+            <Title order={1} mb={5}>{t('myLearningJourney')}</Title>
+            <Text color="dimmed" size="lg">{t('motivationalMessage')}</Text>
           </Box>
           <Button 
             size="md"
@@ -150,7 +150,7 @@ function Dashboard() {
               },
             })}
           >
-            {t('dashboard.createNewCourseButton')}
+            {t('createNewCourseButton')}
           </Button>
         </Group>
       </Box>
@@ -164,7 +164,7 @@ function Dashboard() {
       {error && !loading && (
         <Alert 
           icon={<IconAlertCircle size={16} />}
-          title={t('dashboard.errorAlertTitle')} 
+          title={t('errorAlertTitle')} 
           color="red" 
           mb="lg"
         >
@@ -179,16 +179,16 @@ function Dashboard() {
             <Group position="apart">
               <div>
                 <Text color="dimmed" size="xs" transform="uppercase" weight={700}>
-                  {t('dashboard.stats.currentStreak')}
+                  {t('stats.currentStreak')}
                 </Text>
-                <Text weight={700} size="xl">{userStats.currentStreak} {t('dashboard.stats.daysUnit')}</Text>
+                <Text weight={700} size="xl">{userStats.currentStreak} {t('stats.daysUnit')}</Text>
               </div>
               <ThemeIcon color="orange" size={50} radius="md" variant="light">
                 <IconFlame size={30} />
               </ThemeIcon>
             </Group>
             <Text size="xs" color="dimmed" mt="md">
-              {t('dashboard.stats.currentStreakDescription')}
+              {t('stats.currentStreakDescription')}
             </Text>
           </Paper>
 
@@ -196,7 +196,7 @@ function Dashboard() {
             <Group position="apart">
               <div>
                 <Text color="dimmed" size="xs" transform="uppercase" weight={700}>
-                  {t('dashboard.stats.coursesCompleted')}
+                  {t('stats.coursesCompleted')}
                 </Text>
                 <Text weight={700} size="xl">{userStats.coursesCompleted}</Text>
               </div>
@@ -205,7 +205,7 @@ function Dashboard() {
               </ThemeIcon>
             </Group>
             <Text size="xs" color="dimmed" mt="md">
-              {t('dashboard.stats.coursesCompletedDescription')}
+              {t('stats.coursesCompletedDescription')}
             </Text>
           </Paper>
 
@@ -213,16 +213,16 @@ function Dashboard() {
             <Group position="apart">
               <div>
                 <Text color="dimmed" size="xs" transform="uppercase" weight={700}>
-                  {t('dashboard.stats.totalHoursLearned')}
+                  {t('stats.totalHoursLearned')}
                 </Text>
-                <Text weight={700} size="xl">{userStats.totalHoursLearned} {t('dashboard.stats.hoursUnit')}</Text>
+                <Text weight={700} size="xl">{userStats.totalHoursLearned} {t('stats.hoursUnit')}</Text>
               </div>
               <ThemeIcon color="blue" size={50} radius="md" variant="light">
                 <IconCertificate size={30} />
               </ThemeIcon>
             </Group>
             <Text size="xs" color="dimmed" mt="md">
-              {t('dashboard.stats.totalHoursLearnedDescription')}
+              {t('stats.totalHoursLearnedDescription')}
             </Text>
           </Paper>
         </SimpleGrid>
@@ -235,9 +235,9 @@ function Dashboard() {
             <ThemeIcon size={100} radius={100} color="teal" variant="light">
               <IconBook size={60} />
             </ThemeIcon>
-            <Title order={2} align="center">{t('dashboard.beginYourLearningJourney')}</Title>
+            <Title order={2} align="center">{t('beginYourLearningJourney')}</Title>
             <Text align="center" size="lg" maw={500} mx="auto" color="dimmed">
-              {t('dashboard.noCoursesFound')}
+              {t('noCoursesFound')}
             </Text>
             <Button 
               size="lg"
@@ -255,7 +255,7 @@ function Dashboard() {
                 },
               })}
             >
-              {t('dashboard.createMyFirstCourse')}
+              {t('createMyFirstCourse')}
             </Button>
           </Stack>
         </Paper>
@@ -264,7 +264,7 @@ function Dashboard() {
       {/* Featured Course (if available) */}
       {!loading && !error && courses.length > 0 && (
         <>
-          <Title order={2} mb="md">{t('dashboard.continueLearning')}</Title>
+          <Title order={2} mb="md">{t('continueLearning')}</Title>
           <Paper 
             radius="md" 
             p={0}
@@ -294,15 +294,15 @@ function Dashboard() {
                     mb="md"
                     leftSection={<IconHeartHandshake size={12} />}
                   >
-                    {t('dashboard.recommendedForYou')}
+                    {t('recommendedForYou')}
                   </Badge>
-                  <Title order={2} mb="xs">{courses[0]?.title || t('dashboard.featuredCourse.defaultTitle')}</Title>
+                  <Title order={2} mb="xs">{courses[0]?.title || t('featuredCourse.defaultTitle')}</Title>
                   <Text lineClamp={2} mb="lg" color="dimmed">
-                    {courses[0]?.description || t('dashboard.featuredCourse.defaultDescription')}
+                    {courses[0]?.description || t('featuredCourse.defaultDescription')}
                   </Text>
                   
                   <Group position="apart" mb="md">
-                    <Text size="sm">{t('dashboard.yourProgress')}</Text>
+                    <Text size="sm">{t('yourProgress')}</Text>
                     <Text size="sm" weight={500}>
                       {calculateProgress(courses[0])}%
                     </Text>
@@ -331,7 +331,7 @@ function Dashboard() {
                     onClick={() => navigate(`/courses/${courses[0]?.course_id}`)}
                     mt="lg"
                   >
-                    {t('dashboard.continueLearningButton')}
+                    {t('continueLearningButton')}
                   </Button>
                 </Box>
               </Grid.Col>
@@ -342,14 +342,14 @@ function Dashboard() {
       {!loading && !error && courses.length > 0 && (
         <>
           <Group position="apart" mb="md">
-            <Title order={2} mb="lg">{t('dashboard.yourCoursesTitle')}</Title>
+            <Title order={2} mb="lg">{t('yourCoursesTitle')}</Title>
             <Button 
               variant="subtle" 
               color="blue" 
               rightIcon={<IconArrowUpRight size={16} />}
               onClick={() => setViewAllCourses(!viewAllCourses)}
             >
-              {viewAllCourses ? t('dashboard.showFewerCoursesButton') : t('dashboard.viewAllCoursesButton')}
+              {viewAllCourses ? t('showFewerCoursesButton') : t('viewAllCoursesButton')}
             </Button>
           </Group>
 
@@ -392,7 +392,7 @@ function Dashboard() {
                             zIndex: 2
                           }}
                         >
-                          <Tooltip label={t('dashboard.courseProgressTooltip', { progress })}>
+                          <Tooltip label={t('courseProgressTooltip', { progress })}>
                             <Box>
                               <RingProgress
                                 size={60}
@@ -428,7 +428,7 @@ function Dashboard() {
                             e.stopPropagation();
                             handleDelete(course.course_id);
                           }}
-                          title={t('dashboard.deleteCourseTooltip')}
+                          title={t('deleteCourseTooltip')}
                         >
                           <IconTrash size={16} />
                         </ActionIcon>
@@ -448,7 +448,7 @@ function Dashboard() {
                       <Group spacing="xs" mb="md">
                         <IconClock size={14} color={theme.colors.gray[6]} />
                         <Text size="xs" color="dimmed">
-                          {t('dashboard.estimatedTime', { hours: course.total_time_hours })}
+                          {t('estimatedTime', { hours: course.total_time_hours })}
                         </Text>
                       </Group>
                     )}
@@ -465,7 +465,7 @@ function Dashboard() {
                           : `/courses/${course.course_id}`
                       )}
                     >
-                      {course.status === 'creating' ? t('dashboard.viewCreationProgressButton') : t('dashboard.continueLearningButton')}
+                      {course.status === 'creating' ? t('viewCreationProgressButton') : t('continueLearningButton')}
                     </Button>
                   </Card>
                 </Grid.Col>

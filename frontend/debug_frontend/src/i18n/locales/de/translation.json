@@ -13,7 +13,8 @@
     "english": "Englisch",
     "german": "Deutsch",
     "select": "Sprache"
-  },  "navigation": {
+  },
+  "navigation": {
     "home": "Startseite",
     "dashboard": "Dashboard",
     "newCourse": "Neuer Kurs",
@@ -25,7 +26,6 @@
     "logout": "Abmelden",
     "about": "Über uns",
     "impressum": "Impressum",
-    "admin": "Administration",
     "adminArea": "Admin Bereich",
     "title": "Navigation",
     "subtitle": "Wähle dein Ziel",
@@ -378,7 +378,8 @@
       "registerSuccess": "Registrierung erfolgreich! Bitte melden Sie sich an.",
       "logoutSuccess": "Sie wurden abgemeldet"
     }
-  },"settings": {
+  },
+  "settings": {
     "title": "Einstellungen",
     "theme": "Design",
     "dark": "Dunkel",
@@ -398,7 +399,8 @@
     "preferences": "Präferenzen",
     "profile": "Profil",
     "account": "Konto"
-  },  "app": {
+  },
+  "app": {
     "title": "Nexora",
     "poweredBy": "Unterstützt von KI"
   },
@@ -430,5 +432,88 @@
     "newNotePlaceholder": "Neue Notiz...",
     "addButton": "Hinzufügen",
     "noNotes": "Keine Notizen vorhanden."
+  },
+  "courseView": {
+    "loading": "Kursdaten werden geladen...",
+    "error": "Fehler beim Laden der Kursinformationen. Bitte versuchen Sie es später erneut.",
+    "errorNotFound": "Kurs nicht gefunden. Möglicherweise wurde er entfernt oder der Link ist falsch.",
+    "hero": {
+      "welcome": "Willkommen zu",
+      "description": "Dieser Kurs führt Sie durch die Grundlagen von {{topic}}. Machen Sie sich bereit zu lernen und zu entdecken!",
+      "createdBy": "Erstellt von: {{author}}",
+      "estimatedTime": "Geschätzte Zeit: {{hours}} Stunden",
+      "startLearning": "Mit dem Lernen beginnen",
+      "continueLearning": "Weiterlernen",
+      "viewProgress": "Erstellungsfortschritt anzeigen",
+      "chapters_one": "{{count}} Kapitel",
+      "chapters_other": "{{count}} Kapitel"
+    },
+    "creation": {
+      "title": "Kurserstellung läuft",
+      "status": "Status: {{status}}",
+      "generatingOutline": "Kurübersicht wird generiert...",
+      "generatingChapters": "Kapitel werden generiert ({{completed}}/{{total}})...",
+      "generatingQuizzes": "Quizze werden generiert...",
+      "finalizingCourse": "Kursstruktur wird fertiggestellt...",
+      "completed": "Kurserstellung abgeschlossen!",
+      "error": "Während der Kurserstellung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
+      "retry": "Erstellung wiederholen",
+      "viewCourse": "Kurs ansehen",
+      "currentProgress": "Aktueller Fortschritt: {{progress}}%",
+      "stage": {
+        "INITIALIZING": "Initialisiere...",
+        "FETCHING_USER_PROFILE": "Benutzerprofil wird abgerufen...",
+        "CREATING_COURSE_OUTLINE": "Kurübersicht wird erstellt...",
+        "GENERATING_CHAPTER_CONTENT": "Kapitelinhalte werden generiert...",
+        "GENERATING_CHAPTER_QUIZ": "Kapitelquiz wird generiert...",
+        "FINALIZING_COURSE": "Kurs wird fertiggestellt...",
+        "COMPLETED": "Abgeschlossen",
+        "ERROR": "Fehler"
+      },
+      "streamingStatus": "Streaming-Status (Sitzungs-ID: {{sessionId}})",
+      "lastMessage": "Letzte Nachricht: {{message}} um {{timestamp}}",
+      "noMessages": "Noch keine Streaming-Nachrichten."
+    },
+    "progress": {
+      "title": "Ihr Fortschritt",
+      "completed": "{{percentage}}% Abgeschlossen",
+      "chaptersCompleted_one": "{{completedCount}} von {{totalCount}} Kapitel abgeschlossen",
+      "chaptersCompleted_other": "{{completedCount}} von {{totalCount}} Kapiteln abgeschlossen",
+      "resume": "Weiterlernen"
+    },
+    "chapters": {
+      "title": "Kapitel",
+      "status": {
+        "COMPLETED": "Abgeschlossen",
+        "IN_PROGRESS": "In Bearbeitung",
+        "NOT_STARTED": "Nicht begonnen"
+      },
+      "viewChapter": "Kapitel ansehen",
+      "startChapter": "Kapitel beginnen",
+      "continueChapter": "Kapitel fortsetzen",
+      "chapter": "Kapitel {{number}}",
+      "quiz_one": "{{count}} Quiz",
+      "quiz_other": "{{count}} Quizze",
+      "noChapters": "Für diesen Kurs sind noch keine Kapitel verfügbar."
+    },
+    "journey": {
+      "title": "Ihre Lernreise",
+      "description": "Navigieren Sie durch die Kapitel und verfolgen Sie Ihren Fortschritt.",
+      "currentChapter": "Aktuelles Kapitel: {{title}}"
+    },
+    "buttons": {
+      "backToDashboard": "Zurück zum Dashboard",
+      "editCourse": "Kurs bearbeiten (Admin)",
+      "deleteCourse": "Kurs löschen (Admin)"
+    },
+    "deleteModal": {
+      "title": "Kurs löschen",
+      "confirmation": "Sind Sie sicher, dass Sie den Kurs \"{{courseTitle}}\" löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "deleteButton": "Kurs löschen"
+    },
+    "toast": {
+      "deleteSuccess": "Kurs \"{{courseTitle}}\" erfolgreich gelöscht.",
+      "deleteError": "Fehler beim Löschen des Kurses \"{{courseTitle}}\"."
+    }
   }
 }

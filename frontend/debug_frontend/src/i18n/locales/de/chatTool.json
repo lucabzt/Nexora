@@ -1,0 +1,31 @@
+{
+  "title": "KI-Chat-Assistent",
+  "description": "Stellen Sie Fragen und erhalten Sie Hilfe zum Kursmaterial.",
+  "inputPlaceholder": "Stellen Sie eine Frage zum Kursinhalt...",
+  "sendMessage": "Senden",
+  "welcomeMessage": "Hallo! Ich bin Ihr KI-Assistent für diesen Kurs. Wie kann ich Ihnen helfen, das Material besser zu verstehen?",
+  "errorMessage": "Entschuldigung, ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+  "thinking": "Denke nach...",
+  "clearConversation": "Konversation löschen",
+  "confirmClear": "Sind Sie sicher, dass Sie die Konversation löschen möchten?",
+  "emptyConversation": "Noch keine Nachrichten. Stellen Sie eine Frage, um zu beginnen!",
+  "feedback": {
+    "title": "Feedback",
+    "helpful": "Hilfreich",
+    "unhelpful": "Nicht hilfreich",
+    "thanks": "Danke für Ihr Feedback!"
+  },
+  "suggestions": {
+    "title": "Vorschläge",
+    "explainAgain": "Können Sie das nochmal erklären?",
+    "example": "Geben Sie mir ein Beispiel.",
+    "summarize": "Fassen Sie diesen Abschnitt zusammen."
+  },
+  "userSender": "Sie",
+  "aiSender": "KI-Assistent",
+  "genericErrorMessage": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+  "tooltip": {
+    "openChat": "KI-Chat-Assistent öffnen",
+    "closeChat": "KI-Chat-Assistent schließen"
+  }
+}

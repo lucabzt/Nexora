@@ -2,7 +2,7 @@ import { Select } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 
 function LanguageSelector() {
-  const { i18n, t } = useTranslation();
+  const { i18n, t } = useTranslation('language');
 
   const changeLanguage = (value) => {
     i18n.changeLanguage(value);
@@ -13,8 +13,8 @@ function LanguageSelector() {
       value={i18n.language}
       onChange={changeLanguage}
       data={[
-        { value: 'en', label: t('language.english') },
-        { value: 'de', label: t('language.german') },
+        { value: 'en', label: t('english') },
+        { value: 'de', label: t('german') },
       ]}
       size="xs"
       w={100}

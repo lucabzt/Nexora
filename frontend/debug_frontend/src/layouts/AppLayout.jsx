@@ -125,7 +125,7 @@ function AppLayout() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
-  const { t } = useTranslation();
+  const { t } = useTranslation(['navigation', 'app', 'settings']);
   const dark = colorScheme === 'dark';
   // Check if we're on mobile
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -225,7 +225,7 @@ function AppLayout() {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
-              aria-label="Toggle navigation"
+              aria-label={t('app:burgerAriaLabel', 'Toggle navigation')}
             />
 
             <Group spacing="xs">
@@ -284,7 +284,7 @@ function AppLayout() {
                           key={avatarSrc || (user ? user.id : 'app-layout-avatar')}
                           src={avatarSrc}
                           radius="xl"
-                          alt={user.username || 'User avatar'}
+                          alt={user.username || t('app:userAvatarAlt', 'User avatar')}
                           color="cyan"
                           sx={{
                             cursor: 'pointer',
@@ -306,7 +306,7 @@ function AppLayout() {
                             color="cyan"
                             sx={{ textTransform: 'none' }}
                           >
-                            Online
+                            {t('app:onlineStatusBadge', 'Online')}
                           </Badge>
                         </Box>
                       </Group>

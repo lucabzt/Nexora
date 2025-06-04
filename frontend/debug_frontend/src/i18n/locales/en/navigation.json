@@ -1,0 +1,18 @@
+{
+  "dashboard": "Dashboard",
+  "courses": "Courses",
+  "statistics": "Statistics",
+  "login": "Log In",
+  "register": "Sign Up",
+  "logout": "Logout",
+  "impressum": "Imprint",
+  "title": "Navigation",
+  "subtitle": "Choose your destination",
+  "home": "Home",
+  "newCourse": "New Course",
+  "settings": "Settings",
+  "adminArea": "Admin Area",
+  "about": "About",
+  "nexora": "About Nexora",
+  "userAvatarFallbackAlt": "User avatar"
+}

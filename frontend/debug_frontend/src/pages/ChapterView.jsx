@@ -26,7 +26,7 @@ import ToolbarContainer from '../components/tools/ToolbarContainer';
 import { useToolbar } from '../contexts/ToolbarContext';
 
 function ChapterView() {
-  const { t } = useTranslation();
+  const { t } = useTranslation('chapterView');
   const { courseId, chapterId } = useParams(); // This should be the actual DB ID now
   const navigate = useNavigate();
   const { toolbarOpen, toolbarWidth } = useToolbar(); // Get toolbar state from context
@@ -65,7 +65,7 @@ function ChapterView() {
         
         setError(null);
       } catch (error) {
-        setError(t('chapterView.errors.loadFailed'));
+        setError(t('errors.loadFailed'));
         console.error('Error fetching chapter:', error);
       } finally {
         setLoading(false);
@@ -97,9 +97,9 @@ function ChapterView() {
     setQuizSubmitted(true);
     
     if (scorePercentage >= 70) {
-      toast.success(t('chapterView.toast.quizGreatJob', { scorePercentage }));
+      toast.success(t('toast.quizGreatJob', { scorePercentage }));
     } else {
-      toast.info(t('chapterView.toast.quizReviewContent', { scorePercentage }));
+      toast.info(t('toast.quizReviewContent', { scorePercentage }));
     }
   };
 
@@ -108,10 +108,10 @@ function ChapterView() {
       setMarkingComplete(true);
       // Using the ID from URL params
       await courseService.markChapterComplete(courseId, chapterId);
-      toast.success(t('chapterView.toast.markedCompleteSuccess'));
+      toast.success(t('toast.markedCompleteSuccess'));
       navigate(`/courses/${courseId}`);
     } catch (error) {
-      toast.error(t('chapterView.toast.markedCompleteError'));
+      toast.error(t('toast.markedCompleteError'));
       console.error('Error marking chapter complete:', error);
     } finally {
       setMarkingComplete(false);
@@ -142,14 +142,14 @@ function ChapterView() {
       }}>
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
-            <Loader size="lg" title={t('chapterView.loading')} />
+            <Loader size="lg" title={t('loading')} />
           </Box>
         )}
 
         {error && !loading && (
           <Alert 
             icon={<IconAlertCircle size={16} />}
-            title={t('chapterView.errors.genericTitle')} 
+            title={t('errors.genericTitle')} 
             color="red" 
             mb="lg"
           >
@@ -162,7 +162,7 @@ function ChapterView() {
             <Group position="apart" mb="md">
               <div>
                 <Title order={1}>{chapter.caption}</Title>
-                <Text color="dimmed">{t('chapterView.estimatedTime', { minutes: chapter.time_minutes })}</Text>
+                <Text color="dimmed">{t('estimatedTime', { minutes: chapter.time_minutes })}</Text>
               </div>
               <Button 
                 color="green" 
@@ -170,15 +170,15 @@ function ChapterView() {
                 loading={markingComplete}
                 disabled={markingComplete}
               >
-                {t('chapterView.buttons.markComplete')}
+                {t('buttons.markComplete')}
               </Button>
             </Group>
 
             <Tabs value={activeTab} onTabChange={setActiveTab} mb="xl">
               <Tabs.List>
-                <Tabs.Tab value="content" icon={<IconBookmark size={14} />}>{t('chapterView.tabs.content')}</Tabs.Tab>
+                <Tabs.Tab value="content" icon={<IconBookmark size={14} />}>{t('tabs.content')}</Tabs.Tab>
                 <Tabs.Tab value="quiz" icon={<IconQuestionMark size={14} />}>
-                  {t('chapterView.tabs.quizWithCount', { count: chapter.mc_questions?.length || 0 })}
+                  {t('tabs.quizWithCount', { count: chapter.mc_questions?.length || 0 })}
                 </Tabs.Tab>
               </Tabs.List>
 
@@ -194,11 +194,11 @@ function ChapterView() {
                   {quizSubmitted && (
                     <Alert 
                       color={quizScore >= 70 ? "green" : "yellow"}
-                      title={quizScore >= 70 ? t('chapterView.quiz.alert.greatJobTitle') : t('chapterView.quiz.alert.keepPracticingTitle')} 
+                      title={quizScore >= 70 ? t('quiz.alert.greatJobTitle') : t('quiz.alert.keepPracticingTitle')} 
                       mb="lg"
                     >
                       <Group>
-                        <Text>{t('chapterView.quiz.alert.scoreText', { quizScore })}</Text>
+                        <Text>{t('quiz.alert.scoreText', { quizScore })}</Text>
                         <Badge color={quizScore >= 70 ? "green" : "yellow"}>
                           {quizScore}%
                         </Badge>
@@ -226,16 +226,16 @@ function ChapterView() {
                       {quizSubmitted && (
                         <Alert 
                           color={quizAnswers[qIndex] === question.correct_answer ? "green" : "red"}
-                          title={quizAnswers[qIndex] === question.correct_answer ? t('chapterView.quiz.alert.correctTitle') : t('chapterView.quiz.alert.incorrectTitle')}
+                          title={quizAnswers[qIndex] === question.correct_answer ? t('quiz.alert.correctTitle') : t('quiz.alert.incorrectTitle')}
                         >
                           <Text mb="xs">
                             {quizAnswers[qIndex] !== question.correct_answer && (
-                              <>{t('chapterView.quiz.alert.theCorrectAnswerIs')} <strong>
+                              <>{t('quiz.alert.theCorrectAnswerIs')} <strong>
                                 {question[`answer_${question.correct_answer}`]}
                               </strong></>
                             )}
                           </Text>
-                          <Text>{t('chapterView.quiz.alert.explanationLabel')} {question.explanation}</Text>
+                          <Text>{t('quiz.alert.explanationLabel')} {question.explanation}</Text>
                         </Alert>
                       )}
                     </Card>
@@ -251,7 +251,7 @@ function ChapterView() {
                         Object.values(quizAnswers).some(a => a === '')
                       }
                     >
-                      {t('chapterView.buttons.submitQuiz')}
+                      {t('buttons.submitQuiz')}
                     </Button>
                   )}
                 </Paper>
@@ -263,10 +263,10 @@ function ChapterView() {
                 variant="outline" 
                 onClick={() => navigate(`/courses/${courseId}`)}
               >
-                {t('chapterView.buttons.backToCourse')}
+                {t('buttons.backToCourse')}
               </Button>
               {chapter.is_completed && (
-                <Badge color="green" size="lg">{t('chapterView.badge.completed')}</Badge>
+                <Badge color="green" size="lg">{t('badge.completed')}</Badge>
               )}
             </Group>
           </>

@@ -90,7 +90,7 @@ function SettingsPage() {
   const { classes } = useStyles();
   const theme = useMantineTheme();
   const { user, setUser, loading: authLoading } = useAuth();
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation('settings');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [passwordError, setPasswordError] = useState(null);  const [profileImageFile, setProfileImageFile] = useState(null);
@@ -103,7 +103,7 @@ function SettingsPage() {
       email: user?.email || '',
     },
     validate: {
-      username: (value) => (value && value.length < 3 ? 'Username must be at least 3 characters' : null),
+      username: (value) => (value && value.length < 3 ? t('validation.usernameMinLength', 'Username must be at least 3 characters') : null),
     },
   });
 
@@ -114,11 +114,11 @@ function SettingsPage() {
       confirm_new_password: '',
     },
     validate: {
-      old_password: (value) => (value ? null : 'Old password is required'),
+      old_password: (value) => (value ? null : t('validation.oldPasswordRequired', 'Old password is required')),
       new_password: (value) =>
-        value.length < 3 ? 'New password must be at least 3 characters' : null,
+        value.length < 3 ? t('validation.newPasswordMinLength', 'New password must be at least 3 characters') : null,
       confirm_new_password: (value, values) =>
-        value !== values.new_password ? 'Passwords do not match' : null,
+        value !== values.new_password ? t('validation.passwordsDoNotMatch', 'Passwords do not match') : null,
     },
   });
   useEffect(() => {
@@ -164,7 +164,7 @@ function SettingsPage() {
   const handleFileChange = (file) => {
     if (file) {
       if (file.size > MAX_FILE_SIZE_BYTES) {
-        toast.error(`File is too large. Max size is ${MAX_FILE_SIZE_MB}MB.`);
+        toast.error(t('toast.fileTooLarge', { maxSize: MAX_FILE_SIZE_MB }));
         if (resetRef.current) {
           resetRef.current();
         }
@@ -204,7 +204,7 @@ function SettingsPage() {
 
       // Ensure user and user.id are available
       if (!user || !user.id) {
-        throw new Error("User ID is missing, please log in again.");
+        throw new Error(t('authError.userIdMissing', "User ID is missing, please log in again."));
       }
 
       if (profileImageFile || previewImage !== user.profile_image_base64) {
@@ -215,13 +215,13 @@ function SettingsPage() {
       
       // Update user context with the full updated user object from the backend
       setUser(updatedUser); 
-      toast.success('Profile updated successfully!');
+      toast.success(t('toast.profileUpdateSuccess', 'Profile updated successfully!'));
       setProfileImageFile(null); // Clear the selected file state
       // No need to setPreviewImage here, it's handled by the updatedUser in context
       
     } catch (err) {
       console.error("Error updating profile:", err);
-      let errorMessage = err.message || 'Failed to update profile.';
+      let errorMessage = err.message || t('toast.profileUpdateErrorFallback', 'Failed to update profile.');
       if (err.response && err.response.data) {
         if (typeof err.response.data.detail === 'string') {
           errorMessage = err.response.data.detail;
@@ -244,11 +244,11 @@ function SettingsPage() {
     setPasswordError(null);
     try {
       await userService.changePassword(user.id, values.old_password, values.new_password);
-      toast.success('Password changed successfully!');
+      toast.success(t('toast.passwordChangeSuccess', 'Password changed successfully!'));
       passwordForm.reset();
     } catch (err) {
       console.error("Error changing password:", err);
-      const errorMessage = err.response?.data?.detail || err.message || 'Failed to change password.';
+      const errorMessage = err.response?.data?.detail || err.message || t('toast.passwordChangeErrorFallback', 'Failed to change password.');
       setPasswordError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -260,7 +260,7 @@ function SettingsPage() {
       <Container className={classes.settingsContainer} size="xl" px="xs">
         <Paper withBorder shadow="md" p="xl" radius="md">
           <Group position="center">
-            <Text size="lg" weight={500}>Loading user settings...</Text>
+            <Text size="lg" weight={500}>{t('loadingUserSettings', 'Loading user settings...')}</Text>
           </Group>
         </Paper>
       </Container>
@@ -272,8 +272,8 @@ function SettingsPage() {
     return (
       <Container className={classes.settingsContainer} size="xl" px="xs">
         <Paper withBorder shadow="md" p="xl" radius="md">
-          <Alert icon={<IconAlertCircle size={20} />} title="Authentication Error" color="red">
-            User not found or incomplete user data. Please login again.
+          <Alert icon={<IconAlertCircle size={20} />} title={t('authError.title', 'Authentication Error')} color="red">
+            {t('authError.userNotFound', 'User not found or incomplete user data. Please login again.')}
           </Alert>
         </Paper>
       </Container>
@@ -285,14 +285,14 @@ function SettingsPage() {
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
           <IconUser size={28} stroke={1.5} color={theme.colors[theme.primaryColor][6]} />
           <Text gradient={{ from: theme.primaryColor, to: theme.colors[theme.primaryColor][4], deg: 45 }} 
-                inherit variant="gradient">Account Settings</Text>
+                inherit variant="gradient">{t('pageTitle', 'Account Settings')}</Text>
         </Box>
       </Title>
 
       {error && (
         <Alert 
           icon={<IconAlertCircle size={18} />} 
-          title="Update Error" 
+          title={t('updateErrorAlertTitle', 'Update Error')} 
           color="red" 
           withCloseButton 
           onClose={() => setError(null)}
@@ -309,9 +309,9 @@ function SettingsPage() {
             <Group position="apart">
               <Group spacing="xs">
                 <IconSettings size={24} stroke={1.5} color={theme.colors[theme.primaryColor][theme.colorScheme === 'dark' ? 4 : 6]} />
-                <Title order={3}>General Information</Title>
+                <Title order={3}>{t('general.cardTitle', 'General Information')}</Title>
               </Group>
-              <Badge color={theme.primaryColor} variant="light">Profile</Badge>
+              <Badge color={theme.primaryColor} variant="light">{t('general.badge', 'Profile')}</Badge>
             </Group>
           </Card.Section>
           
@@ -324,7 +324,7 @@ function SettingsPage() {
                     radius={150} 
                     mx="auto"
                     style={{ ...styles }}
-                    alt="Profile Preview"
+                    alt={t('general.avatarAlt', 'Profile Preview')}
                     className={classes.avatar}
                   >
                     {!previewImage && user?.username?.charAt(0).toUpperCase()}
@@ -342,7 +342,7 @@ function SettingsPage() {
                       size="sm"
                       radius="md"
                     >
-                      Upload Image
+                      {t('general.uploadImageButton', 'Upload Image')}
                     </Button>
                   )}
                 </FileButton>
@@ -356,20 +356,20 @@ function SettingsPage() {
                     onClick={handleRemoveImage}
                     leftIcon={<IconTrash size={16} />}
                   >
-                    Remove
+                    {t('general.removeImageButton', 'Remove')}
                   </Button>
                 )}
               </Group>
               
               {profileImageFile && (
                 <Text size="sm" color="dimmed" align="center" mt="xs">
-                  Selected: {profileImageFile.name}
+                  {t('general.imageSelectedPrefix', 'Selected:')} {profileImageFile.name}
                 </Text>
               )}
             </Box>            <Box mt="xl">
               <TextInput
-                label="Username"
-                placeholder="Your username"
+                label={t('general.usernameLabel', 'Username')}
+                placeholder={t('general.usernamePlaceholder', 'Your username')}
                 icon={<IconUser size={16} />}
                 {...generalForm.getInputProps('username')}
                 className={classes.formField}
@@ -378,8 +378,8 @@ function SettingsPage() {
               />
               
               <TextInput
-                label="Email"
-                placeholder="Your email"
+                label={t('general.emailLabel', 'Email')}
+                placeholder={t('general.emailPlaceholder', 'Your email')}
                 icon={<IconAt size={16} />}
                 disabled
                 {...generalForm.getInputProps('email')}
@@ -398,7 +398,7 @@ function SettingsPage() {
               className={classes.buttonGradient}
               radius="md"
             >
-              Save Changes
+              {t('general.saveButton', 'Save Changes')}
             </Button>          </form>
         </Card>
 
@@ -409,16 +409,16 @@ function SettingsPage() {
             <Group position="apart">
               <Group spacing="xs">
                 <IconLock size={24} stroke={1.5} color={theme.colors.orange[theme.colorScheme === 'dark' ? 4 : 6]} />
-                <Title order={3}>Security Settings</Title>
+                <Title order={3}>{t('security.cardTitle', 'Security Settings')}</Title>
               </Group>
-              <Badge color="orange" variant="light">Password</Badge>
+              <Badge color="orange" variant="light">{t('security.badge', 'Password')}</Badge>
             </Group>
           </Card.Section>
           
           {passwordError && (
             <Alert 
               icon={<IconAlertCircle size={18} />} 
-              title="Password Error" 
+              title={t('passwordErrorAlertTitle', 'Password Error')} 
               color="red" 
               withCloseButton 
               onClose={() => setPasswordError(null)} 
@@ -431,8 +431,8 @@ function SettingsPage() {
           
           <form onSubmit={passwordForm.onSubmit(handleChangePassword)}>            <Box mt="xl">
               <PasswordInput
-                label="Current Password"
-                placeholder="Enter your current password"
+                label={t('security.currentPasswordLabel', 'Current Password')}
+                placeholder={t('security.currentPasswordPlaceholder', 'Enter your current password')}
                 icon={<IconKey size={16} />}
                 {...passwordForm.getInputProps('old_password')}
                 className={classes.formField}
@@ -441,8 +441,8 @@ function SettingsPage() {
               />
               
               <PasswordInput
-                label="New Password"
-                placeholder="Choose a new password"
+                label={t('security.newPasswordLabel', 'New Password')}
+                placeholder={t('security.newPasswordPlaceholder', 'Choose a new password')}
                 icon={<IconKey size={16} />}
                 {...passwordForm.getInputProps('new_password')}
                 className={classes.formField}
@@ -451,8 +451,8 @@ function SettingsPage() {
               />
               
               <PasswordInput
-                label="Confirm New Password"
-                placeholder="Confirm your new password"
+                label={t('security.confirmNewPasswordLabel', 'Confirm New Password')}
+                placeholder={t('security.confirmNewPasswordPlaceholder', 'Confirm your new password')}
                 icon={<IconKey size={16} />}
                 {...passwordForm.getInputProps('confirm_new_password')}
                 className={classes.formField}
@@ -471,7 +471,7 @@ function SettingsPage() {
               variant="filled"
               radius="md"
             >
-              Update Password
+              {t('security.updatePasswordButton', 'Update Password')}
             </Button>
           </form>
         </Card>

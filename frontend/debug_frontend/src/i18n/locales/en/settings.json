@@ -1,0 +1,67 @@
+{
+  "title": "Settings",
+  "theme": "Theme",
+  "dark": "Dark",
+  "light": "Light",
+  "language": "Language",
+  "languageName": "English",
+  "userMenu": {
+    "loggedInAs": "Logged in as {{username}}",
+    "profile": "Profile",
+    "settings": "Settings",
+    "adminBadge": "ADMIN",
+    "logout": "Logout"
+  },
+  "languageSettings": "Language Settings",
+  "languageDescription": "Choose your preferred language for the application interface.",
+  "selectLanguage": "Select your language",
+  "preferences": "Preferences",
+  "profile": "Profile",
+  "account": "Account",
+  "pageTitle": "Account Settings",
+  "loadingUserSettings": "Loading user settings...",
+  "validation": {
+    "usernameMinLength": "Username must be at least 3 characters",
+    "oldPasswordRequired": "Old password is required",
+    "newPasswordMinLength": "New password must be at least 3 characters",
+    "passwordsDoNotMatch": "Passwords do not match"
+  },
+  "toast": {
+    "fileTooLarge": "File is too large. Max size is {{maxSize}}MB.",
+    "profileUpdateSuccess": "Profile updated successfully!",
+    "profileUpdateErrorFallback": "Failed to update profile.",
+    "passwordChangeSuccess": "Password changed successfully!",
+    "passwordChangeErrorFallback": "Failed to change password."
+  },
+  "authError": {
+    "title": "Authentication Error",
+    "userIdMissing": "User ID is missing, please log in again.",
+    "userNotFound": "User not found or incomplete user data. Please login again."
+  },
+  "updateErrorAlertTitle": "Update Error",
+  "passwordErrorAlertTitle": "Password Error",
+  "general": {
+    "cardTitle": "General Information",
+    "badge": "Profile",
+    "avatarAlt": "Profile Preview",
+    "uploadImageButton": "Upload Image",
+    "removeImageButton": "Remove",
+    "imageSelectedPrefix": "Selected:",
+    "usernameLabel": "Username",
+    "usernamePlaceholder": "Your username",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Your email",
+    "saveButton": "Save Changes"
+  },
+  "security": {
+    "cardTitle": "Security Settings",
+    "badge": "Password",
+    "currentPasswordLabel": "Current Password",
+    "currentPasswordPlaceholder": "Enter your current password",
+    "newPasswordLabel": "New Password",
+    "newPasswordPlaceholder": "Choose a new password",
+    "confirmNewPasswordLabel": "Confirm New Password",
+    "confirmNewPasswordPlaceholder": "Confirm your new password",
+    "updatePasswordButton": "Update Password"
+  }
+}

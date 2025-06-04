@@ -13,19 +13,15 @@
     "english": "English",
     "german": "German",
     "select": "Language"
-  },  "navigation": {
-    "home": "Home",
+  },
+  "navigation": {
     "dashboard": "Dashboard",
-    "newCourse": "New Course",
     "courses": "Courses",
-    "settings": "Settings",
     "statistics": "Statistics",
     "login": "Log In",
     "register": "Sign Up",
     "logout": "Logout",
-    "about": "About",
     "impressum": "Imprint",
-    "admin": "Admin",
     "title": "Navigation",
     "subtitle": "Choose your destination",
     "home": "Home",
@@ -382,7 +378,8 @@
       "registerSuccess": "Registration successful! Please login.",
       "logoutSuccess": "You have been logged out"
     }
-  },"settings": {
+  },
+  "settings": {
     "title": "Settings",
     "theme": "Theme",
     "dark": "Dark",
@@ -402,7 +399,8 @@
     "preferences": "Preferences",
     "profile": "Profile",
     "account": "Account"
-  },  "app": {
+  },
+  "app": {
     "title": "Nexora",
     "poweredBy": "Powered by AI"
   },
@@ -434,5 +432,88 @@
     "newNotePlaceholder": "New note...",
     "addButton": "Add",
     "noNotes": "No notes available."
+  },
+  "courseView": {
+    "loading": "Loading course data...",
+    "error": "Failed to load course information. Please try again later.",
+    "errorNotFound": "Course not found. It might have been removed or the link is incorrect.",
+    "hero": {
+      "welcome": "Welcome to",
+      "description": "This course will guide you through the essentials of {{topic}}. Get ready to learn and explore!",
+      "createdBy": "Created by: {{author}}",
+      "estimatedTime": "Estimated time: {{hours}} hours",
+      "startLearning": "Start Learning",
+      "continueLearning": "Continue Learning",
+      "viewProgress": "View Creation Progress",
+      "chapters_one": "{{count}} chapter",
+      "chapters_other": "{{count}} chapters"
+    },
+    "creation": {
+      "title": "Course Creation in Progress",
+      "status": "Status: {{status}}",
+      "generatingOutline": "Generating course outline...",
+      "generatingChapters": "Generating chapters ({{completed}}/{{total}})...",
+      "generatingQuizzes": "Generating quizzes...",
+      "finalizingCourse": "Finalizing course structure...",
+      "completed": "Course generation complete!",
+      "error": "An error occurred during course creation. Please try again.",
+      "retry": "Retry Creation",
+      "viewCourse": "View Course",
+      "currentProgress": "Current progress: {{progress}}%",
+      "stage": {
+        "INITIALIZING": "Initializing...",
+        "FETCHING_USER_PROFILE": "Fetching user profile...",
+        "CREATING_COURSE_OUTLINE": "Creating course outline...",
+        "GENERATING_CHAPTER_CONTENT": "Generating chapter content...",
+        "GENERATING_CHAPTER_QUIZ": "Generating chapter quiz...",
+        "FINALIZING_COURSE": "Finalizing course...",
+        "COMPLETED": "Completed",
+        "ERROR": "Error"
+      },
+      "streamingStatus": "Streaming Status (Session ID: {{sessionId}})",
+      "lastMessage": "Last message: {{message}} at {{timestamp}}",
+      "noMessages": "No streaming messages yet."
+    },
+    "progress": {
+      "title": "Your Progress",
+      "completed": "{{percentage}}% Completed",
+      "chaptersCompleted_one": "{{completedCount}} of {{totalCount}} chapter completed",
+      "chaptersCompleted_other": "{{completedCount}} of {{totalCount}} chapters completed",
+      "resume": "Resume Learning"
+    },
+    "chapters": {
+      "title": "Chapters",
+      "status": {
+        "COMPLETED": "Completed",
+        "IN_PROGRESS": "In Progress",
+        "NOT_STARTED": "Not Started"
+      },
+      "viewChapter": "View Chapter",
+      "startChapter": "Start Chapter",
+      "continueChapter": "Continue Chapter",
+      "chapter": "Chapter {{number}}",
+      "quiz_one": "{{count}} quiz",
+      "quiz_other": "{{count}} quizzes",
+      "noChapters": "No chapters available for this course yet."
+    },
+    "journey": {
+      "title": "Your Learning Journey",
+      "description": "Navigate through the chapters and track your progress.",
+      "currentChapter": "Current Chapter: {{title}}"
+    },
+    "buttons": {
+      "backToDashboard": "Back to Dashboard",
+      "editCourse": "Edit Course (Admin)",
+      "deleteCourse": "Delete Course (Admin)"
+    },
+    "deleteModal": {
+      "title": "Delete Course",
+      "confirmation": "Are you sure you want to delete the course \"{{courseTitle}}\"? This action cannot be undone.",
+      "deleteButton": "Delete Course"
+    },
+    "toast": {
+      "deleteSuccess": "Course \"{{courseTitle}}\" deleted successfully.",
+      "deleteError": "Failed to delete course \"{{courseTitle}}\"."
+    }
   }
 }

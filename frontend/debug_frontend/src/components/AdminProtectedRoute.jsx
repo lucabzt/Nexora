@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 function AdminProtectedRoute() {
   const { user, isAuthenticated, loading } = useAuth();
-  const { t } = useTranslation();
+  const { t } = useTranslation('admin');
 
   // Show a loading indicator while checking authentication
   if (loading) {
@@ -28,12 +28,12 @@ function AdminProtectedRoute() {
       <Center style={{ height: '100vh', padding: '20px' }}>
         <Alert 
           icon={<IconAlertCircle size={16} />} 
-          title={t('admin.accessDeniedTitle')} 
+          title={t('accessDeniedTitle')} 
           color="red"
           withCloseButton
-          closeButtonLabel={t('admin.closeAlert')}
+          closeButtonLabel={t('closeAlert')}
         >
-          {t('admin.accessDeniedMessage')}
+          {t('accessDeniedMessage')}
           <meta httpEquiv="refresh" content="3;url=/" />
         </Alert>
       </Center>

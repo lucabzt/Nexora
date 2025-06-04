@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 function AppFooter() {
   const currentYear = new Date().getFullYear();
-  const { t } = useTranslation();
+  const { t } = useTranslation(['footer', 'navigation']);
   
   return (
     <Box 
@@ -22,10 +22,10 @@ function AppFooter() {
       <LanguageSelector />
       
       <Text size="sm" color="dimmed">
-        {t('footer.copyright', { year: currentYear })} {' | '}
-        <a href="/impressum" style={{ color: 'inherit', textDecoration: 'underline', margin: '0 8px' }}>{t('navigation.impressum')}</a>
+        {t('copyright', { year: currentYear, ns: 'footer' })} {' | '}
+        <a href="/impressum" style={{ color: 'inherit', textDecoration: 'underline', margin: '0 8px' }}>{t('impressum', { ns: 'navigation' })}</a>
         {' | '}
-        <a href="/about" style={{ color: 'inherit', textDecoration: 'underline', margin: '0 8px' }}>{t('navigation.about')}</a>
+        <a href="/about" style={{ color: 'inherit', textDecoration: 'underline', margin: '0 8px' }}>{t('about', { ns: 'navigation' })}</a>
       </Text>
     </Box>
   );

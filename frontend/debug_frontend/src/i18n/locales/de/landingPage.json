@@ -1,0 +1,58 @@
+{
+  "hero": {
+    "titlePart1": "Personalisiertes Lernen mit",
+    "titlePart2": "KI-gestützten Kursen",
+    "subtitle": "Nexora ist ein KI-Lernassistent der nächsten Generation, der personalisierte Kurse erstellt, die auf Ihren Lernstil, Ihre Ziele und Ihren Zeitplan zugeschnitten sind.",
+    "getStarted": "Loslegen",
+    "login": "Anmelden",
+    "exploreCourses": "Kurse entdecken",
+    "createFirstCourse": "Ersten Kurs erstellen",
+    "backToDashboard": "Zurück zum Dashboard",
+    "imageCaption": "Lernen der nächsten Generation, unterstützt durch KI",
+    "imageAlt": "KI Lern Illustration"
+  },
+  "features": {
+    "title": "Wie Nexora Ihr Lernen transformiert",
+    "feature1Title": "Personalisierter Lehrplan",
+    "feature1Text": "KI-generierte Inhalte, die speziell auf Ihre Ziele und Ihren Lernstil zugeschnitten sind.",
+    "feature2Title": "Fortschrittsverfolgung",
+    "feature2Text": "Überwachen Sie Ihre Lernreise mit detaillierten Fortschrittsanalysen und Einblicken.",
+    "feature3Title": "Adaptives Lernen",
+    "feature3Text": "Die Schwierigkeit der Inhalte passt sich Ihrer Leistung und Ihrem Verständnis an.",
+    "feature4Title": "Interaktive Quizze",
+    "feature4Text": "Testen Sie Ihr Wissen mit intelligenten Quizzen, die Ihr Verständnis vertiefen."
+  },
+  "howItWorks": {
+    "title": "Wie Nexora funktioniert",
+    "subtitle": "Starten Sie Ihre KI-gestützte Lernreise in drei einfachen Schritten.",
+    "step1Title": "Nennen Sie uns Ihre Ziele",
+    "step1Text": "Definieren Sie, was Sie lernen möchten und Ihren bevorzugten Lernstil.",
+    "step2Title": "KI erstellt Ihren Kurs",
+    "step2Text": "Unser intelligentes System entwirft einen individuellen Lehrplan, der auf Ihre Bedürfnisse zugeschnitten ist.",
+    "step3Title": "Lernen und erreichen",
+    "step3Text": "Interagieren Sie mit interaktiven Lektionen und verfolgen Sie Ihren Fortschritt bis zur Meisterschaft.",
+    "step4Title": "Neue Fähigkeiten meistern",
+    "step4Text": "Wenden Sie Ihr Wissen selbstbewusst an",
+    "imageAlt": "Illustration zur Funktionsweise von Nexora",
+    "cta": "Heute mit dem Lernen beginnen"
+  },
+  "testimonials": {
+    "title": "Das sagen unsere Lernenden",
+    "quote1": "Nexoras KI-gesteuerter Ansatz hat mir geholfen, die Python-Programmierung schneller zu meistern, als ich es je für möglich gehalten hätte. Das personalisierte Feedback war von unschätzbarem Wert!",
+    "name1": "John Doe",
+    "role1": "Softwareentwickler",
+    "quote2": "Die interaktiven Quizze und adaptiven Inhalte haben mir wirklich geholfen, Konzepte des maschinellen Lernens zu verstehen, mit denen ich zuvor zu kämpfen hatte.",
+    "name2": "Jane Schmidt",
+    "role2": "Datenwissenschaftlerin",
+    "quote3": "Als vielbeschäftigter Berufstätiger schätze ich, wie Nexora das Lernen in meinen Zeitplan integriert. Die mundgerechten Lektionen sind perfekt für meine begrenzte Zeit.",
+    "name3": "Robert Johnson",
+    "role3": "Marketing Manager"
+  },
+  "cta": {
+    "title": "Bereit, Ihre Lernreise zu transformieren?",
+    "subtitle": "Schließen Sie sich Tausenden von Lernenden an, die ihre Kompetenzentwicklung mit der KI-gestützten Lernplattform von Nexora beschleunigt haben.",
+    "getStartedFree": "Kostenlos loslegen",
+    "createNextCourse": "Nächsten Kurs erstellen",
+    "getStarted": "Loslegen"
+  }
+}

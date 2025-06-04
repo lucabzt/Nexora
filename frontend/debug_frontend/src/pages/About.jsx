@@ -80,7 +80,7 @@ const useStyles = createStyles((theme) => ({
 }));
 
 function About() {
-  const { t } = useTranslation();
+  const { t } = useTranslation('about');
   const { classes } = useStyles();
   const [visible, setVisible] = useState(false);
   
@@ -91,36 +91,36 @@ function About() {
   const teamMembers = [
     {
       name: 'Markus Huber',
-      role: t('about.team.members.markusHuber.role'),
-      bio: t('about.team.members.markusHuber.bio'),
+      role: t('team.members.markusHuber.role'),
+      bio: t('team.members.markusHuber.bio'),
       avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3'
     },
     {
       name: 'Luca Bozzetti',
-      role: t('about.team.members.lucaBozzetti.role'),
-      bio: t('about.team.members.lucaBozzetti.bio'),
+      role: t('team.members.lucaBozzetti.role'),
+      bio: t('team.members.lucaBozzetti.bio'),
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3'
     },
     {
       name: 'Sebastian Rogg',
-      role: t('about.team.members.sebastianRogg.role'),
-      bio: t('about.team.members.sebastianRogg.bio'),
+      role: t('team.members.sebastianRogg.role'),
+      bio: t('team.members.sebastianRogg.bio'),
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3'
     },
     {
       name: 'Matthias Meierlohr',
-      role: t('about.team.members.matthiasMeierlohr.role'),
-      bio: t('about.team.members.matthiasMeierlohr.bio'),
+      role: t('team.members.matthiasMeierlohr.role'),
+      bio: t('team.members.matthiasMeierlohr.bio'),
       avatar: 'https://m.media-amazon.com/images/S/pv-target-images/16627900db04b76fae3b64266ca161511422059cd24062fb5d900971003a0b70._SX1080_FMjpg_.jpg'
     },{
       name: 'Jonas Hörter',
-      role: t('about.team.members.jonasHoerter.role'),
-      bio: t('about.team.members.jonasHoerter.bio'),
+      role: t('team.members.jonasHoerter.role'),
+      bio: t('team.members.jonasHoerter.bio'),
       avatar: 'https://m.media-amazon.com/images/S/pv-target-images/16627900db04b76fae3b64266ca161511422059cd24062fb5d900971003a0b70._SX1080_FMjpg_.jpg'
     },{
       name: 'Paul Vorderbrügge',
-      role: t('about.team.members.paulVorderbruegge.role'),
-      bio: t('about.team.members.paulVorderbruegge.bio'),
+      role: t('team.members.paulVorderbruegge.role'),
+      bio: t('team.members.paulVorderbruegge.bio'),
       avatar: 'https://cdn.vectorstock.com/i/1000v/73/85/avatar-portrait-bartender-gieen-bier-vector-16227385.jpg'
     },
   ];
@@ -137,7 +137,7 @@ function About() {
               order={1}
               size="2.6rem"
             >
-              {t('about.mainTitle.about')} <span className={classes.highlight}>{t('about.mainTitle.nexora')}</span>
+              {t('mainTitle.about')} <span className={classes.highlight}>{t('mainTitle.nexora')}</span>
             </Title>
 
 
@@ -147,11 +147,11 @@ function About() {
               <Grid.Col md={6}>
                 <Stack spacing="xl">
                   <Text size="xl">
-                    {t('about.mainDescription')}
+                    {t('mainDescription')}
                   </Text>
                   
                   <Text>
-                    {t('about.learningApproach')}
+                    {t('learningApproach')}
                   </Text>
                   
                   <Group>
@@ -162,7 +162,7 @@ function About() {
                       radius="md"
                       leftIcon={<IconRocket size={20} />}
                     >
-                      {t('about.buttons.startYourJourney')}
+                      {t('buttons.startYourJourney')}
                     </Button>
                   </Group>
                 </Stack>
@@ -172,8 +172,8 @@ function About() {
                 <Image 
                   src="https://images.unsplash.com/photo-1522881451255-f59ad836fdfb"
                   radius="md"
-                  alt={t('about.imageAlt')}
-                  caption={t('about.imageCaption')}
+                  alt={t('imageAlt')}
+                  caption={t('imageCaption')}
                 />
               </Grid.Col>
             </Grid>
@@ -186,10 +186,10 @@ function About() {
                 </ThemeIcon>
               </Group>
               
-              <Title order={2} align="center" mb="md">{t('about.mission.title')}</Title>
+              <Title order={2} align="center" mb="md">{t('mission.title')}</Title>
               
               <Text size="lg" align="center" mb="xl">
-                {t('about.mission.description')}
+                {t('mission.description')}
               </Text>
               
               <Grid>
@@ -198,9 +198,9 @@ function About() {
                     <ThemeIcon size={40} radius="md" color="teal">
                       <IconUserCheck size={24} />
                     </ThemeIcon>
-                    <Text weight={700} mt="sm">{t('about.mission.item1Title')}</Text>
+                    <Text weight={700} mt="sm">{t('mission.item1Title')}</Text>
                     <Text size="sm" color="dimmed">
-                      {t('about.mission.item1Description')}
+                      {t('mission.item1Description')}
                     </Text>
                   </Card>
                 </Grid.Col>
@@ -210,9 +210,9 @@ function About() {
                     <ThemeIcon size={40} radius="md" color="cyan">
                       <IconWorld size={24} />
                     </ThemeIcon>
-                    <Text weight={700} mt="sm">{t('about.mission.item2Title')}</Text>
+                    <Text weight={700} mt="sm">{t('mission.item2Title')}</Text>
                     <Text size="sm" color="dimmed">
-                      {t('about.mission.item2Description')}
+                      {t('mission.item2Description')}
                     </Text>
                   </Card>
                 </Grid.Col>
@@ -222,9 +222,9 @@ function About() {
                     <ThemeIcon size={40} radius="md" color="blue">
                       <IconBrain size={24} />
                     </ThemeIcon>
-                    <Text weight={700} mt="sm">{t('about.mission.item3Title')}</Text>
+                    <Text weight={700} mt="sm">{t('mission.item3Title')}</Text>
                     <Text size="sm" color="dimmed">
-                      {t('about.mission.item3Description')}
+                      {t('mission.item3Description')}
                     </Text>
                   </Card>
                 </Grid.Col>
@@ -234,9 +234,9 @@ function About() {
                     <ThemeIcon size={40} radius="md" color="indigo">
                       <IconDeviceLaptop size={24} />
                     </ThemeIcon>
-                    <Text weight={700} mt="sm">{t('about.mission.item4Title')}</Text>
+                    <Text weight={700} mt="sm">{t('mission.item4Title')}</Text>
                     <Text size="sm" color="dimmed">
-                      {t('about.mission.item4Description')}
+                      {t('mission.item4Description')}
                     </Text>
                   </Card>
                 </Grid.Col>
@@ -246,69 +246,69 @@ function About() {
             {/* Our Story */}
             <Grid gutter={50} mb={60}>
               <Grid.Col md={5}>
-                <Title order={2} mb="xl">{t('about.journey.title')}</Title>
+                <Title order={2} mb="xl">{t('journey.title')}</Title>
                 
                 <Timeline active={4} bulletSize={24} lineWidth={2}>
                   <Timeline.Item 
                     bullet={<IconBulb size={12} />} 
-                    title={t('about.journey.event1.title')} 
+                    title={t('journey.event1.title')} 
                     titleClassName={classes.timelineTitle}
                   >
                     <Text color="dimmed" size="sm">
-                      {t('about.journey.event1.description')}
+                      {t('journey.event1.description')}
                     </Text>
-                    <Text size="xs" mt={4}>{t('about.journey.event1.date')}</Text>
+                    <Text size="xs" mt={4}>{t('journey.event1.date')}</Text>
                   </Timeline.Item>
                   
                   <Timeline.Item 
                     bullet={<IconRocket size={12} />} 
-                    title={t('about.journey.event2.title')} 
+                    title={t('journey.event2.title')} 
                     titleClassName={classes.timelineTitle}
                   >
                     <Text color="dimmed" size="sm">
-                      {t('about.journey.event2.description')}
+                      {t('journey.event2.description')}
                     </Text>
-                    <Text size="xs" mt={4}>{t('about.journey.event2.date')}</Text>
+                    <Text size="xs" mt={4}>{t('journey.event2.date')}</Text>
                   </Timeline.Item>
                   
                   <Timeline.Item 
                     bullet={<IconChartBar size={12} />} 
-                    title={t('about.journey.event3.title')} 
+                    title={t('journey.event3.title')} 
                     titleClassName={classes.timelineTitle}
                   >
                     <Text color="dimmed" size="sm">
-                      {t('about.journey.event3.description')}
+                      {t('journey.event3.description')}
                     </Text>
-                    <Text size="xs" mt={4}>{t('about.journey.event3.date')}</Text>
+                    <Text size="xs" mt={4}>{t('journey.event3.date')}</Text>
                   </Timeline.Item>
                   
                   <Timeline.Item 
                     bullet={<IconHeart size={12} />}
-                    title={t('about.journey.event4.title')}
+                    title={t('journey.event4.title')}
                     titleClassName={classes.timelineTitle}
                   >
                     <Text color="dimmed" size="sm">
-                      {t('about.journey.event4.description')}
+                      {t('journey.event4.description')}
                     </Text>
-                    <Text size="xs" mt={4}>{t('about.journey.event4.date')}</Text>
+                    <Text size="xs" mt={4}>{t('journey.event4.date')}</Text>
                   </Timeline.Item>
 
                    <Timeline.Item 
                     bullet={<IconHeart size={12} />}
-                    title={t('about.journey.event5.title')}
+                    title={t('journey.event5.title')}
                     titleClassName={classes.timelineTitle}
                   >
                     <Text color="dimmed" size="sm">
-                        {t('about.journey.event5.description')}
+                        {t('journey.event5.description')}
                     </Text>
-                    <Text size="xs" mt={4}>{t('about.journey.event5.date')}</Text>
+                    <Text size="xs" mt={4}>{t('journey.event5.date')}</Text>
                   </Timeline.Item>
                   
                 </Timeline>
               </Grid.Col>
               
               <Grid.Col md={7}>
-                <Title order={2} mb="xl">{t('about.team.title')}</Title>
+                <Title order={2} mb="xl">{t('team.title')}</Title>
                 
                 <Grid>
                   {teamMembers.map((member, index) => (
@@ -347,9 +347,9 @@ function About() {
             >
               <Grid align="center">
                 <Grid.Col md={8}>
-                  <Title order={2} color="white">{t('about.cta.title')}</Title>
+                  <Title order={2} color="white">{t('cta.title')}</Title>
                   <Text color="white" size="lg" mt="xs">
-                    {t('about.cta.subtitle')}
+                    {t('cta.subtitle')}
                   </Text>
                 </Grid.Col>
                 
@@ -360,7 +360,7 @@ function About() {
                     size="lg" 
                     radius="md"
                   >
-                    {t('about.cta.button')}
+                    {t('cta.button')}
                   </Button>
                 </Grid.Col>
               </Grid>

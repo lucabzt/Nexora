@@ -1,0 +1,13 @@
+{
+  "buttons": {
+    "closeToolbar": "Symbolleiste schließen",
+    "openPlotter": "GeoGebra Plotter-Tool öffnen",
+    "openChat": "KI-Chat-Tool öffnen",
+    "openNotes": "Notizen-Tool öffnen"
+  },
+  "tabs": {
+    "plotter": "GeoGebra Plotter-Tool",
+    "chat": "KI-Chat-Tool",
+    "notes": "Notizen-Tool"
+  }
+}
