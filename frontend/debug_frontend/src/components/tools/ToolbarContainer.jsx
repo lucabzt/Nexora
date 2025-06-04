@@ -112,13 +112,12 @@ function ToolbarContainer({ courseId, chapterId }) {
           : '-2px 0 10px rgba(0, 0, 0, 0.1)')
           : 'none',
         transition: 'width 0.3s ease, box-shadow 0.3s ease',
-      }}
-      size={{ 
-        width: toolbarOpen ? (isMobile ? Math.min(toolbarWidth, 280) : toolbarWidth) : (isMobile ? 0 : 40), 
+      }}      size={{ 
+        width: toolbarOpen ? (isMobile ? '100vw' : toolbarWidth) : (isMobile ? 0 : 40), 
         height: 'calc(100vh - 70px)' 
       }}
-      minWidth={isMobile ? 200 : 40}
-      maxWidth={isMobile ? 280 : 800}
+      minWidth={isMobile ? '100vw' : 40}
+      maxWidth={isMobile ? '100vw' : 800}
       enable={{
         top: false,
         right: false,

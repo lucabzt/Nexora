@@ -115,8 +115,8 @@ function ChapterView() {
       setMarkingComplete(false);
     }  };  // Calculate container width and positioning based on toolbar state and mobile
   const sidebarWidth = isMobile 
-    ? (toolbarOpen ? Math.min(toolbarWidth, 280) : 0) // Completely hidden on mobile when closed
-    : (toolbarOpen ? toolbarWidth : 40); // Desktop shows 40px when closed
+    ? (toolbarOpen ? window.innerWidth : 0) // Full screen on mobile when open, hidden when closed
+    : (toolbarOpen ? toolbarWidth : 40); // Desktop shows normal width when open, 40px when closed
   
   return (
     <div style={{ 
