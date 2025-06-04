@@ -34,7 +34,7 @@ const DiscordIcon = (props) => (
 function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, login } = useAuth();
 
   const form = useForm({
     initialValues: {
@@ -58,7 +58,14 @@ function Register() {
       const result = await register(values.username, values.email, values.password);
       
       if (result.success) {
-        navigate('/login');
+        // Automatically log in after registration
+        const loginResult = await login(values.username, values.password);
+        if (loginResult.success) {
+          navigate('/'); // Redirect to dashboard/home
+        } else {
+          // fallback: show error or fallback to login page
+          // toast.error(loginResult.message || 'Login failed after registration.');
+        }
       }
     } finally {
       setIsLoading(false);
