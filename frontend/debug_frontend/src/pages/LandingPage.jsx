@@ -140,14 +140,14 @@ function LandingPage() {
                 </>
               ) : (
                 <Button 
-                  onClick={() => navigate('/create-course')} 
+                  onClick={() => navigate('/')} 
                   size="lg" 
                   radius="md"
                   variant="gradient"
                   gradient={{ from: 'cyan', to: 'teal' }}
                   rightIcon={<IconArrowRight size={18} />}
                 >
-                  Create a New Course
+                  Back to Dashboard
                 </Button>
               )}
             </Group>
