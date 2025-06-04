@@ -20,6 +20,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import SettingsPage from './pages/SettingsPage';
 import StatisticsPage from './pages/StatisticsPage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage'; // Import the OAuth callback page
+import Impressum from './pages/Impressum';
+import About from './pages/About';
 
 function App() {
   const [colorScheme, setColorScheme] = useState(() => {
@@ -64,7 +66,9 @@ function App() {
                 <Route path="/home" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/oauth/callback" element={<OAuthCallbackPage />} /> {/* Moved OAuth callback route here */}
+                <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
+                <Route path="/impressum" element={<Impressum />} />
+                <Route path="/about" element={<About />} />
               </Route>
               
               {/* Protected routes */}

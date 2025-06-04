@@ -144,7 +144,7 @@ function AppLayout() {
     { icon: <IconPlus size={18} />, color: 'teal', label: 'New Course', to: '/create-course' },
     { icon: <IconSettings size={18} />, color: 'gray', label: 'Settings', to: '/settings' },
     { icon: <IconInfoCircle size={18} />, color: 'indigo', label: 'Statistics', to: '/statistics' },
-    { icon: <IconInfoCircle size={18} />, color: 'grape', label: 'About Nexora', to: '/home' },
+    { icon: <IconInfoCircle size={18} />, color: 'grape', label: 'Home', to: '/home' },
   ];
   
   // Handler to close navbar on mobile when navigating

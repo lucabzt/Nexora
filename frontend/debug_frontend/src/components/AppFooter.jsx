@@ -17,7 +17,10 @@ function AppFooter() {
       })}
     >
       <Text size="sm" color="dimmed">
-        © {currentYear} Nexora Learning Platform. All rights reserved.
+        © {currentYear} Nexora Learning Platform. All rights reserved. {' | '}
+        <a href="/impressum" style={{ color: 'inherit', textDecoration: 'underline', margin: '0 8px' }}>Impressum</a>
+        {' | '}
+        <a href="/about" style={{ color: 'inherit', textDecoration: 'underline', margin: '0 8px' }}>About</a>
       </Text>
     </Box>
   );
