@@ -14,8 +14,8 @@ export const useToolbar = () => {
 
 // Provider component to wrap around components that need toolbar state
 export function ToolbarProvider({ children }) {
-  const [toolbarWidth, setToolbarWidth] = useState(500); // Default expanded width
-  const [toolbarOpen, setToolbarOpen] = useState(false);
+  const [toolbarWidth, setToolbarWidth] = useState(500); // Default expanded width for desktop
+  const [toolbarOpen, setToolbarOpen] = useState(false); // Default closed for better mobile UX
 
   // Provide both the toolbar state and update functions
   const value = {

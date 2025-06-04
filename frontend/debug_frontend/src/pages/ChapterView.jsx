@@ -16,6 +16,7 @@ import {
   Paper,
   Badge,
 } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import { IconAlertCircle, IconBookmark, IconQuestionMark } from '@tabler/icons-react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'react-toastify';
@@ -27,6 +28,7 @@ function ChapterView() {
   const { courseId, chapterId } = useParams(); // This should be the actual DB ID now
   const navigate = useNavigate();
   const { toolbarOpen, toolbarWidth } = useToolbar(); // Get toolbar state from context
+  const isMobile = useMediaQuery('(max-width: 768px)'); // Add mobile detection
   const [chapter, setChapter] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -111,8 +113,10 @@ function ChapterView() {
       console.error('Error marking chapter complete:', error);
     } finally {
       setMarkingComplete(false);
-    }  };  // Calculate container width and positioning based on toolbar state  // Calculate container width and positioning based on toolbar state
-  const sidebarWidth = toolbarOpen ? toolbarWidth : 40;
+    }  };  // Calculate container width and positioning based on toolbar state and mobile
+  const sidebarWidth = isMobile 
+    ? (toolbarOpen ? Math.min(toolbarWidth, 280) : 0) // Completely hidden on mobile when closed
+    : (toolbarOpen ? toolbarWidth : 40); // Desktop shows 40px when closed
   
   return (
     <div style={{ 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ActionIcon, Box, Tabs, useMantineTheme } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import { IconChartLine, IconMessage, IconChevronLeft, IconNote } from '@tabler/icons-react';
 import { Resizable } from 're-resizable';
 import GeoGebraPlotter from './GeoGebraPlotter';
@@ -15,26 +16,39 @@ import './Toolbar.css';
  */
 function ToolbarContainer({ courseId, chapterId }) {  
   const theme = useMantineTheme();  
-  const { toolbarOpen, setToolbarOpen, toolbarWidth, setToolbarWidth } = useToolbar();
-  const [activeTab, setActiveTab] = useState(TOOL_TABS.PLOTTER); // Use constant for tab value
-    useEffect(() => {
-    // Only change width if toolbar is open
-    // When closed, we maintain the previous width in state but display at 40px
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const { toolbarOpen, setToolbarOpen, toolbarWidth, setToolbarWidth } = useToolbar();  const [activeTab, setActiveTab] = useState(TOOL_TABS.PLOTTER); // Use constant for tab value
+
+  useEffect(() => {
+    // Handle toolbar width based on screen size and state
     if (!toolbarOpen) {
-      // We don't change the actual stored width, just the display
+      // When closed, maintain stored width but toolbar is hidden on mobile
       console.log('Toolbar closed, maintaining width at:', toolbarWidth);
     } else {
-      // Ensure width is at least 500px when opened
-      if (toolbarWidth <= 40) {
-        setToolbarWidth(500);
+      // When opened, adjust width based on screen size
+      if (isMobile) {
+        // On mobile, use smaller width - about 80% of screen width max, but reasonable minimum
+        const maxMobileWidth = Math.min(280, window.innerWidth * 0.8);
+        const minMobileWidth = 200; // Minimum usable width
+        
+        if (toolbarWidth <= 40 || toolbarWidth > maxMobileWidth) {
+          setToolbarWidth(Math.max(minMobileWidth, Math.min(260, maxMobileWidth)));
+        }
+      } else {
+        // On desktop, ensure reasonable minimum width
+        if (toolbarWidth <= 40) {
+          setToolbarWidth(500);
+        }
       }
       console.log('Toolbar open with width:', toolbarWidth);
     }
-  }, [toolbarOpen, toolbarWidth, setToolbarWidth]);
+  }, [toolbarOpen, toolbarWidth, setToolbarWidth, isMobile]);
 
   const handleToggleToolbar = () => {
     setToolbarOpen(!toolbarOpen);
-  };  const handleTabChange = (value) => {
+  };
+
+  const handleTabChange = (value) => {
     console.log('Tab change requested:', value);
     setActiveTab(value);
     
@@ -50,8 +64,37 @@ function ToolbarContainer({ courseId, chapterId }) {
       console.log('Changed tab to:', value); 
     }
   };
-
-  return (    <Resizable
+  return (
+    <>
+      {/* Mobile floating toggle button - always visible on mobile */}
+      {isMobile && (
+        <ActionIcon
+          size="lg"
+          variant="filled"
+          color="blue"
+          onClick={handleToggleToolbar}
+          sx={{ 
+            position: 'fixed',
+            top: '90px',
+            right: '20px',
+            zIndex: 200,
+            borderRadius: '50%',
+            width: '48px',
+            height: '48px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            boxShadow: theme.colorScheme === 'dark' 
+              ? '0 4px 12px rgba(0, 0, 0, 0.4)' 
+              : '0 4px 12px rgba(0, 0, 0, 0.15)'
+          }}
+        >
+          {toolbarOpen 
+            ? <IconChevronLeft size={22} /> 
+            : activeTab === TOOL_TABS.PLOTTER ? <IconChartLine size={22} /> : <IconMessage size={22} />}
+        </ActionIcon>
+      )}
+        <Resizable
       style={{
         position: 'fixed',
         top: 70, /* Match the header height (70px for md size) */
@@ -61,39 +104,41 @@ function ToolbarContainer({ courseId, chapterId }) {
         overflow: 'hidden',
         height: 'calc(100vh - 70px)', /* Adjust height to account for header */
         zIndex: 100,
-        display: 'flex',
+        // Completely hide on mobile when closed, only show toggle button
+        display: (isMobile && !toolbarOpen) ? 'none' : 'flex',
         flexDirection: 'column',
         boxShadow: toolbarOpen ? (theme.colorScheme === 'dark' 
           ? '-2px 0 10px rgba(0, 0, 0, 0.3)' 
           : '-2px 0 10px rgba(0, 0, 0, 0.1)')
           : 'none',
-        transition: 'width 0.3s ease', // Always animate for consistency
+        transition: 'width 0.3s ease, box-shadow 0.3s ease',
       }}
       size={{ 
-        width: toolbarOpen ? toolbarWidth : 40, 
+        width: toolbarOpen ? (isMobile ? Math.min(toolbarWidth, 280) : toolbarWidth) : (isMobile ? 0 : 40), 
         height: 'calc(100vh - 70px)' 
       }}
-      minWidth={40}
-      maxWidth={800}
+      minWidth={isMobile ? 200 : 40}
+      maxWidth={isMobile ? 280 : 800}
       enable={{
         top: false,
         right: false,
         bottom: false,
-        left: toolbarOpen,
+        left: toolbarOpen && !isMobile,
         topRight: false,
         bottomRight: false,
         bottomLeft: false,
-        topLeft: false,      }}        onResizeStart={() => {
+        topLeft: false,      }}onResizeStart={() => {
         // Set a resize class on body to disable transitions during resize
         document.body.classList.add('resizing-toolbar');
       }}
       onResize={() => {
         // Do nothing during resize to prevent erratic behavior
         // We'll only update at the end of resize
-      }}
-      onResizeStop={(e, direction, ref) => {
+      }}      onResizeStop={(e, direction, ref) => {
         // Update width once at the end of resizing to prevent erratic behavior
-        const newWidth = Math.max(40, Math.min(800, parseInt(ref.style.width, 10)));
+        const newWidth = isMobile 
+          ? Math.max(200, Math.min(280, parseInt(ref.style.width, 10)))
+          : Math.max(40, Math.min(800, parseInt(ref.style.width, 10)));
         setToolbarWidth(newWidth);
         document.body.classList.remove('resizing-toolbar');
         console.log('Toolbar width updated to:', newWidth);
@@ -183,7 +228,7 @@ function ToolbarContainer({ courseId, chapterId }) {
               />
             </Tabs.List>
           </Tabs>
-        )}</Box>      
+        )}</Box>
       
       {/* Tool Content Area */}        <div style={{
         width: '100%',
@@ -205,10 +250,10 @@ function ToolbarContainer({ courseId, chapterId }) {
         )}
         
         {activeTab === TOOL_TABS.NOTES && (
-          <NotesTool isOpen={toolbarOpen} courseId={courseId} chapterId={chapterId} />
-        )}
+          <NotesTool isOpen={toolbarOpen} courseId={courseId} chapterId={chapterId} />        )}
       </div>
     </Resizable>
+    </>
   );
 }
 
