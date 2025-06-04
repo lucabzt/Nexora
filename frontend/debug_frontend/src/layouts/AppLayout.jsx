@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, Link as RouterLink, useNavigate } from 'react-router-dom';
 import { 
   AppShell, 
@@ -118,15 +118,22 @@ const MainLink = ({ icon, color, label, to, isActive, collapsed, onNavigate }) =
 };
 
 function AppLayout() {
-  const theme = useMantineTheme();
-  const [opened, setOpened] = useState(true); // Default to closed for better mobile UX
-  const navigate = useNavigate();
+  const theme = useMantineTheme();  const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const dark = colorScheme === 'dark';
-  
   // Check if we're on mobile
   const isMobile = useMediaQuery('(max-width: 768px)');
+  
+  // Set default navbar state based on device type - closed on mobile, opened on desktop
+  const [opened, setOpened] = useState(!isMobile);
+  
+  // Update opened state when screen size changes
+  useEffect(() => {
+    // Only update if the user hasn't manually toggled the navbar
+    // This prevents the navbar from changing when the user has specifically set it
+    setOpened(!isMobile);
+  }, [isMobile]);
   
   // Get current path to determine active link
   const currentPath = window.location.pathname;
