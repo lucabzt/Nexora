@@ -9,17 +9,14 @@ export const getToolContainerStyle = (isOpen) => ({
   padding: isOpen ? '20px' : '0',
   paddingLeft: isOpen ? '50px' : '0',
   paddingTop: '10px', // Allow space at top  
-  height: '100%',
+  height: 'auto', // Allow for natural height
+  minHeight: '100%', // Ensure it fills the container
   width: '100%',
   display: 'flex',
   flexDirection: 'column',
   pointerEvents: isOpen ? 'auto' : 'none',  // Prevent interaction when collapsed
-  overflowY: 'auto',  // Ensure content can scroll
-  msOverflowStyle: 'none', // Hide scrollbar in IE
-  scrollbarWidth: 'none', // Hide scrollbar in Firefox
-  '&::-webkit-scrollbar': {
-    display: 'none' // Hide scrollbar in Chrome/Safari
-  }
+  // We won't set overflow here - parent container handles scrolling
+  // This prevents scroll issues with the header
 });
 
 // Standard tool tab names - we use string literals directly in the components now

@@ -117,14 +117,14 @@ function ChapterView() {
   const sidebarWidth = isMobile 
     ? (toolbarOpen ? window.innerWidth : 0) // Full screen on mobile when open, hidden when closed
     : (toolbarOpen ? toolbarWidth : 40); // Desktop shows normal width when open, 40px when closed
-  
-  return (
+    return (
     <div style={{ 
       display: 'flex',
       position: 'relative',
       width: '100%',
       height: 'calc(100vh - 70px)', // Adjust for header height
-      marginTop: 0
+      marginTop: 0,
+      overflow: 'hidden' // Prevent page-level scrolling issues
     }}>      {/* Main content with dynamic positioning - centered in available space */}
       <Container size="lg" py="xl" style={{ 
         flexGrow: 1,
@@ -134,7 +134,9 @@ function ChapterView() {
         marginRight: `${sidebarWidth}px`, // Keep space for toolbar
         paddingLeft: '20px', // Add padding on left
         paddingRight: '20px', // Add padding on right
-        overflow: 'auto' // Allow content to scroll if needed
+        overflow: 'auto', // Allow content to scroll if needed
+        position: 'relative', // Create stacking context
+        height: '100%' // Fill the available height
       }}>
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>

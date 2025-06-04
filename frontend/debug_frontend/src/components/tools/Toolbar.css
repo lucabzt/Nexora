@@ -5,6 +5,15 @@ body.resizing-toolbar * {
   transition: none !important;
 }
 
+/* Fix header when toolbar scrolling */
+.mantine-Header-root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200; /* Higher than toolbar */
+}
+
 /* Improve tab button appearance */
 .mantine-Tabs-tab {
   transition: background-color 0.2s ease;
@@ -34,6 +43,12 @@ body.resizing-toolbar * {
 .tool-content {
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  /* Ensure scroll handling stays within container */
+  overflow: auto;
+  height: 100%;
+  /* Prevent toolbar scrolling from affecting page header */
+  position: relative;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 .tool-content::-webkit-scrollbar {

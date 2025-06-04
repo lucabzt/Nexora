@@ -93,11 +93,11 @@ function ToolbarContainer({ courseId, chapterId }) {
             : activeTab === TOOL_TABS.PLOTTER ? <IconChartLine size={22} /> : <IconMessage size={22} />}
         </ActionIcon>
       )}
-        <Resizable
-      style={{
+        <Resizable      style={{
         position: 'fixed',
         top: 70, /* Match the header height (70px for md size) */
         right: 0,
+        bottom: 0, /* Pin to bottom to prevent header issues */
         borderLeft: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : '#e9ecef'}`,
         backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : '#f8f9fa',
         overflow: 'hidden',
@@ -111,7 +111,7 @@ function ToolbarContainer({ courseId, chapterId }) {
           : '-2px 0 10px rgba(0, 0, 0, 0.1)')
           : 'none',
         transition: 'width 0.3s ease, box-shadow 0.3s ease',
-      }}      size={{ 
+      }}size={{ 
         width: toolbarOpen ? (isMobile ? '100vw' : toolbarWidth) : (isMobile ? 0 : 40), 
         height: 'calc(100vh - 70px)' 
       }}
@@ -227,18 +227,17 @@ function ToolbarContainer({ courseId, chapterId }) {
             </Tabs.List>
           </Tabs>
         )}</Box>
-      
-      {/* Tool Content Area */}        <div style={{
+        {/* Tool Content Area */}        <div style={{
         width: '100%',
         height: '100%',
-        overflow: 'hidden',
+        overflow: 'auto', // Allow content to scroll independently
         position: 'relative',
         paddingTop: '40px', // Add space for the toggle button
         backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : '#f8f9fa',
         display: 'flex',
         flexDirection: 'column',
         flexGrow: 1,
-      }}> 
+      }} className="tool-content"> 
         {activeTab === TOOL_TABS.PLOTTER && (
           <GeoGebraPlotter isOpen={toolbarOpen} />
         )}
