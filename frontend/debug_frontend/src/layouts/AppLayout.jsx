@@ -308,7 +308,8 @@ function AppLayout() {
                         </Box>
                       </Group>
                     </UnstyledButton>
-                  </Menu.Target>                  <Menu.Dropdown
+                  </Menu.Target> 
+                    <Menu.Dropdown
                     sx={{
                       border: `1px solid ${dark ? theme.colors.dark[4] : theme.colors.gray[3]}`,
                       boxShadow: dark 
@@ -317,9 +318,7 @@ function AppLayout() {
                       zIndex: 300, // Much higher than navbar (150) and toolbar (100)
                     }}
                   >
-                    <Menu.Label sx={{ fontSize: theme.fontSizes.xs, color: theme.colors.gray[6] }}>
-                      {user.email}
-                    </Menu.Label>
+                    
                     <Menu.Item 
                       icon={<IconSettings size={14} />} 
                       onClick={() => navigate('/settings')}
@@ -342,6 +341,19 @@ function AppLayout() {
                     >
                       Toggle Theme
                     </Menu.Item>
+
+                    <Menu.Item 
+                      icon={ <IconInfoCircle size={14} />} 
+                      onClick={() => {navigate('/about');}}
+                      sx={{
+                        '&:hover': {
+                          backgroundColor: dark ? theme.colors.dark[6] : theme.colors.gray[1],
+                        },
+                      }}
+                    >
+                      About
+                    </Menu.Item>
+
                     <Divider />
                     <Menu.Item 
                       icon={<IconLogout size={14} />} 
