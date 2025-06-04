@@ -52,6 +52,7 @@ function Dashboard() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [viewAllCourses, setViewAllCourses] = useState(false);
   const [userStats, setUserStats] = useState({
     coursesCompleted: 2,
     currentStreak: 5,
@@ -336,9 +337,7 @@ function Dashboard() {
             </Grid>
           </Paper>
         </>
-      )}
-
-      {/* Course Grid */}
+      )}      {/* Course Grid */}
       {!loading && !error && courses.length > 0 && (
         <>
           <Group position="apart" mb="md">
@@ -347,14 +346,14 @@ function Dashboard() {
               variant="subtle" 
               color="blue" 
               rightIcon={<IconArrowUpRight size={16} />}
-              onClick={() => {}}
+              onClick={() => setViewAllCourses(!viewAllCourses)}
             >
-              View All
+              {viewAllCourses ? 'Show Featured' : 'View All'}
             </Button>
           </Group>
 
           <Grid>
-            {courses.map((course, index) => {
+            {(viewAllCourses ? courses : courses.slice(0, 6)).map((course, index) => {
               const statusInfo = getStatusInfo(course.status);
               const StatusIcon = statusInfo.icon;
               const progress = calculateProgress(course);
