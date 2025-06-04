@@ -1,0 +1,66 @@
+{
+  "common": {
+    "loading": "Lädt...",
+    "error": "Fehler",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "create": "Erstellen",
+    "submit": "Absenden"
+  },
+  "language": {
+    "english": "Englisch",
+    "german": "Deutsch",
+    "select": "Sprache"
+  },  "navigation": {
+    "home": "Startseite",
+    "dashboard": "Dashboard",
+    "newCourse": "Neuer Kurs",
+    "courses": "Kurse",
+    "settings": "Einstellungen",
+    "statistics": "Statistiken",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "logout": "Abmelden",
+    "about": "Über uns",
+    "impressum": "Impressum",
+    "admin": "Administration",
+    "title": "Navigation",
+    "subtitle": "Wählen Sie Ihr Ziel"
+  },"auth": {
+    "email": "E-Mail",
+    "password": "Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "name": "Name",
+    "username": "Benutzername",
+    "usernamePlaceholder": "Ihr Benutzername",
+    "passwordPlaceholder": "Ihr Passwort",
+    "loginTitle": "Melden Sie sich an",
+    "registerTitle": "Erstellen Sie ein Konto",
+    "forgotPassword": "Passwort vergessen?",
+    "noAccount": "Noch kein Konto?",
+    "haveAccount": "Bereits ein Konto?",
+    "signUp": "Registrieren",
+    "signIn": "Anmelden",
+    "usernameRequired": "Benutzername wird benötigt",
+    "passwordRequired": "Passwort wird benötigt",
+    "passwordLength": "Passwort muss mindestens 3 Zeichen lang sein",
+    "continueWith": "Oder fortfahren mit"
+  },  "settings": {
+    "title": "Einstellungen",
+    "theme": "Design",
+    "dark": "Dunkel",
+    "light": "Hell",
+    "language": "Sprache",
+    "languageSettings": "Spracheinstellungen",
+    "languageDescription": "Wählen Sie Ihre bevorzugte Sprache für die Anwendungsoberfläche.",
+    "selectLanguage": "Wählen Sie Ihre Sprache",
+    "preferences": "Präferenzen",
+    "profile": "Profil",
+    "account": "Konto"
+  },  "app": {
+    "title": "Nexora",
+    "poweredBy": "Unterstützt von KI"
+  }
+}

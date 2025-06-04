@@ -23,12 +23,15 @@ import {
 import AppFooter from '../components/AppFooter';
 import { Link as RouterLink, useNavigate } from 'react-router-dom'; // Added useNavigate
 import { useAuth } from '../contexts/AuthContext'; // Added useAuth
+import LanguageSelector from '../components/LanguageSelector'; // Import LanguageSelector
+import { useTranslation } from 'react-i18next'; // Import useTranslation hook
 
 function MainLayout() {
   const theme = useMantineTheme();
   const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuth(); // Ensure isAuthenticated is destructured
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const { t } = useTranslation(); // Initialize translation hook
   const dark = colorScheme === 'dark';
 
   // Logic to determine avatar source
@@ -59,8 +62,7 @@ function MainLayout() {
       }}
       header={
         <Header height={{ base: 70, sm: 80 }} p="md">
-          <div style={{  display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>
-            <Title 
+          <div style={{  display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>              <Title 
               order={2} 
               size="1.6rem"
               component={Link}
@@ -75,9 +77,10 @@ function MainLayout() {
                 color: theme.colorScheme === 'dark' ? theme.white : theme.black,
               })}
             >
-              Nexora
+              {t('app.title')}
             </Title>
               <Group spacing="md">
+              <LanguageSelector />
               <ActionIcon
                 variant="outline"
                 color={dark ? 'yellow' : 'teal'}
@@ -110,25 +113,24 @@ function MainLayout() {
                     </Group>
                   </Menu.Target>
                   <Menu.Dropdown>                    <Menu.Item icon={<IconUser size={14} />} onClick={() => navigate('/')}>
-                      Dashboard
+                      {t('navigation.dashboard')}
                     </Menu.Item>
                     <Menu.Item icon={<IconSettings size={14} />} onClick={() => navigate('/settings')}>
-                      Settings
+                      {t('navigation.settings')}
                     </Menu.Item>
                     <Menu.Item icon={<IconLogout size={14} />} onClick={handleLogout}>
-                      Logout
+                      {t('navigation.logout')}
                     </Menu.Item>
                   </Menu.Dropdown>
                 </Menu>
               ) : (
-                <>
-                  <Button 
+                <>                  <Button 
                     component={RouterLink} 
                     to="/login" 
                     variant="outline"
                     radius="md"
                   >
-                    Log In
+                    {t('navigation.login')}
                   </Button>
                   
                   <Button 
@@ -138,7 +140,7 @@ function MainLayout() {
                     radius="md"
                     color="teal"
                   >
-                    Sign Up
+                    {t('navigation.register')}
                   </Button>
                   {/* Theme toggle for non-authenticated users is removed from here */}
                 </>

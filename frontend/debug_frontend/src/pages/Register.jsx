@@ -17,6 +17,7 @@ import { useForm } from '@mantine/form';
 import { useAuth } from '../contexts/AuthContext';
 import authService from '../api/authService'; // Import authService
 import { IconBrandGoogle, IconBrandGithub } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import discordGif from '../assets/wired-flat-2566-logo-discord-hover-wink.gif'; // Import local Discord GIF
 
 // Use Discord GIF icon from local asset

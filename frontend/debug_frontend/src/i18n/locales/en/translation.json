@@ -1,0 +1,66 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "submit": "Submit"
+  },
+  "language": {
+    "english": "English",
+    "german": "German",
+    "select": "Language"
+  },  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "newCourse": "New Course",
+    "courses": "Courses",
+    "settings": "Settings",
+    "statistics": "Statistics",
+    "login": "Log In",
+    "register": "Sign Up",
+    "logout": "Logout",
+    "about": "About",
+    "impressum": "Imprint",
+    "admin": "Admin",
+    "title": "Navigation",
+    "subtitle": "Choose your destination"
+  },"auth": {
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Name",
+    "username": "Username",
+    "usernamePlaceholder": "Your username",
+    "passwordPlaceholder": "Your password",
+    "loginTitle": "Log in to your account",
+    "registerTitle": "Create a new account",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "signUp": "Sign up",
+    "signIn": "Sign in",
+    "usernameRequired": "Username is required",
+    "passwordRequired": "Password is required",
+    "passwordLength": "Password must be at least 3 characters",
+    "continueWith": "Or continue with"
+  },  "settings": {
+    "title": "Settings",
+    "theme": "Theme",
+    "dark": "Dark",
+    "light": "Light",
+    "language": "Language",
+    "languageSettings": "Language Settings",
+    "languageDescription": "Choose your preferred language for the application interface.",
+    "selectLanguage": "Select your language",
+    "preferences": "Preferences",
+    "profile": "Profile",
+    "account": "Account"
+  },  "app": {
+    "title": "Nexora",
+    "poweredBy": "Powered by AI"
+  }
+}

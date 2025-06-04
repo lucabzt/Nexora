@@ -5,6 +5,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import { MantineProvider, ColorSchemeProvider } from '@mantine/core';
 import { AuthProvider } from './contexts/AuthContext';
 import { ToolbarProvider } from './contexts/ToolbarContext';
+import { LanguageProvider } from './contexts/LanguageContext';
+import './i18n/i18n'; // Import i18n configuration
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -44,7 +46,6 @@ function App() {
       localStorage.setItem('mantine-color-scheme', colorScheme);
     }
   }, [colorScheme]);
-
   return (
     <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
       <MantineProvider withGlobalStyles withNormalizeCSS theme={{ 
@@ -59,8 +60,9 @@ function App() {
             },
           },
         },      }}>
-        <AuthProvider>
-          <ToolbarProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <ToolbarProvider>
             <BrowserRouter>
               <Routes>
               {/* Public routes with MainLayout */}
@@ -97,11 +99,11 @@ function App() {
               {/* Default redirect for any unmatched authenticated paths could be to dashboard or handled by AppLayout's index */}
               {/* Fallback route - consider if this is needed or if AppLayout handles index properly */}
               {/* <Route path="*" element={<Navigate to="/" />} /> */}
-            </Routes>
-          </BrowserRouter>
+            </Routes>          </BrowserRouter>
           <ToastContainer position="top-right" autoClose={3000} theme={colorScheme} />
-        </ToolbarProvider>
-        </AuthProvider>
+            </ToolbarProvider>
+          </AuthProvider>
+        </LanguageProvider>
       </MantineProvider>
     </ColorSchemeProvider>
   );

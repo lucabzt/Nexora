@@ -25,6 +25,8 @@ import {
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
+import LanguageSelector from '../components/LanguageSelector';
 import {
   IconHome2,
   IconPlus,
@@ -36,7 +38,8 @@ import {
   IconInfoCircle,
   IconChevronRight,
   IconSparkles,
-  IconShieldCheck
+  IconShieldCheck,
+  IconLanguage
 } from '@tabler/icons-react';
 
 const MainLink = ({ icon, color, label, to, isActive, collapsed, onNavigate }) => {
@@ -118,9 +121,11 @@ const MainLink = ({ icon, color, label, to, isActive, collapsed, onNavigate }) =
 };
 
 function AppLayout() {
-  const theme = useMantineTheme();  const navigate = useNavigate();
+  const theme = useMantineTheme();
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const { t } = useTranslation();
   const dark = colorScheme === 'dark';
   // Check if we're on mobile
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -147,13 +152,13 @@ function AppLayout() {
       avatarSrc = `data:image/jpeg;base64,${user.profile_image_base64}`;
     }
   }  const mainLinksData = [
-    { icon: <IconHome2 size={18} />, color: 'blue', label: 'Dashboard', to: '/' },
-    { icon: <IconPlus size={18} />, color: 'teal', label: 'New Course', to: '/create-course' },
-    { icon: <IconSettings size={18} />, color: 'gray', label: 'Settings', to: '/settings' },
-    { icon: <IconInfoCircle size={18} />, color: 'indigo', label: 'Statistics', to: '/statistics' },
-    { icon: <IconInfoCircle size={18} />, color: 'grape', label: 'Home', to: '/home' },
+    { icon: <IconHome2 size={18} />, color: 'blue', label: t('navigation.dashboard'), to: '/' },
+    { icon: <IconPlus size={18} />, color: 'teal', label: t('navigation.newCourse'), to: '/create-course' },
+    { icon: <IconSettings size={18} />, color: 'gray', label: t('navigation.settings'), to: '/settings' },
+    { icon: <IconInfoCircle size={18} />, color: 'indigo', label: t('navigation.statistics'), to: '/statistics' },
+    { icon: <IconInfoCircle size={18} />, color: 'grape', label: t('navigation.home'), to: '/home' },
     // Admin link - only shown to admin users
-    ...(user?.is_admin ? [{ icon: <IconShieldCheck size={18} />, color: 'violet', label: 'Admin', to: '/admin' }] : []),
+    ...(user?.is_admin ? [{ icon: <IconShieldCheck size={18} />, color: 'violet', label: t('navigation.admin'), to: '/admin' }] : []),
   ];
   
   // Handler to close navbar on mobile when navigating
@@ -231,8 +236,7 @@ function AppLayout() {
                   color: theme.colors.violet[5],
                   filter: 'drop-shadow(0 2px 4px rgba(139, 92, 246, 0.3))',
                 }} 
-              />
-              <Title
+              />              <Title
                 order={1}
                 size="1.6rem"
                 component={RouterLink}
@@ -255,7 +259,7 @@ function AppLayout() {
                   },
                 })}
               >
-                Nexora
+                {t('app.title')}
               </Title>
             </Group>
             
@@ -318,8 +322,7 @@ function AppLayout() {
                       zIndex: 300, // Much higher than navbar (150) and toolbar (100)
                     }}
                   >
-                    
-                    <Menu.Item 
+                      <Menu.Item 
                       icon={<IconSettings size={14} />} 
                       onClick={() => navigate('/settings')}
                       sx={{
@@ -328,9 +331,8 @@ function AppLayout() {
                         },
                       }}
                     >
-                      Settings
-                    </Menu.Item>
-                    <Menu.Item 
+                      {t('navigation.settings')}
+                    </Menu.Item>                    <Menu.Item 
                       icon={dark ? <IconSun size={14} /> : <IconMoonStars size={14} />} 
                       onClick={() => toggleColorScheme()}
                       sx={{
@@ -339,7 +341,7 @@ function AppLayout() {
                         },
                       }}
                     >
-                      Toggle Theme
+                      {t('settings.theme')}
                     </Menu.Item>
 
                     <Menu.Item 
@@ -351,11 +353,10 @@ function AppLayout() {
                         },
                       }}
                     >
-                      About
+                      {t('navigation.about')}
                     </Menu.Item>
 
-                    <Divider />
-                    <Menu.Item 
+                    <Divider />                    <Menu.Item 
                       icon={<IconLogout size={14} />} 
                       onClick={handleLogout}
                       color="red"
@@ -365,7 +366,7 @@ function AppLayout() {
                         },
                       }}
                     >
-                      Logout
+                      {t('navigation.logout')}
                     </Menu.Item>
                   </Menu.Dropdown>
                 </Menu>
@@ -379,9 +380,8 @@ function AppLayout() {
                     '&:hover': {
                       transform: 'scale(1.05)',
                     },
-                  }}
-                >
-                  Login
+                  }}                >
+                  {t('navigation.login')}
                 </Button>
               )}
             </Group>
@@ -428,9 +428,8 @@ function AppLayout() {
                   <IconSparkles size={20} />
                 </ThemeIcon>
                 {opened && (
-                  <Box>
-                    <Text size="sm" weight={600} mb={2}>Navigation</Text>
-                    <Text size="xs" color="dimmed">Choose your destination</Text>
+                  <Box>                    <Text size="sm" weight={600} mb={2}>{t('navigation.title', 'Navigation')}</Text>
+                    <Text size="xs" color="dimmed">{t('navigation.subtitle', 'Choose your destination')}</Text>
                   </Box>
                 )}
               </Group>
@@ -455,14 +454,13 @@ function AppLayout() {
                 textAlign: 'center',
               })}
             >              {opened ? (
-                <>
-                  <Text size="xs" color="dimmed" mb="xs">
-                    Powered by AI
+                <>                  <Text size="xs" color="dimmed" mb="xs">
+                    {t('app.poweredBy', 'Powered by AI')}
                   </Text>
                   <Group spacing="xs" position="center">
                     <IconSparkles size={16} color={theme.colors.violet[5]} />
                     <Text size="xs" weight={500} color={theme.colors.violet[6]}>
-                      Nexora Learning
+                      {t('app.title')}
                     </Text>
                   </Group>
                 </>

@@ -1,0 +1,26 @@
+import { Select } from '@mantine/core';
+import { useTranslation } from 'react-i18next';
+
+function LanguageSelector() {
+  const { i18n, t } = useTranslation();
+
+  const changeLanguage = (value) => {
+    i18n.changeLanguage(value);
+  };
+
+  return (
+    <Select
+      value={i18n.language}
+      onChange={changeLanguage}
+      data={[
+        { value: 'en', label: t('language.english') },
+        { value: 'de', label: t('language.german') },
+      ]}
+      size="xs"
+      w={100}
+      label={t('language.select')}
+    />
+  );
+}
+
+export default LanguageSelector;
