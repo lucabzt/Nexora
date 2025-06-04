@@ -25,6 +25,7 @@ import enCourseView from './locales/en/courseView.json';
 import enCreateCourse from './locales/en/createCourse.json';
 import enImpressum from './locales/en/impressum.json';
 import enToolbarContainer from './locales/en/toolbarContainer.json';
+import enStatisticsPage from './locales/en/statisticsPage.json';
 
 // German translations
 import deCommon from './locales/de/common.json';
@@ -47,6 +48,7 @@ import deCourseView from './locales/de/courseView.json';
 import deCreateCourse from './locales/de/createCourse.json';
 import deImpressum from './locales/de/impressum.json';
 import deToolbarContainer from './locales/de/toolbarContainer.json';
+import deStatisticsPage from './locales/de/statisticsPage.json';
 
 i18n
   // Detect user language
@@ -77,6 +79,7 @@ i18n
         createCourse: enCreateCourse,
         impressum: enImpressum,
         toolbarContainer: enToolbarContainer,
+        statisticsPage: enStatisticsPage,
       },
       de: {
         common: deCommon,
@@ -99,6 +102,7 @@ i18n
         createCourse: deCreateCourse,
         impressum: deImpressum,
         toolbarContainer: deToolbarContainer,
+        statisticsPage: deStatisticsPage,
       },
     },
     fallbackLng: 'en',
