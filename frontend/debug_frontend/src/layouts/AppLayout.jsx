@@ -23,6 +23,7 @@ import {
   Transition,
   Stack
 } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import { useAuth } from '../contexts/AuthContext';
 import {
   IconHome2,
@@ -37,13 +38,20 @@ import {
   IconSparkles
 } from '@tabler/icons-react';
 
-const MainLink = ({ icon, color, label, to, isActive, collapsed }) => {
+const MainLink = ({ icon, color, label, to, isActive, collapsed, onNavigate }) => {
   const navigate = useNavigate();
   const theme = useMantineTheme();
   
+  const handleClick = () => {
+    navigate(to);
+    if (onNavigate) {
+      onNavigate(); // Call the callback to close navbar on mobile
+    }
+  };
+  
   return (
     <UnstyledButton
-      onClick={() => navigate(to)}
+      onClick={handleClick}
       sx={(theme) => ({
         display: 'block',
         width: '100%',
@@ -110,11 +118,14 @@ const MainLink = ({ icon, color, label, to, isActive, collapsed }) => {
 
 function AppLayout() {
   const theme = useMantineTheme();
-  const [opened, setOpened] = useState(true); // Default to open for better UX
+  const [opened, setOpened] = useState(false); // Default to closed for better mobile UX
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const dark = colorScheme === 'dark';
+  
+  // Check if we're on mobile
+  const isMobile = useMediaQuery('(max-width: 768px)');
   
   // Get current path to determine active link
   const currentPath = window.location.pathname;
@@ -128,7 +139,6 @@ function AppLayout() {
       avatarSrc = `data:image/jpeg;base64,${user.profile_image_base64}`;
     }
   }
-
   const mainLinksData = [
     { icon: <IconHome2 size={18} />, color: 'blue', label: 'Dashboard', to: '/' },
     { icon: <IconPlus size={18} />, color: 'teal', label: 'New Course', to: '/create-course' },
@@ -136,12 +146,21 @@ function AppLayout() {
     { icon: <IconInfoCircle size={18} />, color: 'indigo', label: 'Statistics', to: '/statistics' },
     { icon: <IconInfoCircle size={18} />, color: 'grape', label: 'About Nexora', to: '/home' },
   ];
+  
+  // Handler to close navbar on mobile when navigating
+  const handleNavigate = () => {
+    if (isMobile) {
+      setOpened(false);
+    }
+  };
+  
   const mainLinksComponents = mainLinksData.map((link) => (
     <MainLink 
       {...link} 
       key={link.label} 
       isActive={currentPath === link.to}
       collapsed={!opened}
+      onNavigate={handleNavigate}
     />
   ));
 
@@ -348,7 +367,8 @@ function AppLayout() {
       }      navbar={        <Navbar 
           p={opened ? "md" : "xs"}
           hiddenBreakpoint="sm" 
-          width={{ sm: opened ? 250 : 80, lg: opened ? 300 : 80 }}
+          hidden={isMobile && !opened} // Hide completely on mobile when closed
+          width={{ sm: opened ? 250 : (isMobile ? 0 : 80), lg: opened ? 300 : (isMobile ? 0 : 80) }}
           sx={(theme) => ({
             background: dark 
               ? `linear-gradient(180deg, ${theme.colors.dark[7]} 0%, ${theme.colors.dark[8]} 100%)`
@@ -358,6 +378,8 @@ function AppLayout() {
               ? `4px 0 12px ${theme.colors.dark[9]}30`
               : `4px 0 12px ${theme.colors.gray[3]}20`,
             transition: 'width 0.3s ease, padding 0.3s ease',
+            display: (isMobile && !opened) ? 'none' : 'flex', // Completely hide on mobile when closed
+            flexDirection: 'column',
           })}
         >
           <Navbar.Section>
