@@ -322,7 +322,7 @@ function CourseView() {
                         <Button 
                           variant="subtle" 
                           leftIcon={<IconArrowBack size={16} />}
-                          onClick={() => navigate('/dashboard')}
+                          onClick={() => navigate('/')}
                           mb="md"
                         >
                           {t('buttons.backToDashboard')}
