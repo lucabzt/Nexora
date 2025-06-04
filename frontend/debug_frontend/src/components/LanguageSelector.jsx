@@ -18,7 +18,6 @@ function LanguageSelector() {
       ]}
       size="xs"
       w={100}
-      label={t('language.select')}
     />
   );
 }
