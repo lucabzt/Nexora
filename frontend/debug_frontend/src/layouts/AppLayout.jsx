@@ -119,7 +119,7 @@ const MainLink = ({ icon, color, label, to, isActive, collapsed, onNavigate }) =
 
 function AppLayout() {
   const theme = useMantineTheme();
-  const [opened, setOpened] = useState(false); // Default to closed for better mobile UX
+  const [opened, setOpened] = useState(true); // Default to closed for better mobile UX
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();

@@ -201,7 +201,7 @@ function AdminView() {
 
   if (!currentUser || !currentUser.is_admin) {
     return (
-      <Container size="xl" py="xl">
+      <Box p="md">
         <Alert 
           icon={<IconAlertCircle size={16} />} 
           title="Access Denied" 
@@ -209,7 +209,7 @@ function AdminView() {
         >
           This page requires administrator privileges.
         </Alert>
-      </Container>
+      </Box>
     );
   }
 
@@ -224,9 +224,8 @@ function AdminView() {
       <Text size="xl" weight={700}>{value}</Text>
     </Card>
   );
-
   return (
-    <Container size="xl" py="xl">
+    <Box p="md">
       <Box mb={30}>
         <Group position="apart" mb="xl">
           <Title order={2}>
@@ -492,10 +491,9 @@ function AdminView() {
         
         <Group position="right">
           <Button variant="outline" onClick={closeDelete}>Cancel</Button>
-          <Button color="red" onClick={handleDeleteUser}>Delete User</Button>
-        </Group>
+          <Button color="red" onClick={handleDeleteUser}>Delete User</Button>        </Group>
       </Modal>
-    </Container>
+    </Box>
   );
 }
 

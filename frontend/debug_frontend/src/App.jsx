@@ -84,11 +84,12 @@ function App() {
                   {/* <Route path="auth/google/callback" element={<OAuthCallbackPage />} /> Removed from here */}
                 </Route>
               </Route>
-              
-              {/* Admin-only routes */}
+                {/* Admin-only routes - Using AppLayout for consistent interface */}
               <Route element={<AdminProtectedRoute />}>
-                <Route path="/admin" element={<AdminView />} />
-                {/* Add other admin routes here */}
+                <Route path="/admin" element={<AppLayout />}>
+                  <Route index element={<AdminView />} />
+                  {/* Add other admin routes here */}
+                </Route>
               </Route>
 
               {/* Redirect root path for non-authenticated users to home */}
