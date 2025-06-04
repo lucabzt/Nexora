@@ -10,16 +10,31 @@ import {
   Text, 
   Anchor,
   Divider, // Import Divider
-  Box // Import Box for spacing if needed
+  Box, // Import Box for spacing if needed
+  Group // Import Group for button grouping
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useAuth } from '../contexts/AuthContext';
 import authService from '../api/authService'; // Import authService
+import { IconBrandGoogle, IconBrandGithub } from '@tabler/icons-react';
+import discordGif from '../assets/wired-flat-2566-logo-discord-hover-wink.gif'; // Import local Discord GIF
+
+// Use Discord GIF icon from local asset
+const DiscordIcon = (props) => (
+  <img
+    src={discordGif}
+    alt="Discord"
+    width={32}
+    height={32}
+    style={{ display: 'block' }}
+    {...props}
+  />
+);
 
 function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, login } = useAuth();
 
   const form = useForm({
     initialValues: {
@@ -43,7 +58,14 @@ function Register() {
       const result = await register(values.username, values.email, values.password);
       
       if (result.success) {
-        navigate('/login');
+        // Automatically log in after registration
+        const loginResult = await login(values.username, values.password);
+        if (loginResult.success) {
+          navigate('/'); // Redirect to dashboard/home
+        } else {
+          // fallback: show error or fallback to login page
+          // toast.error(loginResult.message || 'Login failed after registration.');
+        }
       }
     } finally {
       setIsLoading(false);
@@ -54,8 +76,25 @@ function Register() {
     authService.redirectToGoogleOAuth();
   };
 
+  const handleGithubLogin = () => {
+    authService.redirectToGithubOAuth();
+  };
+
+  const handleDiscordLogin = () => {
+    authService.redirectToDiscordOAuth();
+  };
+
   return (
-    <Container size="xs" py="xl">
+    <Container
+      size="xs"
+      py="xl"
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+      }}
+    >
       <Title align="center" mb="lg">
         Create Account
       </Title>
@@ -100,10 +139,32 @@ function Register() {
 
           <Divider label="Or sign up with" labelPosition="center" my="lg" />
 
-          <Button fullWidth variant="outline" onClick={handleGoogleLogin} mb="xl">
-            Sign up with Google
-          </Button>
-          
+          <Group position="center" spacing="md" mb="xl">
+            <Button
+              variant="outline"
+              onClick={handleGoogleLogin}
+              px="md"
+              style={{ width: 48, height: 48, padding: 0 }}
+            >
+              <IconBrandGoogle size={24} />
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleGithubLogin}
+              px="md"
+              style={{ width: 48, height: 48, padding: 0 }}
+            >
+              <IconBrandGithub size={24} />
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleDiscordLogin}
+              px="md"
+              style={{ width: 48, height: 48, padding: 0 }}
+            >
+              <DiscordIcon />
+            </Button>
+          </Group>
           <Text align="center" mt="md">
             Already have an account?{' '}
             <Anchor component={Link} to="/login">

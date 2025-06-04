@@ -8,7 +8,9 @@ from sqlalchemy.orm import Session
 from ...db.database import get_db
 from ...services import auth_service
 from ..schemas import token as token_schema, user as user_schema
-from ...utils.oauth import get_google_oauth_client
+from ...utils.oauth import oauth
+from ...config import settings
+
 
 api_router = APIRouter(
     prefix="",
@@ -45,14 +47,12 @@ async def login_google(request: Request):
     Redirects the user to Google OAuth for authentication.
     This endpoint initiates the OAuth flow by redirecting to Google's authorization URL.
     """
-    oauth = get_google_oauth_client()
     if not oauth.google:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Google OAuth client is not configured."
         )
-    redirect_uri = oauth.redirect_uri
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+    return await oauth.google.authorize_redirect(request, settings.GOOGLE_REDIRECT_URI)
 
 
 @api_router.get("/google/callback")
@@ -60,6 +60,51 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
     """
     Handles the callback from Google OAuth after user authentication.
     """
-    return await auth_service.handle_google_callback(request, db)
+    return await auth_service.handle_oauth_callback(request, db, website="google")
+
+
+
+@api_router.get("/login/github")
+async def login_github(request: Request):
+    """
+    Redirects the user to Github OAuth for authentication.
+    This endpoint initiates the OAuth flow by redirecting to github's authorization URL.
+    """
+    if not oauth.github:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="github OAuth client is not configured."
+        )
+    return await oauth.github.authorize_redirect(request, settings.GITHUB_REDIRECT_URI)
+
+
+@api_router.get("/github/callback")
+async def github_callback(request: Request, db: Session = Depends(get_db)):
+    """
+    Handles the callback from Github OAuth after user authentication.
+    """
+    return await auth_service.handle_oauth_callback(request, db, website="github")
+
+
+@api_router.get("/login/discord")
+async def login_discord(request: Request):
+    """
+    Redirects the user to Discord OAuth for authentication.
+    This endpoint initiates the OAuth flow by redirecting to Discord's authorization URL.
+    """
+    if not oauth.discord:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Discord OAuth client is not configured."
+        )
+    return await oauth.discord.authorize_redirect(request, settings.DISCORD_REDIRECT_URI)
+
+
+@api_router.get("/discord/callback")
+async def discord_callback(request: Request, db: Session = Depends(get_db)):
+    """
+    Handles the callback from Discord OAuth after user authentication.
+    """
+    return await auth_service.handle_oauth_callback(request, db, website="discord")
 
 

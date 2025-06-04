@@ -219,18 +219,16 @@ const HomePage = () => {
                 <li><a href="#" className="text-base text-gray-500 hover:text-gray-900">Pricing</a></li>
                 <li><a href="#" className="text-base text-gray-500 hover:text-gray-900">API</a></li>
               </ul>
-            </div>
-            <div>
+            </div>            <div>
               <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400">
                 Company
               </h3>
               <ul className="mt-4 space-y-4">
-                <li><a href="#" className="text-base text-gray-500 hover:text-gray-900">About</a></li>
+                <li><Link to="/about" className="text-base text-gray-500 hover:text-gray-900">About</Link></li>
                 <li><a href="#" className="text-base text-gray-500 hover:text-gray-900">Blog</a></li>
                 <li><a href="#" className="text-base text-gray-500 hover:text-gray-900">Careers</a></li>
               </ul>
-            </div>
-            <div>
+            </div>            <div>
               <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400">
                 Support
               </h3>
@@ -238,6 +236,7 @@ const HomePage = () => {
                 <li><a href="#" className="text-base text-gray-500 hover:text-gray-900">Help Center</a></li>
                 <li><a href="#" className="text-base text-gray-500 hover:text-gray-900">Contact</a></li>
                 <li><a href="#" className="text-base text-gray-500 hover:text-gray-900">Privacy</a></li>
+                <li><Link to="/impressum" className="text-base text-gray-500 hover:text-gray-900">Impressum</Link></li>
               </ul>
             </div>
             <div>

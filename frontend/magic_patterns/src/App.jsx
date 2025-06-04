@@ -8,6 +8,8 @@ import DashboardPage from './pages/DashboardPage';
 import CourseCreationPage from './pages/CourseCreationPage';
 import CourseViewPage from './pages/CourseViewPage';
 import GoogleCallbackPage from './pages/GoogleCallbackPage';
+import AboutPage from './pages/AboutPage';
+import ImpressumPage from './pages/ImpressumPage';
 import Navbar from './components/Navbar';
 import PaperBackground from './components/PaperBackground';
 import LoadingSpinner from './components/LoadingSpinner';
@@ -43,10 +45,11 @@ const AppContent = () => {
 
   return (
     <PaperBackground>
-      <div className="min-h-screen w-full">
-        <Routes>
+      <div className="min-h-screen w-full">        <Routes>
           {/* Public routes */}
           <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/impressum" element={<ImpressumPage />} />
           <Route path="/login" element={
             <PublicRoute>
               <LoginPage />

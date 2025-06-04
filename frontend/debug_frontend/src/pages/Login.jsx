@@ -16,6 +16,20 @@ import {
 import { useForm } from '@mantine/form';
 import { useAuth } from '../contexts/AuthContext';
 import authService from '../api/authService'; // Import authService
+import { IconBrandGoogle, IconBrandGithub } from '@tabler/icons-react';
+import discordGif from '../assets/wired-flat-2566-logo-discord-hover-wink.gif'; // Import local Discord GIF
+
+// Use Discord GIF icon from local asset
+const DiscordIcon = (props) => (
+  <img
+    src={discordGif}
+    alt="Discord"
+    width={32}
+    height={32}
+    style={{ display: 'block' }}
+    {...props}
+  />
+);
 
 function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -51,12 +65,29 @@ function Login() {
     authService.redirectToGoogleOAuth();
   };
 
+  const handleGithubLogin = () => {
+    authService.redirectToGithubOAuth();
+  };
+
+  const handleDiscordLogin = () => {
+    authService.redirectToDiscordOAuth();
+  };
+
+
   return (
-    <Container size="xs" py="xl">
+    <Container
+      size="xs"
+      py="xl"
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+      }}
+    >
       <Title align="center" mb="lg">
         Welcome Back
       </Title>
-
       <Paper withBorder shadow="md" p={30} radius="md" mt="xl">
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <TextInput
@@ -81,9 +112,32 @@ function Login() {
 
           <Divider label="Or continue with" labelPosition="center" my="lg" />
 
-          <Button fullWidth variant="outline" onClick={handleGoogleLogin} mb="xl">
-            Sign in with Google
-          </Button>
+          <Group position="center" spacing="md" mb="xl">
+            <Button 
+              variant="outline" 
+              onClick={handleGoogleLogin} 
+              px="md"
+              style={{ width: 48, height: 48, padding: 0 }}
+            >
+              <IconBrandGoogle size={24} />
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleGithubLogin} 
+              px="md"
+              style={{ width: 48, height: 48, padding: 0 }}
+            >
+              <IconBrandGithub size={24} />
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleDiscordLogin}
+              px="md"
+              style={{ width: 48, height: 48, padding: 0 }}
+            >
+              <DiscordIcon />
+            </Button>
+          </Group>
           
           <Text align="center" mt="md">
             Don't have an account?{' '}

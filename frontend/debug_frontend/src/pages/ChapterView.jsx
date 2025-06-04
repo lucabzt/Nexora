@@ -14,17 +14,21 @@ import {
   Box,
   Loader,
   Paper,
-  Divider,
-  Badge
+  Badge,
 } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import { IconAlertCircle, IconBookmark, IconQuestionMark } from '@tabler/icons-react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'react-toastify';
 import { courseService } from '../api/courseService';
+import ToolbarContainer from '../components/tools/ToolbarContainer';
+import { useToolbar } from '../contexts/ToolbarContext';
 
 function ChapterView() {
   const { courseId, chapterId } = useParams(); // This should be the actual DB ID now
   const navigate = useNavigate();
+  const { toolbarOpen, toolbarWidth } = useToolbar(); // Get toolbar state from context
+  const isMobile = useMediaQuery('(max-width: 768px)'); // Add mobile detection
   const [chapter, setChapter] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -33,6 +37,12 @@ function ChapterView() {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState(0);
   const [markingComplete, setMarkingComplete] = useState(false);
+  // Effect to handle resize when toolbar changes
+  useEffect(() => {
+    // This will trigger a re-render when toolbar state changes
+    console.log("Toolbar state changed:", { open: toolbarOpen, width: toolbarWidth });
+    // We could add additional logic here if needed
+  }, [toolbarOpen, toolbarWidth]);
 
   useEffect(() => {
     const fetchChapter = async () => {
@@ -103,146 +113,167 @@ function ChapterView() {
       console.error('Error marking chapter complete:', error);
     } finally {
       setMarkingComplete(false);
-    }
-  };
+    }  };  // Calculate container width and positioning based on toolbar state and mobile
+  const sidebarWidth = isMobile 
+    ? (toolbarOpen ? window.innerWidth : 0) // Full screen on mobile when open, hidden when closed
+    : (toolbarOpen ? toolbarWidth : 40); // Desktop shows normal width when open, 40px when closed
+    return (
+    <div style={{ 
+      display: 'flex',
+      position: 'relative',
+      width: '100%',
+      height: 'calc(100vh - 70px)', // Adjust for header height
+      marginTop: 0,
+      overflow: 'hidden' // Prevent page-level scrolling issues
+    }}>      {/* Main content with dynamic positioning - centered in available space */}
+      <Container size="lg" py="xl" style={{ 
+        flexGrow: 1,
+        maxWidth: `calc(100% - ${sidebarWidth}px)`, // Limit max width to available space
+        width: `calc(100% - ${sidebarWidth}px)`, // Use calculated width
+        transition: 'all 0.3s ease',
+        marginRight: `${sidebarWidth}px`, // Keep space for toolbar
+        paddingLeft: '20px', // Add padding on left
+        paddingRight: '20px', // Add padding on right
+        overflow: 'auto', // Allow content to scroll if needed
+        position: 'relative', // Create stacking context
+        height: '100%' // Fill the available height
+      }}>
+        {loading && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
+            <Loader size="lg" />
+          </Box>
+        )}
 
-  return (
-    <Container size="lg" py="xl">
-      {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
-          <Loader size="lg" />
-        </Box>
-      )}
+        {error && !loading && (
+          <Alert 
+            icon={<IconAlertCircle size={16} />}
+            title="Error!" 
+            color="red" 
+            mb="lg"
+          >
+            {error}
+          </Alert>
+        )}
 
-      {error && !loading && (
-        <Alert 
-          icon={<IconAlertCircle size={16} />}
-          title="Error!" 
-          color="red" 
-          mb="lg"
-        >
-          {error}
-        </Alert>
-      )}
+        {!loading && !error && chapter && (
+          <>
+            <Group position="apart" mb="md">
+              <div>
+                <Title order={1}>{chapter.caption}</Title>
+                <Text color="dimmed">Estimated time: {chapter.time_minutes} minutes</Text>
+              </div>
+              <Button 
+                color="green" 
+                onClick={markChapterComplete} 
+                loading={markingComplete}
+                disabled={markingComplete}
+              >
+                Mark as Complete
+              </Button>
+            </Group>
 
-      {!loading && !error && chapter && (
-        <>
-          <Group position="apart" mb="md">
-            <div>
-              <Title order={1}>{chapter.caption}</Title>
-              <Text color="dimmed">Estimated time: {chapter.time_minutes} minutes</Text>
-            </div>
-            <Button 
-              color="green" 
-              onClick={markChapterComplete} 
-              loading={markingComplete}
-              disabled={markingComplete}
-            >
-              Mark as Complete
-            </Button>
-          </Group>
+            <Tabs value={activeTab} onTabChange={setActiveTab} mb="xl">
+              <Tabs.List>
+                <Tabs.Tab value="content" icon={<IconBookmark size={14} />}>Content</Tabs.Tab>
+                <Tabs.Tab value="quiz" icon={<IconQuestionMark size={14} />}>
+                  Quiz ({chapter.mc_questions?.length || 0} Questions)
+                </Tabs.Tab>
+              </Tabs.List>
 
-          <Tabs value={activeTab} onTabChange={setActiveTab} mb="xl">
-            <Tabs.List>
-              <Tabs.Tab value="content" icon={<IconBookmark size={14} />}>Content</Tabs.Tab>
-              <Tabs.Tab value="quiz" icon={<IconQuestionMark size={14} />}>
-                Quiz ({chapter.mc_questions?.length || 0} Questions)
-              </Tabs.Tab>
-            </Tabs.List>
-
-            <Tabs.Panel value="content" pt="xs">
-              <Paper shadow="xs" p="md" withBorder>
-                <div className="markdown-content">
-                  <ReactMarkdown>{chapter.content}</ReactMarkdown>
-                </div>
-              </Paper>
-            </Tabs.Panel>
-
-            <Tabs.Panel value="quiz" pt="xs">
-              <Paper shadow="xs" p="md" withBorder>
-                {quizSubmitted && (
-                  <Alert 
-                    color={quizScore >= 70 ? "green" : "yellow"}
-                    title={quizScore >= 70 ? "Great job!" : "Keep practicing!"} 
-                    mb="lg"
-                  >
-                    <Group>
-                      <Text>You scored {quizScore}% on the quiz</Text>
-                      <Badge color={quizScore >= 70 ? "green" : "yellow"}>
-                        {quizScore}%
-                      </Badge>
-                    </Group>
-                  </Alert>
-                )}
-                
-                {chapter.mc_questions?.map((question, qIndex) => (
-                  <Card key={qIndex} mb="md" withBorder>
-                    <Text weight={500} mb="md">{qIndex + 1}. {question.question}</Text>
-                    
-                    <Radio.Group
-                      value={quizAnswers[qIndex]}
-                      onChange={(value) => handleAnswerChange(qIndex, value)}
-                      name={`question-${qIndex}`}
-                      mb="md"
-                      disabled={quizSubmitted}
+              <Tabs.Panel value="content" pt="xs">
+                <Paper shadow="xs" p="md" withBorder>
+                  <div className="markdown-content">
+                    <ReactMarkdown>{chapter.content}</ReactMarkdown>
+                  </div>
+                </Paper>
+              </Tabs.Panel>
+              <Tabs.Panel value="quiz" pt="xs">
+                <Paper shadow="xs" p="md" withBorder>
+                  {quizSubmitted && (
+                    <Alert 
+                      color={quizScore >= 70 ? "green" : "yellow"}
+                      title={quizScore >= 70 ? "Great job!" : "Keep practicing!"} 
+                      mb="lg"
                     >
-                      <Radio value="a" label={question.answer_a} mb="xs" />
-                      <Radio value="b" label={question.answer_b} mb="xs" />
-                      <Radio value="c" label={question.answer_c} mb="xs" />
-                      <Radio value="d" label={question.answer_d} mb="xs" />
-                    </Radio.Group>
-                    
-                    {quizSubmitted && (
-                      <Alert 
-                        color={quizAnswers[qIndex] === question.correct_answer ? "green" : "red"}
-                        title={quizAnswers[qIndex] === question.correct_answer ? "Correct" : "Incorrect"}
+                      <Group>
+                        <Text>You scored {quizScore}% on the quiz</Text>
+                        <Badge color={quizScore >= 70 ? "green" : "yellow"}>
+                          {quizScore}%
+                        </Badge>
+                      </Group>
+                    </Alert>
+                  )}
+                  
+                  {chapter.mc_questions?.map((question, qIndex) => (
+                    <Card key={qIndex} mb="md" withBorder>
+                      <Text weight={500} mb="md">{qIndex + 1}. {question.question}</Text>
+                      
+                      <Radio.Group
+                        value={quizAnswers[qIndex]}
+                        onChange={(value) => handleAnswerChange(qIndex, value)}
+                        name={`question-${qIndex}`}
+                        mb="md"
+                        disabled={quizSubmitted}
                       >
-                        <Text mb="xs">
-                          {quizAnswers[qIndex] !== question.correct_answer && (
-                            <>The correct answer is: <strong>
-                              {question[`answer_${question.correct_answer}`]}
-                            </strong></>
-                          )}
-                        </Text>
-                        <Text>Explanation: {question.explanation}</Text>
-                      </Alert>
-                    )}
-                  </Card>
-                ))}
-                
-                {!quizSubmitted && (
-                  <Button 
-                    onClick={handleSubmitQuiz}
-                    fullWidth 
-                    mt="md"
-                    disabled={
-                      !chapter.mc_questions || 
-                      Object.values(quizAnswers).some(a => a === '')
-                    }
-                  >
-                    Submit Quiz
-                  </Button>
-                )}
-              </Paper>
-            </Tabs.Panel>
-          </Tabs>
+                        <Radio value="a" label={question.answer_a} mb="xs" />
+                        <Radio value="b" label={question.answer_b} mb="xs" />
+                        <Radio value="c" label={question.answer_c} mb="xs" />
+                        <Radio value="d" label={question.answer_d} mb="xs" />
+                      </Radio.Group>
+                      
+                      {quizSubmitted && (
+                        <Alert 
+                          color={quizAnswers[qIndex] === question.correct_answer ? "green" : "red"}
+                          title={quizAnswers[qIndex] === question.correct_answer ? "Correct" : "Incorrect"}
+                        >
+                          <Text mb="xs">
+                            {quizAnswers[qIndex] !== question.correct_answer && (
+                              <>The correct answer is: <strong>
+                                {question[`answer_${question.correct_answer}`]}
+                              </strong></>
+                            )}
+                          </Text>
+                          <Text>Explanation: {question.explanation}</Text>
+                        </Alert>
+                      )}
+                    </Card>
+                  ))}
+                  
+                  {!quizSubmitted && (
+                    <Button 
+                      onClick={handleSubmitQuiz}
+                      fullWidth 
+                      mt="md"
+                      disabled={
+                        !chapter.mc_questions || 
+                        Object.values(quizAnswers).some(a => a === '')
+                      }
+                    >
+                      Submit Quiz
+                    </Button>
+                  )}
+                </Paper>
+              </Tabs.Panel>
+            </Tabs>
 
-          <Group position="apart">
-            <Button 
-              variant="outline" 
-              onClick={() => navigate(`/courses/${courseId}`)}
-            >
-              Back to Course
-            </Button>
-            {chapter.is_completed && (
-              <Badge color="green" size="lg">Completed</Badge>
-            )}
-          </Group>
-        </>
-      )}
-    </Container>
+            <Group position="apart">
+              <Button 
+                variant="outline" 
+                onClick={() => navigate(`/courses/${courseId}`)}
+              >
+                Back to Course
+              </Button>
+              {chapter.is_completed && (
+                <Badge color="green" size="lg">Completed</Badge>
+              )}
+            </Group>
+          </>
+        )}      </Container>
+      
+      {/* Toolbar Container with all interactive tools */}
+      <ToolbarContainer courseId={courseId} chapterId={chapterId} />
+    </div>
   );
 }
-
 
 export default ChapterView;

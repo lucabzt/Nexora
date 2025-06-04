@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { MantineProvider, ColorSchemeProvider } from '@mantine/core';
 import { AuthProvider } from './contexts/AuthContext';
+import { ToolbarProvider } from './contexts/ToolbarContext';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -16,8 +17,13 @@ import LandingPage from './pages/LandingPage';
 import AppLayout from './layouts/AppLayout';
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminProtectedRoute from './components/AdminProtectedRoute'; // Import AdminProtectedRoute
 import SettingsPage from './pages/SettingsPage';
+import StatisticsPage from './pages/StatisticsPage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage'; // Import the OAuth callback page
+import Impressum from './pages/Impressum';
+import About from './pages/About';
+import AdminView from './pages/AdminView'; // Import AdminView component
 
 function App() {
   const [colorScheme, setColorScheme] = useState(() => {
@@ -52,20 +58,21 @@ function App() {
               },
             },
           },
-        },
-      }}>
+        },      }}>
         <AuthProvider>
-          <BrowserRouter>
-            <Routes>
+          <ToolbarProvider>
+            <BrowserRouter>
+              <Routes>
               {/* Public routes with MainLayout */}
               <Route element={<MainLayout />}>
                 <Route path="/home" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/google/callback" element={<OAuthCallbackPage />} /> {/* Moved OAuth callback route here */}
+                <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
+                <Route path="/impressum" element={<Impressum />} />
+                <Route path="/about" element={<About />} />
               </Route>
-              
-              {/* Protected routes */}
+                {/* Protected routes */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/" element={<AppLayout />}>
                   <Route index element={<Dashboard />} />
@@ -73,8 +80,15 @@ function App() {
                   <Route path="courses/:courseId" element={<CourseView />} />
                   <Route path="courses/:courseId/chapters/:chapterId" element={<ChapterView />} />
                   <Route path="settings" element={<SettingsPage />} />
+                  <Route path="statistics" element={<StatisticsPage />} />
                   {/* <Route path="auth/google/callback" element={<OAuthCallbackPage />} /> Removed from here */}
-                  {/* Add other protected routes here */}
+                </Route>
+              </Route>
+                {/* Admin-only routes - Using AppLayout for consistent interface */}
+              <Route element={<AdminProtectedRoute />}>
+                <Route path="/admin" element={<AppLayout />}>
+                  <Route index element={<AdminView />} />
+                  {/* Add other admin routes here */}
                 </Route>
               </Route>
 
@@ -86,6 +100,7 @@ function App() {
             </Routes>
           </BrowserRouter>
           <ToastContainer position="top-right" autoClose={3000} theme={colorScheme} />
+        </ToolbarProvider>
         </AuthProvider>
       </MantineProvider>
     </ColorSchemeProvider>

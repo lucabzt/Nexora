@@ -50,4 +50,13 @@ GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "https://www.nexora-ai.de/api/google/callback")
 FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL", "https://www.nexora-ai.de/google/callback")
 
+GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")
+GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET")
+GITHUB_REDIRECT_URI = os.getenv("GITHUB_REDIRECT_URI", "https://www.nexora-ai.de/api/github/callback")
+
+DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")
+DISCORD_CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET")
+DISCORD_REDIRECT_URI = os.getenv("DISCORD_REDIRECT_URI", "https://www.nexora-ai.de/api/discord/callback")
+
+
 

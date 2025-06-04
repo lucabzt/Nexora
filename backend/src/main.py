@@ -6,7 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from .api.routers import auth as auth_router
-from .api.routers import courses, files, users  # Your existing users router
+from .api.routers import courses, files, users, statistics  # Your existing users router
+from .api.routers import notes
 from .api.schemas import user as user_schema
 from .db.database import engine
 from .db.models import db_user as user_model
@@ -51,7 +52,9 @@ async def read_users_me(current_user: user_model.User = Depends(auth.get_current
 app.include_router(users.router)
 app.include_router(courses.router)
 app.include_router(files.router)
+app.include_router(statistics.router)
 app.include_router(auth_router.api_router)
+app.include_router(notes.router)
 
 
 # The root path "/" is now outside the /api prefix

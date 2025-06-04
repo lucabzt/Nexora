@@ -1,0 +1,65 @@
+/* Toolbar styling */
+
+/* Disable transitions during resizing for smoother experience */
+body.resizing-toolbar * {
+  transition: none !important;
+}
+
+/* Fix header when toolbar scrolling */
+.mantine-Header-root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200; /* Higher than toolbar */
+}
+
+/* Improve tab button appearance */
+.mantine-Tabs-tab {
+  transition: background-color 0.2s ease;
+}
+
+.mantine-Tabs-tab:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.mantine-Tabs-tab[data-active] {
+  background-color: rgba(34, 139, 230, 0.1);
+  border-right: 2px solid #228be6;
+}
+
+/* Better resizing handle */
+.splitter-handle-left {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 6px;
+  cursor: col-resize;
+  z-index: 20;
+}
+
+/* Custom scrollbars for tools */
+.tool-content {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  /* Ensure scroll handling stays within container */
+  overflow: auto;
+  height: 100%;
+  /* Prevent toolbar scrolling from affecting page header */
+  position: relative;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+.tool-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.tool-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tool-content::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
