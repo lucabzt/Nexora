@@ -34,6 +34,7 @@ import {
   IconSun,
   IconMoonStars,
   IconLogout,
+  IconChartLine,
   IconUser,
   IconInfoCircle,
   IconChevronRight,
@@ -152,12 +153,13 @@ function AppLayout() {
       avatarSrc = `data:image/jpeg;base64,${user.profile_image_base64}`;
     }
   }  const mainLinksData = [
-    { icon: <IconHome2 size={20} />, color: 'blue', label: t('navigation.home'), to: '/' },
-    { icon: <IconPlus size={20} />, color: 'teal', label: t('navigation.newCourse'), to: '/create-course' },
-    { icon: <IconSettings size={20} />, color: 'grape', label: t('navigation.settings'), to: '/settings' },
-    { icon: <IconInfoCircle size={20} />, color: 'gray', label: t('navigation.nexora'), to: '/home' },
+    { icon: <IconHome2 size={20} />, color: 'blue', label: t('home', { ns: 'navigation' }), to: '/' },
+    { icon: <IconPlus size={20} />, color: 'teal', label: t('newCourse', { ns: 'navigation' }), to: '/create-course' },
+    { icon: <IconChartLine size={20} />, color: 'grape', label: t('statistics', { ns: 'navigation' }), to: '/statistics' },
+    { icon: <IconSettings size={20} />, color: 'grape', label: t('settings', { ns: 'navigation' }), to: '/settings' },
+    { icon: <IconInfoCircle size={20} />, color: 'gray', label: t('nexora', { ns: 'navigation' }), to: '/home' },
     // Admin link - only shown to admin users
-    ...(user?.is_admin ? [{ icon: <IconShieldCheck size={20} />, color: 'red', label: t('navigation.adminArea'), to: '/admin' }] : []),
+    ...(user?.is_admin ? [{ icon: <IconShieldCheck size={20} />, color: 'red', label: t('adminArea', { ns: 'navigation' }), to: '/admin' }] : []),
   ];
   
   // Handler to close navbar on mobile when navigating
@@ -225,7 +227,7 @@ function AppLayout() {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
-              aria-label={t('app:burgerAriaLabel', 'Toggle navigation')}
+              aria-label={t('burgerAriaLabel', { ns: 'app', defaultValue: 'Toggle navigation' })}
             />
 
             <Group spacing="xs">
@@ -258,7 +260,7 @@ function AppLayout() {
                   },
                 })}
               >
-                {t('app.title')}
+                {t('title', { ns: 'app' })}
               </Title>
             </Group>
             
@@ -284,7 +286,7 @@ function AppLayout() {
                           key={avatarSrc || (user ? user.id : 'app-layout-avatar')}
                           src={avatarSrc}
                           radius="xl"
-                          alt={user.username || t('app:userAvatarAlt', 'User avatar')}
+                          alt={user.username || t('userAvatarAlt', { ns: 'app', defaultValue: 'User avatar' })}
                           color="cyan"
                           sx={{
                             cursor: 'pointer',
@@ -306,7 +308,7 @@ function AppLayout() {
                             color="cyan"
                             sx={{ textTransform: 'none' }}
                           >
-                            {t('app:onlineStatusBadge', 'Online')}
+                            {t('onlineStatusBadge', { ns: 'app', defaultValue: 'Online' })}
                           </Badge>
                         </Box>
                       </Group>
@@ -330,7 +332,7 @@ function AppLayout() {
                         },
                       }}
                     >
-                      {t('navigation.settings')}
+                      {t('settings', { ns: 'navigation' })}
                     </Menu.Item>                    <Menu.Item 
                       icon={dark ? <IconSun size={14} /> : <IconMoonStars size={14} />} 
                       onClick={() => toggleColorScheme()}
@@ -340,7 +342,7 @@ function AppLayout() {
                         },
                       }}
                     >
-                      {t('settings.theme')}
+                      {t('theme', { ns: 'settings' })}
                     </Menu.Item>
 
                     <Menu.Item 
@@ -352,7 +354,7 @@ function AppLayout() {
                         },
                       }}
                     >
-                      {t('navigation.about')}
+                      {t('about', { ns: 'navigation' })}
                     </Menu.Item>
 
                     <Divider />                    <Menu.Item 
@@ -365,7 +367,7 @@ function AppLayout() {
                         },
                       }}
                     >
-                      {t('navigation.logout')}
+                      {t('logout', { ns: 'navigation' })}
                     </Menu.Item>
                   </Menu.Dropdown>
                 </Menu>
@@ -380,7 +382,7 @@ function AppLayout() {
                       transform: 'scale(1.05)',
                     },
                   }}                >
-                  {t('navigation.login')}
+                  {t('login', { ns: 'navigation' })}
                 </Button>
               )}
             </Group>
@@ -427,8 +429,8 @@ function AppLayout() {
                   <IconSparkles size={20} />
                 </ThemeIcon>
                 {opened && (
-                  <Box>                    <Text size="sm" weight={600} mb={2}>{t('navigation.title', 'Navigation')}</Text>
-                    <Text size="xs" color="dimmed">{t('navigation.subtitle', 'Choose your destination')}</Text>
+                  <Box>                    <Text size="sm" weight={600} mb={2}>{t('title', { ns: 'navigation', defaultValue: 'Navigation' })}</Text>
+                    <Text size="xs" color="dimmed">{t('subtitle', { ns: 'navigation', defaultValue: 'Choose your destination' })}</Text>
                   </Box>
                 )}
               </Group>
@@ -454,12 +456,12 @@ function AppLayout() {
               })}
             >              {opened ? (
                 <>                  <Text size="xs" color="dimmed" mb="xs">
-                    {t('app.poweredBy', 'Powered by AI')}
+                    {t('poweredBy', { ns: 'app', defaultValue: 'Powered by AI' })}
                   </Text>
                   <Group spacing="xs" position="center">
                     <IconSparkles size={16} color={theme.colors.violet[5]} />
                     <Text size="xs" weight={500} color={theme.colors.violet[6]}>
-                      {t('app.title')}
+                      {t('title', { ns: 'app' })}
                     </Text>
                   </Group>
                 </>

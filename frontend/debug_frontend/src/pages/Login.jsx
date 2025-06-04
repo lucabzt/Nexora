@@ -18,27 +18,28 @@ import { useAuth } from '../contexts/AuthContext';
 import authService from '../api/authService'; // Import authService
 import { IconBrandGoogle, IconBrandGithub } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next'; // Import useTranslation hook
-
-const { t } = useTranslation('auth');
 import discordGif from '../assets/wired-flat-2566-logo-discord-hover-wink.gif'; // Import local Discord GIF
 
 // Use Discord GIF icon from local asset
-const DiscordIcon = (props) => (
-  <img
-    src={discordGif}
-    alt={t('discordAltText')}
-    width={32}
-    height={32}
-    style={{ display: 'block' }}
-    {...props}
-  />
-);
+const DiscordIcon = (props) => {
+  const { t } = useTranslation('auth');
+  return (
+    <img
+      src={discordGif}
+      alt={t('discordAltText')}
+      width={32}
+      height={32}
+      style={{ display: 'block' }}
+      {...props}
+    />
+  );
+}
 
 function Login() {
+  const { t } = useTranslation('auth');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
-  
 
   const form = useForm({
     initialValues: {

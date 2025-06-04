@@ -76,14 +76,14 @@ function MainLayout() {
                 color: theme.colorScheme === 'dark' ? theme.white : theme.black,
               })}
             >
-              {t('app.title')}
+              {t('title', { ns: 'app' })}
             </Title>
               <Group spacing="md">
               <ActionIcon
                 variant="outline"
                 color={dark ? 'yellow' : 'teal'}
                 onClick={() => toggleColorScheme()}
-                title={t('app:colorSchemeToggleTitle', 'Toggle color scheme')}
+                title={t('colorSchemeToggleTitle', { ns: 'app', defaultValue: 'Toggle color scheme' })}
                 size="lg"
                 radius="md"
               >
@@ -96,7 +96,7 @@ function MainLayout() {
                       <Avatar
                         key={avatarSrc || user.id}
                         src={avatarSrc}
-                        alt={user.username || t('navigation:userAvatarFallbackAlt', 'User')}
+                        alt={user.username || t('userAvatarFallbackAlt', { ns: 'navigation', defaultValue: 'User' })}
                         radius="xl"
                         size="sm"
                         color="cyan" // Added color for consistency if image fails
@@ -111,13 +111,13 @@ function MainLayout() {
                     </Group>
                   </Menu.Target>
                   <Menu.Dropdown>                    <Menu.Item icon={<IconUser size={14} />} onClick={() => navigate('/')}>
-                      {t('navigation.dashboard')}
+                      {t('dashboard', { ns: 'navigation' })}
                     </Menu.Item>
                     <Menu.Item icon={<IconSettings size={14} />} onClick={() => navigate('/settings')}>
-                      {t('navigation.settings')}
+                      {t('settings', { ns: 'navigation' })}
                     </Menu.Item>
                     <Menu.Item icon={<IconLogout size={14} />} onClick={handleLogout}>
-                      {t('navigation.logout')}
+                      {t('logout', { ns: 'navigation' })}
                     </Menu.Item>
                   </Menu.Dropdown>
                 </Menu>
@@ -128,7 +128,7 @@ function MainLayout() {
                     variant="outline"
                     radius="md"
                   >
-                    {t('navigation.login')}
+                    {t('login', { ns: 'navigation' })}
                   </Button>
                   
                   <Button 
@@ -138,7 +138,7 @@ function MainLayout() {
                     radius="md"
                     color="teal"
                   >
-                    {t('navigation.register')}
+                    {t('register', { ns: 'navigation' })}
                   </Button>
                   {/* Theme toggle for non-authenticated users is removed from here */}
                 </>
