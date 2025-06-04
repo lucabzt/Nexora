@@ -1,0 +1,18 @@
+{
+  "home": "Startseite",
+  "dashboard": "Dashboard",
+  "newCourse": "Neuer Kurs",
+  "courses": "Kurse",
+  "settings": "Einstellungen",
+  "statistics": "Statistiken",
+  "login": "Anmelden",
+  "register": "Registrieren",
+  "logout": "Abmelden",
+  "about": "Über uns",
+  "impressum": "Impressum",
+  "adminArea": "Admin Bereich",
+  "title": "Navigation",
+  "subtitle": "Wähle dein Ziel",
+  "nexora": "Über Nexora",
+  "userAvatarFallbackAlt": "Benutzer-Avatar"
+}

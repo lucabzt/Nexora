@@ -1,0 +1,64 @@
+{
+  "loadingCourseDetails": "Kursdetails werden geladen...",
+  "errors": {
+    "loadFailed": "Kursdetails konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
+    "genericTitle": "Fehler!",
+    "noCourseFound": "Kein Kurs mit dieser ID gefunden."
+  },
+  "creation": {
+    "title": "Kurserstellung läuft",
+    "statusInitializing": "Kurserstellung wird initialisiert...",
+    "statusCreatingChapters": "KI erstellt gerade Ihre Kapitel...",
+    "statusFinalizing": "Kursstruktur wird finalisiert...",
+    "statusComplete": "Kurserstellung abgeschlossen!",
+    "statusCreatingCourse": "Kurs wird erstellt...",
+    "aiInActionBadge": "KI in Aktion",
+    "progressLabel": "Gesamtfortschritt",
+    "currentStatusLabel": "Aktueller Status:",
+    "description": "Ihre personalisierte Lernerfahrung wird von unserer KI maßgeschneidert. Dies kann einen Moment dauern.",
+    "chaptersCreatedLabel_one": "{{chaptersCreated}} von gesch. {{estimatedTotal}} Kapitel erstellt",
+    "chaptersCreatedLabel_other": "{{chaptersCreated}} von gesch. {{estimatedTotal}} Kapiteln erstellt",
+    "estimatedTotalLabel": "Geschätzte Gesamtzahl Kapitel",
+    "learningTimeLabel": "Gesch. Lernzeit",
+    "buildingCourseLabel": "Ihr Kurs wird erstellt",
+    "creatingHighQualityContentLabel": "Unsere KI generiert hochwertige Inhalte, die auf Ihre Lernziele zugeschnitten sind. Bitte warten Sie einen Moment.",
+    "upcomingChapterAlt": "Kommendes Kapitel {{chapterNumber}}",
+    "creatingChapterOverlay": "Kapitel {{chapterNumber}} wird erstellt",
+    "aiCraftingOverlay": "KI erstellt dieses Kapitel...",
+    "placeholderChapterTitle": "Kapitel {{chapterNumber}} (In Kürze)",
+    "placeholderChapterDescription": "Der Inhalt für dieses Kapitel wird derzeit von unserer KI generiert. Er wird in Kürze verfügbar sein.",
+    "placeholderButtonCreating": "Wird erstellt..."
+  },
+  "buttons": {
+    "viewCompletedCourse": "Abgeschlossenen Kurs ansehen",
+    "backToDashboard": "Zurück zum Dashboard",
+    "startLearning": "Lernen beginnen",
+    "continueLearning": "Weiterlernen",
+    "reviewChapter": "Kapitel wiederholen"
+  },
+  "progress": {
+    "percentageComplete": "{{percentage}}% abgeschlossen",
+    "courseProgressLabel": "Kursfortschritt",
+    "chaptersCompletedStats": "{{completedChapters}} von {{totalChapters}} Kapiteln",
+    "chaptersCompletedText": "{{completedChapters}} von {{totalChapters}} Kapiteln abgeschlossen",
+    "estimatedTimeLabel": "Geschätzte Zeit"
+  },
+  "chapters": {
+    "statusCompleted": "Abgeschlossen",
+    "statusInProgress": "In Bearbeitung",
+    "statusNotStarted": "Nicht begonnen",
+    "defaultCaptionText": "Kapitel {{chapterNumber}}",
+    "defaultTitleText": "Kapitel {{chapterNumber}}",
+    "quizCount_one": "{{count}} Quiz",
+    "quizCount_other": "{{count}} Quizze"
+  },
+  "sessionIdLabel": "Sitzungs-ID:",
+  "aiGeneratedCourseLabel": "KI-generierter Kurs",
+  "personalizedLearningPathLabel": "Personalisierter Lernpfad von TeachAI",
+  "learningJourneyLabel": "Ihre Lernreise",
+  "followChaptersLabel": "Folgen Sie den Kapiteln unten, um den Kursinhalt zu meistern.",
+  "courseMasteredLabel": "Kurs gemeistert!",
+  "beginLearningLabel": "Beginnen Sie Ihre Reise!",
+  "continueLearningLabel": "Machen Sie weiter!",
+  "congratulationsLabel": "Herzlichen Glückwunsch!"
+}

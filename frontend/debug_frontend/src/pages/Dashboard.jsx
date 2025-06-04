@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { 
   Container, 
@@ -46,6 +47,7 @@ import {
 import { courseService } from '../api/courseService';
 
 function Dashboard() {
+  const { t } = useTranslation('dashboard');
   const navigate = useNavigate();
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
@@ -60,7 +62,7 @@ function Dashboard() {
   });
 
   const handleDelete = async (courseId) => {
-    if (!window.confirm('Are you sure you want to permanently delete this course? This action cannot be undone.')) {
+    if (!window.confirm(t('deleteCourseConfirmation'))) {
       return;
     }
     try {
@@ -68,7 +70,7 @@ function Dashboard() {
       setCourses(prevCourses => prevCourses.filter(course => course.course_id !== courseId));
       // Optional: Show a success notification
     } catch (err) {
-      setError(`Failed to delete course. ${err.message || ''}`);
+      setError(t('deleteCourseError', { message: err.message || '' }));
       console.error('Error deleting course:', err);
       // Optional: Show an error notification
     }
@@ -82,7 +84,7 @@ function Dashboard() {
         setCourses(coursesData);
         setError(null);
       } catch (error) {
-        setError('Failed to load courses. Please try again later.');
+        setError(t('loadCoursesError'));
         console.error('Error fetching courses:', error);
       } finally {
         setLoading(false);
@@ -95,13 +97,13 @@ function Dashboard() {
   const getStatusInfo = (status) => {
     switch (status) {
       case 'creating':
-        return { color: 'blue', icon: IconClock, label: 'Creating' };
+        return { color: 'blue', icon: IconClock, label: t('status.creating') };
       case 'finished':
-        return { color: 'green', icon: IconCheck, label: 'Finished' };
+        return { color: 'green', icon: IconCheck, label: t('status.finished') };
       case 'updating':
-        return { color: 'orange', icon: IconClock, label: 'Updating' };
+        return { color: 'orange', icon: IconClock, label: t('status.updating') };
       default:
-        return { color: 'gray', icon: IconBook, label: 'Learning' };
+        return { color: 'gray', icon: IconBook, label: t('status.learning') };
     }
   };
   // Function to generate a placeholder image URL with a specific theme
@@ -130,8 +132,8 @@ function Dashboard() {
       <Box mb="xl">
         <Group position="apart" mb="md">
           <Box>
-            <Title order={1} mb={5}>My Learning Journey</Title>
-            <Text color="dimmed">Continue your path to knowledge and growth</Text>
+            <Title order={1} mb={5}>{t('myLearningJourney')}</Title>
+            <Text color="dimmed" size="lg">{t('motivationalMessage')}</Text>
           </Box>
           <Button 
             size="md"
@@ -148,7 +150,7 @@ function Dashboard() {
               },
             })}
           >
-            Create New Course
+            {t('createNewCourseButton')}
           </Button>
         </Group>
       </Box>
@@ -162,7 +164,7 @@ function Dashboard() {
       {error && !loading && (
         <Alert 
           icon={<IconAlertCircle size={16} />}
-          title="Error!" 
+          title={t('errorAlertTitle')} 
           color="red" 
           mb="lg"
         >
@@ -177,16 +179,16 @@ function Dashboard() {
             <Group position="apart">
               <div>
                 <Text color="dimmed" size="xs" transform="uppercase" weight={700}>
-                  Current Streak
+                  {t('stats.currentStreak')}
                 </Text>
-                <Text weight={700} size="xl">{userStats.currentStreak} Days</Text>
+                <Text weight={700} size="xl">{userStats.currentStreak} {t('stats.daysUnit')}</Text>
               </div>
               <ThemeIcon color="orange" size={50} radius="md" variant="light">
                 <IconFlame size={30} />
               </ThemeIcon>
             </Group>
             <Text size="xs" color="dimmed" mt="md">
-              Keep it up! You're building great habits.
+              {t('stats.currentStreakDescription')}
             </Text>
           </Paper>
 
@@ -194,7 +196,7 @@ function Dashboard() {
             <Group position="apart">
               <div>
                 <Text color="dimmed" size="xs" transform="uppercase" weight={700}>
-                  Courses Completed
+                  {t('stats.coursesCompleted')}
                 </Text>
                 <Text weight={700} size="xl">{userStats.coursesCompleted}</Text>
               </div>
@@ -203,7 +205,7 @@ function Dashboard() {
               </ThemeIcon>
             </Group>
             <Text size="xs" color="dimmed" mt="md">
-              You've already mastered {userStats.coursesCompleted} courses!
+              {t('stats.coursesCompletedDescription')}
             </Text>
           </Paper>
 
@@ -211,16 +213,16 @@ function Dashboard() {
             <Group position="apart">
               <div>
                 <Text color="dimmed" size="xs" transform="uppercase" weight={700}>
-                  Total Learning Hours
+                  {t('stats.totalHoursLearned')}
                 </Text>
-                <Text weight={700} size="xl">{userStats.totalHoursLearned} hrs</Text>
+                <Text weight={700} size="xl">{userStats.totalHoursLearned} {t('stats.hoursUnit')}</Text>
               </div>
               <ThemeIcon color="blue" size={50} radius="md" variant="light">
                 <IconCertificate size={30} />
               </ThemeIcon>
             </Group>
             <Text size="xs" color="dimmed" mt="md">
-              That's {userStats.totalHoursLearned} hours of valuable knowledge!
+              {t('stats.totalHoursLearnedDescription')}
             </Text>
           </Paper>
         </SimpleGrid>
@@ -233,10 +235,9 @@ function Dashboard() {
             <ThemeIcon size={100} radius={100} color="teal" variant="light">
               <IconBook size={60} />
             </ThemeIcon>
-            <Title order={2} align="center">Begin Your Learning Journey</Title>
+            <Title order={2} align="center">{t('beginYourLearningJourney')}</Title>
             <Text align="center" size="lg" maw={500} mx="auto" color="dimmed">
-              You don't have any courses yet. Create your first personalized course to
-              start expanding your knowledge!
+              {t('noCoursesFound')}
             </Text>
             <Button 
               size="lg"
@@ -254,7 +255,7 @@ function Dashboard() {
                 },
               })}
             >
-              Create My First Course
+              {t('createMyFirstCourse')}
             </Button>
           </Stack>
         </Paper>
@@ -263,7 +264,7 @@ function Dashboard() {
       {/* Featured Course (if available) */}
       {!loading && !error && courses.length > 0 && (
         <>
-          <Title order={2} mb="md">Continue Learning</Title>
+          <Title order={2} mb="md">{t('continueLearning')}</Title>
           <Paper 
             radius="md" 
             p={0}
@@ -293,15 +294,15 @@ function Dashboard() {
                     mb="md"
                     leftSection={<IconHeartHandshake size={12} />}
                   >
-                    Recommended For You
+                    {t('recommendedForYou')}
                   </Badge>
-                  <Title order={2} mb="xs">{courses[0]?.title || 'Introduction to Machine Learning'}</Title>
+                  <Title order={2} mb="xs">{courses[0]?.title || t('featuredCourse.defaultTitle')}</Title>
                   <Text lineClamp={2} mb="lg" color="dimmed">
-                    {courses[0]?.description || 'Learn the fundamentals of machine learning and AI. Perfect for beginners wanting to understand core concepts.'}
+                    {courses[0]?.description || t('featuredCourse.defaultDescription')}
                   </Text>
                   
                   <Group position="apart" mb="md">
-                    <Text size="sm">Your progress:</Text>
+                    <Text size="sm">{t('yourProgress')}</Text>
                     <Text size="sm" weight={500}>
                       {calculateProgress(courses[0])}%
                     </Text>
@@ -330,7 +331,7 @@ function Dashboard() {
                     onClick={() => navigate(`/courses/${courses[0]?.course_id}`)}
                     mt="lg"
                   >
-                    Continue Learning
+                    {t('continueLearningButton')}
                   </Button>
                 </Box>
               </Grid.Col>
@@ -341,14 +342,14 @@ function Dashboard() {
       {!loading && !error && courses.length > 0 && (
         <>
           <Group position="apart" mb="md">
-            <Title order={2}>My Courses</Title>
+            <Title order={2} mb="lg">{t('yourCoursesTitle')}</Title>
             <Button 
               variant="subtle" 
               color="blue" 
               rightIcon={<IconArrowUpRight size={16} />}
               onClick={() => setViewAllCourses(!viewAllCourses)}
             >
-              {viewAllCourses ? 'Show Featured' : 'View All'}
+              {viewAllCourses ? t('showFewerCoursesButton') : t('viewAllCoursesButton')}
             </Button>
           </Group>
 
@@ -391,7 +392,7 @@ function Dashboard() {
                             zIndex: 2
                           }}
                         >
-                          <Tooltip label={`${progress}% complete`}>
+                          <Tooltip label={t('courseProgressTooltip', { progress })}>
                             <Box>
                               <RingProgress
                                 size={60}
@@ -427,7 +428,7 @@ function Dashboard() {
                             e.stopPropagation();
                             handleDelete(course.course_id);
                           }}
-                          title="Delete course"
+                          title={t('deleteCourseTooltip')}
                         >
                           <IconTrash size={16} />
                         </ActionIcon>
@@ -447,7 +448,7 @@ function Dashboard() {
                       <Group spacing="xs" mb="md">
                         <IconClock size={14} color={theme.colors.gray[6]} />
                         <Text size="xs" color="dimmed">
-                          Est. time: {course.total_time_hours} hours
+                          {t('estimatedTime', { hours: course.total_time_hours })}
                         </Text>
                       </Group>
                     )}
@@ -464,7 +465,7 @@ function Dashboard() {
                           : `/courses/${course.course_id}`
                       )}
                     >
-                      {course.status === 'creating' ? 'View Creation Progress' : 'Continue Learning'}
+                      {course.status === 'creating' ? t('viewCreationProgressButton') : t('continueLearningButton')}
                     </Button>
                   </Card>
                 </Grid.Col>

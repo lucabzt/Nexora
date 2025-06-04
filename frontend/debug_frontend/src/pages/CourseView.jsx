@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   Container, 
   Title, 
@@ -40,6 +41,7 @@ import {
 import { courseService } from '../api/courseService';
 
 function CourseView() {
+  const { t } = useTranslation('courseView');
   const { courseId } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -54,7 +56,7 @@ function CourseView() {
   // Streaming creation states
   const [isStreamingActive, setIsStreamingActive] = useState(isCreating);
   const [creationProgress, setCreationProgress] = useState({
-    status: 'Initializing course creation...',
+    status: t('creation.statusInitializing'),
     progress: 5,
     chaptersCreated: 0,
     estimatedTotal: 3
@@ -74,7 +76,7 @@ function CourseView() {
           setIsStreamingActive(false);
         }
       } catch (error) {
-        setError('Failed to load course. Please try again later.');
+        setError(t('errors.loadFailed'));
         console.error('Error fetching course:', error);
       } finally {
         setLoading(false);
@@ -100,8 +102,8 @@ function CourseView() {
               
               setCreationProgress({
                 status: newChapters.length === estimatedTotal 
-                  ? 'Finalizing course creation...'
-                  : `Creating chapters... (${newChapters.length}/${estimatedTotal})`,
+                  ? t('creation.statusFinalizing')
+                  : t('creation.statusCreatingChapters', { chaptersCreated: newChapters.length, estimatedTotal }),
                 progress: Math.round(progress),
                 chaptersCreated: newChapters.length,
                 estimatedTotal: estimatedTotal
@@ -110,7 +112,7 @@ function CourseView() {
               // Check if creation is complete (course status is finished)
               if (courseData.status === 'finished' || newChapters.length >= estimatedTotal) {
                 setCreationProgress({
-                  status: 'Course creation complete!',
+                  status: t('creation.statusComplete'),
                   progress: 100,
                   chaptersCreated: newChapters.length,
                   estimatedTotal: estimatedTotal
@@ -137,14 +139,14 @@ function CourseView() {
     <Container size="lg" py="xl">
       {loading && (
         <Box sx={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
-          <Loader size="lg" />
+          <Loader size="lg" title={t('loadingCourseDetails')} />
         </Box>
       )}
 
       {error && !loading && (
         <Alert 
           icon={<IconAlertCircle size={16} />}
-          title="Error!" 
+          title={t('errors.genericTitle')} 
           color="red" 
           mb="lg"
         >
@@ -153,7 +155,7 @@ function CourseView() {
       )}
 
       {!loading && !error && (
-        <>          {/* Course Creation Progress Section */}
+        <>          {/* {t('creation.title')} Section */}
           {isStreamingActive && (
             <Paper 
               radius="md" 
@@ -189,7 +191,7 @@ function CourseView() {
                   <Badge color="blue" variant="filled" size="lg" radius="sm" mb="sm">
                     <Group spacing="xs">
                       <IconBrain size={16} />
-                      <span>AI in Action</span>
+                      <span>{t('creation.aiInActionBadge')}</span>
                     </Group>
                   </Badge>
                   <Title 
@@ -199,7 +201,7 @@ function CourseView() {
                       fontSize: '1.8rem',
                     })}
                   >
-                    Creating Your Custom Course
+                    {t('creation.title')}
                   </Title>
                 </Box>
                 
@@ -219,7 +221,7 @@ function CourseView() {
               
               <Box mb="xl">
                 <Group position="apart" mb="xs">
-                  <Text size="sm" weight={600} color="dimmed">PROGRESS</Text>
+                  <Text size="sm" weight={600} color="dimmed">{t('creation.progressLabel')}</Text>
                   <Text size="sm" weight={700}>{creationProgress.progress}%</Text>
                 </Group>
                 
@@ -252,12 +254,12 @@ function CourseView() {
                 })}
               >
                 <Text align="center" size="lg" weight={600} mb="xs" color={creationProgress.progress === 100 ? 'teal' : undefined}>
-                  {creationProgress.status}
+                  {t('creation.currentStatusLabel')} {creationProgress.status}
                 </Text>
                 
                 {creationProgress.progress > 0 && creationProgress.progress < 100 && (
                   <Text color="dimmed" size="sm" align="center">
-                    This may take a few minutes. Our AI is crafting personalized learning content based on your request.
+                    {t('creation.description')}
                   </Text>
                 )}
                 
@@ -269,7 +271,7 @@ function CourseView() {
                       leftIcon={<IconArrowRight size={16} />}
                       onClick={() => window.location.reload()}
                     >
-                      View Your Completed Course
+                      {t('buttons.viewCompletedCourse')}
                     </Button>
                   </Group>
                 )}
@@ -279,21 +281,21 @@ function CourseView() {
                 <Group position="center" mt="md" spacing="xl">
                   <Box sx={{ textAlign: 'center' }}>
                     <Text size="xl" weight={700}>{creationProgress.chaptersCreated}</Text>
-                    <Text size="xs" color="dimmed">Chapters Created</Text>
+                    <Text size="xs" color="dimmed">{t('creation.chaptersCreatedLabel', { chaptersCreated: creationProgress.chaptersCreated, estimatedTotal: creationProgress.estimatedTotal })}</Text>
                   </Box>
                   
                   <Divider orientation="vertical" />
                   
                   <Box sx={{ textAlign: 'center' }}>
                     <Text size="xl" weight={700}>{creationProgress.estimatedTotal}</Text>
-                    <Text size="xs" color="dimmed">Total Chapters</Text>
+                    <Text size="xs" color="dimmed">{t('creation.estimatedTotalLabel')}</Text>
                   </Box>
                   
                   <Divider orientation="vertical" />
                   
                   <Box sx={{ textAlign: 'center' }}>
                     <Text size="xl" weight={700}>{course?.total_time_hours || 2} hrs</Text>
-                    <Text size="xs" color="dimmed">Learning Time</Text>
+                    <Text size="xs" color="dimmed">{t('creation.learningTimeLabel')}</Text>
                   </Box>
                 </Group>
               )}
@@ -320,20 +322,20 @@ function CourseView() {
                         <Button 
                           variant="subtle" 
                           leftIcon={<IconArrowBack size={16} />}
-                          onClick={() => navigate('/')}
+                          onClick={() => navigate('/dashboard')}
                           mb="md"
                         >
-                          Back to Dashboard
+                          {t('buttons.backToDashboard')}
                         </Button>
                         
                         {isStreamingActive ? (
                           <Badge size="lg" color="blue" variant="filled" px="md" py="sm">
                             <IconClock size={16} style={{ marginRight: 6 }} />
-                            Creating Course
+                            {t('creation.statusCreatingCourse')}
                           </Badge>
                         ) : (
                           <Badge size="lg" color="teal" variant="filled" px="md" py="sm">
-                            {Math.round(progress)}% Complete
+                            {t('progress.percentageComplete', { percentage: Math.round(progress) })}
                           </Badge>
                         )}
                       </Group>
@@ -360,7 +362,7 @@ function CourseView() {
 
                       <Group position="apart" mb="lg">
                         <Box>
-                          <Text size="sm" weight={500} color="dimmed">COURSE PROGRESS</Text>
+                          <Text size="sm" weight={500} color="dimmed">{t('progress.courseProgressLabel')}</Text>
                           <Group spacing="xs" mt="xs">
                             <RingProgress 
                               size={60} 
@@ -375,20 +377,20 @@ function CourseView() {
                             />
                             <div>
                               <Text size="md" weight={700}>{completedChapters} of {chapters.length}</Text>
-                              <Text size="xs" color="dimmed">Chapters completed</Text>
+                              <Text size="xs" color="dimmed">{t('progress.chaptersCompletedStats', { completedChapters, totalChapters: chapters.length })}</Text>
                             </div>
                           </Group>
                         </Box>
                         
                         <Box>
-                          <Text size="sm" weight={500} color="dimmed">ESTIMATED TIME</Text>
+                          <Text size="sm" weight={500} color="dimmed">{t('progress.estimatedTimeLabel')}</Text>
                           <Group spacing="xs" mt="xs">
                             <ThemeIcon size="lg" radius="md" color="teal" variant="light">
                               <IconClock size={20} />
                             </ThemeIcon>
                             <div>
                               <Text size="md" weight={700}>{course.total_time_hours || "2"} hours</Text>
-                              <Text size="xs" color="dimmed">Total learning time</Text>
+                              <Text size="xs" color="dimmed">{t('progress.learningTimeLabel')}</Text>
                             </div>
                           </Group>
                         </Box>
@@ -403,11 +405,11 @@ function CourseView() {
                           onClick={() => navigate('/courses/' + courseId + '/chapters/' + chapters[0]?.id)}
                           mt="md"
                         >
-                          {progress > 0 ? 'Continue Learning' : 'Start Learning'}
+                          {progress > 0 ? t('buttons.continueLearning') : t('buttons.startLearning')}
                         </Button>
                       )}
                       
-                      <Text size="xs" color="dimmed" mt={30}>Session ID: {course.session_id}</Text>
+                      <Text size="xs" color="dimmed" mt={30}>{t('sessionIdLabel')} {course.session_id}</Text>
                     </Box>
                   </Grid.Col>
                   
@@ -438,9 +440,9 @@ function CourseView() {
                           <IconBrain size={18} />
                         </ThemeIcon>
                         <div>
-                          <Text color="white" weight={600}>AI-Generated Course</Text>
+                          <Text color="white" weight={600}>{t('aiGeneratedCourseLabel')}</Text>
                           <Text color="white" opacity={0.7} size="xs">
-                            Personalized learning path
+                            {t('personalizedLearningPathLabel')}
                           </Text>
                         </div>
                       </Group>
@@ -457,10 +459,10 @@ function CourseView() {
                       color: theme.colorScheme === 'dark' ? theme.white : theme.black,
                     })}
                   >
-                    Your Learning Journey
+                    {t('learningJourneyLabel')}
                   </Title>
                   <Text color="dimmed">
-                    Follow the chapters below to master this topic
+                    {t('followChaptersLabel')}
                   </Text>
                 </Box>
                 
@@ -480,13 +482,13 @@ function CourseView() {
                     <div>
                       <Text weight={600} size="sm">
                         {completedChapters === chapters.length ? 
-                          'Course Mastered!' : 
-                          `${completedChapters === 0 ? 'Begin your learning' : 'Continue learning'}`}
+                          t('courseMasteredLabel') : 
+                          `${completedChapters === 0 ? t('beginLearningLabel') : t('continueLearningLabel')}`}
                       </Text>
                       <Text size="xs" color="dimmed">
                         {completedChapters === chapters.length ? 
-                          'Congratulations on completing the course!' : 
-                          `${completedChapters} of ${chapters.length} chapters completed`}
+                          t('congratulationsLabel') : 
+                          t('progress.chaptersCompletedText', { completedChapters, totalChapters: chapters.length })}
                       </Text>
                     </div>
                   </Group>
@@ -500,10 +502,9 @@ function CourseView() {
                   textAlign: 'center',
                 })}>
                   <Loader size="md" mb="md" mx="auto" />
-                  <Title order={3} mb="sm">Building Your Custom Course</Title>
+                  <Title order={3} mb="sm">{t('creation.buildingCourseLabel')}</Title>
                   <Text color="dimmed" size="sm" maw={400} mx="auto">
-                    Our AI is crafting personalized chapters tailored just for you. 
-                    This may take a few minutes as we create high-quality learning content.
+                    {t('creation.creatingHighQualityContentLabel')}
                   </Text>
                 </Paper>
               )}
@@ -542,7 +543,7 @@ function CourseView() {
                         <Image
                           src={chapterImage}
                           height={180}
-                          alt={chapter.caption || "Chapter " + (index + 1)}
+                          alt={chapter.caption || t('chapters.defaultCaptionText', { chapterNumber: index + 1 })}
                         />
                         
                         {chapter.is_completed && (
@@ -575,12 +576,12 @@ function CourseView() {
                             color={chapter.is_completed ? "green" : "blue"} 
                             variant="filled" 
                           >
-                            {chapter.is_completed ? "Completed" : chapter.time_minutes + " min"}
+                            {chapter.is_completed ? t('chapters.statusCompleted') : (progress > 0 && index === completedChapters ? t('chapters.statusInProgress') : t('chapters.statusNotStarted'))}
                           </Badge>
                           
                           {chapter.mc_questions && (
                             <Badge color="yellow" variant="filled" ml={6}>
-                              {chapter.mc_questions.length} {chapter.mc_questions.length === 1 ? 'Quiz' : 'Quizzes'}
+                              {t('chapters.quizCount', { count: chapter.mc_questions.length })}
                             </Badge>
                           )}
                         </Box>
@@ -593,7 +594,7 @@ function CourseView() {
                           lineClamp={2}
                           sx={{ minHeight: '3.2rem' }}
                         >
-                          {chapter.caption || `Chapter ${index + 1}`}
+                          {chapter.caption || t('chapters.defaultTitleText', { chapterNumber: index + 1 })}
                         </Text>
                         
                         <Text 
@@ -625,7 +626,7 @@ function CourseView() {
                               }
                         }
                       >
-                        {chapter.is_completed ? 'Review Chapter' : 'Start Learning'}
+                        {chapter.is_completed ? t('buttons.reviewChapter') : t('buttons.startLearning')}
                       </Button>
                     </Card>
                   );
@@ -653,7 +654,7 @@ function CourseView() {
                           <Image
                             src={`https://source.unsplash.com/600x400/?learning,education,${index}`}
                             height={180}
-                            alt={`Upcoming Chapter ${chapters.length + index + 1}`}
+                            alt={t('creation.upcomingChapterAlt', { chapterNumber: chapters.length + index + 1 })}
                             sx={{ filter: 'blur(3px) grayscale(50%)' }}
                           />
                           <Overlay opacity={0.6} color="#000" />
@@ -672,22 +673,22 @@ function CourseView() {
                             }}
                           >
                             <Loader color="white" size="md" mb="md" />
-                            <Text align="center" color="white" weight={600}>Creating Chapter {chapters.length + index + 1}</Text>
-                            <Text align="center" color="white" size="xs" opacity={0.8}>Our AI is crafting this content</Text>
+                            <Text align="center" color="white" weight={600}>{t('creation.creatingChapterOverlay', { chapterNumber: chapters.length + index + 1 })}</Text>
+                            <Text align="center" color="white" size="xs" opacity={0.8}>{t('creation.aiCraftingOverlay')}</Text>
                           </Box>
                         </Box>
                       </Card.Section>
                       <Box mt="md" sx={{ flex: 1 }}>
-                        <Text weight={500} color="dimmed">Chapter {chapters.length + index + 1}</Text>
+                        <Text weight={500} color="dimmed">{t('creation.placeholderChapterTitle', { chapterNumber: chapters.length + index + 1 })}</Text>
                         <Box mt="sm" mb="lg">
                           <Loader size="xs" mb="xs" />
                           <Text size="sm" color="dimmed" lineClamp={3} sx={{ minHeight: '4.5rem' }}>
-                            This chapter is being generated with personalized content tailored to your learning needs...
+                            {t('creation.placeholderChapterDescription')}
                           </Text>
                         </Box>
                       </Box>
                       <Button variant="light" color="gray" fullWidth mt="md" disabled>
-                        Creating Chapter...
+                        {t('creation.placeholderButtonCreating')}
                       </Button>
                     </Card>
                   ))

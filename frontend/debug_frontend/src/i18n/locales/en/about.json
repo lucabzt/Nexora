@@ -1,0 +1,87 @@
+{
+  "mainTitle": {
+    "about": "About ",
+    "nexora": "Nexora"
+  },
+  "mainDescription": "Nexora is not just another learning platform — it's a revolutionary approach to education that harnesses the power of artificial intelligence to create truly personalized learning pathways that evolve with you.",
+  "learningApproach": "Our AI-powered system analyzes your learning style, strengths, weaknesses, and goals to craft custom courses that adapt in real-time as you progress. Whether you're picking up a new skill, deepening your expertise, or exploring entirely new fields of knowledge, Nexora is your AI learning companion on the journey.",
+  "buttons": {
+    "startYourJourney": "Start Your Journey"
+  },
+  "imageAlt": "AI Learning",
+  "imageCaption": "Neural networks learning patterns, just like our AI learns about you",
+  "mission": {
+    "title": "Our Mission",
+    "description": "To democratize high-quality education by creating AI-powered learning experiences that are as unique as each learner, making mastery of any subject accessible to everyone.",
+    "item1Title": "Personalization",
+    "item1Description": "Every learning path uniquely tailored to individual needs",
+    "item2Title": "Accessibility",
+    "item2Description": "Quality education available to anyone, anywhere",
+    "item3Title": "Innovation",
+    "item3Description": "Continuously advancing the frontier of AI in education",
+    "item4Title": "Technology",
+    "item4Description": "Leveraging cutting-edge AI to enhance human learning"
+  },
+  "journey": {
+    "title": "Our Journey",
+    "event1": {
+      "title": "The Idea",
+      "description": "We developed the concept for adaptive AI learning while researching neural networks",
+      "date": "January 2022"
+    },
+    "event2": {
+      "title": "Foundation",
+      "description": "Nexora was officially launched with seed funding from education technology investors",
+      "date": "June 2023"
+    },
+    "event3": {
+      "title": "First Users",
+      "description": "Beta platform welcomed 500 early users who helped shape our learning algorithms",
+      "date": "March 2024"
+    },
+    "event4": {
+      "title": "Where We Are Today",
+      "description": "Serving thousands of learners with continuously improving AI-powered curriculum",
+      "date": "June 2025"
+    },
+    "event5": {
+      "title": "Where We Want to Go",
+      "description": "Expanding our platform to support more languages and subjects, with global reach",
+      "date": "June 2026"
+    }
+  },
+  "team": {
+    "title": "Meet Our Team",
+    "members": {
+      "markusHuber": {
+        "role": "Software Architect & Full-Stack Developer",
+        "bio": "AI expert with 15+ years experience in machine learning and adaptive education systems."
+      },
+      "lucaBozzetti": {
+        "role": "AI Researcher & Agent Developer",
+        "bio": "Former professor with a passion for innovating education through technology."
+      },
+      "sebastianRogg": {
+        "role": "Still in progress",
+        "bio": "Full-stack engineer specializing in AI integration and responsive learning systems."
+      },
+      "matthiasMeierlohr": {
+        "role": "Frontend Designer & UX Specialist",
+        "bio": "Swift UI designer focused on creating intuitive, user-friendly interfaces for AI applications."
+      },
+      "jonasHoerter": {
+        "role": "Eierlecker & Backend Developer",
+        "bio": "Swift UI designer focused on creating intuitive, user-friendly interfaces for AI applications."
+      },
+      "paulVorderbruegge": {
+        "role": "Beer Lover & Backend Specialist",
+        "bio": "Swift UI designer focused on creating intuitive, user-friendly interfaces for AI applications."
+      }
+    }
+  },
+  "cta": {
+    "title": "Ready to Transform Your Learning Journey?",
+    "subtitle": "Join thousands who are already experiencing the future of education.",
+    "button": "Get Started For Free"
+  }
+}

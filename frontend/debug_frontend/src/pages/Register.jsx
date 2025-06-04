@@ -17,24 +17,29 @@ import { useForm } from '@mantine/form';
 import { useAuth } from '../contexts/AuthContext';
 import authService from '../api/authService'; // Import authService
 import { IconBrandGoogle, IconBrandGithub } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
+
 import discordGif from '../assets/wired-flat-2566-logo-discord-hover-wink.gif'; // Import local Discord GIF
 
 // Use Discord GIF icon from local asset
-const DiscordIcon = (props) => (
+const DiscordIcon = (props) => {
+    const { t } = useTranslation('auth');
   <img
     src={discordGif}
-    alt="Discord"
+    alt={t('discordAltText')}
     width={32}
     height={32}
     style={{ display: 'block' }}
     {...props}
   />
-);
+};
 
 function Register() {
+  const { t } = useTranslation('auth');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { register, login } = useAuth();
+  
 
   const form = useForm({
     initialValues: {
@@ -44,10 +49,12 @@ function Register() {
       confirmPassword: '',
     },
     validate: {
-      username: (value) => !value ? 'Username is required' : value.length < 3 ? 'Username must be at least 3 characters' : null,
-      email: (value) => !/^\S+@\S+$/.test(value) ? 'Invalid email address' : null,
-      password: (value) => !value ? 'Password is required' : value.length < 3 ? 'Password must be at least 3 characters' : null,
-      confirmPassword: (value, values) => value !== values.password ? 'Passwords do not match' : null,
+      username: (value) => !value ? t('usernameRequired') : 
+                          value.length < 3 ? t('usernameLength', 'Username must be at least 3 characters') : null,
+      email: (value) => !/^\S+@\S+$/.test(value) ? t('emailInvalid', 'Invalid email address') : null,
+      password: (value) => !value ? t('passwordRequired') : 
+                           value.length < 3 ? t('passwordLength') : null,
+      confirmPassword: (value, values) => value !== values.password ? t('passwordsDoNotMatch', 'Passwords do not match') : null,
     },
   });
 
@@ -94,50 +101,49 @@ function Register() {
         flexDirection: 'column',
         justifyContent: 'center',
       }}
-    >
-      <Title align="center" mb="lg">
-        Create Account
+    >      <Title align="center" mb="lg">
+        {t('registerTitle')}
       </Title>
 
       <Paper withBorder shadow="md" p={30} radius="md" mt="xl">
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <TextInput
-            label="Username"
-            placeholder="Your username"
+            label={t('username')}
+            placeholder={t('usernamePlaceholder')}
             required
             {...form.getInputProps('username')}
             mb="md"
           />
 
           <TextInput
-            label="Email"
-            placeholder="Your email"
+            label={t('email')}
+            placeholder={t('emailPlaceholder', 'Your email')}
             required
             {...form.getInputProps('email')}
             mb="md"
           />
 
           <PasswordInput
-            label="Password"
-            placeholder="Your password"
+            label={t('password')}
+            placeholder={t('passwordPlaceholder')}
             required
             {...form.getInputProps('password')}
             mb="md"
           />
 
           <PasswordInput
-            label="Confirm Password"
-            placeholder="Confirm your password"
+            label={t('confirmPassword')}
+            placeholder={t('confirmPasswordPlaceholder', 'Confirm your password')}
             required
             {...form.getInputProps('confirmPassword')}
             mb="xl"
           />
 
           <Button fullWidth type="submit" loading={isLoading}>
-            Register
+            {t('signUp')}
           </Button>
 
-          <Divider label="Or sign up with" labelPosition="center" my="lg" />
+          <Divider label={t('continueWith')} labelPosition="center" my="lg" />
 
           <Group position="center" spacing="md" mb="xl">
             <Button
@@ -164,11 +170,10 @@ function Register() {
             >
               <DiscordIcon />
             </Button>
-          </Group>
-          <Text align="center" mt="md">
-            Already have an account?{' '}
+          </Group>          <Text align="center" mt="md">
+            {t('haveAccount')}{' '}
             <Anchor component={Link} to="/login">
-              Login
+              {t('signIn')}
             </Anchor>
           </Text>
         </form>

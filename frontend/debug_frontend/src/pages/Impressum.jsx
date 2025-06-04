@@ -12,6 +12,7 @@ import {
   createStyles
 } from '@mantine/core';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   IconBuilding, 
   IconUser, 
@@ -57,6 +58,7 @@ const useStyles = createStyles((theme) => ({
 
 function Impressum() {
   const { classes } = useStyles();
+  const { t } = useTranslation('impressum');
   const theme = useMantineTheme();
   const [visible, setVisible] = useState(false);
   
@@ -70,21 +72,21 @@ function Impressum() {
         {(styles) => (
           <div className={classes.wrapper} style={styles}>
             <Title className={classes.title} align="center">
-              Impressum
+              {t('mainTitle')}
             </Title>
             
             <Stack spacing="xl">
               <Paper withBorder p="md" radius="md" className={classes.section}>
                 <Group spacing="md" mb="xs">
                   <IconBuilding size={24} color={theme.colors.teal[5]} />
-                  <Title order={3}>Company Information</Title>
+                  <Title order={3}>{t('companyInfo.title')}</Title>
                 </Group>
                 <Divider mb="md" />
                 <Stack spacing="xs">
-                  <Text size="lg" weight={700}>Nexora GmbH</Text>
-                  <Text>Innovative AI-Powered Learning Solutions</Text>
-                  <Text color="dimmed">Registration: HRB 123456 B (Amtsgericht Berlin)</Text>
-                  <Text color="dimmed">VAT ID: DE123456789</Text>
+                  <Text size="lg" weight={700}>{t('companyInfo.name')}</Text>
+                  <Text>{t('companyInfo.tagline')}</Text>
+                  <Text color="dimmed">{t('companyInfo.registration')}</Text>
+                  <Text color="dimmed">{t('companyInfo.vatId')}</Text>
                 </Stack>
               </Paper>
               
@@ -92,22 +94,22 @@ function Impressum() {
                 <Paper withBorder p="md" radius="md" className={classes.section}>
                   <Group spacing="md" mb="xs">
                     <IconUser size={24} color={theme.colors.blue[5]} />
-                    <Title order={3}>Legal Representative</Title>
+                    <Title order={3}>{t('legalRepresentative.title')}</Title>
                   </Group>
                   <Divider mb="md" />
-                  <Text>Markus Example</Text>
-                  <Text color="dimmed">Managing Director</Text>
+                  <Text>{t('legalRepresentative.name')}</Text>
+                  <Text color="dimmed">{t('legalRepresentative.role')}</Text>
                 </Paper>
                 
                 <Paper withBorder p="md" radius="md" className={classes.section}>
                   <Group spacing="md" mb="xs">
                     <IconMapPin size={24} color={theme.colors.red[5]} />
-                    <Title order={3}>Address</Title>
+                    <Title order={3}>{t('address.title')}</Title>
                   </Group>
                   <Divider mb="md" />
-                  <Text>Example Street 1</Text>
-                  <Text>12345 Example City</Text>
-                  <Text>Germany</Text>
+                  <Text>{t('address.street')}</Text>
+                  <Text>{t('address.city')}</Text>
+                  <Text>{t('address.country')}</Text>
                 </Paper>
               </Group>
               
@@ -115,37 +117,35 @@ function Impressum() {
                 <Paper withBorder p="md" radius="md" className={classes.section}>
                   <Group spacing="md" mb="xs">
                     <IconMail size={24} color={theme.colors.violet[5]} />
-                    <Title order={3}>Contact</Title>
+                    <Title order={3}>{t('contact.title')}</Title>
                   </Group>
                   <Divider mb="md" />
-                  <Text>Email: info@nexora.ai</Text>
-                  <Text>Phone: +49 (0) 30 123 45678</Text>
+                  <Text>{t('contact.email')}</Text>
+                  <Text>{t('contact.phone')}</Text>
                 </Paper>
                 
                 <Paper withBorder p="md" radius="md" className={classes.section}>
                   <Group spacing="md" mb="xs">
                     <IconWorld size={24} color={theme.colors.cyan[5]} />
-                    <Title order={3}>Online Presence</Title>
+                    <Title order={3}>{t('onlinePresence.title')}</Title>
                   </Group>
                   <Divider mb="md" />
-                  <Text>Website: www.nexora.ai</Text>
-                  <Text>Social Media: @nexoralearning</Text>
+                  <Text>{t('onlinePresence.website')}</Text>
+                  <Text>{t('onlinePresence.socialMedia')}</Text>
                 </Paper>
               </Group>
               
               <Paper withBorder p="md" radius="md" className={classes.section}>
                 <Group spacing="md" mb="xs">
                   <IconScale size={24} color={theme.colors.yellow[5]} />
-                  <Title order={3}>Legal Disclaimer</Title>
+                  <Title order={3}>{t('legalDisclaimer.title')}</Title>
                 </Group>
                 <Divider mb="md" />
                 <Text mb="md">
-                  Despite careful content control, we assume no liability for the content of external links. 
-                  The operators of the linked pages are solely responsible for their content.
+                  {t('legalDisclaimer.externalLinks')}
                 </Text>
                 <Text>
-                  All content on this website is protected by copyright. Reproduction or use without 
-                  explicit permission is prohibited.
+                  {t('legalDisclaimer.copyright')}
                 </Text>
               </Paper>
               
@@ -153,30 +153,29 @@ function Impressum() {
                 <Paper withBorder p="md" radius="md" className={classes.section}>
                   <Group spacing="md" mb="xs">
                     <IconFileText size={24} color={theme.colors.green[5]} />
-                    <Title order={3}>Content Responsibility</Title>
+                    <Title order={3}>{t('contentResponsibility.title')}</Title>
                   </Group>
                   <Divider mb="md" />
                   <Text>
-                    Responsible for the content according to § 55 Abs. 2 RStV: Markus Example, 
-                    Example Street 1, 12345 Example City
+                    {t('contentResponsibility.details')}
                   </Text>
                 </Paper>
                 
                 <Paper withBorder p="md" radius="md" className={classes.section}>
                   <Group spacing="md" mb="xs">
                     <IconCertificate size={24} color={theme.colors.orange[5]} />
-                    <Title order={3}>Data Protection</Title>
+                    <Title order={3}>{t('dataProtection.title')}</Title>
                   </Group>
                   <Divider mb="md" />
                   <Text>
-                    For details on how we process your data, please refer to our Privacy Policy.
+                    {t('dataProtection.info')}
                   </Text>
                 </Paper>
               </Group>
               
               <Box mt="xl">
                 <Text color="dimmed" size="sm" align="center">
-                  This impressum page was last updated: June 2025
+                  {t('lastUpdated')}
                 </Text>
               </Box>
             </Stack>
