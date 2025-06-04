@@ -193,8 +193,10 @@ function AppLayout() {
             boxShadow: dark 
               ? `0 4px 12px ${theme.colors.dark[9]}50`
               : `0 4px 12px ${theme.colors.gray[3]}30`,
+            zIndex: 200, // Higher than navbar (150) and toolbar (100)
+            position: 'relative', // Ensure stacking context
           })}
-        >          <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+        ><div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
             <Burger
               opened={opened}
               onClick={() => setOpened((o) => !o)}
@@ -252,7 +254,7 @@ function AppLayout() {
             
             <Group spacing="xs">
               {user ? (
-                <Menu shadow="md" width={220}>
+                <Menu shadow="md" width={220} withinPortal={true} zIndex={300}>
                   <Menu.Target>
                     <UnstyledButton
                       sx={{
@@ -297,13 +299,13 @@ function AppLayout() {
                         </Box>
                       </Group>
                     </UnstyledButton>
-                  </Menu.Target>
-                  <Menu.Dropdown
+                  </Menu.Target>                  <Menu.Dropdown
                     sx={{
                       border: `1px solid ${dark ? theme.colors.dark[4] : theme.colors.gray[3]}`,
                       boxShadow: dark 
                         ? `0 8px 24px ${theme.colors.dark[9]}70`
                         : `0 8px 24px ${theme.colors.gray[4]}40`,
+                      zIndex: 300, // Much higher than navbar (150) and toolbar (100)
                     }}
                   >
                     <Menu.Label sx={{ fontSize: theme.fontSizes.xs, color: theme.colors.gray[6] }}>
@@ -380,6 +382,7 @@ function AppLayout() {
             transition: 'width 0.3s ease, padding 0.3s ease',
             display: (isMobile && !opened) ? 'none' : 'flex', // Completely hide on mobile when closed
             flexDirection: 'column',
+            zIndex: 150, // Higher than toolbar (100)
           })}
         >
           <Navbar.Section>

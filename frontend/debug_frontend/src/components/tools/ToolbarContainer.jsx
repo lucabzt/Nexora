@@ -72,12 +72,11 @@ function ToolbarContainer({ courseId, chapterId }) {
           size="lg"
           variant="filled"
           color="blue"
-          onClick={handleToggleToolbar}
-          sx={{ 
+          onClick={handleToggleToolbar}          sx={{ 
             position: 'fixed',
             top: '90px',
             right: '20px',
-            zIndex: 200,
+            zIndex: 150, // Lower than user menu dropdown (300) but higher than toolbar (100)
             borderRadius: '50%',
             width: '48px',
             height: '48px',
@@ -116,7 +115,7 @@ function ToolbarContainer({ courseId, chapterId }) {
         width: toolbarOpen ? (isMobile ? '100vw' : toolbarWidth) : (isMobile ? 0 : 40), 
         height: 'calc(100vh - 70px)' 
       }}
-      minWidth={isMobile ? '100vw' : 40}
+      minWidth={isMobile ? (toolbarOpen ? '100vw' : 0) : 40}
       maxWidth={isMobile ? '100vw' : 800}
       enable={{
         top: false,
