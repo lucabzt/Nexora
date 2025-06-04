@@ -17,11 +17,13 @@ import LandingPage from './pages/LandingPage';
 import AppLayout from './layouts/AppLayout';
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminProtectedRoute from './components/AdminProtectedRoute'; // Import AdminProtectedRoute
 import SettingsPage from './pages/SettingsPage';
 import StatisticsPage from './pages/StatisticsPage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage'; // Import the OAuth callback page
 import Impressum from './pages/Impressum';
 import About from './pages/About';
+import AdminView from './pages/AdminView'; // Import AdminView component
 
 function App() {
   const [colorScheme, setColorScheme] = useState(() => {
@@ -70,8 +72,7 @@ function App() {
                 <Route path="/impressum" element={<Impressum />} />
                 <Route path="/about" element={<About />} />
               </Route>
-              
-              {/* Protected routes */}
+                {/* Protected routes */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/" element={<AppLayout />}>
                   <Route index element={<Dashboard />} />
@@ -81,8 +82,13 @@ function App() {
                   <Route path="settings" element={<SettingsPage />} />
                   <Route path="statistics" element={<StatisticsPage />} />
                   {/* <Route path="auth/google/callback" element={<OAuthCallbackPage />} /> Removed from here */}
-                  {/* Add other protected routes here */}
                 </Route>
+              </Route>
+              
+              {/* Admin-only routes */}
+              <Route element={<AdminProtectedRoute />}>
+                <Route path="/admin" element={<AdminView />} />
+                {/* Add other admin routes here */}
               </Route>
 
               {/* Redirect root path for non-authenticated users to home */}

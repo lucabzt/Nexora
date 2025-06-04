@@ -75,6 +75,49 @@ const userService = {
   },
 
   // Add other user-related service methods if needed (e.g., deleteUser, getAllUsers for admins)
+  
+  // Admin-specific functions
+  async getAllUsers() {
+    try {
+      const response = await api.get('/');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching all users:', error.response || error);
+      throw error;
+    }
+  },
+
+  async adminUpdateUser(userId, userData) {
+    try {
+      const response = await api.put(`/${userId}`, userData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating user as admin:', error.response || error);
+      throw error;
+    }
+  },
+
+  async adminChangePassword(userId, newPassword) {
+    try {
+      const response = await api.put(`/${userId}/change_password`, {
+        new_password: newPassword, // Admins don't need to provide old password
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error changing user password as admin:', error.response || error);
+      throw error;
+    }
+  },
+
+  async deleteUser(userId) {
+    try {
+      const response = await api.delete(`/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting user:', error.response || error);
+      throw error;
+    }
+  },
 };
 
 export default userService;

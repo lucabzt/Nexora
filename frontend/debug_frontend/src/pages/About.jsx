@@ -36,7 +36,6 @@ const useStyles = createStyles((theme) => ({
   title: {
     fontFamily: `'Roboto', ${theme.fontFamily}`,
     fontWeight: 900,
-    marginBottom: theme.spacing.xl,
     textAlign: 'center',
     marginTop: 120,
     marginBottom: 30,

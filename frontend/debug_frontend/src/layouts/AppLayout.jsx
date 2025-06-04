@@ -35,7 +35,8 @@ import {
   IconUser,
   IconInfoCircle,
   IconChevronRight,
-  IconSparkles
+  IconSparkles,
+  IconShieldCheck
 } from '@tabler/icons-react';
 
 const MainLink = ({ icon, color, label, to, isActive, collapsed, onNavigate }) => {
@@ -138,13 +139,14 @@ function AppLayout() {
     } else {
       avatarSrc = `data:image/jpeg;base64,${user.profile_image_base64}`;
     }
-  }
-  const mainLinksData = [
+  }  const mainLinksData = [
     { icon: <IconHome2 size={18} />, color: 'blue', label: 'Dashboard', to: '/' },
     { icon: <IconPlus size={18} />, color: 'teal', label: 'New Course', to: '/create-course' },
     { icon: <IconSettings size={18} />, color: 'gray', label: 'Settings', to: '/settings' },
     { icon: <IconInfoCircle size={18} />, color: 'indigo', label: 'Statistics', to: '/statistics' },
     { icon: <IconInfoCircle size={18} />, color: 'grape', label: 'Home', to: '/home' },
+    // Admin link - only shown to admin users
+    ...(user?.is_admin ? [{ icon: <IconShieldCheck size={18} />, color: 'violet', label: 'Admin', to: '/admin' }] : []),
   ];
   
   // Handler to close navbar on mobile when navigating
