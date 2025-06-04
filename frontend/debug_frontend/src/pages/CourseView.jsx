@@ -211,10 +211,17 @@ function CourseView() {
                 </Card>
               )}
 
-              <SimpleGrid cols={1} spacing="lg">
-                {chapters.map((chapter, index) => (
+              <SimpleGrid cols={1} spacing="lg">                {chapters.map((chapter, index) => (
                   <Card key={chapter.id || index} shadow="sm" padding="lg" radius="md" withBorder>
-                    <Group position="apart" mb="xs">
+                    <Card.Section>
+                      <img 
+                        src="https://static-cse.canva.com/blob/1145487/positivecultureinclassroom.jpg"
+                        alt={chapter.caption || `Chapter ${index + 1}`}
+                        height={160}
+                        style={{ objectFit: 'cover', width: '100%' }}
+                      />
+                    </Card.Section>
+                    <Group position="apart" mt="md" mb="xs">
                       <Text weight={500}>{chapter.caption}</Text>
                       <Group spacing="xs">
                         <Badge color={chapter.is_completed ? "green" : "blue"} variant="filled">
@@ -246,10 +253,17 @@ function CourseView() {
                 
                 {/* Show placeholder for chapters being created */}
                 {isStreamingActive && creationProgress.estimatedTotal > chapters.length && (
-                  <>
-                    {Array.from({ length: creationProgress.estimatedTotal - chapters.length }).map((_, index) => (
+                  <>                    {Array.from({ length: creationProgress.estimatedTotal - chapters.length }).map((_, index) => (
                       <Card key={`placeholder-${index}`} shadow="sm" padding="lg" radius="md" withBorder opacity={0.5}>
-                        <Group position="apart" mb="xs">
+                        <Card.Section>
+                          <img 
+                            src="https://static-cse.canva.com/blob/1145487/positivecultureinclassroom.jpg"
+                            alt={`Chapter ${chapters.length + index + 1}`}
+                            height={160}
+                            style={{ objectFit: 'cover', width: '100%', opacity: 0.5 }}
+                          />
+                        </Card.Section>
+                        <Group position="apart" mt="md" mb="xs">
                           <Text weight={500} color="dimmed">Chapter {chapters.length + index + 1}</Text>
                           <Badge color="gray" variant="outline">
                             Creating...
