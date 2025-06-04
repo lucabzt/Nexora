@@ -127,6 +127,13 @@ function MainLayout() {
                     to="/login" 
                     variant="outline"
                     radius="md"
+                    sx={(theme) => ({
+                      [theme.fn.smallerThan('sm')]: {
+                        paddingLeft: theme.spacing.xs,
+                        paddingRight: theme.spacing.xs,
+                        fontSize: theme.fontSizes.xs,
+                      },
+                    })}
                   >
                     {t('login', { ns: 'navigation' })}
                   </Button>
@@ -137,6 +144,13 @@ function MainLayout() {
                     variant="filled"
                     radius="md"
                     color="teal"
+                    sx={(theme) => ({
+                      [theme.fn.smallerThan('sm')]: {
+                        paddingLeft: theme.spacing.xs,
+                        paddingRight: theme.spacing.xs,
+                        fontSize: theme.fontSizes.xs,
+                      },
+                    })}
                   >
                     {t('register', { ns: 'navigation' })}
                   </Button>
