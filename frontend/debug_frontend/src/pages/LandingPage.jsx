@@ -94,7 +94,7 @@ function LandingPage() {
           <div className={classes.heroContent}>
             <Title
               order={1}
-              size="3.5rem"
+              size="3.3rem"
               weight={900}
               sx={(theme) => ({ 
                 color: theme.colorScheme === 'dark' ? theme.white : theme.black,
