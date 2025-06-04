@@ -28,14 +28,19 @@
     "admin": "Admin",
     "title": "Navigation",
     "subtitle": "Choose your destination"
-  },"auth": {
+  },  "auth": {
     "email": "Email",
+    "emailPlaceholder": "Your email",
+    "emailInvalid": "Invalid email address",
     "password": "Password",
     "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Confirm your password",
     "name": "Name",
     "username": "Username",
     "usernamePlaceholder": "Your username",
+    "usernameLength": "Username must be at least 3 characters",
     "passwordPlaceholder": "Your password",
+    "passwordsDoNotMatch": "Passwords do not match",
     "loginTitle": "Log in to your account",
     "registerTitle": "Create a new account",
     "forgotPassword": "Forgot password?",
@@ -47,7 +52,7 @@
     "passwordRequired": "Password is required",
     "passwordLength": "Password must be at least 3 characters",
     "continueWith": "Or continue with"
-  },  "settings": {
+  },"settings": {
     "title": "Settings",
     "theme": "Theme",
     "dark": "Dark",

@@ -36,6 +36,7 @@ function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { register, login } = useAuth();
+  const { t } = useTranslation();
 
   const form = useForm({
     initialValues: {
@@ -45,10 +46,12 @@ function Register() {
       confirmPassword: '',
     },
     validate: {
-      username: (value) => !value ? 'Username is required' : value.length < 3 ? 'Username must be at least 3 characters' : null,
-      email: (value) => !/^\S+@\S+$/.test(value) ? 'Invalid email address' : null,
-      password: (value) => !value ? 'Password is required' : value.length < 3 ? 'Password must be at least 3 characters' : null,
-      confirmPassword: (value, values) => value !== values.password ? 'Passwords do not match' : null,
+      username: (value) => !value ? t('auth.usernameRequired') : 
+                          value.length < 3 ? t('auth.usernameLength', 'Username must be at least 3 characters') : null,
+      email: (value) => !/^\S+@\S+$/.test(value) ? t('auth.emailInvalid', 'Invalid email address') : null,
+      password: (value) => !value ? t('auth.passwordRequired') : 
+                           value.length < 3 ? t('auth.passwordLength') : null,
+      confirmPassword: (value, values) => value !== values.password ? t('auth.passwordsDoNotMatch', 'Passwords do not match') : null,
     },
   });
 
@@ -95,50 +98,49 @@ function Register() {
         flexDirection: 'column',
         justifyContent: 'center',
       }}
-    >
-      <Title align="center" mb="lg">
-        Create Account
+    >      <Title align="center" mb="lg">
+        {t('auth.registerTitle')}
       </Title>
 
       <Paper withBorder shadow="md" p={30} radius="md" mt="xl">
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <TextInput
-            label="Username"
-            placeholder="Your username"
+            label={t('auth.username')}
+            placeholder={t('auth.usernamePlaceholder')}
             required
             {...form.getInputProps('username')}
             mb="md"
           />
 
           <TextInput
-            label="Email"
-            placeholder="Your email"
+            label={t('auth.email')}
+            placeholder={t('auth.emailPlaceholder', 'Your email')}
             required
             {...form.getInputProps('email')}
             mb="md"
           />
 
           <PasswordInput
-            label="Password"
-            placeholder="Your password"
+            label={t('auth.password')}
+            placeholder={t('auth.passwordPlaceholder')}
             required
             {...form.getInputProps('password')}
             mb="md"
           />
 
           <PasswordInput
-            label="Confirm Password"
-            placeholder="Confirm your password"
+            label={t('auth.confirmPassword')}
+            placeholder={t('auth.confirmPasswordPlaceholder', 'Confirm your password')}
             required
             {...form.getInputProps('confirmPassword')}
             mb="xl"
           />
 
           <Button fullWidth type="submit" loading={isLoading}>
-            Register
+            {t('auth.signUp')}
           </Button>
 
-          <Divider label="Or sign up with" labelPosition="center" my="lg" />
+          <Divider label={t('auth.continueWith')} labelPosition="center" my="lg" />
 
           <Group position="center" spacing="md" mb="xl">
             <Button
@@ -165,11 +167,10 @@ function Register() {
             >
               <DiscordIcon />
             </Button>
-          </Group>
-          <Text align="center" mt="md">
-            Already have an account?{' '}
+          </Group>          <Text align="center" mt="md">
+            {t('auth.haveAccount')}{' '}
             <Anchor component={Link} to="/login">
-              Login
+              {t('auth.signIn')}
             </Anchor>
           </Text>
         </form>

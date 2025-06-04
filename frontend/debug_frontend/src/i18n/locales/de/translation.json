@@ -28,14 +28,19 @@
     "admin": "Administration",
     "title": "Navigation",
     "subtitle": "Wählen Sie Ihr Ziel"
-  },"auth": {
+  },  "auth": {
     "email": "E-Mail",
+    "emailPlaceholder": "Ihre E-Mail",
+    "emailInvalid": "Ungültige E-Mail-Adresse",
     "password": "Passwort",
     "confirmPassword": "Passwort bestätigen",
+    "confirmPasswordPlaceholder": "Bestätigen Sie Ihr Passwort",
     "name": "Name",
     "username": "Benutzername",
     "usernamePlaceholder": "Ihr Benutzername",
+    "usernameLength": "Benutzername muss mindestens 3 Zeichen lang sein",
     "passwordPlaceholder": "Ihr Passwort",
+    "passwordsDoNotMatch": "Passwörter stimmen nicht überein",
     "loginTitle": "Melden Sie sich an",
     "registerTitle": "Erstellen Sie ein Konto",
     "forgotPassword": "Passwort vergessen?",
@@ -47,7 +52,7 @@
     "passwordRequired": "Passwort wird benötigt",
     "passwordLength": "Passwort muss mindestens 3 Zeichen lang sein",
     "continueWith": "Oder fortfahren mit"
-  },  "settings": {
+  },"settings": {
     "title": "Einstellungen",
     "theme": "Design",
     "dark": "Dunkel",
