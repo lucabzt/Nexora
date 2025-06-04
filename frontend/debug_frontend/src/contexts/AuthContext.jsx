@@ -2,12 +2,14 @@ import { createContext, useState, useEffect, useCallback, useContext } from 'rea
 import authService from '../api/authService';
 import userService from '../api/userService'; // Import userService
 import { toast } from 'react-toastify'; // Ensure toast is imported
+import { useTranslation } from 'react-i18next';
 
 const AuthContext = createContext();
 
 
 
 export const AuthProvider = ({ children }) => {
+  const { t } = useTranslation();
   const [user, setUserState] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -53,7 +55,7 @@ export const AuthProvider = ({ children }) => {
       console.error("Error in fetchAndSetFullUser:", error);
       authService.logout(); // Clears localStorage and user state
       setUserState(null);   // Ensure state is cleared
-      toast.error(error.message || "Session invalid or expired. Please login again.");
+      toast.error(error.message || t('auth.notifications.sessionExpired'));
       return null;
     }
   }, []); // Dependencies: setUserState (from useState, stable), authService, userService, toast (imports, stable)
@@ -93,16 +95,16 @@ export const AuthProvider = ({ children }) => {
 
         if (userSession) {
           console.log("AuthContext: Login successful, user session created:", userSession);
-          toast.success("Login successful!");
+          toast.success(t('auth.notifications.loginSuccess'));
           return { success: true, user: userSession };
         } else {
           console.error("AuthContext: Login failed - fetchAndSetFullUser did not return a user session.");
           // fetchAndSetFullUser handles its own errors including toast
-          return { success: false, message: "Failed to process user session after login." };
+          return { success: false, message: t('auth.notifications.loginSessionError') };
         }
       } else {
         console.error("AuthContext: Login failed - No access token received from /token endpoint.");
-        throw new Error("Login failed: No access token received.");
+        throw new Error(t('auth.notifications.loginNoToken'));
       }
     } catch (error) {
       const message =
@@ -123,7 +125,7 @@ export const AuthProvider = ({ children }) => {
     console.log(`AuthContext: Attempting registration for user: ${username}, email: ${email}`);
     try {
       await authService.register(username, email, password);
-      toast.success("Registration successful! Please login.");
+      toast.success(t('auth.notifications.registerSuccess'));
       console.log(`AuthContext: Registration successful for user: ${username}`);
       return { success: true };
     } catch (error) {
@@ -143,7 +145,7 @@ export const AuthProvider = ({ children }) => {
     authService.logout();
     setUserState(null); // Use the internal setter
     localStorage.removeItem('user'); // Ensure localStorage is also cleared on logout
-    toast.info("You have been logged out");
+    toast.info(t('auth.notifications.logoutSuccess'));
     console.log("AuthContext: User logged out.");
   }, []);
 

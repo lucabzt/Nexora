@@ -24,7 +24,7 @@ import discordGif from '../assets/wired-flat-2566-logo-discord-hover-wink.gif'; 
 const DiscordIcon = (props) => (
   <img
     src={discordGif}
-    alt="Discord"
+    alt={t('auth.discordAltText')}
     width={32}
     height={32}
     style={{ display: 'block' }}
@@ -94,7 +94,7 @@ function Login() {
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <TextInput
             label={t('auth.username')}
-            placeholder={t('auth.usernamePlaceholder') || "Your username"}
+            placeholder={t('auth.usernamePlaceholder')}
             required
             {...form.getInputProps('username')}
             mb="md"
@@ -102,7 +102,7 @@ function Login() {
 
           <PasswordInput
             label={t('auth.password')}
-            placeholder={t('auth.passwordPlaceholder') || "Your password"}
+            placeholder={t('auth.passwordPlaceholder')}
             required
             {...form.getInputProps('password')}
             mb="xl"

@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Title, Text, useMantineTheme } from '@mantine/core';
 import { getToolContainerStyle } from './ToolUtils';
+import { useTranslation } from 'react-i18next';
 
 /**
  * GeoGebraPlotter tool component
  * An interactive plotter for math visualization
  */
 function GeoGebraPlotter({ isOpen }) {
+  const { t, i18n } = useTranslation();
   const theme = useMantineTheme();
   
   const containerStyle = {
@@ -17,13 +19,13 @@ function GeoGebraPlotter({ isOpen }) {
   
   return (
     <div style={containerStyle}>
-      <Title order={3} mb="md">GeoGebra Plotter</Title>
+      <Title order={3} mb="md">{t('geoGebraPlotter.title')}</Title>
       <Text size="sm" color="dimmed" mb="md">
-        Use this interactive GeoGebra plotter to visualize mathematical concepts.
+        {t('geoGebraPlotter.description')}
       </Text>
       <iframe 
-        src="https://www.geogebra.org/graphing?lang=en" 
-        title="GeoGebra Graphing Calculator"
+        src={`https://www.geogebra.org/graphing?lang=${i18n.language}`} 
+        title={t('geoGebraPlotter.iframeTitle')}
         style={{ 
           width: '100%', 
           height: 'calc(100vh - 220px)', /* Adjusted for header + panel title/description */

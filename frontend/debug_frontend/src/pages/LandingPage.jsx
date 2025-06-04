@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   Container,
@@ -72,6 +73,7 @@ const useStyles = createStyles((theme) => ({
 }));
 
 function LandingPage() {
+  const { t } = useTranslation();
   const { classes } = useStyles();
   const theme = useMantineTheme();
   const { height, width } = useViewportSize();
@@ -100,19 +102,18 @@ function LandingPage() {
               })}
               mb="md"
             >
-              Personalized Learning with{' '}
+              {t('landingPage.hero.titlePart1')}{' '}
               <Text 
                 component="span" 
                 variant="gradient" 
                 gradient={{ from: 'cyan', to: 'teal', deg: 45 }}
               >
-                AI-Powered Courses
+                {t('landingPage.hero.titlePart2')}
               </Text>
             </Title>
             
             <Text size="xl" color="dimmed" mb={30}>
-              Nexora is a next-generation AI learning assistant that creates personalized courses
-              tailored to your learning style, goals, and schedule.
+              {t('landingPage.hero.subtitle')}
             </Text>
             
             <Group>
@@ -126,7 +127,7 @@ function LandingPage() {
                     variant="gradient"
                     gradient={{ from: 'cyan', to: 'teal' }}
                   >
-                    Get Started
+                    {t('landingPage.hero.getStarted')}
                   </Button>
                   <Button 
                     component={Link} 
@@ -135,7 +136,7 @@ function LandingPage() {
                     radius="md"
                     variant="outline"
                   >
-                    Log In
+                    {t('landingPage.hero.login')}
                   </Button>
                 </>
               ) : (
@@ -147,7 +148,7 @@ function LandingPage() {
                   gradient={{ from: 'cyan', to: 'teal' }}
                   rightIcon={<IconArrowRight size={18} />}
                 >
-                  Back to Dashboard
+                  {t('landingPage.hero.backToDashboard')}
                 </Button>
               )}
             </Group>
@@ -162,7 +163,7 @@ function LandingPage() {
                   radius="md"
                   src="https://images.unsplash.com/photo-1523240795612-9a054b0db644"
                   alt="AI Learning Illustration"
-                  caption="Next-gen learning, powered by AI"
+                  caption={t('landingPage.hero.imageCaption')}
                 />
               </Box>
             )}
@@ -172,7 +173,7 @@ function LandingPage() {
       
       {/* Features Section */}
       <Box className={`${classes.section} ${classes.gradient}`} mb={50}>
-        <Title order={2} align="center" mb={50}>How Nexora Transforms Your Learning</Title>
+        <Title order={2} align="center" mb={50}>{t('landingPage.features.title')}</Title>
         
         <Grid>
           <Grid.Col sm={6} md={3}>
@@ -185,10 +186,10 @@ function LandingPage() {
                     </ThemeIcon>
                   </Card.Section>
                   
-                  <Title order={3} size="h4" mb="xs">Personalized Curriculum</Title>
+                  <Title order={3} size="h4" mb="xs">{t('landingPage.features.feature1Title')}</Title>
                   
                   <Text size="sm" color="dimmed">
-                    AI-generated content tailored specifically to your goals and learning style.
+                    {t('landingPage.features.feature1Text')}
                   </Text>
                 </Card>
               )}
@@ -205,10 +206,10 @@ function LandingPage() {
                     </ThemeIcon>
                   </Card.Section>
                   
-                  <Title order={3} size="h4" mb="xs">Progress Tracking</Title>
+                  <Title order={3} size="h4" mb="xs">{t('landingPage.features.feature2Title')}</Title>
                   
                   <Text size="sm" color="dimmed">
-                    Monitor your learning journey with detailed progress analytics and insights.
+                    {t('landingPage.features.feature2Text')}
                   </Text>
                 </Card>
               )}
@@ -225,10 +226,10 @@ function LandingPage() {
                     </ThemeIcon>
                   </Card.Section>
                   
-                  <Title order={3} size="h4" mb="xs">Adaptive Learning</Title>
+                  <Title order={3} size="h4" mb="xs">{t('landingPage.features.feature3Title')}</Title>
                   
                   <Text size="sm" color="dimmed">
-                    Content difficulty adjusts based on your performance and comprehension.
+                    {t('landingPage.features.feature3Text')}
                   </Text>
                 </Card>
               )}
@@ -245,10 +246,10 @@ function LandingPage() {
                     </ThemeIcon>
                   </Card.Section>
                   
-                  <Title order={3} size="h4" mb="xs">Interactive Quizzes</Title>
+                  <Title order={3} size="h4" mb="xs">{t('landingPage.features.feature4Title')}</Title>
                   
                   <Text size="sm" color="dimmed">
-                    Test your knowledge with smart quizzes that reinforce your understanding.
+                    {t('landingPage.features.feature4Text')}
                   </Text>
                 </Card>
               )}
@@ -267,7 +268,7 @@ function LandingPage() {
                   <Image
                     radius="md"
                     src="https://images.unsplash.com/photo-1695473507908-ff60e604c113"
-                    alt="How Nexora Works"
+                    alt={t('landingPage.howItWorks.imageAlt')}
                   />
                 </div>
               )}
@@ -278,7 +279,7 @@ function LandingPage() {
             <Transition mounted={visible} transition="slide-left" duration={800}>
               {(styles) => (
                 <Stack spacing="xl" style={styles}>
-                  <Title order={2}>How Nexora Works</Title>
+                  <Title order={2}>{t('landingPage.howItWorks.title')}</Title>
                   
                   <List
                     spacing="lg"
@@ -291,23 +292,23 @@ function LandingPage() {
                     }
                   >
                     <List.Item>
-                      <Text size="lg" weight={500}>Tell us what you want to learn</Text>
-                      <Text color="dimmed">Specify your learning goals and time commitment</Text>
+                      <Text size="lg" weight={500}>{t('landingPage.howItWorks.step1Title')}</Text>
+                      <Text color="dimmed">{t('landingPage.howItWorks.step1Text')}</Text>
                     </List.Item>
                     
                     <List.Item>
-                      <Text size="lg" weight={500}>AI generates your personal curriculum</Text>
-                      <Text color="dimmed">Our AI creates a structured learning path just for you</Text>
+                      <Text size="lg" weight={500}>{t('landingPage.howItWorks.step2Title')}</Text>
+                      <Text color="dimmed">{t('landingPage.howItWorks.step2Text')}</Text>
                     </List.Item>
                     
                     <List.Item>
-                      <Text size="lg" weight={500}>Learn at your own pace</Text>
-                      <Text color="dimmed">Complete lessons, take quizzes, and track your progress</Text>
+                      <Text size="lg" weight={500}>{t('landingPage.howItWorks.step3Title')}</Text>
+                      <Text color="dimmed">{t('landingPage.howItWorks.step3Text')}</Text>
                     </List.Item>
                     
                     <List.Item>
-                      <Text size="lg" weight={500}>Master new skills</Text>
-                      <Text color="dimmed">Apply your knowledge with confidence</Text>
+                      <Text size="lg" weight={500}>{t('landingPage.howItWorks.step4Title')}</Text>
+                      <Text color="dimmed">{t('landingPage.howItWorks.step4Text')}</Text>
                     </List.Item>
                   </List>
                   
@@ -321,7 +322,7 @@ function LandingPage() {
                       color="teal"
                       mt="md"
                     >
-                      Start Learning Today
+                      {t('landingPage.howItWorks.cta')}
                     </Button>
                   )}
                 </Stack>
@@ -333,7 +334,7 @@ function LandingPage() {
       
       {/* Testimonial Section */}
       <Box py={50} className={classes.gradient}>
-        <Title order={2} align="center" mb={30}>What Our Learners Say</Title>
+        <Title order={2} align="center" mb={30}>{t('landingPage.testimonials.title')}</Title>
         
         <Grid>
           <Grid.Col sm={12} md={4}>
@@ -341,15 +342,15 @@ function LandingPage() {
               {(styles) => (
                 <Card shadow="sm" p="lg" radius="md" withBorder style={styles}>
                   <Text italic size="lg" mb="md">
-                    "Nexora helped me learn Python in half the time it would have taken me with traditional courses. The personalized approach made all the difference."
+                    {t('landingPage.testimonials.quote1')}
                   </Text>
                   <Group>
                     <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: theme.colors.gray[3], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       JD
                     </div>
                     <div>
-                      <Text weight={500}>John Doe</Text>
-                      <Text size="xs" color="dimmed">Software Developer</Text>
+                      <Text weight={500}>{t('landingPage.testimonials.name1')}</Text>
+                      <Text size="xs" color="dimmed">{t('landingPage.testimonials.role1')}</Text>
                     </div>
                   </Group>
                 </Card>
@@ -362,15 +363,15 @@ function LandingPage() {
               {(styles) => (
                 <Card shadow="sm" p="lg" radius="md" withBorder style={styles}>
                   <Text italic size="lg" mb="md">
-                    "The interactive quizzes and adaptive content really helped me understand machine learning concepts that I had struggled with before."
+                    {t('landingPage.testimonials.quote2')}
                   </Text>
                   <Group>
                     <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: theme.colors.gray[3], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       JS
                     </div>
                     <div>
-                      <Text weight={500}>Jane Smith</Text>
-                      <Text size="xs" color="dimmed">Data Scientist</Text>
+                      <Text weight={500}>{t('landingPage.testimonials.name2')}</Text>
+                      <Text size="xs" color="dimmed">{t('landingPage.testimonials.role2')}</Text>
                     </div>
                   </Group>
                 </Card>
@@ -383,15 +384,15 @@ function LandingPage() {
               {(styles) => (
                 <Card shadow="sm" p="lg" radius="md" withBorder style={styles}>
                   <Text italic size="lg" mb="md">
-                    "As a busy professional, I appreciate how Nexora fits learning into my schedule. The bite-sized lessons are perfect for my limited time."
+                    {t('landingPage.testimonials.quote3')}
                   </Text>
                   <Group>
                     <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: theme.colors.gray[3], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       RJ
                     </div>
                     <div>
-                      <Text weight={500}>Robert Johnson</Text>
-                      <Text size="xs" color="dimmed">Marketing Manager</Text>
+                      <Text weight={500}>{t('landingPage.testimonials.name3')}</Text>
+                      <Text size="xs" color="dimmed">{t('landingPage.testimonials.role3')}</Text>
                     </div>
                   </Group>
                 </Card>
@@ -406,10 +407,10 @@ function LandingPage() {
         <Transition mounted={visible} transition="fade" duration={800}>
           {(styles) => (
             <Stack align="center" spacing="xl" style={styles}>
-              <Title order={2} align="center">Ready to Transform Your Learning Journey?</Title>
+              <Title order={2} align="center">{t('landingPage.cta.title')}</Title>
               
               <Text size="xl" align="center" color="dimmed" maw={600} mx="auto">
-                Join thousands of learners who have accelerated their skills development with Nexora's AI-powered learning platform.
+                {t('landingPage.cta.subtitle')}
               </Text>
               
               {!isAuthenticated ? (
@@ -422,7 +423,7 @@ function LandingPage() {
                     variant="gradient"
                     gradient={{ from: 'cyan', to: 'teal', deg: 60 }}
                   >
-                    Get Started for Free
+                    {t('landingPage.cta.getStartedFree')}
                   </Button>
                   <Button 
                     component={Link}
@@ -431,7 +432,7 @@ function LandingPage() {
                     variant="outline" 
                     radius="md"
                   >
-                    Log In
+                    {t('landingPage.hero.login')}
                   </Button>
                 </Group>
               ) : (
@@ -443,7 +444,7 @@ function LandingPage() {
                   gradient={{ from: 'cyan', to: 'teal', deg: 60 }}
                   mt="xl"
                 >
-                  Create Your Next Course
+                  {t('landingPage.cta.createNextCourse')}
                 </Button>
               )}
             </Stack>

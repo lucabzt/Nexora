@@ -152,13 +152,12 @@ function AppLayout() {
       avatarSrc = `data:image/jpeg;base64,${user.profile_image_base64}`;
     }
   }  const mainLinksData = [
-    { icon: <IconHome2 size={18} />, color: 'blue', label: t('navigation.dashboard'), to: '/' },
-    { icon: <IconPlus size={18} />, color: 'teal', label: t('navigation.newCourse'), to: '/create-course' },
-    { icon: <IconSettings size={18} />, color: 'gray', label: t('navigation.settings'), to: '/settings' },
-    { icon: <IconInfoCircle size={18} />, color: 'indigo', label: t('navigation.statistics'), to: '/statistics' },
-    { icon: <IconInfoCircle size={18} />, color: 'grape', label: t('navigation.home'), to: '/home' },
+    { icon: <IconHome2 size={20} />, color: 'blue', label: t('navigation.home'), to: '/' },
+    { icon: <IconPlus size={20} />, color: 'teal', label: t('navigation.newCourse'), to: '/create-course' },
+    { icon: <IconSettings size={20} />, color: 'grape', label: t('navigation.settings'), to: '/settings' },
+    { icon: <IconInfoCircle size={20} />, color: 'gray', label: t('navigation.nexora'), to: '/home' },
     // Admin link - only shown to admin users
-    ...(user?.is_admin ? [{ icon: <IconShieldCheck size={18} />, color: 'violet', label: t('navigation.admin'), to: '/admin' }] : []),
+    ...(user?.is_admin ? [{ icon: <IconShieldCheck size={20} />, color: 'red', label: t('navigation.adminArea'), to: '/admin' }] : []),
   ];
   
   // Handler to close navbar on mobile when navigating
@@ -237,7 +236,7 @@ function AppLayout() {
                   filter: 'drop-shadow(0 2px 4px rgba(139, 92, 246, 0.3))',
                 }} 
               />              <Title
-                order={1}
+                order={3}
                 size="1.6rem"
                 component={RouterLink}
                 to={user ? "/" : "/home"}

@@ -26,9 +26,198 @@
     "about": "Über uns",
     "impressum": "Impressum",
     "admin": "Administration",
+    "adminArea": "Admin Bereich",
     "title": "Navigation",
-    "subtitle": "Wählen Sie Ihr Ziel"
-  },  "auth": {
+    "subtitle": "Wähle dein Ziel",
+    "nexora": "Über Nexora"
+  },
+  "landingPage": {
+    "hero": {
+      "titlePart1": "Personalisiertes Lernen mit",
+      "titlePart2": "KI-gestützten Kursen",
+      "subtitle": "Nexora ist ein KI-Lernassistent der nächsten Generation, der personalisierte Kurse erstellt, die auf Ihren Lernstil, Ihre Ziele und Ihren Zeitplan zugeschnitten sind.",
+      "getStarted": "Loslegen",
+      "login": "Anmelden",
+      "exploreCourses": "Kurse entdecken",
+      "createFirstCourse": "Ersten Kurs erstellen",
+      "backToDashboard": "Zurück zum Dashboard",
+      "imageCaption": "Lernen der nächsten Generation, unterstützt durch KI"
+    },
+    "features": {
+      "title": "Wie Nexora Ihr Lernen transformiert",
+      "feature1Title": "Personalisierter Lehrplan",
+      "feature1Text": "KI-generierte Inhalte, die speziell auf Ihre Ziele und Ihren Lernstil zugeschnitten sind.",
+      "feature2Title": "Fortschrittsverfolgung",
+      "feature2Text": "Überwachen Sie Ihre Lernreise mit detaillierten Fortschrittsanalysen und Einblicken.",
+      "feature3Title": "Adaptives Lernen",
+      "feature3Text": "Die Schwierigkeit der Inhalte passt sich Ihrer Leistung und Ihrem Verständnis an.",
+      "feature4Title": "Interaktive Quizze",
+      "feature4Text": "Testen Sie Ihr Wissen mit intelligenten Quizzen, die Ihr Verständnis vertiefen."
+    },
+    "howItWorks": {
+      "title": "Wie Nexora funktioniert",
+      "subtitle": "Starten Sie Ihre KI-gestützte Lernreise in drei einfachen Schritten.",
+      "step1Title": "Nennen Sie uns Ihre Ziele",
+      "step1Text": "Definieren Sie, was Sie lernen möchten und Ihren bevorzugten Lernstil.",
+      "step2Title": "KI erstellt Ihren Kurs",
+      "step2Text": "Unser intelligentes System entwirft einen individuellen Lehrplan, der auf Ihre Bedürfnisse zugeschnitten ist.",
+      "step3Title": "Lernen und erreichen",
+      "step3Text": "Interagieren Sie mit interaktiven Lektionen und verfolgen Sie Ihren Fortschritt bis zur Meisterschaft.",
+      "step4Title": "Neue Fähigkeiten meistern",
+      "step4Text": "Wenden Sie Ihr Wissen selbstbewusst an",
+      "imageAlt": "Illustration zur Funktionsweise von Nexora",
+      "cta": "Heute mit dem Lernen beginnen"
+    },
+    "testimonials": {
+      "title": "Das sagen unsere Lernenden",
+      "quote1": "Nexoras KI-gesteuerter Ansatz hat mir geholfen, die Python-Programmierung schneller zu meistern, als ich es je für möglich gehalten hätte. Das personalisierte Feedback war von unschätzbarem Wert!",
+      "name1": "John Doe",
+      "role1": "Softwareentwickler",
+      "quote2": "Die interaktiven Quizze und adaptiven Inhalte haben mir wirklich geholfen, Konzepte des maschinellen Lernens zu verstehen, mit denen ich zuvor zu kämpfen hatte.",
+      "name2": "Jane Schmidt",
+      "role2": "Datenwissenschaftlerin",
+      "quote3": "Als vielbeschäftigter Berufstätiger schätze ich, wie Nexora das Lernen in meinen Zeitplan integriert. Die mundgerechten Lektionen sind perfekt für meine begrenzte Zeit.",
+      "name3": "Robert Johnson",
+      "role3": "Marketing Manager"
+    },
+    "cta": {
+      "title": "Bereit, Ihre Lernreise zu transformieren?",
+      "subtitle": "Schließen Sie sich Tausenden von Lernenden an, die ihre Kompetenzentwicklung mit der KI-gestützten Lernplattform von Nexora beschleunigt haben.",
+      "getStartedFree": "Kostenlos loslegen",
+      "createNextCourse": "Nächsten Kurs erstellen"
+    }
+  },
+  "about": {
+    "mainTitle": {
+      "about": "Über ",
+      "nexora": "Nexora"
+    },
+    "mainDescription": "Nexora ist nicht nur eine weitere Lernplattform – es ist ein revolutionärer Bildungsansatz, der die Kraft der künstlichen Intelligenz nutzt, um wirklich personalisierte Lernpfade zu schaffen, die sich mit Ihnen entwickeln.",
+    "learningApproach": "Unser KI-gestütztes System analysiert Ihren Lernstil, Ihre Stärken, Schwächen und Ziele, um maßgeschneiderte Kurse zu erstellen, die sich in Echtzeit an Ihren Fortschritt anpassen. Egal, ob Sie eine neue Fähigkeit erlernen, Ihr Fachwissen vertiefen oder völlig neue Wissensgebiete erkunden – Nexora ist Ihr KI-Lernbegleiter auf dieser Reise.",
+    "buttons": {
+      "startYourJourney": "Beginne deine Reise"
+    },
+    "imageAlt": "KI-Lernen",
+    "imageCaption": "Neuronale Netze lernen Muster, genau wie unsere KI über Sie lernt",
+    "mission": {
+      "title": "Unsere Mission",
+      "description": "Hochwertige Bildung zu demokratisieren, indem wir KI-gestützte Lernerfahrungen schaffen, die so einzigartig sind wie jeder Lernende, und so die Beherrschung jedes Fachs für alle zugänglich machen.",
+      "item1Title": "Personalisierung",
+      "item1Description": "Jeder Lernpfad ist einzigartig auf individuelle Bedürfnisse zugeschnitten",
+      "item2Title": "Zugänglichkeit",
+      "item2Description": "Qualitativ hochwertige Bildung für jeden und überall verfügbar",
+      "item3Title": "Innovation",
+      "item3Description": "Die Grenzen der KI in der Bildung kontinuierlich erweitern",
+      "item4Title": "Technologie",
+      "item4Description": "Nutzung modernster KI zur Verbesserung des menschlichen Lernens"
+    },
+    "journey": {
+      "title": "Unsere Reise",
+      "event1": {
+        "title": "Die Idee",
+        "description": "Wir haben das Konzept für adaptives KI-Lernen während der Erforschung neuronaler Netze entwickelt",
+        "date": "Januar 2022"
+      },
+      "event2": {
+        "title": "Gründung",
+        "description": "Nexora wurde offiziell mit Startkapital von Bildungstechnologie-Investoren gegründet",
+        "date": "Juni 2023"
+      },
+      "event3": {
+        "title": "Erste Nutzer",
+        "description": "Die Beta-Plattform begrüßte 500 frühe Nutzer, die halfen, unsere Lernalgorithmen zu formen",
+        "date": "März 2024"
+      },
+      "event4": {
+        "title": "Wo wir heute stehen",
+        "description": "Wir bedienen Tausende von Lernenden mit einem sich ständig verbessernden KI-gestützten Lehrplan",
+        "date": "Juni 2025"
+      },
+      "event5": {
+        "title": "Wohin wir wollen",
+        "description": "Erweiterung unserer Plattform zur Unterstützung weiterer Sprachen und Fächer mit globaler Reichweite",
+        "date": "Juni 2026"
+      }
+    },
+    "team": {
+      "title": "Lernen Sie unser Team kennen",
+      "members": {
+        "markusHuber": {
+          "role": "Softwarearchitekt & Full-Stack-Entwickler",
+          "bio": "KI-Experte mit über 15 Jahren Erfahrung in maschinellem Lernen und adaptiven Bildungssystemen."
+        },
+        "lucaBozzetti": {
+          "role": "KI-Forscher & Agentenentwickler",
+          "bio": "Ehemaliger Professor mit einer Leidenschaft für die Innovation der Bildung durch Technologie."
+        },
+        "sebastianRogg": {
+          "role": "Noch in Arbeit",
+          "bio": "Full-Stack-Ingenieur, spezialisiert auf KI-Integration und responsive Lernsysteme."
+        },
+        "matthiasMeierlohr": {
+          "role": "Frontend-Designer & UX-Spezialist",
+          "bio": "Swift UI-Designer mit Fokus auf die Erstellung intuitiver, benutzerfreundlicher Oberflächen für KI-Anwendungen."
+        },
+        "jonasHoerter": {
+          "role": "Eierlecker & Backend-Entwickler",
+          "bio": "Swift UI-Designer mit Fokus auf die Erstellung intuitiver, benutzerfreundlicher Oberflächen für KI-Anwendungen."
+        },
+        "paulVorderbruegge": {
+          "role": "Bierliebhaber & Backend-Spezialist",
+          "bio": "Swift UI-Designer mit Fokus auf die Erstellung intuitiver, benutzerfreundlicher Oberflächen für KI-Anwendungen."
+        }
+      }
+    },
+    "cta": {
+      "title": "Bereit, Ihre Lernreise zu transformieren?",
+      "subtitle": "Schließen Sie sich Tausenden an, die bereits die Zukunft der Bildung erleben.",
+      "button": "Kostenlos loslegen"
+    }
+  },
+  "dashboard": {
+    "deleteCourseConfirmation": "Sind Sie sicher, dass Sie diesen Kurs dauerhaft löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "deleteCourseError": "Kurs konnte nicht gelöscht werden. {{message}}",
+    "loadCoursesError": "Kurse konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
+    "status": {
+      "creating": "Wird erstellt",
+      "finished": "Abgeschlossen",
+      "updating": "Wird aktualisiert",
+      "learning": "Lernen"
+    },
+    "myLearningJourney": "Meine Lernreise",
+    "motivationalMessage": "Setzen Sie Ihren Weg zu Wissen und Wachstum fort",
+    "createNewCourseButton": "Neuen Kurs erstellen",
+    "stats": {
+      "currentStreak": "Aktuelle Serie",
+      "daysUnit": "Tage",
+      "currentStreakDescription": "Weiter so! Sie bauen großartige Gewohnheiten auf.",
+      "coursesCompleted": "Abgeschlossene Kurse",
+      "coursesCompletedDescription": "Sie haben bereits {{count}} Kurse gemeistert!",
+      "totalHoursLearned": "Gesamte Lernstunden",
+      "hoursUnit": "Std.",
+      "totalHoursLearnedDescription": "Das sind {{hours}} Stunden wertvolles Wissen!"
+    },
+    "errorAlertTitle": "Fehler!",
+    "beginYourLearningJourney": "Beginnen Sie Ihre Lernreise",
+    "noCoursesFound": "Sie haben noch keine Kurse. Erstellen Sie Ihren ersten personalisierten Kurs, um Ihr Wissen zu erweitern!",
+    "createMyFirstCourse": "Meinen ersten Kurs erstellen",
+    "continueLearning": "Weiterlernen",
+    "recommendedForYou": "Für Sie empfohlen",
+    "featuredCourse": {
+      "defaultTitle": "Einführung in das maschinelle Lernen",
+      "defaultDescription": "Lernen Sie die Grundlagen des maschinellen Lernens und der KI. Perfekt für Anfänger, die Kernkonzepte verstehen möchten."
+    },
+    "yourProgress": "Ihr Fortschritt:",
+    "yourCoursesTitle": "Meine Kurse",
+    "viewAllCoursesButton": "Alle anzeigen",
+    "showFewerCoursesButton": "Empfohlene anzeigen",
+    "courseProgressTooltip": "{{progress}}% abgeschlossen",
+    "deleteCourseTooltip": "Kurs löschen",
+    "estimatedTime": "Gesch. Zeit: {{hours}} Stunden",
+    "viewCreationProgressButton": "Erstellungsfortschritt anzeigen",
+    "continueLearningButton": "Weiterlernen"
+  },
+  "auth": {
     "email": "E-Mail",
     "emailPlaceholder": "Ihre E-Mail",
     "emailInvalid": "Ungültige E-Mail-Adresse",
@@ -51,13 +240,30 @@
     "usernameRequired": "Benutzername wird benötigt",
     "passwordRequired": "Passwort wird benötigt",
     "passwordLength": "Passwort muss mindestens 3 Zeichen lang sein",
-    "continueWith": "Oder fortfahren mit"
+    "continueWith": "Oder fortfahren mit",
+    "discordAltText": "Discord",
+    "notifications": {
+      "sessionExpired": "Sitzung ungültig oder abgelaufen. Bitte erneut anmelden.",
+      "loginSuccess": "Anmeldung erfolgreich!",
+      "loginSessionError": "Benutzersitzung konnte nach der Anmeldung nicht verarbeitet werden.",
+      "loginNoToken": "Anmeldung fehlgeschlagen: Kein Zugriffstoken erhalten.",
+      "registerSuccess": "Registrierung erfolgreich! Bitte melden Sie sich an.",
+      "logoutSuccess": "Sie wurden abgemeldet"
+    }
   },"settings": {
     "title": "Einstellungen",
     "theme": "Design",
     "dark": "Dunkel",
     "light": "Hell",
     "language": "Sprache",
+    "languageName": "Deutsch",
+    "userMenu": {
+      "loggedInAs": "Angemeldet als {{username}}",
+      "profile": "Profil",
+      "settings": "Einstellungen",
+      "adminBadge": "ADMIN",
+      "logout": "Abmelden"
+    },
     "languageSettings": "Spracheinstellungen",
     "languageDescription": "Wählen Sie Ihre bevorzugte Sprache für die Anwendungsoberfläche.",
     "selectLanguage": "Wählen Sie Ihre Sprache",
@@ -67,5 +273,34 @@
   },  "app": {
     "title": "Nexora",
     "poweredBy": "Unterstützt von KI"
+  },
+  "admin": {
+    "accessDeniedTitle": "Zugriff verweigert",
+    "accessDeniedMessage": "Dieser Bereich erfordert Administratorrechte. Sie werden zum Dashboard weitergeleitet.",
+    "closeAlert": "Warnung schließen"
+  },
+  "footer": {
+    "copyright": "© {{year}} Nexora Lernplattform. Alle Rechte vorbehalten."
+  },
+  "chatTool": {
+    "welcomeMessage": "Hallo! Ich kann Fragen zu diesem Kapitelinhalt beantworten. Wie kann ich Ihnen helfen?",
+    "errorMessage": "Entschuldigung, beim Senden Ihrer Nachricht ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
+    "title": "KI-Lernassistent",
+    "description": "Stellen Sie Fragen zum Kapitelinhalt und erhalten Sie KI-gestützte Antworten.",
+    "userSender": "Sie",
+    "aiSender": "KI-Assistent",
+    "inputPlaceholder": "Geben Sie Ihre Frage ein...",
+    "sendButton": "Senden"
+  },
+  "geoGebraPlotter": {
+    "title": "GeoGebra Plotter",
+    "description": "Verwenden Sie diesen interaktiven GeoGebra-Plotter, um mathematische Konzepte zu visualisieren.",
+    "iframeTitle": "GeoGebra Grafikrechner"
+  },
+  "notesTool": {
+    "title": "Notizen zu diesem Kapitel",
+    "newNotePlaceholder": "Neue Notiz...",
+    "addButton": "Hinzufügen",
+    "noNotes": "Keine Notizen vorhanden."
   }
 }

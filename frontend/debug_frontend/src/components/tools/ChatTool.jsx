@@ -15,18 +15,20 @@ import {
 import { IconSend, IconRobot, IconUser } from '@tabler/icons-react';
 import { chatService } from '../../api/chatService';
 import { getToolContainerStyle } from './ToolUtils';
+import { useTranslation } from 'react-i18next';
 
 /**
  * ChatTool component
  * An interactive AI chat interface for questions about the course content
  */
 function ChatTool({ isOpen, courseId, chapterId }) {
+  const { t } = useTranslation();
   const theme = useMantineTheme();
   const [messages, setMessages] = useState([
     {
       id: 'welcome',
       sender: 'ai',
-      content: 'Hello! I can answer questions about this chapter content. How can I help you?',
+      content: t('chatTool.welcomeMessage'),
       timestamp: new Date().toISOString()
     }
   ]);
@@ -155,7 +157,7 @@ function ChatTool({ isOpen, courseId, chapterId }) {
         if (aiMessageIndex !== -1) {
           updatedMessages[aiMessageIndex] = {
             ...updatedMessages[aiMessageIndex],
-            content: 'Sorry, there was an error sending your message. Please try again.',
+            content: t('chatTool.errorMessage'),
             isStreaming: false,
             isError: true,
           };
@@ -169,9 +171,9 @@ function ChatTool({ isOpen, courseId, chapterId }) {
   };
   return (
     <div style={getToolContainerStyle(isOpen)}>
-      <Title order={3} mb="md">AI Learning Assistant</Title>
+      <Title order={3} mb="md">{t('chatTool.title')}</Title>
       <Text size="sm" color="dimmed" mb="md">
-        Ask questions about the chapter content and get AI-powered answers.
+        {t('chatTool.description')}
       </Text>
       
       <Box 
@@ -215,7 +217,7 @@ function ChatTool({ isOpen, courseId, chapterId }) {
                   {message.sender === 'user' ? <IconUser size={18} /> : <IconRobot size={18} />}
                 </Avatar>
                 <Text weight={500} size="sm">
-                  {message.sender === 'user' ? 'You' : 'AI Assistant'}
+                  {message.sender === 'user' ? t('chatTool.userSender') : t('chatTool.aiSender')}
                 </Text>
               </Group>
               
@@ -234,7 +236,7 @@ function ChatTool({ isOpen, courseId, chapterId }) {
       <form onSubmit={handleSendMessage} style={{ width: '100%' }}>
         <Group spacing="xs" position="center" sx={{ width: '100%' }}>
           <TextInput
-            placeholder="Type your question..."
+            placeholder={t('chatTool.inputPlaceholder')}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             disabled={isLoading}
@@ -246,7 +248,7 @@ function ChatTool({ isOpen, courseId, chapterId }) {
             disabled={!inputValue.trim() || isLoading}
             loading={isLoading}
           >
-            Send
+            {t('chatTool.sendButton')}
           </Button>
         </Group>
       </form>
