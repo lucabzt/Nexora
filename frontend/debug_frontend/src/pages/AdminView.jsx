@@ -105,7 +105,7 @@ function AdminView() {
         return ''; // Return empty for invalid dates
       }
       // Format to a common standard, e.g., "Jun 5, 2025, 3:09 PM"
-      return date.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      return date.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
     } catch (error) {
       console.error("Error formatting date:", dateString, error);
       return '';
