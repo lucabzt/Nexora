@@ -1,0 +1,11 @@
+## Latex
+
+You can use Latex in your code with the <Latex> tag.
+In the following you will see an example where I substituted curly braces with % due to formatting issues. You should use
+curly braces though.
+
+() => {
+  return (
+    <Latex>We give illustrations for the %1 + 2% processes $e^+e^-$, gluon-gluon and $\\gamma\\gamma \\to W t\\bar b$.</Latex>
+  );
+}
