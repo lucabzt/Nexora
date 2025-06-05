@@ -5,5 +5,5 @@ from typing import List
 from pydantic import BaseModel, Field
 
 
-class JsxSlides(BaseModel):
-    slides: List[str] = Field(description="List of slides. Each slide is jsx code as a string")
+class HtmlSlides(BaseModel):
+    slides: List[str] = Field(description="List of slides. Each slide is html code as a string")

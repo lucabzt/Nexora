@@ -7,7 +7,7 @@ import os
 from google.adk import Runner
 from google.adk.agents import LlmAgent
 
-from .schema import JsxSlides
+from .schema import HtmlSlides
 from ..agent import StandardAgent, StructuredAgent
 from ..utils import load_instructions_from_files
 
@@ -27,10 +27,10 @@ class SlideAgent(StructuredAgent):
         # gemini-2.5-flash-preview-05-20
         html_agent = LlmAgent(
             name="slide_agent",
-            model="gemini-2.0-flash",
-            description="Agent for creating jsx slide decks for great explanations and visualizations.",
+            model="gemini-2.5-flash-preview-05-20",
+            description="Agent for creating html slide decks for great explanations and visualizations.",
             instruction=full_instructions,
-            output_schema=JsxSlides,
+            output_schema=HtmlSlides,
         )
 
         # Create necessary
