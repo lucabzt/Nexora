@@ -615,7 +615,7 @@ function CourseView() {
                         mt="md"
                         rightIcon={chapter.is_completed ? <IconCircleCheck size={16} /> : <IconChevronRight size={16} />}
                         onClick={() => navigate(`/courses/${courseId}/chapters/${chapter.id}`)}
-                        disabled={isStreamingActive}
+                        disabled={isStreamingActive && index > 0}
                         sx={(theme) => 
                           chapter.is_completed 
                             ? {} 

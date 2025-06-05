@@ -10,6 +10,12 @@ const header = `(props) => {
       const {Latex}=props;
 `
 
+const latextest = `return (<Latex>{"$\\\\lim_{x\\\\to a} f(x) = L$"}</Latex>);`
+
+const latextest2 = `return (
+    <Latex>We give illustrations for the {1 + 2} processes $e^+e^-$, gluon-gluon and $\\gamma\\gamma \\to W t\\bar b$.</Latex>
+  );`
+
 function AiCodeWrapper({ children }) {
     const full_react_component =
         `

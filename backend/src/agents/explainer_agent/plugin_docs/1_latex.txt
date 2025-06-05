@@ -5,9 +5,10 @@ In the following you will see an example where I substituted curly braces with %
 curly braces though.
 
 return (
-    <Latex>%'We give illustrations for the %1 + 2% processes $e^+e^-$, gluon-gluon and $\\gamma\\gamma \\to W t\\bar b$.'%</Latex>
+    <Latex>%"We give illustrations for the %1 + 2% processes $e^+e^-$, gluon-gluon and $\\gamma\\gamma \\to W t\\bar b$."%</Latex>
 );
 
 Please use $ as a delimiter for every math expressions inside the <Latex> tag as you see in the example.
 Remember that all % in the above example should be replaced with curly braces.
-Wrap all the content you write in the <Latex> tags with a %''%, % again standing for curly braces.
+Wrap all the content you write in the <Latex> tags with a %""%, % again standing for curly braces.
+Inside the %""% please do not use another " as it will of close the first one and therefore lead to parsing issues
