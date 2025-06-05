@@ -40,7 +40,6 @@ class Chapter(Base):
     index = Column(Integer, nullable=False)
     caption = Column(String(300), nullable=False)
     summary = Column(Text)
-    content = Column(Text, nullable=False)
     time_minutes = Column(Integer, nullable=False)
     is_completed = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -48,6 +47,7 @@ class Chapter(Base):
     # Relationships
     course = relationship("Course", back_populates="chapters")
     mc_questions = relationship("MultipleChoiceQuestion", back_populates="chapter", cascade="all, delete-orphan")
+    slides = relationship("Slide", back_populates="chapter", cascade="all, delete-orphan")
 
 
 class MultipleChoiceQuestion(Base):
@@ -67,3 +67,15 @@ class MultipleChoiceQuestion(Base):
     
     # Relationships
     chapter = relationship("Chapter", back_populates="mc_questions")
+
+class Slide(Base):
+    """Slide table containing jsx slides."""
+    __tablename__ = "slides"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    index = Column(Integer, nullable=False)
+    chapter_id = Column(Integer, ForeignKey("chapters.id"), nullable=False)
+    code = Column(Text, nullable=False)
+
+    # Relationships
+    chapter = relationship("Chapter", back_populates="slides")

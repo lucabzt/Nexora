@@ -4,8 +4,9 @@ This file defines the service that coordinates the interaction between all the a
 import json
 
 from sqlalchemy.orm import Session
-from ..db.crud import chapters_crud, documents_crud, images_crud, questions_crud, courses_crud
 
+from ..agents.html_agent.agent import SlideAgent
+from ..db.crud import chapters_crud, documents_crud, images_crud, questions_crud, courses_crud, slides_crud
 
 from google.adk.sessions import InMemorySessionService
 
@@ -27,7 +28,7 @@ class AgentService:
         
         # define agents
         self.planner_agent = PlannerAgent(self.app_name, self.session_service)
-        self.explainer_agent = ExplainerAgent(self.app_name, self.session_service)
+        self.slide_agent = SlideAgent(self.app_name, self.session_service)
         self.tester_agent = TesterAgent(self.app_name, self.session_service)
         self.info_agent = InfoAgent(self.app_name, self.session_service)
 
@@ -116,7 +117,7 @@ class AgentService:
 
         # Process each chapter and stream as it's created
         for idx, topic in enumerate(response_planner["chapters"]):
-            # Create input to explainer agent
+            # Create input to slide agent
             pretty_topic = f"""
                                     Chapter {idx + 1}:
                                     Caption: {topic['caption']}
@@ -125,8 +126,8 @@ class AgentService:
                                     Note by Planner Agent: {json.dumps(topic['note'], indent=2)}
                                 """
 
-            # Get response from explainer agent
-            response_explainer = await self.explainer_agent.run(
+            # Get response from slide agent
+            response_slide = await self.slide_agent.run(
                 user_id=user_id,
                 session_id=session_id,
                 content=create_text_query(pretty_topic),
@@ -135,7 +136,7 @@ class AgentService:
             # Create input to tester agent
             pretty_chapter = f"""
                                     {pretty_topic}
-                                    Full Content: \n{json.dumps(response_explainer['explanation'], indent=2)}
+                                    Full Content: \n{json.dumps(response_slide['slides'], indent=2)}
                             """
 
             # Get response from tester agent
@@ -152,7 +153,6 @@ class AgentService:
                 index=idx + 1,
                 caption=topic['caption'],
                 summary=json.dumps(topic['content'], indent=2),
-                content=response_explainer['explanation'],
                 time_minutes=topic['time'],
             )
 
@@ -180,13 +180,22 @@ class AgentService:
                     "explanation": q.explanation
                 })
 
+            # Save slides in db
+            for index, slide in enumerate(response_slide['slides']):
+                s = slides_crud.create_slide(
+                    db=db,
+                    chapter_id=int(chapter_db.id),
+                    index = index + 1,
+                    code = slide
+                )
+
             # Build chapter response
             chapter_data = {
                 "id": chapter_db.id,
                 "index": chapter_db.index,
                 "caption": chapter_db.caption,
                 "summary": chapter_db.summary,
-                "content": chapter_db.content,
+                "slides": response_slide['slides'],
                 "mc_questions": question_objects,
                 "time_minutes": chapter_db.time_minutes,
                 "is_completed": chapter_db.is_completed

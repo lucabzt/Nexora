@@ -43,6 +43,36 @@ async def _verify_course_ownership(course_id: int, user_id: str, db: Session) ->
     
     return course
 
+def build_chapter(chapter: Chapter) -> ChapterSchema:
+    """
+    Utility function to transform a Chapter database object into a ChapterSchema object.
+    """
+    mc_questions = [
+        MCQuestionSchema(
+            question=q.question,
+            answer_a=q.answer_a,
+            answer_b=q.answer_b,
+            answer_c=q.answer_c,
+            answer_d=q.answer_d,
+            correct_answer=q.correct_answer,
+            explanation=q.explanation
+        ) for q in chapter.mc_questions
+    ]
+
+    slides = [
+        s.code for s in chapter.slides
+    ]
+
+    return ChapterSchema(
+        id=chapter.id,  # Add this
+        index=chapter.index,
+        caption=chapter.caption,
+        summary=chapter.summary or "",
+        content=slides,
+        mc_questions=mc_questions,
+        time_minutes=chapter.time_minutes,
+        is_completed=chapter.is_completed  # Add this
+    )
 
 
 @router.post("/create")
@@ -110,28 +140,7 @@ async def get_course_by_id(
     # Build the complete course response with all required fields
     chapters = []
     for chapter in sorted(course.chapters, key=lambda x: x.index):
-        mc_questions = [
-            MCQuestionSchema(
-                question=q.question,
-                answer_a=q.answer_a,
-                answer_b=q.answer_b,
-                answer_c=q.answer_c,
-                answer_d=q.answer_d,
-                correct_answer=q.correct_answer,
-                explanation=q.explanation
-            ) for q in chapter.mc_questions
-        ]
-        
-        chapters.append(ChapterSchema(
-            id=chapter.id,  # Add this
-            index=chapter.index,
-            caption=chapter.caption,
-            summary=chapter.summary or "",
-            content=chapter.content,
-            mc_questions=mc_questions,
-            time_minutes=chapter.time_minutes,
-            is_completed=chapter.is_completed  # Add this
-        ))
+        chapters.append(build_chapter(chapter))
     
     return CourseSchema(
         course_id=int(course.id),  # Map database 'id' to schema 'course_id'
@@ -158,28 +167,7 @@ async def get_course_chapters(
     
     chapters = []
     for chapter in sorted(course.chapters, key=lambda x: x.index):
-        mc_questions = [
-            MCQuestionSchema(
-                question=q.question,
-                answer_a=q.answer_a,
-                answer_b=q.answer_b,
-                answer_c=q.answer_c,
-                answer_d=q.answer_d,
-                correct_answer=q.correct_answer,
-                explanation=q.explanation
-            ) for q in chapter.mc_questions
-        ]
-        
-        chapters.append(ChapterSchema(
-            id=chapter.id,  # Add this
-            index=chapter.index,
-            caption=chapter.caption,
-            summary=chapter.summary or "",
-            content=chapter.content,
-            mc_questions=mc_questions,
-            time_minutes=chapter.time_minutes,
-            is_completed=chapter.is_completed  # Add this
-        ))
+        chapters.append(build_chapter(chapter))
     
     return chapters
 
@@ -209,29 +197,7 @@ async def get_chapter_by_id(
             detail="Chapter not found in this course"
         )
     
-    # Build chapter response with questions
-    mc_questions = [
-        MCQuestionSchema(
-            question=q.question,
-            answer_a=q.answer_a,
-            answer_b=q.answer_b,
-            answer_c=q.answer_c,
-            answer_d=q.answer_d,
-            correct_answer=q.correct_answer,
-            explanation=q.explanation
-        ) for q in chapter.mc_questions
-    ]
-    
-    return ChapterSchema(
-        id=chapter.id,  # Add this
-        index=chapter.index,
-        caption=chapter.caption,
-        summary=chapter.summary or "",
-        content=chapter.content,
-        mc_questions=mc_questions,
-        time_minutes=chapter.time_minutes,
-        is_completed=chapter.is_completed  # Add this
-    )
+    return build_chapter(chapter)
 
 
 @router.patch("/{course_id}/chapters/{chapter_id}/complete")
@@ -309,7 +275,6 @@ async def update_chapter(
         chapter_id: int,
         caption: str,
         summary: str,
-        content: str,
         time_minutes: int,
         current_user: User = Depends(get_current_active_user),
         db: Session = Depends(get_db)
@@ -338,8 +303,6 @@ async def update_chapter(
         update_data["caption"] = caption
     if summary is not None:
         update_data["summary"] = summary
-    if content is not None:
-        update_data["content"] = content
     if time_minutes is not None:
         update_data["time_minutes"] = time_minutes
 
@@ -350,7 +313,7 @@ async def update_chapter(
         )
 
     # Update the chapter
-    updated_chapter = chapter_crud.update_chapter(db, chapter_id, **update_data)
+    updated_chapter = chapters_crud.update_chapter(db, chapter_id, **update_data)
 
     if not updated_chapter:
         raise HTTPException(
@@ -358,29 +321,7 @@ async def update_chapter(
             detail="Failed to update chapter"
         )
 
-    # Build chapter response with questions
-    mc_questions = [
-        MCQuestionSchema(
-            question=q.question,
-            answer_a=q.answer_a,
-            answer_b=q.answer_b,
-            answer_c=q.answer_c,
-            answer_d=q.answer_d,
-            correct_answer=q.correct_answer,
-            explanation=q.explanation
-        ) for q in updated_chapter.mc_questions
-    ]
-
-    return ChapterSchema(
-        id=updated_chapter.id,
-        index=updated_chapter.index,
-        caption=updated_chapter.caption,
-        summary=updated_chapter.summary or "",
-        content=updated_chapter.content,
-        mc_questions=mc_questions,
-        time_minutes=updated_chapter.time_minutes,
-        is_completed=updated_chapter.is_completed
-    )
+    return build_chapter(chapter)
 
 
 @router.delete("/{course_id}/chapters/{chapter_id}")

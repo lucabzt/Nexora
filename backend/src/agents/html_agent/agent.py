@@ -7,17 +7,18 @@ import os
 from google.adk import Runner
 from google.adk.agents import LlmAgent
 
-from ..agent import StandardAgent
+from .schema import JsxSlides
+from ..agent import StandardAgent, StructuredAgent
 from ..utils import load_instructions_from_files
 
 from google.adk.models.lite_llm import LiteLlm
 
 
-class HtmlAgent(StandardAgent):
+class SlideAgent(StructuredAgent):
     def __init__(self, app_name: str, session_service):
         # Combine instructions to include revealjs docs
         files = ["html_agent/instructions.txt"]
-        files.extend([f"html_agent/revealjs_docs/{filename}" for filename in os.listdir(os.path.join(os.path.dirname(__file__), "revealjs_docs"))])
+        #files.extend([f"html_agent/revealjs_docs/{filename}" for filename in os.listdir(os.path.join(os.path.dirname(__file__), "revealjs_docs"))])
         full_instructions = load_instructions_from_files(sorted(files))
 
         # Create the html agent
@@ -25,10 +26,11 @@ class HtmlAgent(StandardAgent):
         # gemini-2.5-pro-preview-05-06
         # gemini-2.5-flash-preview-05-20
         html_agent = LlmAgent(
-            name="html_agent",
-            model="gemini-2.5-flash-preview-05-20",
-            description="Agent for creating reveal.js slide decks for great explanations and visualizations.",
+            name="slide_agent",
+            model="gemini-2.0-flash",
+            description="Agent for creating jsx slide decks for great explanations and visualizations.",
             instruction=full_instructions,
+            output_schema=JsxSlides,
         )
 
         # Create necessary

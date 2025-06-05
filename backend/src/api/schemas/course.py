@@ -27,7 +27,7 @@ class Chapter(BaseModel):
     index: int
     caption: str
     summary: str
-    content: str
+    content: List[str]
     mc_questions: List[MultipleChoiceQuestion]
     time_minutes: int
     is_completed: bool = False  # Also useful for the frontend
