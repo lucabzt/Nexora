@@ -4,6 +4,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 from ..models.db_user import User
+from datetime import datetime, timezone
 
 def get_user_by_id(db: Session, user_id: str) -> Optional[User]:
     """Retrieve a user by their ID."""
@@ -40,6 +41,15 @@ def create_user(db: Session,
     db.add(user)
     db.commit()
     db.refresh(user)
+    return user
+
+def update_user_last_login(db: Session, user_id: str) -> Optional[User]:
+    """Update the last_login time for a user."""
+    user = get_user_by_id(db, user_id)
+    if user:
+        user.last_login = datetime.now(timezone.utc)
+        db.commit()
+        db.refresh(user)
     return user
 
 def update_user_profile_image(db: Session, user: User, profile_image_base64: str):

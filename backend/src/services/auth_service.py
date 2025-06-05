@@ -6,7 +6,7 @@ import secrets
 import uuid
 import base64
 import requests
-from datetime import timedelta
+from datetime import timedelta, datetime
 from logging import Logger
 
 from fastapi import HTTPException, status, Request
@@ -14,7 +14,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from ..db.crud import users_crud as users_crud
+from ..db.crud import users_crud
 from ..core import security
 from ..utils.oauth import oauth
 from ..db.models.db_user import User as UserModel
@@ -48,7 +48,13 @@ async def login_user(form_data: OAuth2PasswordRequestForm, db: Session) -> token
         data={"sub": user.username, "user_id": user.id, "is_admin": user.is_admin, "email": user.email},
         expires_delta=access_token_expires,
     )
+    previous_last_login = user.last_login
+    users_crud.update_user_last_login(db, user_id=user.id)
+    # Refresh user object to get the updated last_login if needed, though previous_last_login is what we return
+    # For consistency, we could re-fetch the user or trust the previous_last_login variable is sufficient.
+
     return token_schema.Token(
+        last_login=previous_last_login,
         access_token= access_token,
         token_type= "bearer",
         user_id= str(user.id),
@@ -78,7 +84,8 @@ async def register_user(user_data: user_schema.UserCreate, db: Session):
             break
     
     # Create the user in the database
-    return users_crud.create_user(
+    # When a user is registered, created_at and last_login are set by default in the model
+    new_user = users_crud.create_user(
         db = db,
         user_id = user_id,
         username = user_data.username,
@@ -88,6 +95,8 @@ async def register_user(user_data: user_schema.UserCreate, db: Session):
         is_admin = False,
         profile_image_base64 = user_data.profile_image_base64,
     )
+    # No need to manually set last_login here as the model default handles it on creation.
+    return new_user
 
 
 async def handle_oauth_callback(request: Request, db: Session, website: str = "google"):
@@ -222,7 +231,11 @@ async def handle_oauth_callback(request: Request, db: Session, website: str = "g
     if not frontend_base_url:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail="Frontend base URL is not configured.")
-    redirect_url_with_fragment = f"{frontend_base_url}#access_token={access_token}&token_type=bearer&expires_in={security.ACCESS_TOKEN_EXPIRE_MINUTES * 60}"
+    previous_last_login = db_user.last_login
+    users_crud.update_user_last_login(db, user_id=db_user.id)
+    # Similar to above, previous_last_login holds the value we need for the redirect.
+
+    redirect_url_with_fragment = f"{frontend_base_url}#access_token={access_token}&token_type=bearer&expires_in={security.ACCESS_TOKEN_EXPIRE_MINUTES * 60}&last_login={previous_last_login.isoformat() if previous_last_login else ''}"
 
     return RedirectResponse(url=redirect_url_with_fragment)
 

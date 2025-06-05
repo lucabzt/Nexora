@@ -96,6 +96,22 @@ function AdminView() {
     }
   }, [users]);
 
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        console.warn("Invalid date string received:", dateString);
+        return ''; // Return empty for invalid dates
+      }
+      // Format to a common standard, e.g., "Jun 5, 2025, 3:09 PM"
+      return date.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch (error) {
+      console.error("Error formatting date:", dateString, error);
+      return '';
+    }
+  };
+
   const fetchUsers = async () => {
     setLoading(true);
     setError(null);
@@ -345,16 +361,19 @@ function AdminView() {
             <Skeleton height={40} mb="sm" />
             <Skeleton height={40} mb="sm" />
             <Skeleton height={40} mb="sm" />
-          </>
+          </> // Corrected closing tag for JSX Fragment
         ) : (
+          // Table to display when not loading
           <Box sx={{ overflowX: 'auto' }}>
-            <Table striped highlightOnHover withBorder withColumnBorders verticalSpacing="sm" sx={{ minWidth: 700 }}>
+            <Table striped highlightOnHover withBorder withColumnBorders verticalSpacing="sm" sx={{ minWidth: 900 }}>
               <thead>
                 <tr>
                   <th>{t('table.header.username')}</th>
                   <th>{t('table.header.email')}</th>
                   <th>{t('table.header.status')}</th>
                   <th>{t('table.header.role')}</th>
+                  <th>{t('table.header.createdAt')}</th>
+                  <th>{t('table.header.lastLogin')}</th>
                   <th>{t('table.header.actions')}</th>
                 </tr>
               </thead>
@@ -380,18 +399,19 @@ function AdminView() {
                           {user.is_admin ? t('table.role.admin') : t('table.role.user')}
                         </Badge>
                       </td>
+                      <td>{formatDate(user.created_at)}</td>
+                      <td>{formatDate(user.last_login)}</td>
                       <td>
                         <Group spacing="xs">
                           <Tooltip label={t('table.actions.editUser')}>
                             <ActionIcon 
                               color="blue" 
                               onClick={() => openEditModal(user)}
-                              disabled={user.id === currentUser.id && user.is_admin} // Prevent admin from de-editing self if they are the one being edited
+                              disabled={user.id === currentUser.id && user.is_admin} // Prevent admin from editing their own core details if they are an admin
                             >
                               <IconEdit size="1rem" />
                             </ActionIcon>
                           </Tooltip>
-                          
                           <Tooltip label={t('table.actions.changePassword')}>
                             <ActionIcon 
                               color="yellow" 
@@ -400,7 +420,6 @@ function AdminView() {
                               <IconLock size="1rem" />
                             </ActionIcon>
                           </Tooltip>
-                          
                           <Tooltip label={t('table.actions.deleteUser')}>
                             <ActionIcon 
                               color="red" 
@@ -416,7 +435,7 @@ function AdminView() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} style={{ textAlign: 'center', padding: '20px 0' }}>
+                    <td colSpan={7} style={{ textAlign: 'center', padding: '20px 0' }}>
                       {t('table.noUsersFound')}
                     </td>
                   </tr>

@@ -28,6 +28,8 @@
       "email": "Email",
       "status": "Status",
       "role": "Role",
+      "createdAt": "Created At",
+      "lastLogin": "Last Login",
       "actions": "Actions"
     },
     "status": {

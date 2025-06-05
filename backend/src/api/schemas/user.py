@@ -1,6 +1,7 @@
 # app/schemas.py
 from pydantic import BaseModel, EmailStr, Field, field_validator # Make sure field_validator is imported
 from typing import Optional, List
+from datetime import datetime
 import re
 from ...config.settings import MIN_PASSWORD_LENGTH, REQUIRE_UPPERCASE, REQUIRE_LOWERCASE, REQUIRE_DIGIT, REQUIRE_SPECIAL_CHAR, SPECIAL_CHARACTERS_REGEX_PATTERN # Make sure SPECIAL_CHARACTERS_REGEX_PATTERN is imported
 
@@ -114,6 +115,8 @@ class User(UserBase):
     is_active: bool
     is_admin: bool
     profile_image_base64: Optional[str] = None # Added for profile image
+    created_at: datetime
+    last_login: datetime
 
     class Config:
         from_attributes = True
