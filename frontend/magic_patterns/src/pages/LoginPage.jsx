@@ -77,7 +77,7 @@ const LoginPage = () => {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                Username
+                Username or Email
               </label>
               <input
                 id="username"
@@ -87,7 +87,7 @@ const LoginPage = () => {
                 value={formData.username}
                 onChange={handleInputChange}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500"
-                placeholder="Enter your username"
+                placeholder="Enter your username or email"
               />
             </div>
 

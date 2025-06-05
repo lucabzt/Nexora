@@ -1,0 +1,20 @@
+{
+  "title": "My Notes",
+  "newNotePlaceholder": "Type your new note here...",
+  "addButton": "Add Note",
+  "noNotes": "You haven't added any notes for this chapter yet.",
+  "saveNoteAriaLabel": "Save note",
+  "cancelEditAriaLabel": "Cancel edit",
+  "editNoteAriaLabel": "Edit note",
+  "deleteNoteAriaLabel": "Delete note",
+  "tooltip": {
+    "openNotes": "Open Notes Tool",
+    "closeNotes": "Close Notes Tool"
+  },
+  "notifications": {
+    "saved": "Notes saved successfully!",
+    "cleared": "Notes cleared!",
+    "saveError": "Error saving notes.",
+    "loadError": "Error loading notes."
+  }
+}

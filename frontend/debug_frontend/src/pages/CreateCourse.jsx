@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { 
   Container, 
@@ -28,6 +29,7 @@ import { courseService } from '../api/courseService';
 
 function CreateCourse() {
   const navigate = useNavigate();
+  const { t } = useTranslation('createCourse');
   const [active, setActive] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -46,8 +48,8 @@ function CreateCourse() {
       images: [],
     },
     validate: {
-      query: (value) => (!value ? 'Topic is required' : null),
-      time_hours: (value) => (value <= 0 ? 'Time must be greater than 0' : null),
+      query: (value) => (!value ? t('form.validation.topicRequired') : null),
+      time_hours: (value) => (value <= 0 ? t('form.validation.timePositive') : null),
     },
   });
 
@@ -59,11 +61,11 @@ function CreateCourse() {
     try {
       const documentData = await courseService.uploadDocument(file);
       setUploadedDocuments(prev => [...prev, documentData]);
-      toast.success(`Document "${file.name}" uploaded successfully`);
+      toast.success(t('toast.documentUploadSuccess', { fileName: file.name }));
       return documentData;
     } catch (err) {
       console.error('Error uploading document:', err);
-      toast.error(`Failed to upload document: ${err.message || 'Unknown error'}`);
+      toast.error(t('toast.documentUploadError', { error: err.message || t('errors.unknown') }));
       return null;
     } finally {
       setIsUploading(false);
@@ -78,11 +80,11 @@ function CreateCourse() {
     try {
       const imageData = await courseService.uploadImage(file);
       setUploadedImages(prev => [...prev, imageData]);
-      toast.success(`Image "${file.name}" uploaded successfully`);
+      toast.success(t('toast.imageUploadSuccess', { fileName: file.name }));
       return imageData;
     } catch (err) {
       console.error('Error uploading image:', err);
-      toast.error(`Failed to upload image: ${err.message || 'Unknown error'}`);
+      toast.error(t('toast.imageUploadError', { error: err.message || t('errors.unknown') }));
       return null;
     } finally {
       setIsUploading(false);
@@ -103,9 +105,9 @@ function CreateCourse() {
       console.log('Course creation completed');
     } else if (data.type === 'error') {
       console.error('Streaming error:', data.data);
-      setError(data.data.message || 'An error occurred during course creation');
+      setError(data.data.message || t('streaming.error.generic'));
       setStreamingProgress({
-        status: 'Error occurred during course creation',
+        status: t('streaming.status.errorOccurred'),
         progress: 0,
         phase: 'error'
       });
@@ -122,7 +124,7 @@ function CreateCourse() {
     setCourseInfo(null);
     setChapters([]);
     setStreamingProgress({
-      status: 'Initializing course creation...',
+      status: t('streaming.status.initializing'),
       progress: 5,
     });
 
@@ -182,10 +184,10 @@ function CreateCourse() {
 
   return (
     <Container size="md" py="xl">
-      <Title order={1} mb="lg">Create a New Learning Course</Title>
+      <Title order={1} mb="lg">{t('mainTitle')}</Title>
         {streamingProgress ? (
         <Paper radius="md" p="xl" withBorder>
-          <Title order={3} mb="md">Creating Your Course</Title>
+          <Title order={2} align="center" mb="xl">{t('streaming.title')}</Title>
           
           <Progress 
             value={streamingProgress.progress} 
@@ -202,7 +204,7 @@ function CreateCourse() {
           
           {streamingProgress.progress > 0 && streamingProgress.progress < 100 && (
             <Text color="dimmed" size="sm" align="center" mb="md">
-              This may take a few minutes. Our AI is crafting personalized content for your course.
+              {t('streaming.description')}
             </Text>
           )}
           
@@ -210,16 +212,16 @@ function CreateCourse() {
             <Card shadow="sm" p="lg" mt="md" mb="md" withBorder>
               <Title order={4}>{courseInfo.title}</Title>
               <Text mt="sm" color="dimmed" size="sm">{courseInfo.description}</Text>
-              <Text mt="md" size="sm">Time investment: {courseInfo.total_time_hours} hours</Text>
+              <Text mt="md" size="sm">{t('streaming.courseInfo.time')} {courseInfo.total_time_hours} {t('streaming.courseInfo.hours')}</Text>
             </Card>
           )}
           
           {chapters.length > 0 && (
             <>
               <Title order={4} mt="xl" mb="md">
-                Chapters Created: {chapters.length} 
+                {t('streaming.chapters.title')} {chapters.length} 
                 {courseInfo?.total_time_hours && 
-                  ` (Expected: ~${Math.max(3, Math.ceil(courseInfo.total_time_hours * 1.5))})`
+                  ` (${t('streaming.chapters.expected')} ~${Math.max(3, Math.ceil(courseInfo.total_time_hours * 1.5))})`
                 }
               </Title>
               
@@ -229,8 +231,8 @@ function CreateCourse() {
                     <Group position="apart" mb="xs">
                       <Text weight={500} size="sm">{chapter.caption}</Text>
                       <Group spacing="xs">
-                        <Badge size="sm">{chapter.time_minutes} min</Badge>
-                        <Badge size="sm" color="green">{chapter.mc_questions?.length || 0} questions</Badge>
+                        <Badge size="sm">{chapter.time_minutes} {t('streaming.chapters.minutes')}</Badge>
+                        <Badge size="sm" color="green">{chapter.mc_questions?.length || 0} {t('streaming.chapters.questions')}</Badge>
                       </Group>
                     </Group>
                     <Text size="xs" color="dimmed" lineClamp={1}>
@@ -249,14 +251,14 @@ function CreateCourse() {
               mt="xl"
               onClick={() => navigate(`/courses/${courseInfo.course_id}`)}
             >
-              Go to Course
+              {t('streaming.button.goToCourse')}
             </Button>
           )}
           
           {error && (
             <Alert 
               icon={<IconAlertCircle size={16} />}
-              title="Error!" 
+              title={t('streaming.error.title')} 
               color="red" 
               mt="lg"
             >
@@ -267,17 +269,17 @@ function CreateCourse() {
       ) : (
         <Paper radius="md" p="xl" withBorder>
           <Stepper active={active} breakpoint="sm" mb="xl">
-            <Stepper.Step label="Topic" description="What do you want to learn?">
+            <Stepper.Step label={t('stepper.details.label')} description={t('stepper.details.description')}>
               <TextInput
                 required
-                label="Learning Topic"
-                placeholder="e.g. Python Programming, Machine Learning, Web Development"
+                label={t('form.topic.label')}
+                placeholder={t('form.topic.placeholder')}
                 {...form.getInputProps('query')}
                 mb="md"
               />
               <Textarea
-                label="Additional Details (Optional)"
-                placeholder="Any specific aspects or focus areas?"
+                label={t('form.topic.descriptionLabel')}
+                placeholder={t('form.topic.descriptionPlaceholder')}
                 autosize
                 minRows={3}
                 maxRows={6}
@@ -285,27 +287,27 @@ function CreateCourse() {
               />
             </Stepper.Step>
             
-            <Stepper.Step label="Time" description="How much time do you have?">
+            <Stepper.Step label={t('stepper.time.label')} description={t('stepper.time.description')}>
               <NumberInput
                 required
-                label="Time Investment (hours)"
-                placeholder="e.g. 2"
+                label={t('form.time.label')}
+                placeholder={t('form.time.placeholder')}
                 min={1}
                 max={100}
                 {...form.getInputProps('time_hours')}
                 mb="md"
               />
               <Text size="sm" color="dimmed">
-                This helps us structure the course to fit your available time.
+                {t('form.time.description')}
               </Text>
             </Stepper.Step>
             
-            <Stepper.Step label="Resources" description="Add learning materials">
+            <Stepper.Step label={t('stepper.uploads.label')} description={t('stepper.uploads.description')}>
               <Group grow mb="md">
                 <div>
                   <FileInput
-                    label="Upload Documents (Optional)"
-                    placeholder="Upload PDF, DOC, TXT, etc."
+                    label={t('form.documents.label')}
+                    placeholder={t('form.documents.placeholder')}
                     accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
                     icon={<IconFileText size={14} />}
                     onChange={handleMultipleDocuments}
@@ -315,11 +317,11 @@ function CreateCourse() {
                   />
                   {uploadedDocuments.length > 0 && (
                     <>
-                      <Text size="sm" weight={500} mb="xs">Uploaded Documents:</Text>
+                      <Text size="sm" weight={500} mb="xs">{t('form.documents.uploadedTitle')}</Text>
                       <List size="sm" spacing="xs" mb="md">
                         {uploadedDocuments.map((doc) => (
                           <List.Item key={doc.id} icon={<IconFileText size={14} />}>
-                            {doc.filename} ({Math.round(doc.size / 1024)} KB)
+                            {t('form.documents.fileEntry', { fileName: doc.filename, sizeKB: Math.round(doc.size / 1024) })}
                           </List.Item>
                         ))}
                       </List>
@@ -329,8 +331,8 @@ function CreateCourse() {
                 
                 <div>
                   <FileInput
-                    label="Upload Images (Optional)"
-                    placeholder="Upload JPG, PNG, etc."
+                    label={t('form.images.label')}
+                    placeholder={t('form.images.placeholder')}
                     accept="image/*"
                     icon={<IconPhoto size={14} />}
                     onChange={handleMultipleImages}
@@ -340,11 +342,11 @@ function CreateCourse() {
                   />
                   {uploadedImages.length > 0 && (
                     <>
-                      <Text size="sm" weight={500} mb="xs">Uploaded Images:</Text>
+                      <Text size="sm" weight={500} mb="xs">{t('form.images.uploadedTitle')}</Text>
                       <List size="sm" spacing="xs" mb="md">
                         {uploadedImages.map((img) => (
                           <List.Item key={img.id} icon={<IconPhoto size={14} />}>
-                            {img.filename} ({Math.round(img.size / 1024)} KB)
+                            {t('form.images.fileEntry', { fileName: img.filename, sizeKB: Math.round(img.size / 1024) })}
                           </List.Item>
                         ))}
                       </List>
@@ -355,7 +357,7 @@ function CreateCourse() {
               
               {(uploadedDocuments.length > 0 || uploadedImages.length > 0) && (
                 <Text size="sm" color="dimmed" mb="md">
-                  Your uploaded files will be used to generate a more personalized learning experience.
+                  {t('form.uploads.personalizedExperience')}
                 </Text>
               )}
             </Stepper.Step>
@@ -364,7 +366,7 @@ function CreateCourse() {
           {error && (
             <Alert 
               icon={<IconAlertCircle size={16} />}
-              title="Error!" 
+              title={t('form.error.alertTitle')} 
               color="red" 
               mb="lg"
             >
@@ -375,23 +377,23 @@ function CreateCourse() {
           {isUploading && (
             <Alert 
               icon={<Loader size={16} />}
-              title="Uploading File" 
+              title={t('alert.uploading.title')} 
               color="blue" 
               mb="lg"
             >
-              Please wait while your file is being uploaded...
+              {t('alert.uploading.message')}
             </Alert>
           )}
 
           <Group position="right" mt="xl">
             {active > 0 && (
               <Button variant="default" onClick={prevStep} disabled={isSubmitting || isUploading}>
-                Back
+                {t('buttons.back')}
               </Button>
             )}
             {active < 2 ? (
               <Button onClick={nextStep} disabled={isSubmitting || isUploading}>
-                Next step
+                {t('buttons.nextStep')}
               </Button>
             ) : (
               <Button 
@@ -399,7 +401,7 @@ function CreateCourse() {
                 loading={isSubmitting} 
                 disabled={isSubmitting || isUploading}
               >
-                {isSubmitting ? 'Creating...' : 'Create Course'}
+                {isSubmitting ? t('buttons.creating') : t('buttons.createCourse')}
               </Button>
             )}
           </Group>

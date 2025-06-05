@@ -1,0 +1,31 @@
+{
+  "title": "AI Chat Assistant",
+  "description": "Ask questions and get help with the course material.",
+  "inputPlaceholder": "Ask a question about the course content...",
+  "sendMessage": "Send",
+  "welcomeMessage": "Hello! I'm your AI assistant for this course. How can I help you understand the material better?",
+  "errorMessage": "Sorry, I encountered an error. Please try again.",
+  "thinking": "Thinking...",
+  "clearConversation": "Clear Conversation",
+  "confirmClear": "Are you sure you want to clear the conversation?",
+  "emptyConversation": "No messages yet. Ask a question to get started!",
+  "feedback": {
+    "title": "Feedback",
+    "helpful": "Helpful",
+    "unhelpful": "Unhelpful",
+    "thanks": "Thanks for your feedback!"
+  },
+  "suggestions": {
+    "title": "Suggestions",
+    "explainAgain": "Can you explain that again?",
+    "example": "Give me an example.",
+    "summarize": "Summarize this section."
+  },
+  "userSender": "You",
+  "aiSender": "AI Assistant",
+  "genericErrorMessage": "Something went wrong. Please try again.",
+  "tooltip": {
+    "openChat": "Open AI Chat Assistant",
+    "closeChat": "Close AI Chat Assistant"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "loading": "Loading chapter...",
+  "estimatedTime": "Estimated time: {{minutes}} minutes",
+  "buttons": {
+    "markComplete": "Mark as Complete",
+    "submitQuiz": "Submit Quiz",
+    "backToCourse": "Back to Course"
+  },
+  "tabs": {
+    "content": "Content",
+    "quizWithCount_one": "Quiz ({{count}} Question)",
+    "quizWithCount_other": "Quiz ({{count}} Questions)"
+  },
+  "badge": {
+    "completed": "Completed"
+  },
+  "toast": {
+    "quizGreatJob": "Great job! You scored {{scorePercentage}}%",
+    "quizReviewContent": "You scored {{scorePercentage}}%. Try reviewing the content again.",
+    "markedCompleteSuccess": "Chapter marked as complete!",
+    "markedCompleteError": "Failed to mark chapter as complete"
+  },
+  "errors": {
+    "loadFailed": "Failed to load chapter. Please try again later.",
+    "genericTitle": "Error!"
+  },
+  "quiz": {
+    "alert": {
+      "greatJobTitle": "Great job!",
+      "keepPracticingTitle": "Keep practicing!",
+      "scoreText": "You scored {{quizScore}}% on the quiz",
+      "correctTitle": "Correct",
+      "incorrectTitle": "Incorrect",
+      "theCorrectAnswerIs": "The correct answer is:",
+      "explanationLabel": "Explanation:"
+    }
+  }
+}

@@ -1,11 +1,11 @@
-// frontend/debug_frontend/src/pages/ChapterView.jsx
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-  Container,
-  Title,
-  Text,
-  Card,
+import { useTranslation } from 'react-i18next';
+import { 
+  Container, 
+  Title, 
+  Text, 
+  Card, 
   Group,
   Button,
   Tabs,
@@ -20,13 +20,13 @@ import {
 import { useMediaQuery } from '@mantine/hooks';
 import { IconAlertCircle, IconBookmark, IconQuestionMark } from '@tabler/icons-react';
 import ReactMarkdown from 'react-markdown';
-import Slideshow from '../components/Slideshow';
 import { toast } from 'react-toastify';
 import { courseService } from '../api/courseService';
 import ToolbarContainer from '../components/tools/ToolbarContainer';
 import { useToolbar } from '../contexts/ToolbarContext';
 
 function ChapterView() {
+  const { t } = useTranslation('chapterView');
   const { courseId, chapterId } = useParams(); // This should be the actual DB ID now
   const navigate = useNavigate();
   const { toolbarOpen, toolbarWidth } = useToolbar(); // Get toolbar state from context
@@ -39,8 +39,6 @@ function ChapterView() {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState(0);
   const [markingComplete, setMarkingComplete] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
-
   // Effect to handle resize when toolbar changes
   useEffect(() => {
     // This will trigger a re-render when toolbar state changes
@@ -55,7 +53,7 @@ function ChapterView() {
         // Using the ID from URL params
         const chapterData = await courseService.getChapter(courseId, chapterId);
         setChapter(chapterData);
-
+        
         // Initialize quiz answers
         if (chapterData.mc_questions) {
           const initialAnswers = {};
@@ -64,10 +62,10 @@ function ChapterView() {
           });
           setQuizAnswers(initialAnswers);
         }
-
+        
         setError(null);
       } catch (error) {
-        setError('Failed to load chapter. Please try again later.');
+        setError(t('errors.loadFailed'));
         console.error('Error fetching chapter:', error);
       } finally {
         setLoading(false);
@@ -86,22 +84,22 @@ function ChapterView() {
 
   const handleSubmitQuiz = () => {
     if (!chapter?.mc_questions) return;
-
+    
     let correct = 0;
     chapter.mc_questions.forEach((question, index) => {
       if (quizAnswers[index] === question.correct_answer) {
         correct++;
       }
     });
-
+    
     const scorePercentage = Math.round((correct / chapter.mc_questions.length) * 100);
     setQuizScore(scorePercentage);
     setQuizSubmitted(true);
-
+    
     if (scorePercentage >= 70) {
-      toast.success(`Great job! You scored ${scorePercentage}%`);
+      toast.success(t('toast.quizGreatJob', { scorePercentage }));
     } else {
-      toast.info(`You scored ${scorePercentage}%. Try reviewing the content again.`);
+      toast.info(t('toast.quizReviewContent', { scorePercentage }));
     }
   };
 
@@ -110,41 +108,27 @@ function ChapterView() {
       setMarkingComplete(true);
       // Using the ID from URL params
       await courseService.markChapterComplete(courseId, chapterId);
-      toast.success('Chapter marked as complete!');
+      toast.success(t('toast.markedCompleteSuccess'));
       navigate(`/courses/${courseId}`);
     } catch (error) {
-      toast.error('Failed to mark chapter as complete');
+      toast.error(t('toast.markedCompleteError'));
       console.error('Error marking chapter complete:', error);
     } finally {
       setMarkingComplete(false);
-    }
-  };
-
-  const handleSlideChange = (slideIndex) => {
-    setCurrentSlide(slideIndex);
-  };
-
-  // Function to determine if content is slides (array) or markdown (string)
-  const isSlideContent = (content) => {
-    return Array.isArray(content);
-  };
-
-  // Calculate container width and positioning based on toolbar state and mobile
-  const sidebarWidth = isMobile
+    }  };  // Calculate container width and positioning based on toolbar state and mobile
+  const sidebarWidth = isMobile 
     ? (toolbarOpen ? window.innerWidth : 0) // Full screen on mobile when open, hidden when closed
     : (toolbarOpen ? toolbarWidth : 40); // Desktop shows normal width when open, 40px when closed
-
-  return (
-    <div style={{
+    return (
+    <div style={{ 
       display: 'flex',
       position: 'relative',
       width: '100%',
       height: 'calc(100vh - 70px)', // Adjust for header height
       marginTop: 0,
       overflow: 'hidden' // Prevent page-level scrolling issues
-    }}>
-      {/* Main content with dynamic positioning - centered in available space */}
-      <Container size="xl" py="xl" style={{
+    }}>      {/* Main content with dynamic positioning - centered in available space */}
+      <Container size="lg" py="xl" style={{ 
         flexGrow: 1,
         maxWidth: `calc(100% - ${sidebarWidth}px)`, // Limit max width to available space
         width: `calc(100% - ${sidebarWidth}px)`, // Use calculated width
@@ -158,15 +142,15 @@ function ChapterView() {
       }}>
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
-            <Loader size="lg" />
+            <Loader size="lg" title={t('loading')} />
           </Box>
         )}
 
         {error && !loading && (
-          <Alert
+          <Alert 
             icon={<IconAlertCircle size={16} />}
-            title="Error!"
-            color="red"
+            title={t('errors.genericTitle')} 
+            color="red" 
             mb="lg"
           >
             {error}
@@ -178,84 +162,54 @@ function ChapterView() {
             <Group position="apart" mb="md">
               <div>
                 <Title order={1}>{chapter.caption}</Title>
-                <Text color="dimmed">
-                  Estimated time: {chapter.time_minutes} minutes
-                  {isSlideContent(chapter.content) && (
-                    <> • {chapter.content.length} slides</>
-                  )}
-                </Text>
+                <Text color="dimmed">{t('estimatedTime', { minutes: chapter.time_minutes })}</Text>
               </div>
-              <Group>
-                {isSlideContent(chapter.content) && (
-                  <Badge color="blue" variant="light">
-                    Slide {currentSlide + 1} of {chapter.content.length}
-                  </Badge>
-                )}
-                <Button
-                  color="green"
-                  onClick={markChapterComplete}
-                  loading={markingComplete}
-                  disabled={markingComplete}
-                >
-                  Mark as Complete
-                </Button>
-              </Group>
+              <Button 
+                color="green" 
+                onClick={markChapterComplete} 
+                loading={markingComplete}
+                disabled={markingComplete}
+              >
+                {t('buttons.markComplete')}
+              </Button>
             </Group>
 
             <Tabs value={activeTab} onTabChange={setActiveTab} mb="xl">
               <Tabs.List>
-                <Tabs.Tab value="content" icon={<IconBookmark size={14} />}>
-                  {isSlideContent(chapter.content) ? 'Slides' : 'Content'}
-                </Tabs.Tab>
+                <Tabs.Tab value="content" icon={<IconBookmark size={14} />}>{t('tabs.content')}</Tabs.Tab>
                 <Tabs.Tab value="quiz" icon={<IconQuestionMark size={14} />}>
-                  Quiz ({chapter.mc_questions?.length || 0} Questions)
+                  {t('tabs.quizWithCount', { count: chapter.mc_questions?.length || 0 })}
                 </Tabs.Tab>
               </Tabs.List>
 
               <Tabs.Panel value="content" pt="xs">
-                {isSlideContent(chapter.content) ? (
-                  // Render slideshow for slide content
-                  <Box sx={{
-                    width: '100%',
-                    // Optimize layout for slideshow
-                    minHeight: isMobile ? '400px' : '600px',
-                  }}>
-                    <Slideshow
-                      slides={chapter.content}
-                      onSlideChange={handleSlideChange}
-                    />
-                  </Box>
-                ) : (
-                  // Fallback to markdown for legacy content
-                  <Paper shadow="xs" p="md" withBorder>
-                    <div className="markdown-content">
-                      <ReactMarkdown>{chapter.content}</ReactMarkdown>
-                    </div>
-                  </Paper>
-                )}
+                <Paper shadow="xs" p="md" withBorder>
+                  <div className="markdown-content">
+                    <ReactMarkdown>{chapter.content}</ReactMarkdown>
+                  </div>
+                </Paper>
               </Tabs.Panel>
-
               <Tabs.Panel value="quiz" pt="xs">
                 <Paper shadow="xs" p="md" withBorder>
                   {quizSubmitted && (
-                    <Alert
+                    <Alert 
                       color={quizScore >= 70 ? "green" : "yellow"}
-                      title={quizScore >= 70 ? "Great job!" : "Keep practicing!"}
+                      title={quizScore >= 70 ? t('quiz.alert.greatJobTitle') : t('quiz.alert.keepPracticingTitle')} 
                       mb="lg"
                     >
                       <Group>
-                        <Text>You scored {quizScore}% on the quiz</Text>
+                        <Text>{t('quiz.alert.scoreText', { quizScore })}</Text>
                         <Badge color={quizScore >= 70 ? "green" : "yellow"}>
                           {quizScore}%
                         </Badge>
                       </Group>
                     </Alert>
                   )}
-
+                  
                   {chapter.mc_questions?.map((question, qIndex) => (
                     <Card key={qIndex} mb="md" withBorder>
                       <Text weight={500} mb="md">{qIndex + 1}. {question.question}</Text>
-
+                      
                       <Radio.Group
                         value={quizAnswers[qIndex]}
                         onChange={(value) => handleAnswerChange(qIndex, value)}
@@ -268,36 +222,36 @@ function ChapterView() {
                         <Radio value="c" label={question.answer_c} mb="xs" />
                         <Radio value="d" label={question.answer_d} mb="xs" />
                       </Radio.Group>
-
+                      
                       {quizSubmitted && (
-                        <Alert
+                        <Alert 
                           color={quizAnswers[qIndex] === question.correct_answer ? "green" : "red"}
-                          title={quizAnswers[qIndex] === question.correct_answer ? "Correct" : "Incorrect"}
+                          title={quizAnswers[qIndex] === question.correct_answer ? t('quiz.alert.correctTitle') : t('quiz.alert.incorrectTitle')}
                         >
                           <Text mb="xs">
                             {quizAnswers[qIndex] !== question.correct_answer && (
-                              <>The correct answer is: <strong>
+                              <>{t('quiz.alert.theCorrectAnswerIs')} <strong>
                                 {question[`answer_${question.correct_answer}`]}
                               </strong></>
                             )}
                           </Text>
-                          <Text>Explanation: {question.explanation}</Text>
+                          <Text>{t('quiz.alert.explanationLabel')} {question.explanation}</Text>
                         </Alert>
                       )}
                     </Card>
                   ))}
-
+                  
                   {!quizSubmitted && (
-                    <Button
+                    <Button 
                       onClick={handleSubmitQuiz}
-                      fullWidth
+                      fullWidth 
                       mt="md"
                       disabled={
-                        !chapter.mc_questions ||
+                        !chapter.mc_questions || 
                         Object.values(quizAnswers).some(a => a === '')
                       }
                     >
-                      Submit Quiz
+                      {t('buttons.submitQuiz')}
                     </Button>
                   )}
                 </Paper>
@@ -305,20 +259,19 @@ function ChapterView() {
             </Tabs>
 
             <Group position="apart">
-              <Button
-                variant="outline"
+              <Button 
+                variant="outline" 
                 onClick={() => navigate(`/courses/${courseId}`)}
               >
-                Back to Course
+                {t('buttons.backToCourse')}
               </Button>
               {chapter.is_completed && (
-                <Badge color="green" size="lg">Completed</Badge>
+                <Badge color="green" size="lg">{t('badge.completed')}</Badge>
               )}
             </Group>
           </>
-        )}
-      </Container>
-
+        )}      </Container>
+      
       {/* Toolbar Container with all interactive tools */}
       <ToolbarContainer courseId={courseId} chapterId={chapterId} />
     </div>

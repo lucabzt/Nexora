@@ -17,21 +17,26 @@ import { useForm } from '@mantine/form';
 import { useAuth } from '../contexts/AuthContext';
 import authService from '../api/authService'; // Import authService
 import { IconBrandGoogle, IconBrandGithub } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next'; // Import useTranslation hook
 import discordGif from '../assets/wired-flat-2566-logo-discord-hover-wink.gif'; // Import local Discord GIF
 
 // Use Discord GIF icon from local asset
-const DiscordIcon = (props) => (
-  <img
-    src={discordGif}
-    alt="Discord"
-    width={32}
-    height={32}
-    style={{ display: 'block' }}
-    {...props}
-  />
-);
+const DiscordIcon = (props) => {
+  const { t } = useTranslation('auth');
+  return (
+    <img
+      src={discordGif}
+      alt={t('discordAltText')}
+      width={32}
+      height={32}
+      style={{ display: 'block' }}
+      {...props}
+    />
+  );
+}
 
 function Login() {
+  const { t } = useTranslation('auth');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -42,8 +47,9 @@ function Login() {
       password: '',
     },
     validate: {
-      username: (value) => !value ? 'Username is required' : null,
-      password: (value) => !value ? 'Password is required' : value.length < 3 ? 'Password must be at least 3 characters' : null,
+      username: (value) => !value ? t('usernameRequired') || 'Username is required' : null,
+      password: (value) => !value ? t('passwordRequired') || 'Password is required' : 
+                           value.length < 3 ? t('passwordLength') || 'Password must be at least 3 characters' : null,
     },
   });
 
@@ -84,33 +90,32 @@ function Login() {
         flexDirection: 'column',
         justifyContent: 'center',
       }}
-    >
-      <Title align="center" mb="lg">
-        Welcome Back
+    >      <Title align="center" mb="lg">
+        {t('loginTitle')}
       </Title>
       <Paper withBorder shadow="md" p={30} radius="md" mt="xl">
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <TextInput
-            label="Username"
-            placeholder="Your username"
+            label={t('username')}
+            placeholder={t('usernamePlaceholder')}
             required
             {...form.getInputProps('username')}
             mb="md"
           />
 
           <PasswordInput
-            label="Password"
-            placeholder="Your password"
+            label={t('password')}
+            placeholder={t('passwordPlaceholder')}
             required
             {...form.getInputProps('password')}
             mb="xl"
           />
 
           <Button fullWidth type="submit" loading={isLoading}>
-            Sign in
+            {t('signIn')}
           </Button>
 
-          <Divider label="Or continue with" labelPosition="center" my="lg" />
+          <Divider label={t('continueWith')} labelPosition="center" my="lg" />
 
           <Group position="center" spacing="md" mb="xl">
             <Button 
@@ -140,9 +145,9 @@ function Login() {
           </Group>
           
           <Text align="center" mt="md">
-            Don't have an account?{' '}
+            {t('noAccount')}{' '}
             <Anchor component={Link} to="/register">
-              Register
+              {t('signUp')}
             </Anchor>
           </Text>
         </form>

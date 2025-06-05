@@ -1,0 +1,58 @@
+{
+  "hero": {
+    "titlePart1": "Personalized Learning with",
+    "titlePart2": "AI-Powered Courses",
+    "subtitle": "Nexora is a next-generation AI learning assistant that creates personalized courses tailored to your learning style, goals, and schedule.",
+    "getStarted": "Get Started",
+    "login": "Log In",
+    "exploreCourses": "Explore Courses",
+    "createFirstCourse": "Create Your First Course",
+    "backToDashboard": "Back to Dashboard",
+    "imageCaption": "Next-gen learning, powered by AI",
+    "imageAlt": "AI Learning Illustration"
+  },
+  "features": {
+    "title": "How Nexora Transforms Your Learning",
+    "feature1Title": "Personalized Curriculum",
+    "feature1Text": "AI-generated content tailored specifically to your goals and learning style.",
+    "feature2Title": "Progress Tracking",
+    "feature2Text": "Monitor your learning journey with detailed progress analytics and insights.",
+    "feature3Title": "Adaptive Learning",
+    "feature3Text": "Content difficulty adjusts based on your performance and comprehension.",
+    "feature4Title": "Interactive Quizzes",
+    "feature4Text": "Test your knowledge with smart quizzes that reinforce your understanding."
+  },
+  "howItWorks": {
+    "title": "How Nexora Works",
+    "subtitle": "Start your AI-powered learning journey in three simple steps.",
+    "step1Title": "Tell Us Your Goals",
+    "step1Text": "Define what you want to learn and your preferred learning style.",
+    "step2Title": "AI Creates Your Course",
+    "step2Text": "Our intelligent system designs a custom curriculum tailored to your needs.",
+    "step3Title": "Learn and Achieve",
+    "step3Text": "Engage with interactive lessons and track your progress towards mastery.",
+    "step4Title": "Master new skills",
+    "step4Text": "Apply your knowledge with confidence",
+    "imageAlt": "How Nexora Works illustration",
+    "cta": "Start Learning Today"
+  },
+  "testimonials": {
+    "title": "What Our Learners Say",
+    "quote1": "Nexora's AI-driven approach helped me master Python programming faster than I ever thought possible. The personalized feedback was invaluable!",
+    "name1": "John Doe",
+    "role1": "Software Developer",
+    "quote2": "The interactive quizzes and adaptive content really helped me understand machine learning concepts that I had struggled with before.",
+    "name2": "Jane Smith",
+    "role2": "Data Scientist",
+    "quote3": "As a busy professional, I appreciate how Nexora fits learning into my schedule. The bite-sized lessons are perfect for my limited time.",
+    "name3": "Robert Johnson",
+    "role3": "Marketing Manager"
+  },
+  "cta": {
+    "title": "Ready to Transform Your Learning Journey?",
+    "subtitle": "Join thousands of learners who have accelerated their skills development with Nexora's AI-powered learning platform.",
+    "getStartedFree": "Get Started for Free",
+    "createNextCourse": "Create Your Next Course",
+    "getStarted": "Get Started"
+  }
+}

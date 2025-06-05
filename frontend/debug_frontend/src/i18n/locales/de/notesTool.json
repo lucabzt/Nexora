@@ -1,0 +1,20 @@
+{
+  "title": "Meine Notizen",
+  "newNotePlaceholder": "Neue Notiz hier eingeben...",
+  "addButton": "Notiz hinzufügen",
+  "noNotes": "Sie haben noch keine Notizen für dieses Kapitel hinzugefügt.",
+  "saveNoteAriaLabel": "Notiz speichern",
+  "cancelEditAriaLabel": "Bearbeitung abbrechen",
+  "editNoteAriaLabel": "Notiz bearbeiten",
+  "deleteNoteAriaLabel": "Notiz löschen",
+  "tooltip": {
+    "openNotes": "Notizwerkzeug öffnen",
+    "closeNotes": "Notizwerkzeug schließen"
+  },
+  "notifications": {
+    "saved": "Notizen erfolgreich gespeichert!",
+    "cleared": "Notizen gelöscht!",
+    "saveError": "Fehler beim Speichern der Notizen.",
+    "loadError": "Fehler beim Laden der Notizen."
+  }
+}

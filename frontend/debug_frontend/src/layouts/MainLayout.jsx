@@ -10,7 +10,8 @@ import {
   Button,
   Avatar, // Added Avatar
   Menu,
-  Text // Ensure Text is imported
+  Text, // Ensure Text is imported
+  useMantineColorScheme // Import here directly
 } from '@mantine/core';
 import { 
   IconSettings,
@@ -19,16 +20,17 @@ import {
   IconUser, 
   IconLogout 
 } from '@tabler/icons-react'; // Added IconLogout and IconUser
-import { useMantineColorScheme } from '@mantine/core';
 import AppFooter from '../components/AppFooter';
 import { Link as RouterLink, useNavigate } from 'react-router-dom'; // Added useNavigate
 import { useAuth } from '../contexts/AuthContext'; // Added useAuth
+import { useTranslation } from 'react-i18next'; // Import useTranslation hook
 
 function MainLayout() {
   const theme = useMantineTheme();
   const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuth(); // Ensure isAuthenticated is destructured
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const { t } = useTranslation(['app', 'navigation']); // Initialize translation hook for app and navigation namespaces
   const dark = colorScheme === 'dark';
 
   // Logic to determine avatar source
@@ -59,8 +61,7 @@ function MainLayout() {
       }}
       header={
         <Header height={{ base: 70, sm: 80 }} p="md">
-          <div style={{  display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>
-            <Title 
+          <div style={{  display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>              <Title 
               order={2} 
               size="1.6rem"
               component={Link}
@@ -75,10 +76,19 @@ function MainLayout() {
                 color: theme.colorScheme === 'dark' ? theme.white : theme.black,
               })}
             >
-              Nexora
+              {t('title', { ns: 'app' })}
             </Title>
-            
-            <Group spacing="md">
+              <Group spacing="md">
+              <ActionIcon
+                variant="outline"
+                color={dark ? 'yellow' : 'teal'}
+                onClick={() => toggleColorScheme()}
+                title={t('colorSchemeToggleTitle', { ns: 'app', defaultValue: 'Toggle color scheme' })}
+                size="lg"
+                radius="md"
+              >
+                {dark ? <IconSun size={20} /> : <IconMoonStars size={20} />}
+              </ActionIcon>
               {isAuthenticated && user ? ( // Added user check for safety
                 <Menu shadow="md" width={200} position="bottom-end">
                   <Menu.Target>
@@ -86,7 +96,7 @@ function MainLayout() {
                       <Avatar
                         key={avatarSrc || user.id}
                         src={avatarSrc}
-                        alt={user.username || 'User'}
+                        alt={user.username || t('userAvatarFallbackAlt', { ns: 'navigation', defaultValue: 'User' })}
                         radius="xl"
                         size="sm"
                         color="cyan" // Added color for consistency if image fails
@@ -100,33 +110,32 @@ function MainLayout() {
                       )}
                     </Group>
                   </Menu.Target>
-                  <Menu.Dropdown>
-                    <Menu.Item icon={<IconUser size={14} />} onClick={() => navigate('/')}>
-                      Dashboard
+                  <Menu.Dropdown>                    <Menu.Item icon={<IconUser size={14} />} onClick={() => navigate('/')}>
+                      {t('dashboard', { ns: 'navigation' })}
                     </Menu.Item>
                     <Menu.Item icon={<IconSettings size={14} />} onClick={() => navigate('/settings')}>
-                      Settings
-                    </Menu.Item>
-                    <Menu.Item 
-                      icon={dark ? <IconSun size={14} /> : <IconMoonStars size={14} />} 
-                      onClick={() => toggleColorScheme()}
-                    >
-                      Toggle Theme
+                      {t('settings', { ns: 'navigation' })}
                     </Menu.Item>
                     <Menu.Item icon={<IconLogout size={14} />} onClick={handleLogout}>
-                      Logout
+                      {t('logout', { ns: 'navigation' })}
                     </Menu.Item>
                   </Menu.Dropdown>
                 </Menu>
               ) : (
-                <>
-                  <Button 
+                <>                  <Button 
                     component={RouterLink} 
                     to="/login" 
                     variant="outline"
                     radius="md"
+                    sx={(theme) => ({
+                      [theme.fn.smallerThan('sm')]: {
+                        paddingLeft: theme.spacing.xs,
+                        paddingRight: theme.spacing.xs,
+                        fontSize: theme.fontSizes.xs,
+                      },
+                    })}
                   >
-                    Log In
+                    {t('login', { ns: 'navigation' })}
                   </Button>
                   
                   <Button 
@@ -135,8 +144,15 @@ function MainLayout() {
                     variant="filled"
                     radius="md"
                     color="teal"
+                    sx={(theme) => ({
+                      [theme.fn.smallerThan('sm')]: {
+                        paddingLeft: theme.spacing.xs,
+                        paddingRight: theme.spacing.xs,
+                        fontSize: theme.fontSizes.xs,
+                      },
+                    })}
                   >
-                    Sign Up
+                    {t('register', { ns: 'navigation' })}
                   </Button>
                   {/* Theme toggle for non-authenticated users is removed from here */}
                 </>

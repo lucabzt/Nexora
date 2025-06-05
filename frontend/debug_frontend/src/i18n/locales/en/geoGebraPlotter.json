@@ -1,0 +1,24 @@
+{
+  "title": "GeoGebra Function Plotter",
+  "description": "Visualize mathematical functions using the interactive GeoGebra graphing calculator.",
+  "iframeTitle": "GeoGebra Graphing Calculator",
+  "inputLabel": "Enter function f(x):",
+  "plotButton": "Plot Function",
+  "resetButton": "Reset Plot",
+  "loading": "Loading GeoGebra...",
+  "error": "Error loading GeoGebra applet.",
+  "defaultFunction": "sin(x)",
+  "instructions": "Enter a function like 'x^2', 'sin(x)', or 'cos(x*2)' and click 'Plot Function'.",
+  "plotSettings": {
+    "title": "Plot Settings",
+    "xAxisLabel": "X-Axis Label:",
+    "yAxisLabel": "Y-Axis Label:",
+    "showGrid": "Show Grid",
+    "showAxes": "Show Axes",
+    "color": "Plot Color:"
+  },
+  "tooltip": {
+    "openPlotter": "Open GeoGebra Plotter",
+    "closePlotter": "Close GeoGebra Plotter"
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "pageTitle": "Learning Statistics & Analytics",
+  "keyMetrics": {
+    "activeUsers": "Active Users",
+    "completedCourses": "Completed Courses",
+    "chaptersProgress": "Chapters Progress",
+    "quizSuccessRate": "Quiz Success Rate",
+    "studyTime": "Study Time",
+    "studyTimeSubtitle": "Total time studying",
+    "studyTimeValue": "{{count}} hrs"
+  },
+  "tabs": {
+    "daily": "Daily Progress",
+    "weekly": "Weekly Stats",
+    "monthly": "Monthly Trends",
+    "subjects": "Subject Analysis"
+  },
+  "dailyTab": {
+    "learningActivityTitle": "Today's Learning Activity",
+    "quizPerformanceTitle": "Quiz Performance",
+    "avgScoreSuffix": "% avg score",
+    "activeHoursTitle": "Active Hours Today",
+    "polarArea": {
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "evening": "Evening",
+      "night": "Night",
+      "hoursSpentLabel": "Hours Spent"
+    }
+  },
+  "weeklyTab": {
+    "weeklyProgressTitle": "Weekly Learning Progress",
+    "studyTimeAxis": "Study Time (minutes)",
+    "completionRateAxis": "Completion Rate (%)",
+    "engagementTitle": "Weekly Engagement",
+    "radarLabels": {
+      "quizzes": "Quizzes",
+      "reading": "Reading",
+      "videos": "Videos",
+      "practice": "Practice",
+      "discussion": "Discussion",
+      "review": "Review"
+    },
+    "radarDatasetThisWeek": "This Week",
+    "radarDatasetLastWeek": "Last Week",
+    "courseActivityTitle": "Course Activity",
+    "doughnutLabels": {
+      "active": "Active Courses",
+      "completedThisWeek": "Completed This Week",
+      "onHold": "On Hold"
+    }
+  },
+  "monthlyTab": {
+    "monthlyProgressTitle": "Monthly Learning Progress",
+    "learningHoursTitle": "Monthly Learning Hours",
+    "hoursStudiedLabel": "Hours Studied",
+    "achievementGrowthTitle": "Achievement Growth",
+    "achievementsLabel": "Achievements",
+    "months": {
+      "jan": "Jan", "feb": "Feb", "mar": "Mar", "apr": "Apr",
+      "may": "May", "jun": "Jun", "jul": "Jul", "aug": "Aug",
+      "sep": "Sep", "oct": "Oct", "nov": "Nov", "dec": "Dec"
+    }
+  },
+  "subjectsTab": {
+    "distributionTitle": "Subject Distribution",
+    "performanceTitle": "Performance by Subject",
+    "averageScoreLabel": "Average Score (%)",
+    "subjectNames": {
+      "mathematics": "Mathematics",
+      "programming": "Programming",
+      "languages": "Languages",
+      "science": "Science",
+      "history": "History",
+      "arts": "Arts"
+    },
+    "subjectCard": {
+      "coursesCompleted_one": "{{count}} course completed",
+      "coursesCompleted_other": "{{count}} courses completed",
+      "averageScore": "{{score}}% average score",
+      "hoursSpent_one": "{{count}} hour spent",
+      "hoursSpent_other": "{{count}} hours spent",
+      "badgeExcellent": "Excellent",
+      "badgeGood": "Good"
+    }
+  },
+  "statsCard": {
+    "ofTotal": "of {{total}} total"
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "mainTitle": "Neuen Lernkurs erstellen",
+  "form": {
+    "validation": {
+      "topicRequired": "Thema ist erforderlich",
+      "timePositive": "Zeit muss größer als 0 sein"
+    },
+    "topic": {
+      "label": "Über welches Thema möchten Sie lernen?",
+      "placeholder": "z.B. Einführung in die Quantenphysik",
+      "description": "Seien Sie spezifisch für bessere Ergebnisse. Sie können Unterthemen oder gewünschte Schwerpunkte angeben.",
+      "descriptionLabel": "Zusätzliche Details (Optional)",
+      "descriptionPlaceholder": "Gibt es spezielle Aspekte oder Schwerpunkte?"
+    },
+    "time": {
+      "label": "Geschätzte Lernzeit (Stunden)",
+      "placeholder": "z.B. 2",
+      "description": "Wie lange soll der Kurs dauern? (z.B. 2 für einen kurzen Überblick, 10 für mehr Tiefe)"
+    },
+    "documents": {
+      "label": "Dokumente hochladen (Optional)",
+      "placeholder": "PDF, DOC, TXT, etc. hochladen",
+      "uploadedTitle": "Hochgeladene Dokumente:",
+      "fileEntry": "{{fileName}} ({{sizeKB}} KB)"
+    },
+    "images": {
+      "label": "Bilder hochladen (Optional)",
+      "placeholder": "JPG, PNG, etc. hochladen",
+      "uploadedTitle": "Hochgeladene Bilder:",
+      "fileEntry": "{{fileName}} ({{sizeKB}} KB)"
+    },
+    "uploads": {
+      "personalizedExperience": "Ihre hochgeladenen Dateien werden verwendet, um ein persönlicheres Lernerlebnis zu generieren."
+    },
+    "error": {
+      "alertTitle": "Formularfehler!"
+    }
+  },
+  "toast": {
+    "documentUploadSuccess": "Dokument \"{{fileName}}\" erfolgreich hochgeladen",
+    "documentUploadError": "Fehler beim Hochladen des Dokuments: {{error}}",
+    "imageUploadSuccess": "Bild \"{{fileName}}\" erfolgreich hochgeladen",
+    "imageUploadError": "Fehler beim Hochladen des Bildes: {{error}}"
+  },
+  "errors": {
+    "unknown": "Unbekannter Fehler"
+  },
+  "streaming": {
+    "title": "Dein Kurs wird erstellt",
+    "description": "Dies kann einige Minuten dauern. Unsere KI erstellt personalisierte Inhalte für Ihren Kurs.",
+    "courseInfo": {
+      "time": "Zeitinvestition:",
+      "hours": "Stunden"
+    },
+    "chapters": {
+      "title": "Erstellte Kapitel:",
+      "expected": "Erwartet:",
+      "minutes": "Min.",
+      "questions": "Fragen"
+    },
+    "button": {
+      "goToCourse": "Zum Kurs gehen"
+    },
+    "error": {
+      "generic": "Während der Kurserstellung ist ein Fehler aufgetreten",
+      "title": "Streaming-Fehler!"
+    },
+    "status": {
+      "errorOccurred": "Fehler bei der Kurserstellung",
+      "initializing": "Kurserstellung wird initialisiert..."
+    }
+  },
+  "stepper": {
+    "details": {
+      "label": "Kursdetails",
+      "description": "Definieren Sie Ihr Thema und Ihren Umfang"
+    },
+    "time": {
+      "label": "Zeit",
+      "description": "Wie viel Zeit haben Sie?"
+    },
+    "uploads": {
+      "label": "Inhalt hochladen (Optional)",
+      "description": "Stellen Sie Dokumente oder Bilder bereit"
+    }
+  },
+  "alert": {
+    "uploading": {
+      "title": "Datei wird hochgeladen",
+      "message": "Bitte warten Sie, während Ihre Datei hochgeladen wird..."
+    }
+  },
+  "buttons": {
+    "back": "Zurück",
+    "nextStep": "Nächster Schritt",
+    "createCourse": "Kurs erstellen",
+    "creating": "Erstelle..."
+  }
+}

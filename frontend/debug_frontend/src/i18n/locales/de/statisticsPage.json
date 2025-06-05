@@ -1,0 +1,90 @@
+{
+  "pageTitle": "Lernstatistiken & Analysen",
+  "keyMetrics": {
+    "activeUsers": "Aktive Nutzer",
+    "completedCourses": "Abgeschlossene Kurse",
+    "chaptersProgress": "Kapitelfortschritt",
+    "quizSuccessRate": "Quiz-Erfolgsrate",
+    "studyTime": "Lernzeit",
+    "studyTimeSubtitle": "Gesamte Lernzeit",
+    "studyTimeValue": "{{count}} Std."
+  },
+  "tabs": {
+    "daily": "Täglicher Fortschritt",
+    "weekly": "Wöchentliche Statistiken",
+    "monthly": "Monatliche Trends",
+    "subjects": "Fächeranalyse"
+  },
+  "dailyTab": {
+    "learningActivityTitle": "Heutige Lernaktivität",
+    "quizPerformanceTitle": "Quiz-Leistung",
+    "avgScoreSuffix": "% durchschn. Punktzahl",
+    "activeHoursTitle": "Aktive Stunden heute",
+    "polarArea": {
+      "morning": "Morgen",
+      "afternoon": "Nachmittag",
+      "evening": "Abend",
+      "night": "Nacht",
+      "hoursSpentLabel": "Verbrachte Stunden"
+    }
+  },
+  "weeklyTab": {
+    "weeklyProgressTitle": "Wöchentlicher Lernfortschritt",
+    "studyTimeAxis": "Lernzeit (Minuten)",
+    "completionRateAxis": "Abschlussrate (%)",
+    "engagementTitle": "Wöchentliches Engagement",
+    "radarLabels": {
+      "quizzes": "Quizze",
+      "reading": "Lesen",
+      "videos": "Videos",
+      "practice": "Übung",
+      "discussion": "Diskussion",
+      "review": "Wiederholung"
+    },
+    "radarDatasetThisWeek": "Diese Woche",
+    "radarDatasetLastWeek": "Letzte Woche",
+    "courseActivityTitle": "Kursaktivität",
+    "doughnutLabels": {
+      "active": "Aktive Kurse",
+      "completedThisWeek": "Diese Woche abgeschlossen",
+      "onHold": "Pausiert"
+    }
+  },
+  "monthlyTab": {
+    "monthlyProgressTitle": "Monatlicher Lernfortschritt",
+    "learningHoursTitle": "Monatliche Lernstunden",
+    "hoursStudiedLabel": "Gelernte Stunden",
+    "achievementGrowthTitle": "Erfolgszuwachs",
+    "achievementsLabel": "Erfolge",
+    "months": {
+      "jan": "Jan", "feb": "Feb", "mar": "Mär", "apr": "Apr",
+      "may": "Mai", "jun": "Jun", "jul": "Jul", "aug": "Aug",
+      "sep": "Sep", "okt": "Okt", "nov": "Nov", "dez": "Dez"
+    }
+  },
+  "subjectsTab": {
+    "distributionTitle": "Fächerverteilung",
+    "performanceTitle": "Leistung nach Fach",
+    "averageScoreLabel": "Durchschnittliche Punktzahl (%)",
+    "subjectNames": {
+      "mathematics": "Mathematik",
+      "programming": "Programmieren",
+      "languages": "Sprachen",
+      "science": "Naturwissenschaften",
+      "history": "Geschichte",
+      "arts": "Künste"
+    },
+    "subjectCard": {
+      "coursesCompleted_one": "{{count}} Kurs abgeschlossen",
+      "coursesCompleted_other": "{{count}} Kurse abgeschlossen",
+      "averageScore": "{{score}}% durchschn. Punktzahl",
+      "hoursSpent_one": "{{count}} Stunde gelernt",
+      "hoursSpent_other": "{{count}} Stunden gelernt",
+      "badgeExcellent": "Ausgezeichnet",
+      "badgeGood": "Gut"
+    }
+  },
+  "statsCard": {
+    "ofTotal": "von {{total}} gesamt"
+  }
+}

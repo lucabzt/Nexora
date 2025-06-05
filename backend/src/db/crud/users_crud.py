@@ -2,6 +2,7 @@
 from typing import Optional
 
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import text
 from ..models.db_user import User
 
 def get_user_by_id(db: Session, user_id: str) -> Optional[User]:
@@ -68,7 +69,53 @@ def change_user_password(db: Session, db_user: User, hashed_password: str):
     return db_user
 
 def delete_user(db: Session, db_user: User):
-    """Delete a user from the database."""
+    """
+    Delete a user from the database, including all associated data:
+    - Notes
+    - Questions in course chapters
+    - Courses 
+    - Documents
+    - Images
+    
+    This ensures no foreign key constraints are violated.
+    """
+    user_id = db_user.id
+
+    # 1. Delete notes associated with user
+    db.execute(text("DELETE FROM notes WHERE user_id = :user_id"), {"user_id": user_id})
+
+    # 2. Get all courses by this user
+    courses = db.execute(text("SELECT id FROM courses WHERE user_id = :user_id"), {"user_id": user_id}).fetchall()
+    course_ids = [course[0] for course in courses]
+    
+    if course_ids:
+        # Convert list to tuple for SQL IN operator
+        # Ensure course_ids_tuple is correctly formatted for the IN clause
+        if len(course_ids) == 1:
+            course_ids_placeholder = f"(:course_id_0)"
+            params = {f"course_id_0": course_ids[0]}
+        else:
+            course_ids_placeholder = ", ".join([f":course_id_{i}" for i in range(len(course_ids))])
+            course_ids_placeholder = f"({course_ids_placeholder})"
+            params = {f"course_id_{i}": course_id for i, course_id in enumerate(course_ids)}
+
+        # 3. Delete all questions from the user's courses
+        db.execute(text(f"DELETE FROM multiple_choice_questions WHERE chapter_id IN "
+                        f"(SELECT id FROM chapters WHERE course_id IN {course_ids_placeholder})"), params)
+        
+        # 4. Delete chapters related to courses
+        db.execute(text(f"DELETE FROM chapters WHERE course_id IN {course_ids_placeholder}"), params)
+        
+        # 5. Delete courses
+        db.execute(text(f"DELETE FROM courses WHERE id IN {course_ids_placeholder}"), params)
+    
+    # 6. Delete documents and images directly associated with the user
+    db.execute(text("DELETE FROM documents WHERE user_id = :user_id"), {"user_id": user_id})
+    db.execute(text("DELETE FROM images WHERE user_id = :user_id"), {"user_id": user_id})
+    
+    # 7. Finally, delete the user
+    # 7. Finally, delete the user
     db.delete(db_user)
     db.commit()
+    
     return db_user

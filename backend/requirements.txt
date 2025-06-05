@@ -16,3 +16,4 @@ Authlib
 itsdangerous
 types-SQLAlchemy
 requests
+deprecated

@@ -1,0 +1,9 @@
+{
+  "title": "Admin Dashboard",
+  "users": "Users",
+  "courses": "Courses",
+  "settings": "Settings",
+  "accessDeniedTitle": "Access Denied",
+  "accessDeniedMessage": "You do not have permission to view this page. You will be redirected shortly.",
+  "closeAlert": "Close alert"
+}

@@ -1,0 +1,67 @@
+{
+  "title": "Einstellungen",
+  "theme": "Thema",
+  "dark": "Dunkel",
+  "light": "Hell",
+  "language": "Sprache",
+  "languageName": "Deutsch",
+  "userMenu": {
+    "loggedInAs": "Angemeldet als {{username}}",
+    "profile": "Profil",
+    "settings": "Einstellungen",
+    "adminBadge": "ADMIN",
+    "logout": "Abmelden"
+  },
+  "languageSettings": "Spracheinstellungen",
+  "languageDescription": "Wählen Sie Ihre bevorzugte Sprache für die Anwendungsoberfläche.",
+  "selectLanguage": "Wählen Sie Ihre Sprache",
+  "preferences": "Präferenzen",
+  "profile": "Profil",
+  "account": "Konto",
+  "pageTitle": "Kontoeinstellungen",
+  "loadingUserSettings": "Benutzereinstellungen werden geladen...",
+  "validation": {
+    "usernameMinLength": "Benutzername muss mindestens 3 Zeichen lang sein",
+    "oldPasswordRequired": "Altes Passwort ist erforderlich",
+    "newPasswordMinLength": "Neues Passwort muss mindestens 3 Zeichen lang sein",
+    "passwordsDoNotMatch": "Passwörter stimmen nicht überein"
+  },
+  "toast": {
+    "fileTooLarge": "Datei ist zu groß. Maximale Größe ist {{maxSize}}MB.",
+    "profileUpdateSuccess": "Profil erfolgreich aktualisiert!",
+    "profileUpdateErrorFallback": "Profil konnte nicht aktualisiert werden.",
+    "passwordChangeSuccess": "Passwort erfolgreich geändert!",
+    "passwordChangeErrorFallback": "Passwort konnte nicht geändert werden."
+  },
+  "authError": {
+    "title": "Authentifizierungsfehler",
+    "userIdMissing": "Benutzer-ID fehlt, bitte erneut anmelden.",
+    "userNotFound": "Benutzer nicht gefunden oder unvollständige Benutzerdaten. Bitte erneut anmelden."
+  },
+  "updateErrorAlertTitle": "Update-Fehler",
+  "passwordErrorAlertTitle": "Passwort-Fehler",
+  "general": {
+    "cardTitle": "Allgemeine Informationen",
+    "badge": "Profil",
+    "avatarAlt": "Profilvorschau",
+    "uploadImageButton": "Bild hochladen",
+    "removeImageButton": "Entfernen",
+    "imageSelectedPrefix": "Ausgewählt:",
+    "usernameLabel": "Benutzername",
+    "usernamePlaceholder": "Ihr Benutzername",
+    "emailLabel": "E-Mail",
+    "emailPlaceholder": "Ihre E-Mail-Adresse",
+    "saveButton": "Änderungen speichern"
+  },
+  "security": {
+    "cardTitle": "Sicherheitseinstellungen",
+    "badge": "Passwort",
+    "currentPasswordLabel": "Aktuelles Passwort",
+    "currentPasswordPlaceholder": "Geben Sie Ihr aktuelles Passwort ein",
+    "newPasswordLabel": "Neues Passwort",
+    "newPasswordPlaceholder": "Wählen Sie ein neues Passwort",
+    "confirmNewPasswordLabel": "Neues Passwort bestätigen",
+    "confirmNewPasswordPlaceholder": "Bestätigen Sie Ihr neues Passwort",
+    "updatePasswordButton": "Passwort aktualisieren"
+  }
+}

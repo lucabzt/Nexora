@@ -1,0 +1,99 @@
+{
+  "mainTitle": "Create a New Learning Course",
+  "form": {
+    "validation": {
+      "topicRequired": "Topic is required",
+      "timePositive": "Time must be greater than 0"
+    },
+    "topic": {
+      "label": "What topic do you want to learn about?",
+      "placeholder": "e.g., Introduction to Quantum Physics",
+      "description": "Be specific for better results. You can include subtopics or desired focus areas.",
+      "descriptionLabel": "Additional Details (Optional)",
+      "descriptionPlaceholder": "Any specific aspects or focus areas?"
+    },
+    "time": {
+      "label": "Estimated learning time (hours)",
+      "placeholder": "e.g. 2",
+      "description": "How long should the course be? (e.g., 2 for a short overview, 10 for more depth)"
+    },
+    "documents": {
+      "label": "Upload Documents (Optional)",
+      "placeholder": "Upload PDF, DOC, TXT, etc.",
+      "uploadedTitle": "Uploaded Documents:",
+      "fileEntry": "{{fileName}} ({{sizeKB}} KB)"
+    },
+    "images": {
+      "label": "Upload Images (Optional)",
+      "placeholder": "Upload JPG, PNG, etc.",
+      "uploadedTitle": "Uploaded Images:",
+      "fileEntry": "{{fileName}} ({{sizeKB}} KB)"
+    },
+    "uploads": {
+      "personalizedExperience": "Your uploaded files will be used to generate a more personalized learning experience."
+    },
+    "error": {
+      "alertTitle": "Form Error!"
+    }
+  },
+  "toast": {
+    "documentUploadSuccess": "Document \"{{fileName}}\" uploaded successfully",
+    "documentUploadError": "Failed to upload document: {{error}}",
+    "imageUploadSuccess": "Image \"{{fileName}}\" uploaded successfully",
+    "imageUploadError": "Failed to upload image: {{error}}"
+  },
+  "errors": {
+    "unknown": "Unknown error"
+  },
+  "streaming": {
+    "title": "Creating Your Course",
+    "description": "This may take a few minutes. Our AI is crafting personalized content for your course.",
+    "courseInfo": {
+      "time": "Time investment:",
+      "hours": "hours"
+    },
+    "chapters": {
+      "title": "Chapters Created:",
+      "expected": "Expected:",
+      "minutes": "min",
+      "questions": "questions"
+    },
+    "button": {
+      "goToCourse": "Go to Course"
+    },
+    "error": {
+      "generic": "An error occurred during course creation",
+      "title": "Streaming Error!"
+    },
+    "status": {
+      "errorOccurred": "Error occurred during course creation",
+      "initializing": "Initializing course creation..."
+    }
+  },
+  "stepper": {
+    "details": {
+      "label": "Course Details",
+      "description": "Define your topic and scope"
+    },
+    "time": {
+      "label": "Time",
+      "description": "How much time do you have?"
+    },
+    "uploads": {
+      "label": "Upload Content (Optional)",
+      "description": "Provide documents or images"
+    }
+  },
+  "alert": {
+    "uploading": {
+      "title": "Uploading File",
+      "message": "Please wait while your file is being uploaded..."
+    }
+  },
+  "buttons": {
+    "back": "Back",
+    "nextStep": "Next step",
+    "createCourse": "Create Course",
+    "creating": "Creating..."
+  }
+}

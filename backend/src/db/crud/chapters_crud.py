@@ -6,6 +6,8 @@ from ..models.db_course import Chapter
 
 
 
+
+
 ############### CHAPTERS
 def get_chapter_by_id(db: Session, chapter_id: int) -> Optional[Chapter]:
     """Get chapter by ID"""

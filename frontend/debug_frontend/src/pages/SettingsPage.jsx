@@ -13,23 +13,87 @@ import {
   Space,
   Divider,
   Box,
+  createStyles,
+  Transition,
+  ActionIcon,
+  Tooltip,
+  Card,
+  Badge,
+  SimpleGrid,
+  useMantineTheme,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconAlertCircle, IconUpload, IconPhoto, IconSettings, IconLock } from '@tabler/icons-react';
+import { 
+  IconAlertCircle, 
+  IconUpload, 
+  IconPhoto, 
+  IconSettings, 
+  IconLock, 
+  IconTrash, 
+  IconUser,
+  IconAt,
+  IconKey,
+  IconDeviceFloppy,
+  IconArrowUpRight
+} from '@tabler/icons-react';
 import { useAuth } from '../contexts/AuthContext';
 import userService from '../api/userService';
 import { toast } from 'react-toastify';
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { IconLanguage } from '@tabler/icons-react';
+import LanguageSettingsCard from '../components/LanguageSettingsCard';
+
+// Create styles for the SettingsPage components
+const useStyles = createStyles((theme) => ({
+  settingsContainer: {
+    maxWidth: '900px', // Make it wider
+    width: '100%',
+    padding: theme.spacing.md,
+  },
+  cardContainer: {
+    // Removed hover effects
+    boxShadow: theme.shadows.sm,
+  },
+  avatarContainer: {
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginBottom: theme.spacing.xl, // Increased spacing
+    marginTop: theme.spacing.md,
+  },
+  avatar: {
+    boxShadow: theme.shadows.md,
+    border: `3px solid ${theme.colors[theme.primaryColor][5]}`,
+  },
+  buttonGradient: {
+    background: theme.fn.gradient({ from: 'blue', to: 'cyan', deg: 45 }),
+  },
+  sectionTitle: {
+    borderBottom: `2px solid ${theme.colors[theme.primaryColor][5]}`, // Better contrast
+    paddingBottom: theme.spacing.xs,
+    marginBottom: theme.spacing.xl, // Increased spacing
+  },
+  formField: {
+    marginTop: theme.spacing.md,
+  },
+  submitButton: {
+    marginTop: theme.spacing.lg,
+  },
+}));
 
 const MAX_FILE_SIZE_MB = 12;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 function SettingsPage() {
+  const { classes } = useStyles();
+  const theme = useMantineTheme();
   const { user, setUser, loading: authLoading } = useAuth();
+  const { t, i18n } = useTranslation('settings');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [passwordError, setPasswordError] = useState(null);
-  const [profileImageFile, setProfileImageFile] = useState(null);
+  const [passwordError, setPasswordError] = useState(null);  const [profileImageFile, setProfileImageFile] = useState(null);
   const [previewImage, setPreviewImage] = useState(user?.profile_image_base64 || null);
   const resetRef = useRef(null);
 
@@ -39,7 +103,7 @@ function SettingsPage() {
       email: user?.email || '',
     },
     validate: {
-      username: (value) => (value && value.length < 3 ? 'Username must be at least 3 characters' : null),
+      username: (value) => (value && value.length < 3 ? t('validation.usernameMinLength', 'Username must be at least 3 characters') : null),
     },
   });
 
@@ -50,11 +114,11 @@ function SettingsPage() {
       confirm_new_password: '',
     },
     validate: {
-      old_password: (value) => (value ? null : 'Old password is required'),
+      old_password: (value) => (value ? null : t('validation.oldPasswordRequired', 'Old password is required')),
       new_password: (value) =>
-        value.length < 3 ? 'New password must be at least 3 characters' : null,
+        value.length < 3 ? t('validation.newPasswordMinLength', 'New password must be at least 3 characters') : null,
       confirm_new_password: (value, values) =>
-        value !== values.new_password ? 'Passwords do not match' : null,
+        value !== values.new_password ? t('validation.passwordsDoNotMatch', 'Passwords do not match') : null,
     },
   });
   useEffect(() => {
@@ -100,7 +164,7 @@ function SettingsPage() {
   const handleFileChange = (file) => {
     if (file) {
       if (file.size > MAX_FILE_SIZE_BYTES) {
-        toast.error(`File is too large. Max size is ${MAX_FILE_SIZE_MB}MB.`);
+        toast.error(t('toast.fileTooLarge', { maxSize: MAX_FILE_SIZE_MB }));
         if (resetRef.current) {
           resetRef.current();
         }
@@ -140,7 +204,7 @@ function SettingsPage() {
 
       // Ensure user and user.id are available
       if (!user || !user.id) {
-        throw new Error("User ID is missing, please log in again.");
+        throw new Error(t('authError.userIdMissing', "User ID is missing, please log in again."));
       }
 
       if (profileImageFile || previewImage !== user.profile_image_base64) {
@@ -151,13 +215,13 @@ function SettingsPage() {
       
       // Update user context with the full updated user object from the backend
       setUser(updatedUser); 
-      toast.success('Profile updated successfully!');
+      toast.success(t('toast.profileUpdateSuccess', 'Profile updated successfully!'));
       setProfileImageFile(null); // Clear the selected file state
       // No need to setPreviewImage here, it's handled by the updatedUser in context
       
     } catch (err) {
       console.error("Error updating profile:", err);
-      let errorMessage = err.message || 'Failed to update profile.';
+      let errorMessage = err.message || t('toast.profileUpdateErrorFallback', 'Failed to update profile.');
       if (err.response && err.response.data) {
         if (typeof err.response.data.detail === 'string') {
           errorMessage = err.response.data.detail;
@@ -180,122 +244,238 @@ function SettingsPage() {
     setPasswordError(null);
     try {
       await userService.changePassword(user.id, values.old_password, values.new_password);
-      toast.success('Password changed successfully!');
+      toast.success(t('toast.passwordChangeSuccess', 'Password changed successfully!'));
       passwordForm.reset();
     } catch (err) {
       console.error("Error changing password:", err);
-      const errorMessage = err.response?.data?.detail || err.message || 'Failed to change password.';
+      const errorMessage = err.response?.data?.detail || err.message || t('toast.passwordChangeErrorFallback', 'Failed to change password.');
       setPasswordError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
-
   if (authLoading) {
-    return <Container><Text>Loading user settings...</Text></Container>;
+    return (
+      <Container className={classes.settingsContainer} size="xl" px="xs">
+        <Paper withBorder shadow="md" p="xl" radius="md">
+          <Group position="center">
+            <Text size="lg" weight={500}>{t('loadingUserSettings', 'Loading user settings...')}</Text>
+          </Group>
+        </Paper>
+      </Container>
+    );
   }
 
   // Add a check for user.id as well, as it's crucial for API calls
   if (!user || !user.id) {
-    return <Container><Text>User not found or incomplete user data. Please login again.</Text></Container>;
+    return (
+      <Container className={classes.settingsContainer} size="xl" px="xs">
+        <Paper withBorder shadow="md" p="xl" radius="md">
+          <Alert icon={<IconAlertCircle size={20} />} title={t('authError.title', 'Authentication Error')} color="red">
+            {t('authError.userNotFound', 'User not found or incomplete user data. Please login again.')}
+          </Alert>
+        </Paper>
+      </Container>
+    );
   }
-
   return (
-    <Container size="md" my="xl">
-      <Title order={2} align="center" mb="xl">
-        Account Settings
+    <Container className={classes.settingsContainer} size="xl" px="xs">
+      <Title order={1} align="center" mb="xl" className={classes.sectionTitle}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+          <IconUser size={28} stroke={1.5} color={theme.colors[theme.primaryColor][6]} />
+          <Text gradient={{ from: theme.primaryColor, to: theme.colors[theme.primaryColor][4], deg: 45 }} 
+                inherit variant="gradient">{t('pageTitle', 'Account Settings')}</Text>
+        </Box>
       </Title>
 
       {error && (
-        <Alert icon={<IconAlertCircle size={16} />} title="Update Error" color="red" withCloseButton onClose={() => setError(null)}>
+        <Alert 
+          icon={<IconAlertCircle size={18} />} 
+          title={t('updateErrorAlertTitle', 'Update Error')} 
+          color="red" 
+          withCloseButton 
+          onClose={() => setError(null)}
+          mb="lg"
+          radius="md"
+        >
           {error}
         </Alert>
       )}
-      <Space h="md" />
 
-      <Paper withBorder shadow="md" p="lg" radius="md">
-        <Title order={3} mb="lg" icon={<IconSettings size={20} />}>
-          <Group spacing="xs">
-            <IconSettings size={24} stroke={1.5} />
-            <Text>General Information</Text>
-          </Group>
-        </Title>
-        <form onSubmit={generalForm.onSubmit(handleGeneralSubmit)}>
-          <Group position="center" direction="column" mb="lg">
-            <Avatar src={previewImage} size={120} radius={120} alt="Profile Preview">
-              {!previewImage && user?.username?.charAt(0).toUpperCase()}
-            </Avatar>
-            <FileButton resetRef={resetRef} onChange={handleFileChange} accept="image/png,image/jpeg,image/gif">
-              {(props) => <Button {...props} leftIcon={<IconUpload size={16} />}>Upload New Image</Button>}
-            </FileButton>
-            {profileImageFile && (
-              <Text size="sm" color="dimmed">Selected: {profileImageFile.name}</Text>
-            )}
-            {previewImage && (
-              <Button variant="subtle" color="red" size="xs" onClick={handleRemoveImage}>
-                Remove Image
-              </Button>
-            )}
-          </Group>
+      <SimpleGrid cols={1} spacing="xl" breakpoints={[{ minWidth: 'md', cols: 1 }]}>
+        <Card shadow="sm" padding="lg" radius="md" withBorder className={classes.cardContainer}>
+          <Card.Section p="md" bg={theme.colorScheme === 'dark' ? theme.fn.rgba(theme.colors[theme.primaryColor][9], 0.2) : theme.colors[theme.primaryColor][0]}>
+            <Group position="apart">
+              <Group spacing="xs">
+                <IconSettings size={24} stroke={1.5} color={theme.colors[theme.primaryColor][theme.colorScheme === 'dark' ? 4 : 6]} />
+                <Title order={3}>{t('general.cardTitle', 'General Information')}</Title>
+              </Group>
+              <Badge color={theme.primaryColor} variant="light">{t('general.badge', 'Profile')}</Badge>
+            </Group>
+          </Card.Section>
+          
+          <form onSubmit={generalForm.onSubmit(handleGeneralSubmit)}>
+            <Box className={classes.avatarContainer}>              <Transition mounted={true} transition="pop" duration={300} timingFunction="ease">
+                {(styles) => (
+                  <Avatar 
+                    src={previewImage} 
+                    size={150} 
+                    radius={150} 
+                    mx="auto"
+                    style={{ ...styles }}
+                    alt={t('general.avatarAlt', 'Profile Preview')}
+                    className={classes.avatar}
+                  >
+                    {!previewImage && user?.username?.charAt(0).toUpperCase()}
+                  </Avatar>
+                )}
+              </Transition>
+                <Group position="center" spacing="sm" mt="md">
+                <FileButton resetRef={resetRef} onChange={handleFileChange} accept="image/png,image/jpeg,image/gif">
+                  {(props) => (
+                    <Button 
+                      {...props} 
+                      leftIcon={<IconUpload size={16} />}
+                      variant="light"
+                      className={classes.buttonGradient}
+                      size="sm"
+                      radius="md"
+                    >
+                      {t('general.uploadImageButton', 'Upload Image')}
+                    </Button>
+                  )}
+                </FileButton>
+                
+                {previewImage && (
+                  <Button 
+                    variant="light"
+                    color="red" 
+                    size="sm" 
+                    radius="md"
+                    onClick={handleRemoveImage}
+                    leftIcon={<IconTrash size={16} />}
+                  >
+                    {t('general.removeImageButton', 'Remove')}
+                  </Button>
+                )}
+              </Group>
+              
+              {profileImageFile && (
+                <Text size="sm" color="dimmed" align="center" mt="xs">
+                  {t('general.imageSelectedPrefix', 'Selected:')} {profileImageFile.name}
+                </Text>
+              )}
+            </Box>            <Box mt="xl">
+              <TextInput
+                label={t('general.usernameLabel', 'Username')}
+                placeholder={t('general.usernamePlaceholder', 'Your username')}
+                icon={<IconUser size={16} />}
+                {...generalForm.getInputProps('username')}
+                className={classes.formField}
+                radius="md"
+                size="md"
+              />
+              
+              <TextInput
+                label={t('general.emailLabel', 'Email')}
+                placeholder={t('general.emailPlaceholder', 'Your email')}
+                icon={<IconAt size={16} />}
+                disabled
+                {...generalForm.getInputProps('email')}
+                className={classes.formField}
+                radius="md"
+                size="md"
+              />
+            </Box>
+              <Button 
+              type="submit" 
+              loading={isLoading} 
+              fullWidth 
+              mt="xl"
+              size="md"
+              leftIcon={<IconDeviceFloppy size={18} />}
+              className={classes.buttonGradient}
+              radius="md"
+            >
+              {t('general.saveButton', 'Save Changes')}
+            </Button>          </form>
+        </Card>
 
-          <TextInput
-            label="Username"
-            placeholder="Your username"
-            {...generalForm.getInputProps('username')}
-            mb="md"
-          />
-          <TextInput
-            label="Email"
-            placeholder="Your email"
-            disabled
-            {...generalForm.getInputProps('email')}
-            mb="md"
-          />
-          <Button type="submit" loading={isLoading} fullWidth mt="md">
-            Save Changes
-          </Button>
-        </form>
-      </Paper>
+        <LanguageSettingsCard className={classes.cardContainer} />
 
-      <Divider my="xl" label="Security" labelPosition="center" />
-
-      <Paper withBorder shadow="md" p="lg" radius="md">
-        <Title order={3} mb="lg">
-           <Group spacing="xs">
-            <IconLock size={24} stroke={1.5} />
-            <Text>Change Password</Text>
-          </Group>
-        </Title>
-        {passwordError && (
-          <Alert icon={<IconAlertCircle size={16} />} title="Password Error" color="red" withCloseButton onClose={() => setPasswordError(null)} mb="md">
-            {passwordError}
-          </Alert>
-        )}
-        <form onSubmit={passwordForm.onSubmit(handleChangePassword)}>
-          <PasswordInput
-            label="Old Password"
-            placeholder="Your current password"
-            {...passwordForm.getInputProps('old_password')}
-            mb="md"
-          />
-          <PasswordInput
-            label="New Password"
-            placeholder="Your new password"
-            {...passwordForm.getInputProps('new_password')}
-            mb="md"
-          />
-          <PasswordInput
-            label="Confirm New Password"
-            placeholder="Confirm your new password"
-            {...passwordForm.getInputProps('confirm_new_password')}
-            mb="md"
-          />
-          <Button type="submit" loading={isLoading} fullWidth mt="md">
-            Change Password
-          </Button>
-        </form>
-      </Paper>
+        <Card shadow="sm" padding="lg" radius="md" withBorder className={classes.cardContainer}>
+          <Card.Section p="md" bg={theme.colorScheme === 'dark' ? theme.fn.rgba(theme.colors.orange[9], 0.2) : theme.colors.orange[0]}>
+            <Group position="apart">
+              <Group spacing="xs">
+                <IconLock size={24} stroke={1.5} color={theme.colors.orange[theme.colorScheme === 'dark' ? 4 : 6]} />
+                <Title order={3}>{t('security.cardTitle', 'Security Settings')}</Title>
+              </Group>
+              <Badge color="orange" variant="light">{t('security.badge', 'Password')}</Badge>
+            </Group>
+          </Card.Section>
+          
+          {passwordError && (
+            <Alert 
+              icon={<IconAlertCircle size={18} />} 
+              title={t('passwordErrorAlertTitle', 'Password Error')} 
+              color="red" 
+              withCloseButton 
+              onClose={() => setPasswordError(null)} 
+              my="md"
+              radius="md"
+            >
+              {passwordError}
+            </Alert>
+          )}
+          
+          <form onSubmit={passwordForm.onSubmit(handleChangePassword)}>            <Box mt="xl">
+              <PasswordInput
+                label={t('security.currentPasswordLabel', 'Current Password')}
+                placeholder={t('security.currentPasswordPlaceholder', 'Enter your current password')}
+                icon={<IconKey size={16} />}
+                {...passwordForm.getInputProps('old_password')}
+                className={classes.formField}
+                radius="md"
+                size="md"
+              />
+              
+              <PasswordInput
+                label={t('security.newPasswordLabel', 'New Password')}
+                placeholder={t('security.newPasswordPlaceholder', 'Choose a new password')}
+                icon={<IconKey size={16} />}
+                {...passwordForm.getInputProps('new_password')}
+                className={classes.formField}
+                radius="md"
+                size="md"
+              />
+              
+              <PasswordInput
+                label={t('security.confirmNewPasswordLabel', 'Confirm New Password')}
+                placeholder={t('security.confirmNewPasswordPlaceholder', 'Confirm your new password')}
+                icon={<IconKey size={16} />}
+                {...passwordForm.getInputProps('confirm_new_password')}
+                className={classes.formField}
+                radius="md"
+                size="md"
+              />
+            </Box>
+              <Button 
+              type="submit" 
+              loading={isLoading} 
+              fullWidth 
+              mt="xl"
+              size="md"
+              leftIcon={<IconLock size={18} />}
+              color="orange"
+              variant="filled"
+              radius="md"
+            >
+              {t('security.updatePasswordButton', 'Update Password')}
+            </Button>
+          </form>
+        </Card>
+      </SimpleGrid>
     </Container>
   );
 }

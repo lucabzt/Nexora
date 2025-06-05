@@ -4,6 +4,9 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { MantineProvider, ColorSchemeProvider } from '@mantine/core';
 import { AuthProvider } from './contexts/AuthContext';
+import { ToolbarProvider } from './contexts/ToolbarContext';
+import { LanguageProvider } from './contexts/LanguageContext';
+import './i18n/i18n'; // Import i18n configuration
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -16,9 +19,13 @@ import LandingPage from './pages/LandingPage';
 import AppLayout from './layouts/AppLayout';
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminProtectedRoute from './components/AdminProtectedRoute'; // Import AdminProtectedRoute
 import SettingsPage from './pages/SettingsPage';
 import StatisticsPage from './pages/StatisticsPage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage'; // Import the OAuth callback page
+import Impressum from './pages/Impressum';
+import About from './pages/About';
+import AdminView from './pages/AdminView'; // Import AdminView component
 
 function App() {
   const [colorScheme, setColorScheme] = useState(() => {
@@ -39,7 +46,6 @@ function App() {
       localStorage.setItem('mantine-color-scheme', colorScheme);
     }
   }, [colorScheme]);
-
   return (
     <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
       <MantineProvider withGlobalStyles withNormalizeCSS theme={{ 
@@ -53,20 +59,22 @@ function App() {
               },
             },
           },
-        },
-      }}>
-        <AuthProvider>
-          <BrowserRouter>
-            <Routes>
+        },      }}>
+        <LanguageProvider>
+          <AuthProvider>
+            <ToolbarProvider>
+            <BrowserRouter>
+              <Routes>
               {/* Public routes with MainLayout */}
               <Route element={<MainLayout />}>
                 <Route path="/home" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/oauth/callback" element={<OAuthCallbackPage />} /> {/* Moved OAuth callback route here */}
+                <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
+                <Route path="/impressum" element={<Impressum />} />
+                <Route path="/about" element={<About />} />
               </Route>
-              
-              {/* Protected routes */}
+                {/* Protected routes */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/" element={<AppLayout />}>
                   <Route index element={<Dashboard />} />
@@ -76,7 +84,13 @@ function App() {
                   <Route path="settings" element={<SettingsPage />} />
                   <Route path="statistics" element={<StatisticsPage />} />
                   {/* <Route path="auth/google/callback" element={<OAuthCallbackPage />} /> Removed from here */}
-                  {/* Add other protected routes here */}
+                </Route>
+              </Route>
+                {/* Admin-only routes - Using AppLayout for consistent interface */}
+              <Route element={<AdminProtectedRoute />}>
+                <Route path="/admin" element={<AppLayout />}>
+                  <Route index element={<AdminView />} />
+                  {/* Add other admin routes here */}
                 </Route>
               </Route>
 
@@ -85,10 +99,11 @@ function App() {
               {/* Default redirect for any unmatched authenticated paths could be to dashboard or handled by AppLayout's index */}
               {/* Fallback route - consider if this is needed or if AppLayout handles index properly */}
               {/* <Route path="*" element={<Navigate to="/" />} /> */}
-            </Routes>
-          </BrowserRouter>
+            </Routes>          </BrowserRouter>
           <ToastContainer position="top-right" autoClose={3000} theme={colorScheme} />
-        </AuthProvider>
+            </ToolbarProvider>
+          </AuthProvider>
+        </LanguageProvider>
       </MantineProvider>
     </ColorSchemeProvider>
   );

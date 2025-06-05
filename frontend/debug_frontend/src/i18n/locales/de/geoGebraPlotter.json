@@ -1,0 +1,24 @@
+{
+  "title": "GeoGebra Funktionsplotter",
+  "description": "Visualisieren Sie mathematische Funktionen mit dem interaktiven GeoGebra Grafikrechner.",
+  "iframeTitle": "GeoGebra Grafikrechner",
+  "inputLabel": "Funktion f(x) eingeben:",
+  "plotButton": "Funktion plotten",
+  "resetButton": "Plot zurücksetzen",
+  "loading": "GeoGebra wird geladen...",
+  "error": "Fehler beim Laden des GeoGebra-Applets.",
+  "defaultFunction": "sin(x)",
+  "instructions": "Geben Sie eine Funktion wie 'x^2', 'sin(x)' oder 'cos(x*2)' ein und klicken Sie auf 'Funktion plotten'.",
+  "plotSettings": {
+    "title": "Plot-Einstellungen",
+    "xAxisLabel": "X-Achsen-Beschriftung:",
+    "yAxisLabel": "Y-Achsen-Beschriftung:",
+    "showGrid": "Gitter anzeigen",
+    "showAxes": "Achsen anzeigen",
+    "color": "Plotfarbe:"
+  },
+  "tooltip": {
+    "openPlotter": "GeoGebra Plotter öffnen",
+    "closePlotter": "GeoGebra Plotter schließen"
+  }
+}
