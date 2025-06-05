@@ -97,15 +97,43 @@ function AdminView() {
   }, [users]);
 
   const formatDate = (dateString) => {
+    console.log("Given Date String: ", dateString);
     if (!dateString) return '';
     try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) {
-        console.warn("Invalid date string received:", dateString);
-        return ''; // Return empty for invalid dates
+      let processedDateString = dateString;
+      if (typeof dateString === 'string') {
+        // Case 1: Input is 'YYYY-MM-DD HH:MM:SS(.sss)' (space separator)
+        // Convert to 'YYYY-MM-DDTHH:MM:SS(.sss)Z' to ensure UTC parsing
+        if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d*)?$/.test(dateString)) {
+          processedDateString = dateString.replace(' ', 'T') + 'Z';
+        }
+        // Case 2: Input is 'YYYY-MM-DDTHH:MM:SS(.sss)' (T separator, no Z or offset)
+        // Append 'Z' to ensure UTC parsing
+        else if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d*)?$/.test(dateString) &&
+                 !dateString.endsWith('Z') &&
+                 !/[+-]\d{2}:\d{2}$/.test(dateString) &&
+                 !/[+-]\d{4}$/.test(dateString)) { // Also check for +-HHMM offset
+          processedDateString = dateString + 'Z';
+        }
       }
-      // Format to a common standard, e.g., "Jun 5, 2025, 3:09 PM"
-      return date.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
+  
+      const date = new Date(processedDateString);
+      console.log("Processed Date String: ", processedDateString);
+      console.log("Date Object: ", date);
+      
+      if (isNaN(date.getTime())) {
+        // Fallback if processing failed, try original string directly
+        const fallbackDate = new Date(dateString); 
+        if (isNaN(fallbackDate.getTime())) {
+          console.warn("Invalid date string received (tried processed and original):", dateString);
+          return ''; 
+        }
+        // Use fallbackDate for formatting
+        return fallbackDate.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      }
+  
+      // Format using the (UTC-parsed then localized) date object
+      return date.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     } catch (error) {
       console.error("Error formatting date:", dateString, error);
       return '';
