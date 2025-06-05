@@ -113,14 +113,23 @@ def delete_user(db: Session, db_user: User):
         db.execute(text(f"DELETE FROM multiple_choice_questions WHERE chapter_id IN "
                         f"(SELECT id FROM chapters WHERE course_id IN {course_ids_placeholder})"), params)
         
-        # 4. Delete chapters related to courses
+        # 4. Delete documents associated with the user's courses
+        # This must happen before deleting the courses themselves due to foreign key constraints.
+        db.execute(text(f"DELETE FROM documents WHERE course_id IN {course_ids_placeholder}"), params)
+        
+        # 5. Delete chapters related to courses
         db.execute(text(f"DELETE FROM chapters WHERE course_id IN {course_ids_placeholder}"), params)
         
-        # 5. Delete courses
+        # 6. Delete courses
         db.execute(text(f"DELETE FROM courses WHERE id IN {course_ids_placeholder}"), params)
     
-    # 6. Delete documents and images directly associated with the user
-    db.execute(text("DELETE FROM documents WHERE user_id = :user_id"), {"user_id": user_id})
+    # 7. Delete documents directly associated with the user (i.e., not linked to any course)
+    # This handles documents that might have user_id but no course_id.
+    db.execute(text("DELETE FROM documents WHERE user_id = :user_id AND course_id IS NULL"), {"user_id": user_id})
+    
+    # 8. Delete images directly associated with the user
+    # Assuming images are primarily linked via user_id or handled if linked to courses.
+    # If images also have strong FK to courses, their deletion might need similar logic.
     db.execute(text("DELETE FROM images WHERE user_id = :user_id"), {"user_id": user_id})
     
     # 7. Finally, delete the user
