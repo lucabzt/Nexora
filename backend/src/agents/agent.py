@@ -11,18 +11,25 @@ class StandardAgent(ABC):
     """ This is the standard agent without structured output """
     @abstractmethod
     def __init__(self, app_name: str, session_service):
-        pass
+        self.app_name = app_name
+        self.session_service = session_service
 
-    async def run(self, user_id: str, session_id: str, content: types.Content, debug: bool = False) -> Dict[str, Any]:
+    async def run(self, user_id: str, state: dict, content: types.Content, debug: bool = False) -> Dict[str, Any]:
         """
         Wraps the event handling and runner from adk into a simple run() method that includes error handling
         :param user_id: id of the user
-        :param session_id: current session id
+        :param state: the state created from the StateService
         :param content: the user query as a type.Content object
         :param debug: if true the method will print auxiliary outputs (all events)
         :return: the parsed dictionary response from the agent
         """
-        # Key Concept: run_async executes the agent logic and yields Events
+        session = await self.session_service.create_session(
+            app_name=self.app_name,
+            user_id=user_id,
+            state=state
+        )
+        session_id = session.id
+
         # We iterate through events to find the final answer
         async for event in self.runner.run_async(user_id=user_id, session_id=session_id, new_message=content):
             # You can set debug true to see all events during execution
@@ -53,17 +60,24 @@ class StructuredAgent(ABC):
     """ This is an agent that returns structured output. """
     @abstractmethod
     def __init__(self, app_name: str, session_service):
-        pass
+        self.app_name = app_name
+        self.session_service = session_service
 
-    async def run(self, user_id: str, session_id: str, content: types.Content, debug: bool = False) -> Dict[str, Any]:
+    async def run(self, user_id: str, state: dict, content: types.Content, debug: bool = False) -> Dict[str, Any]:
         """
         Wraps the event handling and runner from adk into a simple run() method that includes error handling
         :param user_id: id of the user
-        :param session_id: current session id
+        :param state: the state created from the StateService
         :param content: the user query as a type.Content object
         :param debug: if true the method will print auxiliary outputs (all events)
         :return: the parsed dictionary response from the agent
         """
+        session = await self.session_service.create_session(
+            app_name=self.app_name,
+            user_id=user_id,
+            state=state
+        )
+        session_id = session.id
 
         async for event in self.runner.run_async(
                 user_id=user_id,

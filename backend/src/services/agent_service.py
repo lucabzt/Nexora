@@ -4,6 +4,9 @@ This file defines the service that coordinates the interaction between all the a
 import json
 
 from sqlalchemy.orm import Session
+
+from .query_service import QueryService
+from .state_service import StateService, CourseState
 from ..db.crud import chapters_crud, documents_crud, images_crud, questions_crud, courses_crud
 
 
@@ -24,6 +27,8 @@ class AgentService:
         # session
         self.session_service = InMemorySessionService()
         self.app_name = "Nexora"
+        self.state_manager = StateService()
+        self.query_service = QueryService(self.state_manager)
         
         # define agents
         self.planner_agent = PlannerAgent(self.app_name, self.session_service)
@@ -60,14 +65,11 @@ class AgentService:
         images = images_crud.get_images_by_ids(db, request.picture_ids)
 
         # get a short course title and description from the quick agent
-        info_query = create_text_query(f"""
-                    The following is the user query for creating a course / learning path:
-                    {request.query}
-                    The users uploaded the following documents:
-                    {[doc.filename for doc in docs]}
-                    {[img.filename for img in images]}
-                    """)
-        info_response = await self.info_agent.run(user_id, session_id, info_query)
+        info_response = await self.info_agent.run(
+            user_id=user_id,
+            state={},
+            content=self.query_service.get_info_query(request, docs, images)
+        )
 
         # Create course in database
         course_db = courses_crud.create_course(
@@ -79,6 +81,13 @@ class AgentService:
             total_time_hours=request.time_hours,
             status=CourseStatus.CREATING
         )
+
+        # Create initial state
+        init_state = CourseState(
+            query=request.query,
+            time_hours=request.time_hours,
+        )
+        self.state_manager.create_state(user_id, course_db.id, init_state)
 
         # bind documents to this course
         for doc in docs:
@@ -97,52 +106,31 @@ class AgentService:
 
         yield json.dumps({"type": "course_info", "data": course_info}) + "\n"
 
-        # query for the planner agent
-        planner_query = f"""
-                                    Question (System): What do you want to learn?
-                                    Answer (User): \n{request.query}
-                                    Question (System): How many hours do you want to invest?
-                                    Answer (User): {request.time_hours}
-                                """
-        content = create_docs_query(planner_query, docs, images)
-
         # Query the planner agent (returns a dict)
         response_planner = await self.planner_agent.run(
             user_id=user_id,
-            session_id=session_id,
-            content=content,
+            state=self.state_manager.get_state(user_id=user_id, course_id=course_db.id),
+            content=self.query_service.get_planner_query(request, docs, images),
             debug=False
         )
 
+        # Save chapters to state
+        self.state_manager.save_chapters(user_id, course_db.id, response_planner["chapters"])
+
         # Process each chapter and stream as it's created
         for idx, topic in enumerate(response_planner["chapters"]):
-            # Create input to explainer agent
-            pretty_topic = f"""
-                                    Chapter {idx + 1}:
-                                    Caption: {topic['caption']}
-                                    Time in Minutes: {topic['time']}
-                                    Content Summary: \n{json.dumps(topic['content'], indent=2)}
-                                    Note by Planner Agent: {json.dumps(topic['note'], indent=2)}
-                                """
-
             # Get response from explainer agent
             response_explainer = await self.explainer_agent.run(
                 user_id=user_id,
-                session_id=session_id,
-                content=create_text_query(pretty_topic),
+                state=self.state_manager.get_state(user_id=user_id, course_id=course_db.id),
+                content=self.query_service.get_explainer_query(user_id, course_db.id, idx),
             )
-
-            # Create input to tester agent
-            pretty_chapter = f"""
-                                    {pretty_topic}
-                                    Full Content: \n{json.dumps(response_explainer['explanation'], indent=2)}
-                            """
 
             # Get response from tester agent
             response_tester = await self.tester_agent.run(
                 user_id=user_id,
-                session_id=session_id,
-                content=create_text_query(pretty_chapter),
+                state=self.state_manager.get_state(user_id=user_id, course_id=course_db.id),
+                content=self.query_service.get_tester_query(user_id, course_db.id, idx, response_explainer["explanation"]),
             )
 
             # Save the chapter in db first
