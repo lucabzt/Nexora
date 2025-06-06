@@ -1,9 +1,17 @@
-from passlib.context import CryptContext
-from jose import jwt
 from datetime import datetime, timedelta, timezone
-from ..config.settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from typing import Dict, Optional
+
+from authlib.integrations.starlette_client import OAuth
+from fastapi import HTTPException, status
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+
+from ..config import settings
+from ..config.settings import (ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM,
+                               PRIVATE_KEY, PUBLIC_KEY, SECRET_KEY)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth = OAuth()
 
 
 def verify_password(plain_password, hashed_password):
@@ -15,10 +23,131 @@ def get_password_hash(password):
     """Hash a password using bcrypt."""
     return pwd_context.hash(password)
 
-
-def create_access_token(data: dict, expires_delta: timedelta):
+def create_token(data: dict, expires_delta: timedelta) -> str:
     """Create a JWT access token with an expiration time."""
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    if settings.ALGORITHM == "HS256":
+        return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    elif settings.ALGORITHM == "RS256":
+        return jwt.encode(to_encode, PRIVATE_KEY, algorithm=settings.ALGORITHM)
+    else: raise ValueError(f"Unsupported algorithm: {settings.ALGORITHM}")
+
+
+def create_access_token(data: dict) -> str:
+    """Create a JWT access token with a default expiration time."""
+    return create_token(data, timedelta(settings.ACCESS_TOKEN_EXPIRE_MINUTES))
+
+def create_refresh_token(data: dict) -> str:
+    """Create a JWT refresh token with a longer expiration time."""
+    return create_token(data, timedelta(settings.REFRESH_TOKEN_EXPIRE_MINUTES))
+
+
+def verify_token(token: str) -> str:
+    """Verify a JWT token and return the payload with user info."""
+    try:
+        if settings.ALGORITHM == "HS256":
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[settings.ALGORITHM])
+        elif settings.ALGORITHM == "RS256":
+            payload = jwt.decode(token, PUBLIC_KEY, algorithms=[settings.ALGORITHM])
+        else:
+            raise ValueError(f"Unsupported algorithm: {settings.ALGORITHM}")
+    except JWTError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+        ) from e
+
+    user_id: Optional[str] = payload.get("user_id")
+
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token payload missing required claims",
+        )
+
+    return user_id
+
+
+def set_access_cookie(response, access_token: str):
+    """Set the access token cookie in the response."""
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        path="/",  # send to all paths
+        httponly=True,
+        secure=settings.SECURE_COOKIE,  # use secure cookies if configured
+        samesite=settings.SAME_SITE,  # use configured SameSite policy
+    )
+
+
+
+def set_refresh_cookie(response, refresh_token: str):
+    """Set the refresh token cookie in the response."""
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        path="/auth/refresh",  # restrict refresh token cookie to this path
+        httponly=True,
+        secure=settings.SECURE_COOKIE,  # use secure cookies if configured
+        samesite=settings.SAME_SITE,  # use configured SameSite policy
+    )
+
+
+
+def clear_access_cookie(response):
+    """Clear the access token cookie in the response."""
+    response.delete_cookie(
+        key="access_token",
+        path="/",  # send to all paths
+        httponly=True,
+        secure=settings.SECURE_COOKIE,  # use secure cookies if configured
+        samesite=settings.SAME_SITE,  # use configured SameSite policy
+    )
+
+def clear_refresh_cookie(response):
+    """Clear the refresh token cookie in the response."""
+    response.delete_cookie(
+        key="refresh_token",
+        path="/auth/refresh",  # restrict refresh token cookie to this path
+        httponly=True,
+        secure=settings.SECURE_COOKIE,  # use secure cookies if configured
+        samesite=settings.SAME_SITE,  # use configured SameSite policy
+    )
+
+    
+
+# Google OAuth registration
+oauth.register(
+    name='google',
+    client_id=settings.GOOGLE_CLIENT_ID,
+    client_secret=settings.GOOGLE_CLIENT_SECRET,
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={'scope': 'openid email profile'},
+    #redirect_uri=settings.GOOGLE_REDIRECT_URI
+)
+
+# GitHub OAuth registration
+oauth.register(
+    name='github',
+    client_id=settings.GITHUB_CLIENT_ID,
+    client_secret=settings.GITHUB_CLIENT_SECRET,
+    access_token_url='https://github.com/login/oauth/access_token',
+    authorize_url='https://github.com/login/oauth/authorize',
+    api_base_url='https://api.github.com/',
+    client_kwargs={'scope': 'read:user user:email'},
+    #redirect_uri=settings.GITHUB_REDIRECT_URI
+)
+
+# Discord OAuth registration
+oauth.register(
+    name='discord',
+    client_id=settings.DISCORD_CLIENT_ID,
+    client_secret=settings.DISCORD_CLIENT_SECRET,
+    access_token_url='https://discord.com/api/oauth2/token',
+    authorize_url='https://discord.com/api/oauth2/authorize',
+    api_base_url='https://discord.com/api/',
+    client_kwargs={'scope': 'identify email'},
+)
+
