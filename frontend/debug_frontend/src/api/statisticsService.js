@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_URL = '/api/statistics';
+import { apiWithCookies } from './baseApi';
 
 // Create mock data for different periods
 const generateMockData = () => {
@@ -159,11 +157,11 @@ const generateMockData = () => {
 const statisticsService = {
   async getStatistics() {
     // In a real app, you'd call the API
-    // const response = await axios.get(API_URL);
-    // return response.data;
+    const response = await apiWithCookies.get('/statistics/');
+    return response.data;
     
     // For demo, return mock data
-    return generateMockData();
+    // return generateMockData(); // Kept for potential future use or testing
   },
 };
 
