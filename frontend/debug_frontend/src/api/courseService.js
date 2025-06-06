@@ -1,49 +1,10 @@
-import axios from 'axios';
-import authService from './authService';
-
-const API_URL = '/api';
-
-// Create axios instance with error handling
-const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Add request interceptor for auth headers
-api.interceptors.request.use(
-  (config) => {
-    const headers = authService.getAuthHeader();
-    if (headers.Authorization) {
-      config.headers.Authorization = headers.Authorization;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Add response interceptor for error handling
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // Handle 401 Unauthorized
-    if (error.response && error.response.status === 401) {
-      authService.logout();
-      window.location.href = '/login';
-    }
-    console.error('API Error:', error.response || error);
-    return Promise.reject(error);
-  }
-);
+import { apiWithCookies } from './baseApi';
 
 export const courseService = {
   // Get all courses for current user
   getUserCourses: async () => {
     try {
-      const response = await api.get('/courses/');
+      const response = await apiWithCookies.get('/courses/');
       return response.data;
     } catch (error) {
       throw error;
@@ -53,7 +14,7 @@ export const courseService = {
   // Get a specific course by ID
   getCourseById: async (courseId) => {
     try {
-      const response = await api.get(`/courses/${courseId}`);
+      const response = await apiWithCookies.get(`/courses/${courseId}`);
       return response.data;
     } catch (error) {
       throw error;
@@ -63,7 +24,7 @@ export const courseService = {
   // Get chapters for a course
   getCourseChapters: async (courseId) => {
     try {
-      const response = await api.get(`/courses/${courseId}/chapters`);
+      const response = await apiWithCookies.get(`/courses/${courseId}/chapters`);
       return response.data;
     } catch (error) {
       throw error;
@@ -74,7 +35,7 @@ export const courseService = {
   getChapter: async (courseId, chapterId) => {
     try {
       // Use the actual chapter ID, not index
-      const response = await api.get(`/courses/${courseId}/chapters/${chapterId}`);
+      const response = await apiWithCookies.get(`/courses/${courseId}/chapters/${chapterId}`);
       return response.data;
     } catch (error) {
       throw error;
@@ -84,7 +45,7 @@ export const courseService = {
   // Get quizzes for a course
   getCourseQuizzes: async (courseId) => {
     try {
-      const response = await api.get(`/courses/${courseId}/quizzes`);
+      const response = await apiWithCookies.get(`/courses/${courseId}/quizzes`);
       return response.data;
     } catch (error) {
       throw error;
@@ -94,7 +55,7 @@ export const courseService = {
   // Create a demo course (deprecated, use createCourse instead)
   createDemoCourse: async (data) => {
     try {
-      const response = await api.post('/courses/new_demo', data);
+      const response = await apiWithCookies.post('/courses/new_demo', data);
       return response.data;
     } catch (error) {
       throw error;
@@ -104,7 +65,7 @@ export const courseService = {
   // Delete a course by ID
   deleteCourse: async (courseId) => {
     try {
-      const response = await api.delete(`/courses/${courseId}`);
+      const response = await apiWithCookies.delete(`/courses/${courseId}`);
       // Check for 204 No Content or other success statuses without a body
       if (response.status === 204) {
         return { message: 'Course deleted successfully' };
@@ -123,7 +84,7 @@ export const courseService = {
       let lineBuffer = ""; // Buffer for accumulating parts of lines across progress events
       console.log('[Streaming] Initializing createCourse call');
       
-      await api.post('/courses/create', data, {
+      await apiWithCookies.post('/courses/create', data, {
         responseType: 'text',
         timeout: 300000, // 5 minute timeout for course creation
         onDownloadProgress: (progressEvent) => {
@@ -256,7 +217,7 @@ export const courseService = {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await api.post('/files/documents', formData, {
+      const response = await apiWithCookies.post('/files/documents', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -274,7 +235,7 @@ export const courseService = {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await api.post('/files/images', formData, {
+      const response = await apiWithCookies.post('/files/images', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -290,7 +251,7 @@ export const courseService = {
   markChapterComplete: async (courseId, chapterId) => {
     try {
       // Use the actual chapter ID, not index
-      const response = await api.patch(`/courses/${courseId}/chapters/${chapterId}/complete`);
+      const response = await apiWithCookies.patch(`/courses/${courseId}/chapters/${chapterId}/complete`);
       return response.data;
     } catch (error) {
       throw error;
