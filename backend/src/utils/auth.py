@@ -13,6 +13,7 @@ from ..core.security import verify_password
 # Import settings
 from ..config.settings import SECRET_KEY, ALGORITHM
 
+
 # OAuth2 with Password Flow
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token") # Relative URL for token endpoint
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -45,6 +46,7 @@ import userService from '../api/userService';
 import { useDisclosure } from '@mantine/hooks';
 
 function AdminView() {
+  const { t } = useTranslation('adminView');
   const theme = useMantineTheme();
   const { user: currentUser } = useAuth();
   const navigate = useNavigate();
@@ -94,6 +96,50 @@ function AdminView() {
     }
   }, [users]);
 
+  const formatDate = (dateString) => {
+    console.log("Given Date String: ", dateString);
+    if (!dateString) return '';
+    try {
+      let processedDateString = dateString;
+      if (typeof dateString === 'string') {
+        // Case 1: Input is 'YYYY-MM-DD HH:MM:SS(.sss)' (space separator)
+        // Convert to 'YYYY-MM-DDTHH:MM:SS(.sss)Z' to ensure UTC parsing
+        if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d*)?$/.test(dateString)) {
+          processedDateString = dateString.replace(' ', 'T') + 'Z';
+        }
+        // Case 2: Input is 'YYYY-MM-DDTHH:MM:SS(.sss)' (T separator, no Z or offset)
+        // Append 'Z' to ensure UTC parsing
+        else if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d*)?$/.test(dateString) &&
+                 !dateString.endsWith('Z') &&
+                 !/[+-]\d{2}:\d{2}$/.test(dateString) &&
+                 !/[+-]\d{4}$/.test(dateString)) { // Also check for +-HHMM offset
+          processedDateString = dateString + 'Z';
+        }
+      }
+  
+      const date = new Date(processedDateString);
+      console.log("Processed Date String: ", processedDateString);
+      console.log("Date Object: ", date);
+      
+      if (isNaN(date.getTime())) {
+        // Fallback if processing failed, try original string directly
+        const fallbackDate = new Date(dateString); 
+        if (isNaN(fallbackDate.getTime())) {
+          console.warn("Invalid date string received (tried processed and original):", dateString);
+          return ''; 
+        }
+        // Use fallbackDate for formatting
+        return fallbackDate.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      }
+  
+      // Format using the (UTC-parsed then localized) date object
+      return date.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch (error) {
+      console.error("Error formatting date:", dateString, error);
+      return '';
+    }
+  };
+
   const fetchUsers = async () => {
     setLoading(true);
     setError(null);
@@ -102,8 +148,8 @@ function AdminView() {
       setUsers(data);
     } catch (err) {
       console.error('Failed to fetch users:', err);
-      setError('Failed to load users. Please try again.');
-      toast.error('Failed to load users');
+      setError(t('errors.loadUsersGeneral'));
+      toast.error(t('toast.loadUsersError'));
     } finally {
       setLoading(false);
     }
@@ -136,10 +182,13 @@ function AdminView() {
     try {
       await userService.deleteUser(selectedUser.id);
       setUsers(prevUsers => prevUsers.filter(u => u.id !== selectedUser.id));
-      toast.success(`User ${selectedUser.username} deleted successfully`);
+      toast.success(t('toast.userDeletedSuccess', { username: selectedUser.username }));
       closeDelete();
     } catch (err) {
-      toast.error('Failed to delete user');
+      toast.error(t('toast.deleteUserError'));
+      if (err.response.status === 403) {
+        toast.warning(t('toast.cannotDeleteSelf'));
+      }
       console.error('Failed to delete user:', err);
     }
   };
@@ -150,10 +199,10 @@ function AdminView() {
       setUsers(prevUsers => 
         prevUsers.map(u => u.id === selectedUser.id ? updatedUser : u)
       );
-      toast.success(`User ${selectedUser.username} updated successfully`);
+      toast.success(t('toast.userUpdatedSuccess', { username: editForm.username }));
       closeEdit();
     } catch (err) {
-      toast.error('Failed to update user');
+      toast.error(t('toast.updateUserError'));
       console.error('Failed to update user:', err);
     }
   };
@@ -161,10 +210,10 @@ function AdminView() {
   const handlePasswordChange = async () => {
     try {
       await userService.adminChangePassword(selectedUser.id, newPassword);
-      toast.success(`Password for ${selectedUser.username} changed successfully`);
+      toast.success(t('toast.passwordChangedSuccess', { username: selectedUser.username }));
       closePassword();
     } catch (err) {
-      toast.error('Failed to change password');
+      toast.error(t('toast.passwordChangeError'));
       console.error('Failed to change password:', err);
     }
   };
@@ -194,22 +243,22 @@ function AdminView() {
   // Check if current user is admin
   useEffect(() => {
     if (currentUser && !currentUser.is_admin) {
-      toast.error('Access denied. Admin privileges required.');
+      toast.warning(t('toast.cannotRevokeAdminSelf'));
       navigate('/');
     }
   }, [currentUser, navigate]);
 
   if (!currentUser || !currentUser.is_admin) {
     return (
-      <Container size="xl" py="xl">
+      <Box p="md">
         <Alert 
           icon={<IconAlertCircle size={16} />} 
-          title="Access Denied" 
+          title={t('accessDenied.title')} 
           color="red"
         >
-          This page requires administrator privileges.
+          {t('accessDenied.message')}
         </Alert>
-      </Container>
+      </Box>
     );
   }
 
@@ -224,19 +273,18 @@ function AdminView() {
       <Text size="xl" weight={700}>{value}</Text>
     </Card>
   );
-
   return (
-    <Container size="xl" py="xl">
+    <Box p="md">
       <Box mb={30}>
         <Group position="apart" mb="xl">
           <Title order={2}>
             <Group spacing="xs">
               <IconShieldCheck size={28} style={{ color: theme.colors.violet[6] }} />
-              <span>User Administration</span>
+              <span>{t('title')}</span>
             </Group>
           </Title>
           <Text color="dimmed" size="sm">
-            Manage your platform's users
+            {t('subtitle')}
           </Text>
         </Group>
         
@@ -244,7 +292,7 @@ function AdminView() {
         <Grid mb="lg">
           <Grid.Col span={3}>
             <StatCard 
-              title="Total Users" 
+              title={t('stats.totalUsers')} 
               value={userStats.total} 
               icon={<IconUser size={20} />}
               color="blue"
@@ -252,7 +300,7 @@ function AdminView() {
           </Grid.Col>
           <Grid.Col span={3}>
             <StatCard 
-              title="Active Users" 
+              title={t('stats.activeUsers')} 
               value={userStats.active} 
               icon={<IconUserCheck size={20} />}
               color="green"
@@ -260,7 +308,7 @@ function AdminView() {
           </Grid.Col>
           <Grid.Col span={3}>
             <StatCard 
-              title="Inactive Users" 
+              title={t('stats.inactiveUsers')} 
               value={userStats.inactive} 
               icon={<IconUserExclamation size={20} />}
               color="orange"
@@ -268,7 +316,7 @@ function AdminView() {
           </Grid.Col>
           <Grid.Col span={3}>
             <StatCard 
-              title="Admins" 
+              title={t('stats.administrators')} 
               value={userStats.admins} 
               icon={<IconChartPie size={20} />}
               color="violet"
@@ -278,36 +326,59 @@ function AdminView() {
       </Box>
 
       <Paper shadow="xs" p="md" mb="md">
-        <Group position="apart" mb="md">
+        <Group
+          mb="md"
+          sx={(theme) => ({
+            flexDirection: 'column',
+            alignItems: 'stretch',
+            [theme.fn.largerThan('sm')]: {
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            },
+          })}
+        >
           <TextInput
-            placeholder="Search users..."
-            icon={<IconSearch size="0.9rem" />}
+            placeholder={t('search.placeholder')}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ width: '300px' }}
+            onChange={(event) => setSearchTerm(event.currentTarget.value)}
+            icon={<IconSearch size={16} />}
+            sx={(theme) => ({ 
+              flexGrow: 1, 
+              [theme.fn.smallerThan('sm')]: { 
+                marginRight: 0, 
+                marginBottom: theme.spacing.sm 
+              },
+              [theme.fn.largerThan('sm')]: {
+                marginRight: theme.spacing.md,
+              }
+            })}
           />
-          <Group>
-            <Button 
-              leftIcon={<IconRefresh size="1rem" />}
-              onClick={fetchUsers}
-              variant="outline"
-            >
-              Refresh
-            </Button>
-          </Group>
+          <Button 
+            leftIcon={<IconRefresh size={16} />} 
+            onClick={fetchUsers} 
+            variant="outline" 
+            sx={(theme) => ({
+              [theme.fn.smallerThan('sm')]: {
+                width: '100%',
+              }
+            })}
+          >
+            {t('buttons.refresh')}
+          </Button>
         </Group>
 
         <Tabs value={activeTab} onTabChange={setActiveTab} mb="md">
           <Tabs.List>
-            <Tabs.Tab value="all" icon={<IconUser size="0.8rem" />}>All Users</Tabs.Tab>
-            <Tabs.Tab value="active" icon={<IconUserCheck size="0.8rem" />}>Active</Tabs.Tab>
-            <Tabs.Tab value="inactive" icon={<IconUserExclamation size="0.8rem" />}>Inactive</Tabs.Tab>
-            <Tabs.Tab value="admins" icon={<IconChartPie size="0.8rem" />}>Admins</Tabs.Tab>
+            <Tabs.Tab value="all" icon={<IconUser size="0.8rem" />}>{t('tabs.allUsers')}</Tabs.Tab>
+            <Tabs.Tab value="active" icon={<IconUserCheck size="0.8rem" />}>{t('tabs.activeUsers')}</Tabs.Tab>
+            <Tabs.Tab value="inactive" icon={<IconUserExclamation size="0.8rem" />}>{t('tabs.inactiveUsers')}</Tabs.Tab>
+            <Tabs.Tab value="admins" icon={<IconChartPie size="0.8rem" />}>{t('tabs.administrators')}</Tabs.Tab>
           </Tabs.List>
         </Tabs>
 
         {error && (
-          <Alert icon={<IconAlertCircle size={16} />} title="Error" color="red" mb="md">
+          <Alert icon={<IconAlertCircle size={16} />} title={t('errors.title')} color="red" mb="md">
             {error}
           </Alert>
         )}
@@ -318,84 +389,88 @@ function AdminView() {
             <Skeleton height={40} mb="sm" />
             <Skeleton height={40} mb="sm" />
             <Skeleton height={40} mb="sm" />
-          </>
+          </> // Corrected closing tag for JSX Fragment
         ) : (
-          <Table striped highlightOnHover>
-            <thead>
-              <tr>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Status</th>
-                <th>Role</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((user) => (
-                  <tr key={user.id}>
-                    <td>{user.username}</td>
-                    <td>{user.email}</td>
-                    <td>
-                      <Badge
-                        color={user.is_active ? 'green' : 'red'}
-                        variant="light"
-                      >
-                        {user.is_active ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </td>
-                    <td>
-                      <Badge
-                        color={user.is_admin ? 'violet' : 'blue'}
-                        variant="light"
-                      >
-                        {user.is_admin ? 'Admin' : 'User'}
-                      </Badge>
-                    </td>
-                    <td>
-                      <Group spacing="xs">
-                        <Tooltip label="Edit User">
-                          <ActionIcon 
-                            color="blue" 
-                            onClick={() => openEditModal(user)}
-                            disabled={user.id === currentUser.id}
-                          >
-                            <IconEdit size="1rem" />
-                          </ActionIcon>
-                        </Tooltip>
-                        
-                        <Tooltip label="Change Password">
-                          <ActionIcon 
-                            color="yellow" 
-                            onClick={() => openPasswordModal(user)}
-                            disabled={user.id === currentUser.id}
-                          >
-                            <IconLock size="1rem" />
-                          </ActionIcon>
-                        </Tooltip>
-                        
-                        <Tooltip label="Delete User">
-                          <ActionIcon 
-                            color="red" 
-                            onClick={() => openDeleteModal(user)}
-                            disabled={user.id === currentUser.id}
-                          >
-                            <IconTrash size="1rem" />
-                          </ActionIcon>
-                        </Tooltip>
-                      </Group>
+          // Table to display when not loading
+          <Box sx={{ overflowX: 'auto' }}>
+            <Table striped highlightOnHover withBorder withColumnBorders verticalSpacing="sm" sx={{ minWidth: 900 }}>
+              <thead>
+                <tr>
+                  <th>{t('table.header.username')}</th>
+                  <th>{t('table.header.email')}</th>
+                  <th>{t('table.header.status')}</th>
+                  <th>{t('table.header.role')}</th>
+                  <th>{t('table.header.createdAt')}</th>
+                  <th>{t('table.header.lastLogin')}</th>
+                  <th>{t('table.header.actions')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUsers.length > 0 ? (
+                  filteredUsers.map((user) => (
+                    <tr key={user.id}>
+                      <td>{user.username}</td>
+                      <td>{user.email}</td>
+                      <td>
+                        <Badge
+                          color={user.is_active ? 'green' : 'red'}
+                          variant="light"
+                        >
+                          {user.is_active ? t('table.status.active') : t('table.status.inactive')}
+                        </Badge>
+                      </td>
+                      <td>
+                        <Badge
+                          color={user.is_admin ? 'violet' : 'blue'}
+                          variant="light"
+                        >
+                          {user.is_admin ? t('table.role.admin') : t('table.role.user')}
+                        </Badge>
+                      </td>
+                      <td>{formatDate(user.created_at)}</td>
+                      <td>{formatDate(user.last_login)}</td>
+                      <td>
+                        <Group spacing="xs">
+                          <Tooltip label={t('table.actions.editUser')}>
+                            <ActionIcon 
+                              color="blue" 
+                              onClick={() => openEditModal(user)}
+                              disabled={user.id === currentUser.id && user.is_admin} // Prevent admin from editing their own core details if they are an admin
+                            >
+                              <IconEdit size="1rem" />
+                            </ActionIcon>
+                          </Tooltip>
+                          <Tooltip label={t('table.actions.changePassword')}>
+                            <ActionIcon 
+                              color="yellow" 
+                              onClick={() => openPasswordModal(user)}
+                            >
+                              <IconLock size="1rem" />
+                            </ActionIcon>
+                          </Tooltip>
+                          <Tooltip label={t('table.actions.deleteUser')}>
+                            <ActionIcon 
+                              color="red" 
+                              onClick={() => openDeleteModal(user)}
+                              disabled={user.id === currentUser.id} // Prevent self-deletion
+                            >
+                              <IconTrash size="1rem" />
+                            </ActionIcon>
+                          </Tooltip>
+                        </Group>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={7} style={{ textAlign: 'center', padding: '20px 0' }}>
+                      {t('table.noUsersFound')}
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '20px 0' }}>
-                    No users found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
+                )}
+              </tbody>
+            </Table>
+          </Box>
         )}
       </Paper>
 
@@ -403,12 +478,12 @@ function AdminView() {
       <Modal
         opened={editModal}
         onClose={closeEdit}
-        title={`Edit User: ${selectedUser?.username}`}
+        title={t('editModal.title', { username: selectedUser?.username })}
         size="md"
       >
         <TextInput
-          label="Username"
-          placeholder="Username"
+          label={t('editModal.usernameLabel')}
+          placeholder={t('editModal.usernamePlaceholder')}
           value={editForm.username}
           onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
           required
@@ -416,8 +491,8 @@ function AdminView() {
         />
         
         <TextInput
-          label="Email"
-          placeholder="Email"
+          label={t('editModal.emailLabel')}
+          placeholder={t('editModal.emailPlaceholder')}
           value={editForm.email}
           onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
           required
@@ -425,7 +500,7 @@ function AdminView() {
         />
         
         <Group position="apart" mb="md">
-          <Text>Active Status</Text>
+          <Text>{t('editModal.activeStatusLabel')}</Text>
           <Switch
             checked={editForm.is_active}
             onChange={(e) => setEditForm({ ...editForm, is_active: e.target.checked })}
@@ -437,7 +512,7 @@ function AdminView() {
         </Group>
         
         <Group position="apart" mb="md">
-          <Text>Admin Privileges</Text>
+          <Text>{t('editModal.adminPrivilegesLabel')}</Text>
           <Switch
             checked={editForm.is_admin}
             onChange={(e) => setEditForm({ ...editForm, is_admin: e.target.checked })}
@@ -449,8 +524,8 @@ function AdminView() {
         </Group>
         
         <Group position="right" mt="xl">
-          <Button variant="outline" onClick={closeEdit}>Cancel</Button>
-          <Button onClick={handleEditUser}>Save Changes</Button>
+          <Button variant="outline" onClick={closeEdit}>{t('buttons.cancel')}</Button>
+          <Button onClick={handleEditUser}>{t('editModal.saveChangesButton')}</Button>
         </Group>
       </Modal>
 
@@ -458,24 +533,24 @@ function AdminView() {
       <Modal
         opened={passwordModal}
         onClose={closePassword}
-        title={`Change Password: ${selectedUser?.username}`}
+        title={t('passwordModal.title', { username: selectedUser?.username })}
         size="md"
       >
         <Text color="dimmed" size="sm" mb="md">
-          As an administrator, you can set a new password for this user without knowing their current password.
+          {t('passwordModal.description')}
         </Text>
         
         <PasswordInput
-          label="New Password"
-          placeholder="Enter new password"
+          label={t('passwordModal.newPasswordLabel')}
+          placeholder={t('passwordModal.newPasswordPlaceholder')}
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           required
         />
         
         <Group position="right" mt="xl">
-          <Button variant="outline" onClick={closePassword}>Cancel</Button>
-          <Button onClick={handlePasswordChange} color="yellow">Change Password</Button>
+          <Button variant="outline" onClick={closePassword}>{t('buttons.cancel')}</Button>
+          <Button onClick={handlePasswordChange} color="yellow">{t('passwordModal.changePasswordButton')}</Button>
         </Group>
       </Modal>
 
@@ -483,19 +558,18 @@ function AdminView() {
       <Modal
         opened={deleteModal}
         onClose={closeDelete}
-        title="Delete User"
+        title={t('deleteModal.title')}
         size="md"
       >
         <Text mb="xl">
-          Are you sure you want to delete user <b>{selectedUser?.username}</b>? This action cannot be undone.
+          {t('deleteModal.confirmation', { username: selectedUser?.username, BOLD: (chunks) => <b>{chunks}</b> })}
         </Text>
         
         <Group position="right">
-          <Button variant="outline" onClick={closeDelete}>Cancel</Button>
-          <Button color="red" onClick={handleDeleteUser}>Delete User</Button>
-        </Group>
+          <Button variant="outline" onClick={closeDelete}>{t('buttons.cancel')}</Button>
+          <Button color="red" onClick={handleDeleteUser}>{t('deleteModal.deleteButton')}</Button>        </Group>
       </Modal>
-    </Container>
+    </Box>
   );
 }
 

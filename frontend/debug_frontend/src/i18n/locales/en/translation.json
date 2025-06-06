@@ -1,0 +1,519 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "submit": "Submit"
+  },
+  "language": {
+    "english": "English",
+    "german": "German",
+    "select": "Language"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "courses": "Courses",
+    "statistics": "Statistics",
+    "login": "Log In",
+    "register": "Sign Up",
+    "logout": "Logout",
+    "impressum": "Imprint",
+    "title": "Navigation",
+    "subtitle": "Choose your destination",
+    "home": "Home",
+    "newCourse": "New Course",
+    "settings": "Settings",
+    "adminArea": "Admin Area",
+    "about": "About",
+    "nexora": "About Nexora"
+  },
+  "landingPage": {
+    "hero": {
+      "titlePart1": "Personalized Learning with",
+      "titlePart2": "AI-Powered Courses",
+      "subtitle": "Nexora is a next-generation AI learning assistant that creates personalized courses tailored to your learning style, goals, and schedule.",
+      "getStarted": "Get Started",
+      "login": "Log In",
+      "exploreCourses": "Explore Courses",
+      "createFirstCourse": "Create Your First Course",
+      "backToDashboard": "Back to Dashboard",
+      "imageCaption": "Next-gen learning, powered by AI"
+    },
+    "features": {
+      "title": "How Nexora Transforms Your Learning",
+      "feature1Title": "Personalized Curriculum",
+      "feature1Text": "AI-generated content tailored specifically to your goals and learning style.",
+      "feature2Title": "Progress Tracking",
+      "feature2Text": "Monitor your learning journey with detailed progress analytics and insights.",
+      "feature3Title": "Adaptive Learning",
+      "feature3Text": "Content difficulty adjusts based on your performance and comprehension.",
+      "feature4Title": "Interactive Quizzes",
+      "feature4Text": "Test your knowledge with smart quizzes that reinforce your understanding."
+    },
+    "howItWorks": {
+      "title": "How Nexora Works",
+      "subtitle": "Start your AI-powered learning journey in three simple steps.",
+      "step1Title": "Tell Us Your Goals",
+      "step1Text": "Define what you want to learn and your preferred learning style.",
+      "step2Title": "AI Creates Your Course",
+      "step2Text": "Our intelligent system designs a custom curriculum tailored to your needs.",
+      "step3Title": "Learn and Achieve",
+      "step3Text": "Engage with interactive lessons and track your progress towards mastery.",
+      "step4Title": "Master new skills",
+      "step4Text": "Apply your knowledge with confidence",
+      "imageAlt": "How Nexora Works illustration",
+      "cta": "Start Learning Today"
+    },
+    "testimonials": {
+      "title": "What Our Learners Say",
+      "quote1": "Nexora's AI-driven approach helped me master Python programming faster than I ever thought possible. The personalized feedback was invaluable!",
+      "name1": "John Doe",
+      "role1": "Software Developer",
+      "quote2": "The interactive quizzes and adaptive content really helped me understand machine learning concepts that I had struggled with before.",
+      "name2": "Jane Smith",
+      "role2": "Data Scientist",
+      "quote3": "As a busy professional, I appreciate how Nexora fits learning into my schedule. The bite-sized lessons are perfect for my limited time.",
+      "name3": "Robert Johnson",
+      "role3": "Marketing Manager"
+    },
+    "cta": {
+      "title": "Ready to Transform Your Learning Journey?",
+      "subtitle": "Join thousands of learners who have accelerated their skills development with Nexora's AI-powered learning platform.",
+      "getStartedFree": "Get Started for Free",
+      "createNextCourse": "Create Your Next Course"
+    }
+  },
+  "chapterView": {
+    "loading": "Loading chapter...",
+    "estimatedTime": "Estimated time: {{minutes}} minutes",
+    "buttons": {
+      "markComplete": "Mark as Complete",
+      "submitQuiz": "Submit Quiz",
+      "backToCourse": "Back to Course"
+    },
+    "tabs": {
+      "content": "Content",
+      "quizWithCount_one": "Quiz ({{count}} Question)",
+      "quizWithCount_other": "Quiz ({{count}} Questions)"
+    },
+    "badge": {
+      "completed": "Completed"
+    },
+    "toast": {
+      "quizGreatJob": "Great job! You scored {{scorePercentage}}%",
+      "quizReviewContent": "You scored {{scorePercentage}}%. Try reviewing the content again.",
+      "markedCompleteSuccess": "Chapter marked as complete!",
+      "markedCompleteError": "Failed to mark chapter as complete"
+    },
+    "errors": {
+      "loadFailed": "Failed to load chapter. Please try again later.",
+      "genericTitle": "Error!"
+    },
+    "quiz": {
+      "alert": {
+        "greatJobTitle": "Great job!",
+        "keepPracticingTitle": "Keep practicing!",
+        "scoreText": "You scored {{quizScore}}% on the quiz",
+        "correctTitle": "Correct",
+        "incorrectTitle": "Incorrect",
+        "theCorrectAnswerIs": "The correct answer is:",
+        "explanationLabel": "Explanation:"
+      }
+    }
+  },
+  "adminView": {
+    "title": "User Administration",
+    "subtitle": "Manage your platform's users",
+    "searchPlaceholder": "Search users...",
+    "buttons": {
+      "refresh": "Refresh",
+      "refreshData": "Refresh Data",
+      "cancel": "Cancel"
+    },
+    "stats": {
+      "totalUsers": "Total Users",
+      "activeUsers": "Active Users",
+      "inactiveUsers": "Inactive Users",
+      "administrators": "Administrators"
+    },
+    "tabs": {
+      "allUsers": "All Users",
+      "active": "Active",
+      "inactive": "Inactive",
+      "admins": "Admins",
+      "activeUsers": "Active",
+      "inactiveUsers": "Inactive",
+      "administrators": "Admins"
+    },
+    "table": {
+      "header": {
+        "username": "Username",
+        "email": "Email",
+        "status": "Status",
+        "role": "Role",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "role": {
+        "admin": "Admin",
+        "user": "User"
+      },
+      "actions": {
+        "editUser": "Edit User",
+        "changePassword": "Change Password",
+        "deleteUser": "Delete User"
+      },
+      "noUsersFound": "No users found"
+    },
+    "editModal": {
+      "title": "Edit User: {{username}}",
+      "usernameLabel": "Username",
+      "usernamePlaceholder": "Username",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Email",
+      "activeStatusLabel": "Active Status",
+      "adminPrivilegesLabel": "Admin Privileges",
+      "saveChangesButton": "Save Changes"
+    },
+    "passwordModal": {
+      "title": "Change Password: {{username}}",
+      "description": "As an administrator, you can set a new password for this user without knowing their current password.",
+      "newPasswordLabel": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "changePasswordButton": "Change Password"
+    },
+    "deleteModal": {
+      "title": "Delete User",
+      "confirmation": "Are you sure you want to delete user <BOLD>{{username}}</BOLD>? This action cannot be undone.",
+      "deleteButton": "Delete User"
+    },
+    "toast": {
+      "loadUsersError": "Failed to load users",
+      "userDeletedSuccess": "User {{username}} deleted successfully",
+      "deleteUserError": "Failed to delete user",
+      "userUpdatedSuccess": "User {{username}} updated successfully",
+      "updateUserError": "Failed to update user",
+      "passwordChangedSuccess": "Password for {{username}} changed successfully",
+      "passwordChangeError": "Failed to change password",
+      "cannotDeleteSelf": "You cannot delete your own account.",
+      "cannotRevokeAdminSelf": "You cannot revoke your own admin privileges.",
+      "accessDeniedAdminRequired": "Access denied. Admin privileges required."
+    },
+    "errors": {
+      "title": "Error",
+      "loadUsersGeneral": "Failed to load users. Please try again."
+    },
+    "accessDenied": {
+        "title": "Access Denied",
+        "message": "This page requires administrator privileges."
+    }
+  },
+  "about": {
+    "mainTitle": {
+      "about": "About ",
+      "nexora": "Nexora"
+    },
+    "mainDescription": "Nexora is not just another learning platform — it's a revolutionary approach to education that harnesses the power of artificial intelligence to create truly personalized learning pathways that evolve with you.",
+    "learningApproach": "Our AI-powered system analyzes your learning style, strengths, weaknesses, and goals to craft custom courses that adapt in real-time as you progress. Whether you're picking up a new skill, deepening your expertise, or exploring entirely new fields of knowledge, Nexora is your AI learning companion on the journey.",
+    "buttons": {
+      "startYourJourney": "Start Your Journey"
+    },
+    "imageAlt": "AI Learning",
+    "imageCaption": "Neural networks learning patterns, just like our AI learns about you",
+    "mission": {
+      "title": "Our Mission",
+      "description": "To democratize high-quality education by creating AI-powered learning experiences that are as unique as each learner, making mastery of any subject accessible to everyone.",
+      "item1Title": "Personalization",
+      "item1Description": "Every learning path uniquely tailored to individual needs",
+      "item2Title": "Accessibility",
+      "item2Description": "Quality education available to anyone, anywhere",
+      "item3Title": "Innovation",
+      "item3Description": "Continuously advancing the frontier of AI in education",
+      "item4Title": "Technology",
+      "item4Description": "Leveraging cutting-edge AI to enhance human learning"
+    },
+    "journey": {
+      "title": "Our Journey",
+      "event1": {
+        "title": "The Idea",
+        "description": "We developed the concept for adaptive AI learning while researching neural networks",
+        "date": "January 2022"
+      },
+      "event2": {
+        "title": "Foundation",
+        "description": "Nexora was officially launched with seed funding from education technology investors",
+        "date": "June 2023"
+      },
+      "event3": {
+        "title": "First Users",
+        "description": "Beta platform welcomed 500 early users who helped shape our learning algorithms",
+        "date": "March 2024"
+      },
+      "event4": {
+        "title": "Where We Are Today",
+        "description": "Serving thousands of learners with continuously improving AI-powered curriculum",
+        "date": "June 2025"
+      },
+      "event5": {
+        "title": "Where We Want to Go",
+        "description": "Expanding our platform to support more languages and subjects, with global reach",
+        "date": "June 2026"
+      }
+    },
+    "team": {
+      "title": "Meet Our Team",
+      "members": {
+        "markusHuber": {
+          "role": "Software Architect & Full-Stack Developer",
+          "bio": "AI expert with 15+ years experience in machine learning and adaptive education systems."
+        },
+        "lucaBozzetti": {
+          "role": "AI Researcher & Agent Developer",
+          "bio": "Former professor with a passion for innovating education through technology."
+        },
+        "sebastianRogg": {
+          "role": "Still in progress",
+          "bio": "Full-stack engineer specializing in AI integration and responsive learning systems."
+        },
+        "matthiasMeierlohr": {
+          "role": "Frontend Designer & UX Specialist",
+          "bio": "Swift UI designer focused on creating intuitive, user-friendly interfaces for AI applications."
+        },
+        "jonasHoerter": {
+          "role": "Eierlecker & Backend Developer",
+          "bio": "Swift UI designer focused on creating intuitive, user-friendly interfaces for AI applications."
+        },
+        "paulVorderbruegge": {
+          "role": "Beer Lover & Backend Specialist",
+          "bio": "Swift UI designer focused on creating intuitive, user-friendly interfaces for AI applications."
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to Transform Your Learning Journey?",
+      "subtitle": "Join thousands who are already experiencing the future of education.",
+      "button": "Get Started For Free"
+    }
+  },
+  "dashboard": {
+    "deleteCourseConfirmation": "Are you sure you want to permanently delete this course? This action cannot be undone.",
+    "deleteCourseError": "Failed to delete course. {{message}}",
+    "loadCoursesError": "Failed to load courses. Please try again later.",
+    "status": {
+      "creating": "Creating",
+      "finished": "Finished",
+      "updating": "Updating",
+      "learning": "Learning"
+    },
+    "myLearningJourney": "My Learning Journey",
+    "motivationalMessage": "Continue your path to knowledge and growth",
+    "createNewCourseButton": "Create New Course",
+    "stats": {
+      "currentStreak": "Current Streak",
+      "daysUnit": "Days",
+      "currentStreakDescription": "Keep it up! You're building great habits.",
+      "coursesCompleted": "Courses Completed",
+      "coursesCompletedDescription": "You've already mastered {{count}} courses!",
+      "totalHoursLearned": "Total Learning Hours",
+      "hoursUnit": "hrs",
+      "totalHoursLearnedDescription": "That's {{hours}} hours of valuable knowledge!"
+    },
+    "errorAlertTitle": "Error!",
+    "beginYourLearningJourney": "Begin Your Learning Journey",
+    "noCoursesFound": "You don't have any courses yet. Create your first personalized course to start expanding your knowledge!",
+    "createMyFirstCourse": "Create My First Course",
+    "continueLearning": "Continue Learning",
+    "recommendedForYou": "Recommended For You",
+    "featuredCourse": {
+      "defaultTitle": "Introduction to Machine Learning",
+      "defaultDescription": "Learn the fundamentals of machine learning and AI. Perfect for beginners wanting to understand core concepts."
+    },
+    "yourProgress": "Your progress:",
+    "yourCoursesTitle": "My Courses",
+    "viewAllCoursesButton": "View All",
+    "showFewerCoursesButton": "Show Featured",
+    "courseProgressTooltip": "{{progress}}% complete",
+    "deleteCourseTooltip": "Delete course",
+    "estimatedTime": "Est. time: {{hours}} hours",
+    "viewCreationProgressButton": "View Creation Progress",
+    "continueLearningButton": "Continue Learning"
+  },
+  "auth": {
+    "email": "Email",
+    "emailPlaceholder": "Your email",
+    "emailInvalid": "Invalid email address",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "name": "Name",
+    "username": "Username",
+    "usernamePlaceholder": "Your username",
+    "usernameLength": "Username must be at least 3 characters",
+    "passwordPlaceholder": "Your password",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "loginTitle": "Log in to your account",
+    "registerTitle": "Create a new account",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "signUp": "Sign up",
+    "signIn": "Sign in",
+    "usernameRequired": "Username is required",
+    "passwordRequired": "Password is required",
+    "passwordLength": "Password must be at least 3 characters",
+    "continueWith": "Or continue with",
+    "discordAltText": "Discord",
+    "notifications": {
+      "sessionExpired": "Session invalid or expired. Please login again.",
+      "loginSuccess": "Login successful!",
+      "loginSessionError": "Failed to process user session after login.",
+      "loginNoToken": "Login failed: No access token received.",
+      "registerSuccess": "Registration successful! Please login.",
+      "logoutSuccess": "You have been logged out"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "theme": "Theme",
+    "dark": "Dark",
+    "light": "Light",
+    "language": "Language",
+    "languageName": "English",
+    "userMenu": {
+      "loggedInAs": "Logged in as {{username}}",
+      "profile": "Profile",
+      "settings": "Settings",
+      "adminBadge": "ADMIN",
+      "logout": "Logout"
+    },
+    "languageSettings": "Language Settings",
+    "languageDescription": "Choose your preferred language for the application interface.",
+    "selectLanguage": "Select your language",
+    "preferences": "Preferences",
+    "profile": "Profile",
+    "account": "Account"
+  },
+  "app": {
+    "title": "Nexora",
+    "poweredBy": "Powered by AI"
+  },
+  "admin": {
+    "accessDeniedTitle": "Access Denied",
+    "accessDeniedMessage": "This area requires administrator privileges. You will be redirected to the dashboard.",
+    "closeAlert": "Close alert"
+  },
+  "footer": {
+    "copyright": "© {{year}} Nexora Learning Platform. All rights reserved."
+  },
+  "chatTool": {
+    "welcomeMessage": "Hello! I can answer questions about this chapter content. How can I help you?",
+    "errorMessage": "Sorry, there was an error sending your message. Please try again.",
+    "title": "AI Learning Assistant",
+    "description": "Ask questions about the chapter content and get AI-powered answers.",
+    "userSender": "You",
+    "aiSender": "AI Assistant",
+    "inputPlaceholder": "Type your question...",
+    "sendButton": "Send"
+  },
+  "geoGebraPlotter": {
+    "title": "GeoGebra Plotter",
+    "description": "Use this interactive GeoGebra plotter to visualize mathematical concepts.",
+    "iframeTitle": "GeoGebra Graphing Calculator"
+  },
+  "notesTool": {
+    "title": "Notes for this chapter",
+    "newNotePlaceholder": "New note...",
+    "addButton": "Add",
+    "noNotes": "No notes available."
+  },
+  "courseView": {
+    "loading": "Loading course data...",
+    "error": "Failed to load course information. Please try again later.",
+    "errorNotFound": "Course not found. It might have been removed or the link is incorrect.",
+    "hero": {
+      "welcome": "Welcome to",
+      "description": "This course will guide you through the essentials of {{topic}}. Get ready to learn and explore!",
+      "createdBy": "Created by: {{author}}",
+      "estimatedTime": "Estimated time: {{hours}} hours",
+      "startLearning": "Start Learning",
+      "continueLearning": "Continue Learning",
+      "viewProgress": "View Creation Progress",
+      "chapters_one": "{{count}} chapter",
+      "chapters_other": "{{count}} chapters"
+    },
+    "creation": {
+      "title": "Course Creation in Progress",
+      "status": "Status: {{status}}",
+      "generatingOutline": "Generating course outline...",
+      "generatingChapters": "Generating chapters ({{completed}}/{{total}})...",
+      "generatingQuizzes": "Generating quizzes...",
+      "finalizingCourse": "Finalizing course structure...",
+      "completed": "Course generation complete!",
+      "error": "An error occurred during course creation. Please try again.",
+      "retry": "Retry Creation",
+      "viewCourse": "View Course",
+      "currentProgress": "Current progress: {{progress}}%",
+      "stage": {
+        "INITIALIZING": "Initializing...",
+        "FETCHING_USER_PROFILE": "Fetching user profile...",
+        "CREATING_COURSE_OUTLINE": "Creating course outline...",
+        "GENERATING_CHAPTER_CONTENT": "Generating chapter content...",
+        "GENERATING_CHAPTER_QUIZ": "Generating chapter quiz...",
+        "FINALIZING_COURSE": "Finalizing course...",
+        "COMPLETED": "Completed",
+        "ERROR": "Error"
+      },
+      "streamingStatus": "Streaming Status (Session ID: {{sessionId}})",
+      "lastMessage": "Last message: {{message}} at {{timestamp}}",
+      "noMessages": "No streaming messages yet."
+    },
+    "progress": {
+      "title": "Your Progress",
+      "completed": "{{percentage}}% Completed",
+      "chaptersCompleted_one": "{{completedCount}} of {{totalCount}} chapter completed",
+      "chaptersCompleted_other": "{{completedCount}} of {{totalCount}} chapters completed",
+      "resume": "Resume Learning"
+    },
+    "chapters": {
+      "title": "Chapters",
+      "status": {
+        "COMPLETED": "Completed",
+        "IN_PROGRESS": "In Progress",
+        "NOT_STARTED": "Not Started"
+      },
+      "viewChapter": "View Chapter",
+      "startChapter": "Start Chapter",
+      "continueChapter": "Continue Chapter",
+      "chapter": "Chapter {{number}}",
+      "quiz_one": "{{count}} quiz",
+      "quiz_other": "{{count}} quizzes",
+      "noChapters": "No chapters available for this course yet."
+    },
+    "journey": {
+      "title": "Your Learning Journey",
+      "description": "Navigate through the chapters and track your progress.",
+      "currentChapter": "Current Chapter: {{title}}"
+    },
+    "buttons": {
+      "backToDashboard": "Back to Dashboard",
+      "editCourse": "Edit Course (Admin)",
+      "deleteCourse": "Delete Course (Admin)"
+    },
+    "deleteModal": {
+      "title": "Delete Course",
+      "confirmation": "Are you sure you want to delete the course \"{{courseTitle}}\"? This action cannot be undone.",
+      "deleteButton": "Delete Course"
+    },
+    "toast": {
+      "deleteSuccess": "Course \"{{courseTitle}}\" deleted successfully.",
+      "deleteError": "Failed to delete course \"{{courseTitle}}\"."
+    }
+  }
+}

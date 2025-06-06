@@ -1,0 +1,92 @@
+{
+  "title": "User Administration",
+  "subtitle": "Manage your platform's users",
+  "searchPlaceholder": "Search users...",
+  "buttons": {
+    "refresh": "Refresh",
+    "refreshData": "Refresh Data",
+    "cancel": "Cancel"
+  },
+  "stats": {
+    "totalUsers": "Total Users",
+    "activeUsers": "Active Users",
+    "inactiveUsers": "Inactive Users",
+    "administrators": "Administrators"
+  },
+  "tabs": {
+    "allUsers": "All Users",
+    "active": "Active",
+    "inactive": "Inactive",
+    "admins": "Admins",
+    "activeUsers": "Active",
+    "inactiveUsers": "Inactive",
+    "administrators": "Admins"
+  },
+  "table": {
+    "header": {
+      "username": "Username",
+      "email": "Email",
+      "status": "Status",
+      "role": "Role",
+      "createdAt": "Created At",
+      "lastLogin": "Last Login",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "role": {
+      "admin": "Admin",
+      "user": "User"
+    },
+    "actions": {
+      "editUser": "Edit User",
+      "changePassword": "Change Password",
+      "deleteUser": "Delete User"
+    },
+    "noUsersFound": "No users found"
+  },
+  "editModal": {
+    "title": "Edit User: {{username}}",
+    "usernameLabel": "Username",
+    "usernamePlaceholder": "Username",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Email",
+    "activeStatusLabel": "Active Status",
+    "adminPrivilegesLabel": "Admin Privileges",
+    "saveChangesButton": "Save Changes"
+  },
+  "passwordModal": {
+    "title": "Change Password: {{username}}",
+    "description": "As an administrator, you can set a new password for this user without knowing their current password.",
+    "newPasswordLabel": "New Password",
+    "newPasswordPlaceholder": "Enter new password",
+    "changePasswordButton": "Change Password"
+  },
+  "deleteModal": {
+    "title": "Delete User",
+    "confirmation": "Are you sure you want to delete user <BOLD>{{username}}</BOLD>? This action cannot be undone.",
+    "deleteButton": "Delete User"
+  },
+  "toast": {
+    "loadUsersError": "Failed to load users",
+    "userDeletedSuccess": "User {{username}} deleted successfully",
+    "deleteUserError": "Failed to delete user",
+    "userUpdatedSuccess": "User {{username}} updated successfully",
+    "updateUserError": "Failed to update user",
+    "passwordChangedSuccess": "Password for {{username}} changed successfully",
+    "passwordChangeError": "Failed to change password",
+    "cannotDeleteSelf": "You cannot delete your own account.",
+    "cannotRevokeAdminSelf": "You cannot revoke your own admin privileges.",
+    "accessDeniedAdminRequired": "Access denied. Admin privileges required."
+  },
+  "errors": {
+    "title": "Error",
+    "loadUsersGeneral": "Failed to load users. Please try again."
+  },
+  "accessDenied": {
+    "title": "Access Denied",
+    "message": "This page requires administrator privileges."
+  }
+}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Card,
   Title,
@@ -61,6 +62,7 @@ ChartJS.register(
 function StatisticsPage() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation('statisticsPage');
   const theme = useMantineTheme();
   const isDark = theme.colorScheme === 'dark';
 
@@ -148,7 +150,7 @@ function StatisticsPage() {
         beginAtZero: true,
         title: {
           display: true,
-          text: 'Study Time (minutes)',
+          text: t('weeklyTab.studyTimeAxis'),
           color: chartColors.textColor
         }
       },
@@ -166,7 +168,7 @@ function StatisticsPage() {
         max: 100,
         title: {
           display: true,
-          text: 'Completion Rate (%)',
+          text: t('weeklyTab.completionRateAxis'),
           color: chartColors.textColor
         }
       }
@@ -200,9 +202,11 @@ function StatisticsPage() {
   }
 
   const { userEngagement } = stats;
+  const subjectKeysForCards = ['mathematics', 'programming', 'languages'];
+
   return (
     <Container fluid sx={{ maxWidth: '1200px', margin: '0 auto' }}>
-      <Title order={2} mb="lg">Learning Statistics & Analytics</Title>
+      <Title order={2} mb="lg">{t('pageTitle')}</Title>
       
       {/* Key Metrics Section */}
       <SimpleGrid cols={5} spacing="lg" breakpoints={[
@@ -213,7 +217,7 @@ function StatisticsPage() {
         <StatsCard 
           icon={<IconUsers size={24} />} 
           color="blue" 
-          label="Active Users"
+          label={t('keyMetrics.activeUsers')}
           value={userEngagement.activeUsers} 
           total={userEngagement.totalUsers}
           percentage={(userEngagement.activeUsers / userEngagement.totalUsers * 100).toFixed(0)}
@@ -221,7 +225,7 @@ function StatisticsPage() {
         <StatsCard 
           icon={<IconSchool size={24} />} 
           color="teal" 
-          label="Completed Courses"
+          label={t('keyMetrics.completedCourses')}
           value={userEngagement.completedCourses} 
           total={userEngagement.totalCourses}
           percentage={(userEngagement.completedCourses / userEngagement.totalCourses * 100).toFixed(0)}
@@ -229,7 +233,7 @@ function StatisticsPage() {
         <StatsCard 
           icon={<IconBook size={24} />} 
           color="cyan" 
-          label="Chapters Progress"
+          label={t('keyMetrics.chaptersProgress')}
           value={userEngagement.completedChapters} 
           total={userEngagement.totalChapters}
           percentage={(userEngagement.completedChapters / userEngagement.totalChapters * 100).toFixed(0)}
@@ -237,7 +241,7 @@ function StatisticsPage() {
         <StatsCard 
           icon={<IconTrophy size={24} />} 
           color="grape" 
-          label="Quiz Success Rate"
+          label={t('keyMetrics.quizSuccessRate')}
           value={userEngagement.quizzesPassed} 
           total={userEngagement.quizzesAttempted}
           percentage={(userEngagement.quizzesPassed / userEngagement.quizzesAttempted * 100).toFixed(0)}
@@ -245,9 +249,9 @@ function StatisticsPage() {
         <StatsCard 
           icon={<IconClock size={24} />} 
           color="orange" 
-          label="Study Time"
-          value={`${userEngagement.totalStudyTimeHours} hrs`} 
-          subtitle="Total time studying"
+          label={t('keyMetrics.studyTime')}
+          value={t('keyMetrics.studyTimeValue', { count: userEngagement.totalStudyTimeHours })} 
+          subtitle={t('keyMetrics.studyTimeSubtitle')}
         />
       </SimpleGrid>
       
@@ -268,10 +272,10 @@ function StatisticsPage() {
         }
       }}>
         <Tabs.List grow>
-          <Tabs.Tab value="daily" icon={<IconChartBar size={16} />}>Daily Progress</Tabs.Tab>
-          <Tabs.Tab value="weekly" icon={<IconChartLine size={16} />}>Weekly Stats</Tabs.Tab>
-          <Tabs.Tab value="monthly" icon={<IconCalendar size={16} />}>Monthly Trends</Tabs.Tab>
-          <Tabs.Tab value="subjects" icon={<IconChartPie size={16} />}>Subject Analysis</Tabs.Tab>
+          <Tabs.Tab value="daily" icon={<IconChartBar size={16} />}>{t('tabs.daily')}</Tabs.Tab>
+          <Tabs.Tab value="weekly" icon={<IconChartLine size={16} />}>{t('tabs.weekly')}</Tabs.Tab>
+          <Tabs.Tab value="monthly" icon={<IconCalendar size={16} />}>{t('tabs.monthly')}</Tabs.Tab>
+          <Tabs.Tab value="subjects" icon={<IconChartPie size={16} />}>{t('tabs.subjects')}</Tabs.Tab>
         </Tabs.List>        {/* Fixed size wrapper to prevent layout shifts */}
         <Box sx={{ 
           minHeight: 800, 
@@ -288,7 +292,7 @@ function StatisticsPage() {
                   borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
                   backgroundColor: isDark ? theme.colors.dark[7] : theme.white
                 }}>
-                  <Title order={3} mb="md">Today's Learning Activity</Title>
+                  <Title order={3} mb="md">{t('dailyTab.learningActivityTitle')}</Title>
                   <Box sx={{ height: 300 }}>
                     <Line 
                       data={stats.dailyProgress} 
@@ -307,8 +311,8 @@ function StatisticsPage() {
                   backgroundColor: isDark ? theme.colors.dark[7] : theme.white
                 }}>
                   <Group position="apart" mb="lg">
-                    <Title order={3}>Quiz Performance</Title>
-                    <Badge size="lg" color="green">{userEngagement.averageScore}% avg score</Badge>
+                    <Title order={3}>{t('dailyTab.quizPerformanceTitle')}</Title>
+                    <Badge size="lg" color="green">{userEngagement.averageScore}{t('dailyTab.avgScoreSuffix')}</Badge>
                   </Group>
                   <Box sx={{ height: 200 }}>
                     <RingProgress
@@ -331,14 +335,14 @@ function StatisticsPage() {
                   borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
                   backgroundColor: isDark ? theme.colors.dark[7] : theme.white
                 }}>
-                  <Title order={3} mb="lg">Active Hours Today</Title>
+                  <Title order={3} mb="lg">{t('dailyTab.activeHoursTitle')}</Title>
                   <Box sx={{ height: 200 }}>
                     <PolarArea 
                       data={{
-                        labels: ['Morning', 'Afternoon', 'Evening', 'Night'],
+                        labels: [t('dailyTab.polarArea.morning'), t('dailyTab.polarArea.afternoon'), t('dailyTab.polarArea.evening'), t('dailyTab.polarArea.night')],
                         datasets: [
                           {
-                            label: 'Hours Spent',
+                            label: t('dailyTab.polarArea.hoursSpentLabel'),
                             data: [3.5, 2.1, 1.8, 0.5],
                             backgroundColor: [
                               'rgba(255, 206, 86, 0.7)',
@@ -371,7 +375,7 @@ function StatisticsPage() {
                   justifyContent: 'center',
                   alignItems: 'center'
                 }}>
-                  <Title order={3} mb="md">Weekly Learning Progress</Title>
+                  <Title order={3} mb="md">{t('weeklyTab.weeklyProgressTitle')}</Title>
                   <Box sx={{ height: 200, width: '100%' }}>
                     <Bar 
                       data={stats.weeklyStats} 
@@ -397,14 +401,14 @@ function StatisticsPage() {
                       alignItems: 'center',
                       marginBottom: 12
                     }}>
-                      <Title order={3} mb="md" size="h5">Weekly Engagement</Title>
+                      <Title order={3} mb="md" size="h5">{t('weeklyTab.engagementTitle')}</Title>
                       <Box sx={{ height: 80, width: '100%' }}>
                         <Radar
                           data={{
-                            labels: ['Quizzes', 'Reading', 'Videos', 'Practice', 'Discussion', 'Review'],
+                            labels: [t('weeklyTab.radarLabels.quizzes'), t('weeklyTab.radarLabels.reading'), t('weeklyTab.radarLabels.videos'), t('weeklyTab.radarLabels.practice'), t('weeklyTab.radarLabels.discussion'), t('weeklyTab.radarLabels.review')],
                             datasets: [
                               {
-                                label: 'This Week',
+                                label: t('weeklyTab.radarDatasetThisWeek'),
                                 data: [65, 78, 55, 70, 40, 50],
                                 backgroundColor: 'rgba(53, 162, 235, 0.2)',
                                 borderColor: 'rgb(53, 162, 235)',
@@ -414,7 +418,7 @@ function StatisticsPage() {
                                 pointHoverBorderColor: 'rgb(53, 162, 235)'
                               },
                               {
-                                label: 'Last Week',
+                                label: t('weeklyTab.radarDatasetLastWeek'),
                                 data: [50, 65, 40, 60, 35, 45],
                                 backgroundColor: 'rgba(255, 99, 132, 0.2)',
                                 borderColor: 'rgb(255, 99, 132)',
@@ -440,11 +444,11 @@ function StatisticsPage() {
                       justifyContent: 'center',
                       alignItems: 'center'
                     }}>
-                      <Title order={3} mb="md" size="h5">Course Activity</Title>
+                      <Title order={3} mb="md" size="h5">{t('weeklyTab.courseActivityTitle')}</Title>
                       <Box sx={{ height: 80, width: '100%', display: 'flex', justifyContent: 'center' }}>
                         <Doughnut 
                           data={{
-                            labels: ['Active Courses', 'Completed This Week', 'On Hold'],
+                            labels: [t('weeklyTab.doughnutLabels.active'), t('weeklyTab.doughnutLabels.completedThisWeek'), t('weeklyTab.doughnutLabels.onHold')],
                             datasets: [
                               {
                                 data: [3, 1, 2],
@@ -478,7 +482,7 @@ function StatisticsPage() {
               borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
               backgroundColor: isDark ? theme.colors.dark[7] : theme.white
             }}>
-              <Title order={3} mb="md">Monthly Learning Progress</Title>
+              <Title order={3} mb="md">{t('monthlyTab.monthlyProgressTitle')}</Title>
               <Box sx={{ height: 300 }}>
                 <Bar 
                   data={stats.monthlyProgress} 
@@ -492,14 +496,14 @@ function StatisticsPage() {
                 borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
                 backgroundColor: isDark ? theme.colors.dark[7] : theme.white
               }}>
-                <Title order={3} mb="md">Monthly Learning Hours</Title>
+                <Title order={3} mb="md">{t('monthlyTab.learningHoursTitle')}</Title>
                 <Box sx={{ height: 200 }}>
                   <Line 
                     data={{
-                      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                      labels: [t('monthlyTab.months.jan'), t('monthlyTab.months.feb'), t('monthlyTab.months.mar'), t('monthlyTab.months.apr'), t('monthlyTab.months.may'), t('monthlyTab.months.jun'), t('monthlyTab.months.jul'), t('monthlyTab.months.aug'), t('monthlyTab.months.sep'), t('monthlyTab.months.oct'), t('monthlyTab.months.nov'), t('monthlyTab.months.dec')],
                       datasets: [
                         {
-                          label: 'Hours Studied',
+                          label: t('monthlyTab.hoursStudiedLabel'),
                           data: [12, 15, 10, 14, 18, 20, 17, 12, 15, 19, 22, 16],
                           borderColor: 'rgb(53, 162, 235)',
                           backgroundColor: 'rgba(53, 162, 235, 0.5)',
@@ -516,14 +520,14 @@ function StatisticsPage() {
                 borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
                 backgroundColor: isDark ? theme.colors.dark[7] : theme.white
               }}>
-                <Title order={3} mb="md">Achievement Growth</Title>
+                <Title order={3} mb="md">{t('monthlyTab.achievementGrowthTitle')}</Title>
                 <Box sx={{ height: 200 }}>
                   <Line 
                     data={{
-                      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                      labels: [t('monthlyTab.months.jan'), t('monthlyTab.months.feb'), t('monthlyTab.months.mar'), t('monthlyTab.months.apr'), t('monthlyTab.months.may'), t('monthlyTab.months.jun'), t('monthlyTab.months.jul'), t('monthlyTab.months.aug'), t('monthlyTab.months.sep'), t('monthlyTab.months.oct'), t('monthlyTab.months.nov'), t('monthlyTab.months.dec')],
                       datasets: [
                         {
-                          label: 'Achievements',
+                          label: t('monthlyTab.achievementsLabel'),
                           data: [5, 7, 4, 8, 10, 13, 11, 9, 12, 15, 18, 14],
                           borderColor: 'rgb(255, 99, 132)',
                           backgroundColor: 'rgba(255, 99, 132, 0.5)',
@@ -546,7 +550,7 @@ function StatisticsPage() {
                   borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
                   backgroundColor: isDark ? theme.colors.dark[7] : theme.white
                 }}>
-                  <Title order={3} mb="md">Subject Distribution</Title>
+                  <Title order={3} mb="md">{t('subjectsTab.distributionTitle')}</Title>
                   <Box sx={{ height: 340, display: 'flex', justifyContent: 'center' }}>
                     <Doughnut 
                       data={stats.subjectDistribution}
@@ -570,14 +574,14 @@ function StatisticsPage() {
                   borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
                   backgroundColor: isDark ? theme.colors.dark[7] : theme.white
                 }}>
-                  <Title order={3} mb="md">Performance by Subject</Title>
+                  <Title order={3} mb="md">{t('subjectsTab.performanceTitle')}</Title>
                   <Box sx={{ height: 340 }}>
                     <Bar 
                       data={{
-                        labels: ['Mathematics', 'Programming', 'Languages', 'Science', 'History', 'Arts'],
+                        labels: [t('subjectsTab.subjectNames.mathematics'), t('subjectsTab.subjectNames.programming'), t('subjectsTab.subjectNames.languages'), t('subjectsTab.subjectNames.science'), t('subjectsTab.subjectNames.history'), t('subjectsTab.subjectNames.arts')],
                         datasets: [
                           {
-                            label: 'Average Score (%)',
+                            label: t('subjectsTab.averageScoreLabel'),
                             data: [82, 95, 76, 88, 70, 85],
                             backgroundColor: [
                               'rgba(255, 99, 132, 0.7)',
@@ -601,45 +605,60 @@ function StatisticsPage() {
               { maxWidth: 'md', cols: 2 },
               { maxWidth: 'xs', cols: 1 }
             ]}>
-              {['Mathematics', 'Programming', 'Languages'].map((subject) => (
+              {subjectKeysForCards.map((subjectKey) => {
+                  const subject = t(`subjectsTab.subjectNames.${subjectKey}`);
+                  let coursesCompleted, averageScore, hoursSpent, badgeText;
+                  if (subjectKey === 'programming') {
+                    coursesCompleted = t('subjectsTab.subjectCard.coursesCompleted_other', { count: 4 });
+                    averageScore = t('subjectsTab.subjectCard.averageScore', { score: 95 });
+                    hoursSpent = t('subjectsTab.subjectCard.hoursSpent_other', { count: 19 });
+                    badgeText = t('subjectsTab.subjectCard.badgeExcellent');
+                  } else if (subjectKey === 'mathematics') {
+                    coursesCompleted = t('subjectsTab.subjectCard.coursesCompleted_other', { count: 2 });
+                    averageScore = t('subjectsTab.subjectCard.averageScore', { score: 82 });
+                    hoursSpent = t('subjectsTab.subjectCard.hoursSpent_other', { count: 12 });
+                    badgeText = t('subjectsTab.subjectCard.badgeGood');
+                  } else { // languages
+                    coursesCompleted = t('subjectsTab.subjectCard.coursesCompleted_one', { count: 1 });
+                    averageScore = t('subjectsTab.subjectCard.averageScore', { score: 76 });
+                    hoursSpent = t('subjectsTab.subjectCard.hoursSpent_other', { count: 8 });
+                    badgeText = t('subjectsTab.subjectCard.badgeGood');
+                  }
+                  const subjectCard = (
                 <Paper key={subject} p="md" radius="md" withBorder sx={{ 
                   borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
                   backgroundColor: isDark ? theme.colors.dark[7] : theme.white
                 }}>
                   <Group position="apart">
                     <Text weight={700} size="lg">{subject}</Text>
-                    <Badge color={subject === 'Programming' ? 'green' : 'blue'}>
-                      {subject === 'Programming' ? 'Excellent' : 'Good'}
+                    <Badge color={subjectKey === 'programming' ? 'green' : 'blue'}>
+                      {badgeText}
                     </Badge>
                   </Group>
                   <Divider my="sm" />
                   <Group>
                     <IconBooks size={18} />
                     <Text size="sm">
-                      {subject === 'Programming' ? '4 courses completed' : 
-                       subject === 'Mathematics' ? '2 courses completed' : 
-                       '1 course completed'}
+                      {coursesCompleted}
                     </Text>
                   </Group>
                   <Group mt="xs">
                     <IconTrophy size={18} />
                     <Text size="sm">
-                      {subject === 'Programming' ? '95% average score' : 
-                       subject === 'Mathematics' ? '82% average score' : 
-                       '76% average score'}
+                      {averageScore}
                     </Text>
                   </Group>
                   <Group mt="xs">
                     <IconClock size={18} />
                     <Text size="sm">
-                      {subject === 'Programming' ? '19 hours spent' : 
-                       subject === 'Mathematics' ? '12 hours spent' : 
-                       '8 hours spent'}
+                      {hoursSpent}
                     </Text>
                   </Group>
                 </Paper>
-              ))}
-            </SimpleGrid>
+              );
+              return subjectCard;
+            })}
+             </SimpleGrid>
           </Tabs.Panel>
         </Box>
       </Tabs>
@@ -649,6 +668,7 @@ function StatisticsPage() {
 
 // Reusable stat card component
 function StatsCard({ icon, color, label, value, total, percentage, subtitle }) {
+  const { t } = useTranslation('statisticsPage'); // Add hook here for StatsCard
   const theme = useMantineTheme();
   const isDark = theme.colorScheme === 'dark';
   
@@ -680,7 +700,7 @@ function StatsCard({ icon, color, label, value, total, percentage, subtitle }) {
       <Text size="xl" weight={700}>{value}</Text>
       
       {total && (
-        <Text size="xs" color="dimmed">of {total} total</Text>
+        <Text size="xs" color="dimmed">{t('statsCard.ofTotal', { total })}</Text>
       )}
       
       {subtitle && (

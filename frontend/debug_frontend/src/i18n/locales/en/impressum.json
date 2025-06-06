@@ -1,0 +1,45 @@
+{
+  "mainTitle": "Imprint",
+  "companyInfo": {
+    "title": "Company Information",
+    "name": "Nexora GmbH",
+    "tagline": "Innovative AI-Powered Learning Solutions",
+    "registration": "Registration: HRB 123456 B (Amtsgericht Berlin)",
+    "vatId": "VAT ID: DE123456789"
+  },
+  "legalRepresentative": {
+    "title": "Legal Representative",
+    "name": "Markus Example",
+    "role": "Managing Director"
+  },
+  "address": {
+    "title": "Address",
+    "street": "Example Street 1",
+    "city": "12345 Example City",
+    "country": "Germany"
+  },
+  "contact": {
+    "title": "Contact",
+    "email": "Email: info@nexora.ai",
+    "phone": "Phone: +49 (0) 30 123 45678"
+  },
+  "onlinePresence": {
+    "title": "Online Presence",
+    "website": "Website: www.nexora.ai",
+    "socialMedia": "Social Media: @nexoralearning"
+  },
+  "legalDisclaimer": {
+    "title": "Legal Disclaimer",
+    "externalLinks": "Despite careful content control, we assume no liability for the content of external links. The operators of the linked pages are solely responsible for their content.",
+    "copyright": "All content on this website is protected by copyright. Reproduction or use without explicit permission is prohibited."
+  },
+  "contentResponsibility": {
+    "title": "Content Responsibility",
+    "details": "Responsible for the content according to § 55 Abs. 2 RStV: Markus Example, Example Street 1, 12345 Example City"
+  },
+  "dataProtection": {
+    "title": "Data Protection",
+    "info": "For details on how we process your data, please refer to our Privacy Policy."
+  },
+  "lastUpdated": "This imprint page was last updated: June 2025"
+}

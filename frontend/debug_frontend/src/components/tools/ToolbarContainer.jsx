@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ActionIcon, Box, Tabs, useMantineTheme } from '@mantine/core';
+import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@mantine/hooks';
 import { IconChartLine, IconMessage, IconChevronLeft, IconNote } from '@tabler/icons-react';
 import { Resizable } from 're-resizable';
@@ -14,7 +15,8 @@ import './Toolbar.css';
  * ToolbarContainer component
  * Container for interactive learning tools with a resizable sidebar
  */
-function ToolbarContainer({ courseId, chapterId }) {  
+function ToolbarContainer({ courseId, chapterId }) {
+  const { t } = useTranslation('toolbarContainer');  
   const theme = useMantineTheme();  
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { toolbarOpen, setToolbarOpen, toolbarWidth, setToolbarWidth } = useToolbar();  const [activeTab, setActiveTab] = useState(TOOL_TABS.PLOTTER); // Use constant for tab value
@@ -89,8 +91,11 @@ function ToolbarContainer({ courseId, chapterId }) {
           }}
         >
           {toolbarOpen 
-            ? <IconChevronLeft size={22} /> 
-            : activeTab === TOOL_TABS.PLOTTER ? <IconChartLine size={22} /> : <IconMessage size={22} />}
+            ? <IconChevronLeft size={22} aria-label={t('buttons.closeToolbar')} /> 
+            : activeTab === TOOL_TABS.PLOTTER ? <IconChartLine size={22} aria-label={t('buttons.openPlotter')} /> 
+            : activeTab === TOOL_TABS.CHAT ? <IconMessage size={22} aria-label={t('buttons.openChat')} /> 
+            : <IconNote size={22} aria-label={t('buttons.openNotes')} />
+          }
         </ActionIcon>
       )}
         <Resizable      style={{
@@ -184,8 +189,11 @@ function ToolbarContainer({ courseId, chapterId }) {
               ? '-2px 0 5px rgba(0, 0, 0, 0.3)' 
               : '-2px 0 5px rgba(0, 0, 0, 0.1)')
           }}
-        >          {toolbarOpen            ? <IconChevronLeft size={20} /> 
-            : activeTab === TOOL_TABS.PLOTTER ? <IconChartLine size={20} /> : <IconMessage size={20} />}
+        >          {toolbarOpen            ? <IconChevronLeft size={20} aria-label={t('buttons.closeToolbar')} /> 
+            : activeTab === TOOL_TABS.PLOTTER ? <IconChartLine size={20} aria-label={t('buttons.openPlotter')} /> 
+            : activeTab === TOOL_TABS.CHAT ? <IconMessage size={20} aria-label={t('buttons.openChat')} /> 
+            : <IconNote size={20} aria-label={t('buttons.openNotes')} />
+          }
         </ActionIcon>        {toolbarOpen && (
           <Tabs 
             value={activeTab} 
@@ -200,7 +208,7 @@ function ToolbarContainer({ courseId, chapterId }) {
           >
             <Tabs.List>                <Tabs.Tab 
                 value={TOOL_TABS.PLOTTER}
-                icon={<IconChartLine size={20} />}
+                icon={<IconChartLine size={20} />} aria-label={t('tabs.plotter')}
                 sx={{
                   borderRadius: '0 4px 4px 0',
                   marginTop: '15px',
@@ -209,7 +217,7 @@ function ToolbarContainer({ courseId, chapterId }) {
               />
               <Tabs.Tab 
                 value={TOOL_TABS.CHAT}
-                icon={<IconMessage size={20} />}
+                icon={<IconMessage size={20} />} aria-label={t('tabs.chat')}
                 sx={{
                   borderRadius: '0 4px 4px 0',
                    marginBottom: '15px'
@@ -218,7 +226,7 @@ function ToolbarContainer({ courseId, chapterId }) {
               />
               <Tabs.Tab 
                 value={TOOL_TABS.NOTES}
-                icon={<IconNote size={20} />}
+                icon={<IconNote size={20} />} aria-label={t('tabs.notes')}
                 sx={{
                   borderRadius: '0 4px 4px 0',
                   marginBottom: '15px'

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   Container, 
   Title, 
@@ -18,13 +19,14 @@ import {
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { IconAlertCircle, IconBookmark, IconQuestionMark } from '@tabler/icons-react';
-import ReactMarkdown from 'react-markdown';
 import { toast } from 'react-toastify';
 import { courseService } from '../api/courseService';
 import ToolbarContainer from '../components/tools/ToolbarContainer';
 import { useToolbar } from '../contexts/ToolbarContext';
+import AiCodeWrapper from "../components/AiCodeWrapper.jsx";
 
 function ChapterView() {
+  const { t } = useTranslation('chapterView');
   const { courseId, chapterId } = useParams(); // This should be the actual DB ID now
   const navigate = useNavigate();
   const { toolbarOpen, toolbarWidth } = useToolbar(); // Get toolbar state from context
@@ -63,7 +65,7 @@ function ChapterView() {
         
         setError(null);
       } catch (error) {
-        setError('Failed to load chapter. Please try again later.');
+        setError(t('errors.loadFailed'));
         console.error('Error fetching chapter:', error);
       } finally {
         setLoading(false);
@@ -95,9 +97,9 @@ function ChapterView() {
     setQuizSubmitted(true);
     
     if (scorePercentage >= 70) {
-      toast.success(`Great job! You scored ${scorePercentage}%`);
+      toast.success(t('toast.quizGreatJob', { scorePercentage }));
     } else {
-      toast.info(`You scored ${scorePercentage}%. Try reviewing the content again.`);
+      toast.info(t('toast.quizReviewContent', { scorePercentage }));
     }
   };
 
@@ -106,10 +108,10 @@ function ChapterView() {
       setMarkingComplete(true);
       // Using the ID from URL params
       await courseService.markChapterComplete(courseId, chapterId);
-      toast.success('Chapter marked as complete!');
+      toast.success(t('toast.markedCompleteSuccess'));
       navigate(`/courses/${courseId}`);
     } catch (error) {
-      toast.error('Failed to mark chapter as complete');
+      toast.error(t('toast.markedCompleteError'));
       console.error('Error marking chapter complete:', error);
     } finally {
       setMarkingComplete(false);
@@ -140,14 +142,14 @@ function ChapterView() {
       }}>
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
-            <Loader size="lg" />
+            <Loader size="lg" title={t('loading')} />
           </Box>
         )}
 
         {error && !loading && (
           <Alert 
             icon={<IconAlertCircle size={16} />}
-            title="Error!" 
+            title={t('errors.genericTitle')} 
             color="red" 
             mb="lg"
           >
@@ -160,7 +162,7 @@ function ChapterView() {
             <Group position="apart" mb="md">
               <div>
                 <Title order={1}>{chapter.caption}</Title>
-                <Text color="dimmed">Estimated time: {chapter.time_minutes} minutes</Text>
+                <Text color="dimmed">{t('estimatedTime', { minutes: chapter.time_minutes })}</Text>
               </div>
               <Button 
                 color="green" 
@@ -168,22 +170,22 @@ function ChapterView() {
                 loading={markingComplete}
                 disabled={markingComplete}
               >
-                Mark as Complete
+                {t('buttons.markComplete')}
               </Button>
             </Group>
 
             <Tabs value={activeTab} onTabChange={setActiveTab} mb="xl">
               <Tabs.List>
-                <Tabs.Tab value="content" icon={<IconBookmark size={14} />}>Content</Tabs.Tab>
+                <Tabs.Tab value="content" icon={<IconBookmark size={14} />}>{t('tabs.content')}</Tabs.Tab>
                 <Tabs.Tab value="quiz" icon={<IconQuestionMark size={14} />}>
-                  Quiz ({chapter.mc_questions?.length || 0} Questions)
+                  {t('tabs.quizWithCount', { count: chapter.mc_questions?.length || 0 })}
                 </Tabs.Tab>
               </Tabs.List>
 
               <Tabs.Panel value="content" pt="xs">
                 <Paper shadow="xs" p="md" withBorder>
                   <div className="markdown-content">
-                    <ReactMarkdown>{chapter.content}</ReactMarkdown>
+                    <AiCodeWrapper>{chapter.content}</AiCodeWrapper>
                   </div>
                 </Paper>
               </Tabs.Panel>
@@ -192,11 +194,11 @@ function ChapterView() {
                   {quizSubmitted && (
                     <Alert 
                       color={quizScore >= 70 ? "green" : "yellow"}
-                      title={quizScore >= 70 ? "Great job!" : "Keep practicing!"} 
+                      title={quizScore >= 70 ? t('quiz.alert.greatJobTitle') : t('quiz.alert.keepPracticingTitle')} 
                       mb="lg"
                     >
                       <Group>
-                        <Text>You scored {quizScore}% on the quiz</Text>
+                        <Text>{t('quiz.alert.scoreText', { quizScore })}</Text>
                         <Badge color={quizScore >= 70 ? "green" : "yellow"}>
                           {quizScore}%
                         </Badge>
@@ -224,16 +226,16 @@ function ChapterView() {
                       {quizSubmitted && (
                         <Alert 
                           color={quizAnswers[qIndex] === question.correct_answer ? "green" : "red"}
-                          title={quizAnswers[qIndex] === question.correct_answer ? "Correct" : "Incorrect"}
+                          title={quizAnswers[qIndex] === question.correct_answer ? t('quiz.alert.correctTitle') : t('quiz.alert.incorrectTitle')}
                         >
                           <Text mb="xs">
                             {quizAnswers[qIndex] !== question.correct_answer && (
-                              <>The correct answer is: <strong>
+                              <>{t('quiz.alert.theCorrectAnswerIs')} <strong>
                                 {question[`answer_${question.correct_answer}`]}
                               </strong></>
                             )}
                           </Text>
-                          <Text>Explanation: {question.explanation}</Text>
+                          <Text>{t('quiz.alert.explanationLabel')} {question.explanation}</Text>
                         </Alert>
                       )}
                     </Card>
@@ -249,7 +251,7 @@ function ChapterView() {
                         Object.values(quizAnswers).some(a => a === '')
                       }
                     >
-                      Submit Quiz
+                      {t('buttons.submitQuiz')}
                     </Button>
                   )}
                 </Paper>
@@ -261,10 +263,10 @@ function ChapterView() {
                 variant="outline" 
                 onClick={() => navigate(`/courses/${courseId}`)}
               >
-                Back to Course
+                {t('buttons.backToCourse')}
               </Button>
               {chapter.is_completed && (
-                <Badge color="green" size="lg">Completed</Badge>
+                <Badge color="green" size="lg">{t('badge.completed')}</Badge>
               )}
             </Group>
           </>

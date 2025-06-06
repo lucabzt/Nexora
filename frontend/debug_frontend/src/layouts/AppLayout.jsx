@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, Link as RouterLink, useNavigate } from 'react-router-dom';
 import { 
   AppShell, 
@@ -25,6 +25,8 @@ import {
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
+import LanguageSelector from '../components/LanguageSelector';
 import {
   IconHome2,
   IconPlus,
@@ -32,11 +34,13 @@ import {
   IconSun,
   IconMoonStars,
   IconLogout,
+  IconChartLine,
   IconUser,
   IconInfoCircle,
   IconChevronRight,
   IconSparkles,
-  IconShieldCheck
+  IconShieldCheck,
+  IconLanguage
 } from '@tabler/icons-react';
 
 const MainLink = ({ icon, color, label, to, isActive, collapsed, onNavigate }) => {
@@ -119,14 +123,23 @@ const MainLink = ({ icon, color, label, to, isActive, collapsed, onNavigate }) =
 
 function AppLayout() {
   const theme = useMantineTheme();
-  const [opened, setOpened] = useState(false); // Default to closed for better mobile UX
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const { t } = useTranslation(['navigation', 'app', 'settings']);
   const dark = colorScheme === 'dark';
-  
   // Check if we're on mobile
   const isMobile = useMediaQuery('(max-width: 768px)');
+  
+  // Set default navbar state based on device type - closed on mobile, opened on desktop
+  const [opened, setOpened] = useState(!isMobile);
+  
+  // Update opened state when screen size changes
+  useEffect(() => {
+    // Only update if the user hasn't manually toggled the navbar
+    // This prevents the navbar from changing when the user has specifically set it
+    setOpened(!isMobile);
+  }, [isMobile]);
   
   // Get current path to determine active link
   const currentPath = window.location.pathname;
@@ -140,13 +153,13 @@ function AppLayout() {
       avatarSrc = `data:image/jpeg;base64,${user.profile_image_base64}`;
     }
   }  const mainLinksData = [
-    { icon: <IconHome2 size={18} />, color: 'blue', label: 'Dashboard', to: '/' },
-    { icon: <IconPlus size={18} />, color: 'teal', label: 'New Course', to: '/create-course' },
-    { icon: <IconSettings size={18} />, color: 'gray', label: 'Settings', to: '/settings' },
-    { icon: <IconInfoCircle size={18} />, color: 'indigo', label: 'Statistics', to: '/statistics' },
-    { icon: <IconInfoCircle size={18} />, color: 'grape', label: 'Home', to: '/home' },
+    { icon: <IconHome2 size={20} />, color: 'blue', label: t('home', { ns: 'navigation' }), to: '/' },
+    { icon: <IconPlus size={20} />, color: 'teal', label: t('newCourse', { ns: 'navigation' }), to: '/create-course' },
+    { icon: <IconChartLine size={20} />, color: 'grape', label: t('statistics', { ns: 'navigation' }), to: '/statistics' },
+    { icon: <IconSettings size={20} />, color: 'grape', label: t('settings', { ns: 'navigation' }), to: '/settings' },
+    { icon: <IconInfoCircle size={20} />, color: 'gray', label: t('nexora', { ns: 'navigation' }), to: '/home' },
     // Admin link - only shown to admin users
-    ...(user?.is_admin ? [{ icon: <IconShieldCheck size={18} />, color: 'violet', label: 'Admin', to: '/admin' }] : []),
+    ...(user?.is_admin ? [{ icon: <IconShieldCheck size={20} />, color: 'red', label: t('adminArea', { ns: 'navigation' }), to: '/admin' }] : []),
   ];
   
   // Handler to close navbar on mobile when navigating
@@ -214,7 +227,7 @@ function AppLayout() {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
-              aria-label="Toggle navigation"
+              aria-label={t('burgerAriaLabel', { ns: 'app', defaultValue: 'Toggle navigation' })}
             />
 
             <Group spacing="xs">
@@ -224,9 +237,8 @@ function AppLayout() {
                   color: theme.colors.violet[5],
                   filter: 'drop-shadow(0 2px 4px rgba(139, 92, 246, 0.3))',
                 }} 
-              />
-              <Title
-                order={1}
+              />              <Title
+                order={3}
                 size="1.6rem"
                 component={RouterLink}
                 to={user ? "/" : "/home"}
@@ -248,7 +260,7 @@ function AppLayout() {
                   },
                 })}
               >
-                Nexora
+                {t('title', { ns: 'app' })}
               </Title>
             </Group>
             
@@ -274,7 +286,7 @@ function AppLayout() {
                           key={avatarSrc || (user ? user.id : 'app-layout-avatar')}
                           src={avatarSrc}
                           radius="xl"
-                          alt={user.username || 'User avatar'}
+                          alt={user.username || t('userAvatarAlt', { ns: 'app', defaultValue: 'User avatar' })}
                           color="cyan"
                           sx={{
                             cursor: 'pointer',
@@ -296,12 +308,13 @@ function AppLayout() {
                             color="cyan"
                             sx={{ textTransform: 'none' }}
                           >
-                            Online
+                            {t('onlineStatusBadge', { ns: 'app', defaultValue: 'Online' })}
                           </Badge>
                         </Box>
                       </Group>
                     </UnstyledButton>
-                  </Menu.Target>                  <Menu.Dropdown
+                  </Menu.Target> 
+                    <Menu.Dropdown
                     sx={{
                       border: `1px solid ${dark ? theme.colors.dark[4] : theme.colors.gray[3]}`,
                       boxShadow: dark 
@@ -310,10 +323,7 @@ function AppLayout() {
                       zIndex: 300, // Much higher than navbar (150) and toolbar (100)
                     }}
                   >
-                    <Menu.Label sx={{ fontSize: theme.fontSizes.xs, color: theme.colors.gray[6] }}>
-                      {user.email}
-                    </Menu.Label>
-                    <Menu.Item 
+                      <Menu.Item 
                       icon={<IconSettings size={14} />} 
                       onClick={() => navigate('/settings')}
                       sx={{
@@ -322,9 +332,8 @@ function AppLayout() {
                         },
                       }}
                     >
-                      Settings
-                    </Menu.Item>
-                    <Menu.Item 
+                      {t('settings', { ns: 'navigation' })}
+                    </Menu.Item>                    <Menu.Item 
                       icon={dark ? <IconSun size={14} /> : <IconMoonStars size={14} />} 
                       onClick={() => toggleColorScheme()}
                       sx={{
@@ -333,10 +342,22 @@ function AppLayout() {
                         },
                       }}
                     >
-                      Toggle Theme
+                      {t('theme', { ns: 'settings' })}
                     </Menu.Item>
-                    <Divider />
+
                     <Menu.Item 
+                      icon={ <IconInfoCircle size={14} />} 
+                      onClick={() => {navigate('/about');}}
+                      sx={{
+                        '&:hover': {
+                          backgroundColor: dark ? theme.colors.dark[6] : theme.colors.gray[1],
+                        },
+                      }}
+                    >
+                      {t('about', { ns: 'navigation' })}
+                    </Menu.Item>
+
+                    <Divider />                    <Menu.Item 
                       icon={<IconLogout size={14} />} 
                       onClick={handleLogout}
                       color="red"
@@ -346,7 +367,7 @@ function AppLayout() {
                         },
                       }}
                     >
-                      Logout
+                      {t('logout', { ns: 'navigation' })}
                     </Menu.Item>
                   </Menu.Dropdown>
                 </Menu>
@@ -360,9 +381,8 @@ function AppLayout() {
                     '&:hover': {
                       transform: 'scale(1.05)',
                     },
-                  }}
-                >
-                  Login
+                  }}                >
+                  {t('login', { ns: 'navigation' })}
                 </Button>
               )}
             </Group>
@@ -409,9 +429,8 @@ function AppLayout() {
                   <IconSparkles size={20} />
                 </ThemeIcon>
                 {opened && (
-                  <Box>
-                    <Text size="sm" weight={600} mb={2}>Navigation</Text>
-                    <Text size="xs" color="dimmed">Choose your destination</Text>
+                  <Box>                    <Text size="sm" weight={600} mb={2}>{t('title', { ns: 'navigation', defaultValue: 'Navigation' })}</Text>
+                    <Text size="xs" color="dimmed">{t('subtitle', { ns: 'navigation', defaultValue: 'Choose your destination' })}</Text>
                   </Box>
                 )}
               </Group>
@@ -436,14 +455,13 @@ function AppLayout() {
                 textAlign: 'center',
               })}
             >              {opened ? (
-                <>
-                  <Text size="xs" color="dimmed" mb="xs">
-                    Powered by AI
+                <>                  <Text size="xs" color="dimmed" mb="xs">
+                    {t('poweredBy', { ns: 'app', defaultValue: 'Powered by AI' })}
                   </Text>
                   <Group spacing="xs" position="center">
                     <IconSparkles size={16} color={theme.colors.violet[5]} />
                     <Text size="xs" weight={500} color={theme.colors.violet[6]}>
-                      Nexora Learning
+                      {t('title', { ns: 'app' })}
                     </Text>
                   </Group>
                 </>

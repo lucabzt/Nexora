@@ -86,7 +86,7 @@ export const courseService = {
       
       await apiWithCookies.post('/courses/create', data, {
         responseType: 'text',
-        timeout: 300000, // 5 minute timeout for course creation
+        timeout: 30000000, // 5 minute timeout for course creation
         onDownloadProgress: (progressEvent) => {
           // console.log('[Streaming] onDownloadProgress triggered.');
           

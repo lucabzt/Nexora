@@ -3,8 +3,10 @@ import { Box, Button, Textarea, Group, Loader, ActionIcon, Text, useMantineTheme
 import { IconEdit, IconTrash, IconCheck, IconX } from '@tabler/icons-react';
 import { getNotes, addNote, updateNote, deleteNote } from '../../api/notesService';
 import { getToolContainerStyle } from './ToolUtils';
+import { useTranslation } from 'react-i18next';
 
 function NotesTool({ courseId, chapterId, isOpen }) {
+  const { t } = useTranslation('notesTool');
   const theme = useMantineTheme();
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -74,22 +76,22 @@ function NotesTool({ courseId, chapterId, isOpen }) {
     <Box sx={{ ...getToolContainerStyle(isOpen), flexGrow: 1 }} style={{ overflowY: 'auto' }}>
       {isOpen && (
         <>
-          <Text weight={500} mb="sm">Notizen zu diesem Kapitel</Text>
+          <Text weight={500} mb="sm">{t('title')}</Text>
           <Group mb="sm" align="flex-end">
             <Textarea
-              placeholder="Neue Notiz..."
+              placeholder={t('newNotePlaceholder')}
               value={newNoteText}
               onChange={e => setNewNoteText(e.target.value)}
               minRows={2}
               style={{ flex: 1 }}
             />
             <Button onClick={handleAddNote} disabled={loading || !newNoteText.trim()}>
-              Hinzufügen
+              {t('addButton')}
             </Button>
           </Group>
           {loading ? <Loader /> : (
             <Box>
-              {notes.length === 0 && <Text color="dimmed">Keine Notizen vorhanden.</Text>}              {notes.map(note => (
+              {notes.length === 0 && <Text color="dimmed">{t('noNotes')}</Text>}              {notes.map(note => (
                 <Box key={note.id} mb="sm" p="xs" style={{ 
                   border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]}`, 
                   borderRadius: 4, 
@@ -103,15 +105,15 @@ function NotesTool({ courseId, chapterId, isOpen }) {
                         minRows={2}
                         style={{ flex: 1 }}
                       />
-                      <ActionIcon color="green" onClick={() => handleSaveEdit(note.id)}><IconCheck size={18} /></ActionIcon>
-                      <ActionIcon color="red" onClick={() => setEditingId(null)}><IconX size={18} /></ActionIcon>
+                      <ActionIcon color="green" onClick={() => handleSaveEdit(note.id)} aria-label={t('saveNoteAriaLabel')}><IconCheck size={18} /></ActionIcon>
+                      <ActionIcon color="red" onClick={() => setEditingId(null)} aria-label={t('cancelEditAriaLabel')}><IconX size={18} /></ActionIcon>
                     </Group>
                   ) : (
                     <Group position="apart">
                       <Text style={{ whiteSpace: 'pre-wrap' }}>{note.text}</Text>
                       <Group>
-                        <ActionIcon onClick={() => handleEditNote(note)}><IconEdit size={18} /></ActionIcon>
-                        <ActionIcon color="red" onClick={() => handleDeleteNote(note.id)}><IconTrash size={18} /></ActionIcon>
+                        <ActionIcon onClick={() => handleEditNote(note)} aria-label={t('editNoteAriaLabel')}><IconEdit size={18} /></ActionIcon>
+                        <ActionIcon color="red" onClick={() => handleDeleteNote(note.id)} aria-label={t('deleteNoteAriaLabel')}><IconTrash size={18} /></ActionIcon>
                       </Group>
                     </Group>
                   )}

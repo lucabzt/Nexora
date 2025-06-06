@@ -1,5 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel
+from datetime import datetime
 
 # Token Schemas (remain the same)
 class Token(BaseModel):
@@ -10,6 +11,7 @@ class Token(BaseModel):
     username: str
     email: str # Added email
     is_admin: bool
+    last_login: Optional[datetime] = None # Previous last login time
 
 class TokenData(BaseModel):
     """Schema for the token data."""

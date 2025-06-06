@@ -1,0 +1,92 @@
+{
+  "title": "Benutzerverwaltung",
+  "subtitle": "Verwalten Sie die Benutzer Ihrer Plattform",
+  "searchPlaceholder": "Benutzer suchen...",
+  "buttons": {
+    "refresh": "Aktualisieren",
+    "refreshData": "Daten aktualisieren",
+    "cancel": "Abbrechen"
+  },
+  "stats": {
+    "totalUsers": "Benutzer gesamt",
+    "activeUsers": "Aktive Benutzer",
+    "inactiveUsers": "Inaktive Benutzer",
+    "administrators": "Administratoren"
+  },
+  "tabs": {
+    "allUsers": "Alle Benutzer",
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "admins": "Admins",
+    "activeUsers": "Aktive Benutzer",
+    "inactiveUsers": "Inaktive Benutzer",
+    "administrators": "Administratoren"
+  },
+  "table": {
+    "header": {
+      "username": "Benutzername",
+      "email": "E-Mail",
+      "status": "Status",
+      "role": "Rolle",
+      "createdAt": "Erstellt am",
+      "lastLogin": "Letzter Login",
+      "actions": "Aktionen"
+    },
+    "status": {
+      "active": "Aktiv",
+      "inactive": "Inaktiv"
+    },
+    "role": {
+      "admin": "Admin",
+      "user": "Benutzer"
+    },
+    "actions": {
+      "editUser": "Benutzer bearbeiten",
+      "changePassword": "Passwort ändern",
+      "deleteUser": "Benutzer löschen"
+    },
+    "noUsersFound": "Keine Benutzer gefunden"
+  },
+  "editModal": {
+    "title": "Benutzer bearbeiten: {{username}}",
+    "usernameLabel": "Benutzername",
+    "usernamePlaceholder": "Benutzername",
+    "emailLabel": "E-Mail",
+    "emailPlaceholder": "E-Mail",
+    "activeStatusLabel": "Aktiv-Status",
+    "adminPrivilegesLabel": "Admin-Rechte",
+    "saveChangesButton": "Änderungen speichern"
+  },
+  "passwordModal": {
+    "title": "Passwort ändern: {{username}}",
+    "description": "Als Administrator können Sie ein neues Passwort für diesen Benutzer festlegen, ohne dessen aktuelles Passwort zu kennen.",
+    "newPasswordLabel": "Neues Passwort",
+    "newPasswordPlaceholder": "Neues Passwort eingeben",
+    "changePasswordButton": "Passwort ändern"
+  },
+  "deleteModal": {
+    "title": "Benutzer löschen",
+    "confirmation": "Sind Sie sicher, dass Sie den Benutzer <BOLD>{{username}}</BOLD> löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "deleteButton": "Benutzer löschen"
+  },
+  "toast": {
+    "loadUsersError": "Benutzer konnten nicht geladen werden",
+    "userDeletedSuccess": "Benutzer {{username}} erfolgreich gelöscht",
+    "deleteUserError": "Fehler beim Löschen des Benutzers",
+    "userUpdatedSuccess": "Benutzer {{username}} erfolgreich aktualisiert",
+    "updateUserError": "Fehler beim Aktualisieren des Benutzers",
+    "passwordChangedSuccess": "Passwort für {{username}} erfolgreich geändert",
+    "passwordChangeError": "Fehler beim Ändern des Passworts",
+    "cannotDeleteSelf": "Sie können Ihr eigenes Konto nicht löschen.",
+    "cannotRevokeAdminSelf": "Sie können Ihre eigenen Admin-Rechte nicht entziehen.",
+    "accessDeniedAdminRequired": "Zugriff verweigert. Administratorrechte erforderlich."
+  },
+  "errors": {
+    "title": "Fehler",
+    "loadUsersGeneral": "Benutzer konnten nicht geladen werden. Bitte versuchen Sie es erneut."
+  },
+  "accessDenied": {
+    "title": "Zugriff verweigert",
+    "message": "Diese Seite erfordert Administratorrechte."
+  }
+}
