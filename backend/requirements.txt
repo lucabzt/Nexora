@@ -17,3 +17,4 @@ itsdangerous
 types-SQLAlchemy
 requests
 deprecated
+litellm
