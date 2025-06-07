@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
 
 from authlib.integrations.starlette_client import OAuth
-from fastapi import HTTPException, status, Request, Cookie
+from fastapi import HTTPException, status, Request, Cookie, Response
 from jose import JWTError, jwt
 from typing import Optional
 from passlib.context import CryptContext
@@ -71,7 +71,7 @@ def verify_token(token: str) -> str:
     return user_id
 
 
-def set_access_cookie(response, access_token: str):
+def set_access_cookie(response : Response, access_token: str):
     """Set the access token cookie in the response."""
     response.set_cookie(
         key="access_token",
@@ -79,12 +79,11 @@ def set_access_cookie(response, access_token: str):
         path="/",  # send to all paths
         httponly=True,
         secure=settings.SECURE_COOKIE,  # use secure cookies if configured
-        samesite=settings.SAME_SITE,  # use configured SameSite policy
+        samesite="lax" #settings.SAME_SITE,  # use configured SameSite policy
     )
 
 
-
-def set_refresh_cookie(response, refresh_token: str):
+def set_refresh_cookie(response : Response, refresh_token: str):
     """Set the refresh token cookie in the response."""
     response.set_cookie(
         key="refresh_token",
@@ -92,29 +91,23 @@ def set_refresh_cookie(response, refresh_token: str):
         path="/auth/refresh",  # restrict refresh token cookie to this path
         httponly=True,
         secure=settings.SECURE_COOKIE,  # use secure cookies if configured
-        samesite=settings.SAME_SITE,  # use configured SameSite policy
+        samesite= "lax" #settings.SAME_SITE,  # use configured SameSite policy
     )
 
 
 
-def clear_access_cookie(response):
+def clear_access_cookie(response : Response):
     """Clear the access token cookie in the response."""
     response.delete_cookie(
         key="access_token",
         path="/",  # send to all paths
-        httponly=True,
-        secure=settings.SECURE_COOKIE,  # use secure cookies if configured
-        samesite=settings.SAME_SITE,  # use configured SameSite policy
     )
 
-def clear_refresh_cookie(response):
+def clear_refresh_cookie(response : Response):
     """Clear the refresh token cookie in the response."""
     response.delete_cookie(
         key="refresh_token",
         path="/auth/refresh",  # restrict refresh token cookie to this path
-        httponly=True,
-        secure=settings.SECURE_COOKIE,  # use secure cookies if configured
-        samesite=settings.SAME_SITE,  # use configured SameSite policy
     )
 
 
