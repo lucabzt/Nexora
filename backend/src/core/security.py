@@ -2,8 +2,9 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
 
 from authlib.integrations.starlette_client import OAuth
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Request, Cookie
 from jose import JWTError, jwt
+from typing import Optional
 from passlib.context import CryptContext
 
 from ..config import settings
@@ -116,6 +117,28 @@ def clear_refresh_cookie(response):
         samesite=settings.SAME_SITE,  # use configured SameSite policy
     )
 
+
+async def get_access_token_from_cookie(request: Request) -> Optional[str]:
+    """Extracts the access token from the request's cookies."""
+    access_token = request.cookies.get("access_token")
+    if not access_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated: Access token missing",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return access_token
+
+async def get_refresh_token_from_cookie(request: Request) -> Optional[str]:
+    """Extracts the refresh token from the request's cookies."""
+    refresh_token = request.cookies.get("refresh_token")
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated: Refresh token missing",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return refresh_token
     
 
 # Google OAuth registration

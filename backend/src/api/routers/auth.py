@@ -15,6 +15,7 @@ from ...config import settings
 from ..schemas import auth as auth_schema
 from ..schemas import user as user_schema
 from ...utils import auth as auth_utils
+from ...core.security import get_refresh_token_from_cookie
 
 api_router = APIRouter(
     prefix="/auth",
@@ -63,11 +64,11 @@ async def logout_user(response: Response,
                  response_model=auth_schema.APIResponseStatus)
 async def refresh_token(response: Response,
                         db: Session = Depends(get_db),
-                        token: str = Depends(auth_utils.oauth2_scheme)):
+                        refresh_token_str: str = Depends(get_refresh_token_from_cookie)):
     """
     Endpoint to refresh the user's access token.
     """
-    return await auth_service.refresh_token(token, db, response)
+    return await auth_service.refresh_token(refresh_token_str, db, response)
 
 
 @api_router.get("/login/google")

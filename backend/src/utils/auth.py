@@ -11,14 +11,15 @@ from ..db.models import db_user as user_model
 from ..db.database import get_db
 # Import security utilities
 from ..core import security
+from ..core.security import get_access_token_from_cookie
 # Import settings
 
 from ..db.crud.users_crud import get_active_user_by_id
 
 
-# OAuth2 with Password Flow
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token") # Relative URL for token endpoint
-
+# oauth2_scheme can be removed if Bearer token in Authorization header is no longer supported.
+# For now, it's kept in case it's used elsewhere or for future flexibility.
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False) # auto_error=False if we primarily rely on cookies
 
 class TokenData(BaseModel):
     """Schema for the token data."""
@@ -38,15 +39,24 @@ def authenticate_user(db: Session, username: str, password: str) -> Optional[use
     return authenticated_db_user # Return the SQLAlchemy user model instance
 
 
-async def get_current_active_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> user_model.User:
+async def get_current_active_user(access_token: Optional[str] = Depends(get_access_token_from_cookie), db: Session = Depends(get_db)) -> user_model.User:
     """
     Get the current user based on the provided token.
     Ensures the user is active and returns the user model instance.
     Removed get_current_user dependency to avoid usage of get_current_user instead of get_current_active_user.
     """
 
+    if not access_token:
+        # This case should ideally be handled by get_access_token_from_cookie raising an error.
+        # If oauth2_scheme is also used as a fallback, you might check a header token here.
+        # For a pure cookie-based approach, get_access_token_from_cookie handles the missing token.
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated: Access token missing",
+        )
+
     # Verify the token and extract user ID
-    user_id = security.verify_token(token)
+    user_id = security.verify_token(access_token)
     # Fetch the user from the database using the user ID
     user = get_active_user_by_id(db, user_id)
 
