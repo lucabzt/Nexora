@@ -9,7 +9,7 @@ const userService = {
       // The 'api' instance is configured with baseURL '/api/users'
       // and automatically includes the auth token.
       // So, a GET request to '/me' will hit '/api/users/me'.
-      const response = await apiWithoutCookies.get('/users/me');
+      const response = await apiWithCookies.get('/users/me');
       return response.data;
     } catch (error) {
       //console.error('Error fetching current user (/me):', error.response || error);
