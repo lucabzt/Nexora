@@ -10,7 +10,7 @@ from fastapi import FastAPI, Response, Cookie
 
 from ...db.database import get_db
 from ...services import auth_service
-from ...utils.oauth import oauth
+from ...core.security import oauth
 from ...config import settings
 from ..schemas import auth as auth_schema
 from ..schemas import user as user_schema
