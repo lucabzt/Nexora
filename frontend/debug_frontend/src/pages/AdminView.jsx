@@ -399,11 +399,11 @@ function AdminView() {
                   <Table.Th>{t('table.headers.username')}</Table.Th>
                   <Table.Th>{t('table.headers.profilePicture')}</Table.Th>
                   <Table.Th>{t('table.headers.email')}</Table.Th>
-                  <Table.Th>{t('table.header.status')}</Table.Th>
-                  <Table.Th>{t('table.header.role')}</Table.Th>
-                  <Table.Th>{t('table.header.createdAt')}</Table.Th>
-                  <Table.Th>{t('table.header.lastLogin')}</Table.Th>
-                  <Table.Th>{t('table.header.actions')}</Table.Th>
+                  <Table.Th>{t('table.headers.status')}</Table.Th>
+                  <Table.Th>{t('table.headers.role')}</Table.Th>
+                  <Table.Th>{t('table.headers.createdAt')}</Table.Th>
+                  <Table.Th>{t('table.headers.lastLogin')}</Table.Th>
+                  <Table.Th>{t('table.headers.actions')}</Table.Th>
                 </tr>
               </thead>
               <tbody>
