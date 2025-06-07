@@ -25,6 +25,7 @@ import StatisticsPage from './pages/StatisticsPage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage'; // Import the OAuth callback page
 import Impressum from './pages/Impressum';
 import About from './pages/About';
+import NotFoundPage from './pages/NotFoundPage'; // Import the NotFoundPage component
 import AdminView from './pages/AdminView'; // Import AdminView component
 
 function App() {
@@ -94,6 +95,7 @@ function App() {
               </Route>
 
               {/* Old redirects removed as new routing handles root and protected areas explicitly */}
+              <Route path="*" element={<NotFoundPage />} /> {/* Catch-all route for 404 */}
             </Routes>          </BrowserRouter>
           <ToastContainer position="top-right" autoClose={3000} theme={colorScheme} />
             </ToolbarProvider>
