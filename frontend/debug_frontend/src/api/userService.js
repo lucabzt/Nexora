@@ -12,8 +12,9 @@ const userService = {
       const response = await apiWithCookiesNoRedirect.get('/users/me');
       return response.data;
     } catch (error) {
-      console.error('Error fetching current user (/me):', error.response || error);
-      throw error;
+      //console.error('Error fetching current user (/me):', error.response || error);
+      console.log("Not logged in");
+      //throw error;
     }
   },
 
