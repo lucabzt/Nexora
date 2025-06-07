@@ -15,6 +15,7 @@ from ..core.security import get_access_token_from_cookie
 # Import settings
 
 from ..db.crud.users_crud import get_active_user_by_id
+from fastapi import Request # Added Request for get_optional_current_user
 
 class TokenData(BaseModel):
     """Schema for the token data."""
@@ -74,3 +75,33 @@ async def get_current_admin_user(current_db_user: user_model.User = Depends(get_
             detail="The user doesn't have enough privileges"
         )
     return current_db_user
+
+
+async def get_optional_current_user(
+    request: Request, 
+    db: Session = Depends(get_db)
+) -> Optional[user_model.User]:
+    """
+    Get the current user based on the access token in cookies, if present and valid.
+    Returns the user model instance or None if not authenticated or user not found/active.
+    """
+    try:
+        access_token = await get_access_token_from_cookie(request)
+        if not access_token:
+            return None
+        
+        user_id = security.verify_token(access_token)
+        if not user_id:
+            return None
+            
+        user = get_active_user_by_id(db, user_id)
+        return user # This will be None if user not found or not active
+        
+    except HTTPException as e:
+        # Only suppress 401 errors, other errors might be relevant
+        if e.status_code == status.HTTP_401_UNAUTHORIZED:
+            return None
+        raise e # Re-raise other HTTPExceptions
+    except Exception:
+        # Catch any other unexpected errors during token processing/user fetching
+        return None

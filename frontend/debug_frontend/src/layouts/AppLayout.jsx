@@ -153,11 +153,11 @@ function AppLayout() {
       avatarSrc = `data:image/jpeg;base64,${user.profile_image_base64}`;
     }
   }  const mainLinksData = [
-    { icon: <IconHome2 size={20} />, color: 'blue', label: t('home', { ns: 'navigation' }), to: '/' },
-    { icon: <IconPlus size={20} />, color: 'teal', label: t('newCourse', { ns: 'navigation' }), to: '/create-course' },
-    { icon: <IconChartLine size={20} />, color: 'grape', label: t('statistics', { ns: 'navigation' }), to: '/statistics' },
-    { icon: <IconSettings size={20} />, color: 'grape', label: t('settings', { ns: 'navigation' }), to: '/settings' },
-    { icon: <IconInfoCircle size={20} />, color: 'gray', label: t('nexora', { ns: 'navigation' }), to: '/home' },
+    { icon: <IconHome2 size={20} />, color: 'blue', label: t('home', { ns: 'navigation' }), to: '/dashboard' },
+    { icon: <IconPlus size={20} />, color: 'teal', label: t('newCourse', { ns: 'navigation' }), to: '/dashboard/create-course' },
+    { icon: <IconChartLine size={20} />, color: 'grape', label: t('statistics', { ns: 'navigation' }), to: '/dashboard/statistics' },
+    { icon: <IconSettings size={20} />, color: 'grape', label: t('settings', { ns: 'navigation' }), to: '/dashboard/settings' },
+    { icon: <IconInfoCircle size={20} />, color: 'gray', label: t('nexora', { ns: 'navigation' }), to: '/' },
     // Admin link - only shown to admin users
     ...(user?.is_admin ? [{ icon: <IconShieldCheck size={20} />, color: 'red', label: t('adminArea', { ns: 'navigation' }), to: '/admin' }] : []),
   ];
@@ -241,7 +241,7 @@ function AppLayout() {
                 order={3}
                 size="1.6rem"
                 component={RouterLink}
-                to={user ? "/" : "/home"}
+                to={user ? "/dashboard" : "/"}
                 sx={(theme) => ({
                   textDecoration: 'none',
                   background: `linear-gradient(135deg, ${theme.colors.violet[6]}, ${theme.colors.violet[4]})`,
@@ -325,7 +325,7 @@ function AppLayout() {
                   >
                       <Menu.Item 
                       icon={<IconSettings size={14} />} 
-                      onClick={() => navigate('/settings')}
+                      onClick={() => navigate('/dashboard/settings')}
                       sx={{
                         '&:hover': {
                           backgroundColor: dark ? theme.colors.dark[6] : theme.colors.gray[1],

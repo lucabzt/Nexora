@@ -96,7 +96,7 @@ function CreateCourse() {
     if (data.type === 'course_info') {
       setCourseInfo(data.data);
       // Immediately redirect to course view
-      navigate(`/courses/${data.data.course_id}?creating=true`);
+      navigate(`/dashboard/courses/${data.data.course_id}?creating=true`);
     } else if (data.type === 'chapter') {
       // These updates will be handled by the CourseView component
       setChapters(prev => [...prev, data.data]);
@@ -249,7 +249,7 @@ function CreateCourse() {
               fullWidth 
               color="green" 
               mt="xl"
-              onClick={() => navigate(`/courses/${courseInfo.course_id}`)}
+              onClick={() => navigate(`/dashboard/courses/${courseInfo.course_id}`)}
             >
               {t('streaming.button.goToCourse')}
             </Button>

@@ -138,7 +138,7 @@ function Dashboard() {
           <Button 
             size="md"
             color="teal" 
-            onClick={() => navigate('/create-course')}
+            onClick={() => navigate('/dashboard/create-course')}
             leftIcon={<IconBrain size={20} />}
             sx={(theme) => ({
               background: theme.colorScheme === 'dark' ? 
@@ -241,7 +241,7 @@ function Dashboard() {
             </Text>
             <Button 
               size="lg"
-              onClick={() => navigate('/create-course')} 
+              onClick={() => navigate('/dashboard/create-course')} 
               color="teal"
               leftIcon={<IconStars size={20} />}
               mt="md"
@@ -328,7 +328,7 @@ function Dashboard() {
                     variant="gradient"
                     gradient={{ from: 'teal', to: 'cyan' }}
                     rightIcon={<IconChevronRight size={16} />}
-                    onClick={() => navigate(`/courses/${courses[0]?.course_id}`)}
+                    onClick={() => navigate(`/dashboard/courses/${courses[0]?.course_id}`)}
                     mt="lg"
                   >
                     {t('continueLearningButton')}
@@ -461,8 +461,8 @@ function Dashboard() {
                       rightIcon={<IconChevronRight size={16} />}
                       onClick={() => navigate(
                         course.status === 'creating' 
-                          ? `/courses/${course.course_id}?creating=true`
-                          : `/courses/${course.course_id}`
+                          ? `/dashboard/courses/${course.course_id}?creating=true`
+                          : `/dashboard/courses/${course.course_id}`
                       )}
                     >
                       {course.status === 'creating' ? t('viewCreationProgressButton') : t('continueLearningButton')}
