@@ -64,7 +64,7 @@ async def create_course_request(
     background_tasks.add_task(
         agent_service.create_course, 
         user_id=current_user.id, 
-        course_request=course_request, 
+        request=course_request, 
         db=db, 
         task_id=task_id, 
         ws_manager=ws_manager
