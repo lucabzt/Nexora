@@ -134,7 +134,7 @@ async def register_user(user_data: user_schema.UserCreate, db: Session, response
 
 
 
-async def logout_user(_: user_schema.User, _: Session, response: Response) -> auth_schema.APIResponseStatus:
+async def logout_user(_: user_schema.User, __: Session, response: Response) -> auth_schema.APIResponseStatus:
     """Logs out a user by clearing the access and refresh tokens."""
     
     # Disable the user session in the database if needed
@@ -296,23 +296,35 @@ async def handle_oauth_callback(request: Request, db: Session, website: str = "g
                             detail="User is inactive.")
     
     # Generate an access token for the user
-    access_token_expires = timedelta(minutes=security.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
-        data={"sub": db_user.username, "user_id": db_user.id, "is_admin": db_user.is_admin,
-              "email": db_user.email},
-        expires_delta=access_token_expires,
+        data={"sub": db_user.username,
+              "user_id": db_user.id,
+              "is_admin": db_user.is_admin,
+              "email": db_user.email}
     )
+
+    # Set the access token in the response cookie
+    refresh_token = security.create_refresh_token(
+        data={"sub": db_user.username,
+              "user_id": db_user.id,
+              "is_admin": db_user.is_admin,
+              "email": db_user.email}
+    )
+
+    # Set the access token in the response cookie
+    security.set_access_cookie(response, access_token)
+    # Set the refresh token in the response cookie
+    security.set_refresh_cookie(response, refresh_token)
+
+    # Update the user's last login time
+    users_crud.update_user_last_login(db, user_id=str(db_user.id))
 
     # Redirect to the frontend with the access token
     frontend_base_url = settings.FRONTEND_BASE_URL
     if not frontend_base_url:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail="Frontend base URL is not configured.")
-    previous_last_login = db_user.last_login
-    users_crud.update_user_last_login(db, user_id=db_user.id)
+
     # Similar to above, previous_last_login holds the value we need for the redirect.
-
-    redirect_url_with_fragment = f"{frontend_base_url}#access_token={access_token}&token_type=bearer&expires_in={security.ACCESS_TOKEN_EXPIRE_MINUTES * 60}&last_login={previous_last_login.isoformat() if previous_last_login else ''}"
-
-    return RedirectResponse(url=redirect_url_with_fragment)
+    return RedirectResponse(url=frontend_base_url)
 
