@@ -1,44 +1,75 @@
 """
 Authentication Router
 """
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from fastapi import FastAPI, Response, Cookie
+
+
 
 from ...db.database import get_db
 from ...services import auth_service
-from ..schemas import token as token_schema, user as user_schema
-from ...utils.oauth import oauth
+from ...core.security import oauth
 from ...config import settings
-
+from ..schemas import auth as auth_schema
+from ..schemas import user as user_schema
+from ...utils import auth as auth_utils
+from ...core.security import get_refresh_token_from_cookie
 
 api_router = APIRouter(
-    prefix="",
-    tags=["auth"],
+    prefix="/auth",
+    tags=["authentication"],
     responses={404: {"description": "Not found"}},
 )
 
+@api_router.post("/register",
+                  response_model=auth_schema.APIResponseStatus,
+                  status_code=status.HTTP_201_CREATED)
+async def register_user(response: Response,
+                        user_data: user_schema.UserCreate,
+                        db: Session = Depends(get_db)):
+    """
+    Endpoint to register a new user.
+    Returns the status of the registration.
+    """
+    return await auth_service.register_user(user_data, db, response)
 
-@api_router.post("/token", response_model=token_schema.Token, tags=["authentication"])
-async def login_for_access_token(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db)
-):
+
+
+@api_router.post("/login",
+                 response_model=auth_schema.APIResponseStatus)
+async def login_user(response: Response,
+                     form_data: OAuth2PasswordRequestForm = Depends(),
+                     db: Session = Depends(get_db)):
     """
     Endpoint to login and obtain an access token.
     Use /users/me to get user details.
     """
-    return await auth_service.login_user(form_data, db)
+    return await auth_service.login_user(form_data, db, response)
 
 
-@api_router.post("/register", response_model=user_schema.User, status_code=status.HTTP_201_CREATED,
-                 tags=["Authentication"])
-async def register_user(user_data: user_schema.UserCreate, db: Session = Depends(get_db)):
+@api_router.post("/logout",
+                 response_model=auth_schema.APIResponseStatus)
+async def logout_user(response: Response,
+                      db: Session = Depends(get_db),
+                      user: user_schema.User = Depends(auth_utils.get_current_active_user)):
     """
-    Endpoint to register a new user.
-    Returns the created user object.
+    Endpoint to logout user.
+    This endpoint invalidates the user's session and access token.
     """
-    return await auth_service.register_user(user_data, db)
+    return await auth_service.logout_user(user, db, response)
+
+@api_router.post("/refresh",
+                 response_model=auth_schema.APIResponseStatus)
+async def refresh_token(response: Response,
+                        db: Session = Depends(get_db),
+                        refresh_token_str: Optional[str] = Depends(get_refresh_token_from_cookie)):
+    """
+    Endpoint to refresh the user's access token.
+    """
+    return await auth_service.refresh_token(refresh_token_str, db, response)
 
 
 @api_router.get("/login/google")

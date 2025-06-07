@@ -34,7 +34,7 @@ def update_user(db: Session, user_id: str, user_update, current_user: user_model
     if "password" in update_data and update_data["password"]:
         if str(db_user.id) == str(current_user.id):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Use /change_password to update your password.")
-        elif getattr(current_user, 'is_admin', False) is True:
+        elif getattr(current_user, 'is_admin', False):
             hashed_password = get_password_hash(update_data["password"])
             update_data["hashed_password"] = hashed_password
         del update_data["password"]

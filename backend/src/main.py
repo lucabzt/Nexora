@@ -1,4 +1,5 @@
-import secrets  # Added for generating random passwords/suffixes
+import secrets
+from typing import Optional  # Added for generating random passwords/suffixes
 
 from fastapi import FastAPI  # Ensure Request is imported
 from fastapi import Depends
@@ -43,8 +44,8 @@ app.add_middleware(
 )
 
 # Define /users/me BEFORE including users.router to ensure correct route matching
-@app.get("/users/me", response_model=user_schema.User, tags=["users"])
-async def read_users_me(current_user: user_model.User = Depends(auth.get_current_active_user)):
+@app.get("/users/me", response_model=Optional[user_schema.User], tags=["users"])
+async def read_users_me(current_user: Optional[user_model.User] = Depends(auth.get_current_user_optional)):
     """Get the current logged-in user's details."""
     return current_user
 

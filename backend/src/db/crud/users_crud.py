@@ -78,6 +78,11 @@ def change_user_password(db: Session, db_user: User, hashed_password: str):
     db.refresh(db_user)
     return db_user
 
+
+def get_active_user_by_id(db: Session, user_id: str) -> Optional[User]:
+    """Retrieve an active user by their ID."""
+    return db.query(User).filter(User.id == user_id, User.is_active ==  True).first()
+
 def delete_user(db: Session, db_user: User):
     """
     Delete a user from the database, including all associated data:

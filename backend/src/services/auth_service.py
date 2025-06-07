@@ -2,29 +2,29 @@
 Authentication service for handling user login,
 registration, and Google OAuth callback.
 """
-import secrets
-import uuid
 import base64
-import requests
-from datetime import timedelta, datetime
+import secrets
+from typing import Optional
+import uuid
 from logging import Logger
 
-from fastapi import HTTPException, status, Request
+import requests
+from fastapi import HTTPException, Request, Response, status
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from ..db.crud import users_crud
-from ..core import security
-from ..utils.oauth import oauth
-from ..db.models.db_user import User as UserModel
-from ..api.schemas import token as token_schema
+from ..api.schemas import auth as auth_schema
 from ..api.schemas import user as user_schema
 from ..config import settings as settings
+from ..core import security
+from ..core.security import oauth
+from ..db.crud import users_crud
+from ..db.models.db_user import User as UserModel
 
 logger = Logger(__name__)
 
-async def login_user(form_data: OAuth2PasswordRequestForm, db: Session) -> token_schema.Token:
+async def login_user(form_data: OAuth2PasswordRequestForm, db: Session, response: Response) -> auth_schema.APIResponseStatus:
     """Authenticates a user and returns an access token."""
     if not form_data.username or not form_data.password:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
@@ -43,27 +43,36 @@ async def login_user(form_data: OAuth2PasswordRequestForm, db: Session) -> token
                             detail="Inactive user")
 
     # Generate access token with user details
-    access_token_expires = timedelta(minutes=security.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
-        data={"sub": user.username, "user_id": user.id, "is_admin": user.is_admin, "email": user.email},
-        expires_delta=access_token_expires,
+        data={"sub": user.username,
+              "user_id": user.id,
+              "is_admin": user.is_admin,
+              "email": user.email}
     )
+
+    refresh_token = security.create_refresh_token(
+        data={"sub": user.username,
+              "user_id": user.id,
+              "is_admin": user.is_admin,
+              "email": user.email}
+    )
+
+    # Save last login time
     previous_last_login = user.last_login
-    users_crud.update_user_last_login(db, user_id=user.id)
-    # Refresh user object to get the updated last_login if needed, though previous_last_login is what we return
-    # For consistency, we could re-fetch the user or trust the previous_last_login variable is sufficient.
+    users_crud.update_user_last_login(db, user_id=str(user.id))
 
-    return token_schema.Token(
-        last_login=previous_last_login,
-        access_token= access_token,
-        token_type= "bearer",
-        user_id= str(user.id),
-        username= str(user.username),
-        email= str(user.email),
-        is_admin= bool(user.is_admin),
-    )
 
-async def register_user(user_data: user_schema.UserCreate, db: Session):
+    # Set the access token in the response cookie
+    security.set_access_cookie(response, access_token)
+    # Set the refresh token in the response cookie
+    security.set_refresh_cookie(response, refresh_token)
+
+    return auth_schema.APIResponseStatus(status="success",
+                                         msg="Successfully logged in",
+                                         data={ "last_login": previous_last_login.isoformat()})
+
+
+async def register_user(user_data: user_schema.UserCreate, db: Session, response: Response) -> auth_schema.APIResponseStatus:
     """Registers a new user and returns the created user data."""
     
     # Check if username from incoming data (user_data.username) already exists in the DB
@@ -91,12 +100,75 @@ async def register_user(user_data: user_schema.UserCreate, db: Session):
         username = user_data.username,
         email = user_data.email,
         hashed_password = security.get_password_hash(user_data.password),
-        is_active = True,
-        is_admin = False,
         profile_image_base64 = user_data.profile_image_base64,
     )
-    # No need to manually set last_login here as the model default handles it on creation.
-    return new_user
+
+    # Set access cookie
+    access_token = security.create_access_token(
+        data={"sub": new_user.username,
+              "user_id": new_user.id,
+              "is_admin": False,
+              "email": new_user.email}
+    )
+
+    # Set the access token in the response cookie
+    refresh_token = security.create_refresh_token(
+        data={"sub": new_user.username,
+              "user_id": new_user.id,
+              "is_admin": False,
+              "email": new_user.email}
+    )
+
+    # Set the access token in the response cookie
+    security.set_access_cookie(response, access_token)
+    # Set the refresh token in the response cookie
+    security.set_refresh_cookie(response, refresh_token)
+
+    return auth_schema.APIResponseStatus(status="success",
+                                        msg="Successfully logged in")
+
+
+
+async def logout_user(_: user_schema.User, __: Session, response: Response) -> auth_schema.APIResponseStatus:
+    """Logs out a user by clearing the access and refresh tokens."""
+    
+    # Disable the user session in the database if needed
+    #diable_token(db, response)
+
+    # Clear the access token cookie
+    security.clear_access_cookie(response)
+    # Clear the refresh token cookie
+    security.clear_refresh_cookie(response)
+
+    return auth_schema.APIResponseStatus(status="success", msg="Successfully logged out")
+    
+async def refresh_token(token: Optional[str], db: Session, response: Response) -> auth_schema.APIResponseStatus:
+    """Registers a new user and returns the created user data."""
+    
+    # Verify the token and extract user ID
+    user_id = security.verify_token(token)
+
+    # Fetch the user from the database using the user ID
+    user = users_crud.get_active_user_by_id(db, user_id)
+
+    if user is None:
+        raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate refresh token",
+    )
+
+    access_token = security.create_access_token(
+        data={"sub": user.username,
+              "user_id": user.id,
+              "is_admin": user.is_admin,
+              "email": user.email}
+    )
+
+    # Set the access token in the response cookie
+    security.set_access_cookie(response, access_token)
+
+    return auth_schema.APIResponseStatus(status="success", msg="")
+
 
 
 async def handle_oauth_callback(request: Request, db: Session, website: str = "google"):
@@ -219,23 +291,50 @@ async def handle_oauth_callback(request: Request, db: Session, website: str = "g
                             detail="User is inactive.")
     
     # Generate an access token for the user
-    access_token_expires = timedelta(minutes=security.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
-        data={"sub": db_user.username, "user_id": db_user.id, "is_admin": db_user.is_admin,
-              "email": db_user.email},
-        expires_delta=access_token_expires,
+        data={"sub": db_user.username,
+              "user_id": db_user.id,
+              "is_admin": db_user.is_admin,
+              "email": db_user.email}
     )
 
-    # Redirect to the frontend with the access token
+    # Set the access token in the response cookie
+    refresh_token = security.create_refresh_token(
+        data={"sub": db_user.username,
+              "user_id": db_user.id,
+              "is_admin": db_user.is_admin,
+              "email": db_user.email}
+    )
+
+    # Update the user's last login time
+    users_crud.update_user_last_login(db, user_id=str(db_user.id))
+
+    # Redirect to the frontend
     frontend_base_url = settings.FRONTEND_BASE_URL
     if not frontend_base_url:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail="Frontend base URL is not configured.")
-    previous_last_login = db_user.last_login
-    users_crud.update_user_last_login(db, user_id=db_user.id)
-    # Similar to above, previous_last_login holds the value we need for the redirect.
 
-    redirect_url_with_fragment = f"{frontend_base_url}#access_token={access_token}&token_type=bearer&expires_in={security.ACCESS_TOKEN_EXPIRE_MINUTES * 60}&last_login={previous_last_login.isoformat() if previous_last_login else ''}"
+    redirect_response = RedirectResponse(url=frontend_base_url)
 
-    return RedirectResponse(url=redirect_url_with_fragment)
+    # Set the access token in the redirect_response cookie
+    redirect_response.set_cookie(
+        key="access_token",
+        value=access_token,
+        path="/",
+        httponly=True,
+        secure=settings.SECURE_COOKIE,
+        samesite="lax"
+    )
+    # Set the refresh token in the redirect_response cookie
+    redirect_response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        path="/api/auth/refresh",
+        httponly=True,
+        secure=settings.SECURE_COOKIE,
+        samesite="lax"
+    )
+
+    return redirect_response
 

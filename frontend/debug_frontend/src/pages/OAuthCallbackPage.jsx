@@ -1,74 +1,77 @@
-import { useEffect, useContext } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Loader, Center, Text } from '@mantine/core';
+import { showNotification } from '@mantine/notifications';
+import { useTranslation } from 'react-i18next'; // Added for translations
 
 function OAuthCallbackPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { fetchAndSetFullUser } = useAuth(); // Assuming fetchAndSetFullUser can handle the token object
+  const { fetchAndSetCurrentUser } = useAuth();
+  const { t } = useTranslation('auth'); // Initialize useTranslation for the 'auth' namespace
 
   useEffect(() => {
     const processOAuthCallback = async () => {
-      console.log("OAuthCallbackPage: Processing OAuth callback...");
-      // Read from URL fragment instead of query parameters
-      const hash = location.hash.substring(1); // Remove the leading '#'
-      console.log("OAuthCallbackPage: URL fragment (hash):", hash);
-      const params = new URLSearchParams(hash);
-      
-      const accessToken = params.get('access_token');
-      const tokenType = params.get('token_type');
-      console.log("OAuthCallbackPage: Extracted accessToken:", accessToken);
-      console.log("OAuthCallbackPage: Extracted tokenType:", tokenType);
-      // The backend currently only sends access_token and token_type in the fragment.
-      // Other user details (userId, username, email, isAdmin) are part of the JWT token itself
-      // and will be decoded by the backend or fetched via a /users/me endpoint after setting the token.
-      // So, we don't expect userId, username, etc., directly in the fragment from the backend.
+      console.log("OAuthCallbackPage: Processing OAuth callback (cookie-based)...");
+      const queryParams = new URLSearchParams(location.search);
+      const oauthError = queryParams.get('error');
+      const oauthErrorDescription = queryParams.get('error_description');
 
-      if (accessToken) {
-        console.log("OAuthCallbackPage: Access token found.");
-        // Construct a minimal token object, as the backend now sends only token and type in fragment
-        const tokenData = {
-          access_token: accessToken,
-          token_type: tokenType || 'bearer',
-          // user_id, username, email, is_admin will be populated by fetchAndSetFullUser
-          // after it validates the token and fetches user details.
-        };
-        console.log("OAuthCallbackPage: Constructed tokenData:", tokenData);
+      if (oauthError) {
+        const errorMessage = oauthErrorDescription || oauthError || 'An unknown OAuth error occurred.';
+        console.error(`OAuthCallbackPage: OAuth provider error: ${errorMessage}`);
+        showNotification({
+          title: t('notifications.oauthCallback.titleErrorProvider'),
+          message: t('notifications.oauthCallback.messageErrorProvider', { errorMessage }),
+          color: 'red',
+        });
+        navigate('/login?error=oauth_provider_error');
+        return;
+      }
 
-        try {
-          console.log("OAuthCallbackPage: Calling fetchAndSetFullUser...");
-          // fetchAndSetFullUser should:
-          // 1. Store the raw token (access_token, token_type).
-          // 2. Make a call to /api/users/me using this token to get full user details.
-          // 3. Set the full user context.
-          const user = await fetchAndSetFullUser(tokenData); 
-          if (user) {
-            console.log("OAuthCallbackPage: fetchAndSetFullUser successful, user:", user);
-            navigate('/'); // Redirect to home page on successful login
-          } else {
-            console.error("OAuthCallbackPage: fetchAndSetFullUser did not return a user.");
-            // Handle case where user is not set, possibly show error
-            navigate('/login?error=oauth_failed_user_not_set');
-          }
-        } catch (error) {
-          console.error('OAuthCallbackPage: OAuth callback processing failed during fetchAndSetFullUser:', error);
-          navigate('/login?error=oauth_exception');
+      // If no explicit OAuth error in query params, attempt to fetch user
+      // This relies on the backend having set an HTTP-only cookie
+      try {
+        console.log("OAuthCallbackPage: Calling fetchAndSetCurrentUser (expecting cookie)...");
+        // fetchAndSetFullUser should now internally use the cookie to call /api/auth/me or similar
+        const user = await fetchAndSetCurrentUser(); 
+
+        if (user) {
+          console.log("OAuthCallbackPage: fetchAndSetCurrentUser successful, user:", user);
+          showNotification({
+            title: t('notifications.oauthCallback.titleSuccess'),
+            message: t('notifications.oauthCallback.messageSuccess', { username: user.username || t('notifications.oauthCallback.defaultUsername') }),
+            color: 'green',
+          });
+          navigate('/dashboard'); // Redirect to dashboard
+        } else {
+          console.error("OAuthCallbackPage: fetchAndSetCurrentUser did not return a user (cookie auth). Possible session issue.");
+          showNotification({
+            title: t('notifications.oauthCallback.titleErrorSession'),
+            message: t('notifications.oauthCallback.messageErrorSession'),
+            color: 'red',
+          });
+          navigate('/login?error=session_verification_failed');
         }
-      } else {
-        console.warn("OAuthCallbackPage: Access token not found in URL fragment.");
-        // Parameters not found, redirect to login with an error
-        navigate('/login?error=oauth_missing_token_in_fragment');
+      } catch (error) {
+        console.error('OAuthCallbackPage: Error during fetchAndSetCurrentUser (cookie auth):', error);
+        showNotification({
+          title: t('notifications.oauthCallback.titleErrorException'),
+          message: t('notifications.oauthCallback.messageErrorException'),
+          color: 'red',
+        });
+        navigate('/login?error=oauth_processing_exception');
       }
     };
 
     processOAuthCallback();
-  }, [location, navigate, fetchAndSetFullUser]);
+  }, [location, navigate, fetchAndSetCurrentUser, t]); // Added 't' to dependencies array
 
   return (
     <Center style={{ height: '100vh', flexDirection: 'column' }}>
       <Loader size="xl" />
-      <Text mt="md">Processing your login...</Text>
+      <Text mt="md">{t('notifications.oauthCallback.loadingText')}</Text>
     </Center>
   );
 }

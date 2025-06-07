@@ -40,9 +40,14 @@ apiWithCookies.interceptors.response.use(
         await axios.post('/api/auth/refresh', null, { withCredentials: true }); // Refresh-Call
         processQueue(null);
         return apiWithCookies(originalRequest); // Ursprünglichen Request wiederholen
-      } catch (err) {
-        processQueue(err);
-        return Promise.reject(err);
+      } catch (refreshError) {
+        processQueue(refreshError);
+        // Log the refresh error
+        if ( typeof window !== 'undefined' && 
+            window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+        return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }
@@ -56,6 +61,16 @@ apiWithCookies.interceptors.response.use(
 export const apiWithoutCookies = axios.create({
   baseURL: API_URL,
   withCredentials: false,          // Keine Cookies
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+
+
+export const apiWithCookiesNoRedirect = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,          // Keine Cookies
   headers: {
     'Content-Type': 'application/json',
   },

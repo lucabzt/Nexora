@@ -252,7 +252,6 @@ function About() {
                   <Timeline.Item 
                     bullet={<IconBulb size={12} />} 
                     title={t('journey.event1.title')} 
-                    titleClassName={classes.timelineTitle}
                   >
                     <Text color="dimmed" size="sm">
                       {t('journey.event1.description')}
@@ -263,7 +262,6 @@ function About() {
                   <Timeline.Item 
                     bullet={<IconRocket size={12} />} 
                     title={t('journey.event2.title')} 
-                    titleClassName={classes.timelineTitle}
                   >
                     <Text color="dimmed" size="sm">
                       {t('journey.event2.description')}
@@ -274,7 +272,6 @@ function About() {
                   <Timeline.Item 
                     bullet={<IconChartBar size={12} />} 
                     title={t('journey.event3.title')} 
-                    titleClassName={classes.timelineTitle}
                   >
                     <Text color="dimmed" size="sm">
                       {t('journey.event3.description')}
@@ -285,7 +282,6 @@ function About() {
                   <Timeline.Item 
                     bullet={<IconHeart size={12} />}
                     title={t('journey.event4.title')}
-                    titleClassName={classes.timelineTitle}
                   >
                     <Text color="dimmed" size="sm">
                       {t('journey.event4.description')}
@@ -296,7 +292,6 @@ function About() {
                    <Timeline.Item 
                     bullet={<IconHeart size={12} />}
                     title={t('journey.event5.title')}
-                    titleClassName={classes.timelineTitle}
                   >
                     <Text color="dimmed" size="sm">
                         {t('journey.event5.description')}

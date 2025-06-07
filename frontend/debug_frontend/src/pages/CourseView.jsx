@@ -402,7 +402,7 @@ function CourseView() {
                           variant="gradient"
                           gradient={{ from: 'teal', to: 'cyan' }}
                           rightIcon={<IconChevronRight size={16} />}
-                          onClick={() => navigate('/courses/' + courseId + '/chapters/' + chapters[0]?.id)}
+                          onClick={() => navigate('/dashboard/courses/' + courseId + '/chapters/' + chapters[0]?.id)}
                           mt="md"
                         >
                           {progress > 0 ? t('buttons.continueLearning') : t('buttons.startLearning')}
@@ -614,7 +614,7 @@ function CourseView() {
                         fullWidth
                         mt="md"
                         rightIcon={chapter.is_completed ? <IconCircleCheck size={16} /> : <IconChevronRight size={16} />}
-                        onClick={() => navigate(`/courses/${courseId}/chapters/${chapter.id}`)}
+                        onClick={() => navigate(`/dashboard/courses/${courseId}/chapters/${chapter.id}`)}
                         disabled={isStreamingActive && index > 0}
                         sx={(theme) => 
                           chapter.is_completed 

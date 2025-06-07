@@ -109,7 +109,7 @@ function ChapterView() {
       // Using the ID from URL params
       await courseService.markChapterComplete(courseId, chapterId);
       toast.success(t('toast.markedCompleteSuccess'));
-      navigate(`/courses/${courseId}`);
+      navigate(`/dashboard/courses/${courseId}`);
     } catch (error) {
       toast.error(t('toast.markedCompleteError'));
       console.error('Error marking chapter complete:', error);
@@ -261,7 +261,7 @@ function ChapterView() {
             <Group position="apart">
               <Button 
                 variant="outline" 
-                onClick={() => navigate(`/courses/${courseId}`)}
+                onClick={() => navigate(`/dashboard/courses/${courseId}`)}
               >
                 {t('buttons.backToCourse')}
               </Button>

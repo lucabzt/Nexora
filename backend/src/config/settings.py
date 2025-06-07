@@ -19,10 +19,26 @@ REQUIRE_SPECIAL_CHAR = False
 SPECIAL_CHARACTERS_REGEX_PATTERN = r"[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?~`]"
 
 
+
+
 # JWT settings
-SECRET_KEY = os.getenv("SECRET_KEY", "a_very_secret_key_please_change_me")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "2440"))
+SECRET_KEY = os.getenv("SECRET_KEY", "a_very_secret_key_please_change_me")
+
+######
+#ALGORITHM: str = "RS256"
+#### Private Key (zum Signieren)
+# openssl genrsa -out private.pem 2048
+#### Public Key (zum Verifizieren)
+# openssl rsa -in private.pem -pubout -out public.pem
+PUBLIC_KEY: str = os.getenv("PUBLIC_KEY", "")
+PRIVATE_KEY: str =  os.getenv("PRIVATE_KEY", "")
+######
+
+
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "20"))
+REFRESH_TOKEN_EXPIRE_MINUTES = int(os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES", "360000")) # 100h
+SECURE_COOKIE = os.getenv("SECURE_COOKIE", "true").lower() == "true"
 
 
 # Database settings
