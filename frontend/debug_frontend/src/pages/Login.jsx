@@ -55,13 +55,22 @@ function Login() {
 
   const handleSubmit = async (values) => {
     setIsLoading(true);
-    
     try {
-      const result = await login(values.username, values.password);
+      // The login function from AuthContext now returns the user object on success
+      // or throws an error on failure.
+      const user = await login(values.username, values.password);
       
-      if (result.success) {
-        navigate('/');
+      // If login is successful and returns a user object, navigate.
+      if (user) {
+        navigate('/'); // Navigate to the home page or dashboard
       }
+      // No explicit 'else' needed here because if 'user' is not returned,
+      // an error would have been thrown by the login() function and caught below.
+    } catch (error) {
+      // Errors (e.g., invalid credentials, network issues) are already handled by 
+      // the login function in AuthContext (it shows a toast).
+      // You can add additional error handling specific to this page if needed.
+      console.error("Login page: Login failed", error);
     } finally {
       setIsLoading(false);
     }
