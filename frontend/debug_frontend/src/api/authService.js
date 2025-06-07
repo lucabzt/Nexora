@@ -52,17 +52,17 @@ class AuthService {
   // New method for Google OAuth
   redirectToGoogleOAuth() {
     // The backend URL that initiates the Google OAuth flow
-    window.location.href = `/api/login/google`;
+    window.location.href = `/api/auth/login/google`;
   }
 
   redirectToGithubOAuth() {
     // The backend URL that initiates the Google OAuth flow
-    window.location.href = `/api/login/github`;
+    window.location.href = `/api/auth/login/github`;
   }
 
   redirectToDiscordOAuth() {
     // The backend URL that initiates the Discord OAuth flow
-    window.location.href = `/api/login/discord`;
+    window.location.href = `/api/auth/login/discord`;
   }
 }
 

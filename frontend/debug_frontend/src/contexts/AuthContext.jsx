@@ -9,7 +9,7 @@ const AuthContext = createContext();
 
 
 export const AuthProvider = ({ children }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('auth');
   const [user, setUserState] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }) => {
       console.error("Error in fetchAndSetFullUser:", error);
       authService.logout(); // Clears localStorage and user state
       setUserState(null);   // Ensure state is cleared
-      toast.error(error.message || t('auth.notifications.sessionExpired'));
+      toast.error(error.message || t('notifications.sessionExpired'));
       return null;
     }
   }, []); // Dependencies: setUserState (from useState, stable), authService, userService, toast (imports, stable)
