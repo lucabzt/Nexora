@@ -7,6 +7,11 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any
 
 
+import logging
+logging.getLogger("google_adk.google.adk.models.google_llm").setLevel(logging.WARNING)
+
+
+
 class StandardAgent(ABC):
     """ This is the standard agent without structured output """
     @abstractmethod
@@ -100,7 +105,7 @@ class StructuredAgent(ABC):
                         return dict_response
                     except json.JSONDecodeError as e:
                         print(f"Error parsing JSON response: {e}")
-                        print(f"Raw response: {json_text}")
+                        ### ### ### print(f"Raw response: {json_text}")
                         raise
                 elif event.actions and event.actions.escalate:  # Handle potential errors/escalations
                     return {
