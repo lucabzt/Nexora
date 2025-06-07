@@ -396,6 +396,7 @@ function AdminView() {
             <Table striped highlightOnHover withBorder withColumnBorders verticalSpacing="sm" sx={{ minWidth: 900 }}>
               <thead>
                 <tr>
+                  <th>{t('table.header.profilePicture')}</th>
                   <th>{t('table.header.username')}</th>
                   <th>{t('table.header.email')}</th>
                   <th>{t('table.header.status')}</th>
@@ -409,6 +410,17 @@ function AdminView() {
                 {filteredUsers.length > 0 ? (
                   filteredUsers.map((user) => (
                     <tr key={user.id}>
+                      <td>
+                        {user.profile_image_base64 ? (
+                          <img 
+                            src={`data:image/png;base64,${user.profile_image_base64}`} 
+                            alt={t('table.profilePictureAlt', { username: user.username })} 
+                            style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} 
+                          />
+                        ) : (
+                          <Text size="sm" color="dimmed">{t('table.noProfilePicture')}</Text>
+                        )}
+                      </td>
                       <td>{user.username}</td>
                       <td>{user.email}</td>
                       <td>
