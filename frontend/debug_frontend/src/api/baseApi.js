@@ -65,13 +65,3 @@ export const apiWithoutCookies = axios.create({
     'Content-Type': 'application/json',
   },
 });
-
-
-
-export const apiWithCookiesNoRedirect = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,          // Keine Cookies
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});

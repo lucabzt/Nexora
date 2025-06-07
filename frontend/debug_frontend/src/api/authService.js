@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { apiWithCookies, apiWithoutCookies, apiWithCookiesNoRedirect } from './baseApi';
+import { apiWithCookies, apiWithoutCookies } from './baseApi';
 
 const API_URL = '/api';
 
@@ -40,7 +40,7 @@ class AuthService {
   async getCurrentUser() {
     try {
       // Fetch user data from a protected endpoint. If cookie is valid, this will succeed.
-      const response = await apiWithCookiesNoRedirect.get('/users/me');
+      const response = await apiWithoutCookies.get('/users/me');
       return response.data; // Contains user profile information
     } catch (error) {
       // This can happen if the user is not authenticated or if there's a network issue.
