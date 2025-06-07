@@ -1,6 +1,7 @@
 """
 Authentication Router
 """
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -64,7 +65,7 @@ async def logout_user(response: Response,
                  response_model=auth_schema.APIResponseStatus)
 async def refresh_token(response: Response,
                         db: Session = Depends(get_db),
-                        refresh_token_str: str = Depends(get_refresh_token_from_cookie)):
+                        refresh_token_str: Optional[str] = Depends(get_refresh_token_from_cookie)):
     """
     Endpoint to refresh the user's access token.
     """
@@ -86,11 +87,11 @@ async def login_google(request: Request):
 
 
 @api_router.get("/google/callback")
-async def google_callback(response: Response, request: Request, db: Session = Depends(get_db)):
+async def google_callback(request: Request, db: Session = Depends(get_db)):
     """
     Handles the callback from Google OAuth after user authentication.
     """
-    return await auth_service.handle_oauth_callback(response, request, db, website="google")
+    return await auth_service.handle_oauth_callback(request, db, website="google")
 
 
 
@@ -109,11 +110,11 @@ async def login_github(request: Request):
 
 
 @api_router.get("/github/callback")
-async def github_callback(response: Response, request: Request, db: Session = Depends(get_db)):
+async def github_callback(request: Request, db: Session = Depends(get_db)):
     """
     Handles the callback from Github OAuth after user authentication.
     """
-    return await auth_service.handle_oauth_callback(response, request, db, website="github")
+    return await auth_service.handle_oauth_callback(request, db, website="github")
 
 
 @api_router.get("/login/discord")
@@ -131,10 +132,10 @@ async def login_discord(request: Request):
 
 
 @api_router.get("/discord/callback")
-async def discord_callback(response: Response, request: Request, db: Session = Depends(get_db)):
+async def discord_callback(request: Request, db: Session = Depends(get_db)):
     """
     Handles the callback from Discord OAuth after user authentication.
     """
-    return await auth_service.handle_oauth_callback(response, request, db, website="discord")
+    return await auth_service.handle_oauth_callback(request, db, website="discord")
 
 

@@ -7,7 +7,7 @@ from ...db.database import get_db
 from ...db.models import db_user as user_model
 from ...services import user_service
 from ...utils import auth
-from ...utils.auth import get_optional_current_user # Import the new dependency
+from ...utils.auth import get_current_user_optional # Import the new dependency
 from ..schemas import user as user_schemas  # For Pydantic models
 
 router = APIRouter(
@@ -16,9 +16,11 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.get("/me", response_model=Optional[user_schemas.User], summary="Get current logged-in user's profile")
+@router.get("/me",
+            response_model=Optional[user_schemas.User],
+            summary="Get current logged-in user's profile")
 async def read_current_user(
-    current_user: Optional[user_model.User] = Depends(get_optional_current_user)
+    current_user: Optional[user_model.User] = Depends(get_current_user_optional)
 ):
     """
     Retrieve the profile of the currently authenticated user.
@@ -26,7 +28,8 @@ async def read_current_user(
     """
     return current_user
 
-@router.get("/", response_model=List[user_schemas.User],
+@router.get("/",
+            response_model=List[user_schemas.User],
             dependencies=[Depends(auth.get_current_admin_user)])
 async def read_users(
     skip: int = 0,

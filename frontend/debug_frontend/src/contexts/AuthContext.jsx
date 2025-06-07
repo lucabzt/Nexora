@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('userProfile', JSON.stringify(currentUser)); 
         return currentUser;
       } else {
-        console.warn("AuthContext: No valid user session found or incomplete user data from API.");
+        console.info("AuthContext: No valid user session found or incomplete user data from API.");
         setUserState(null);
         localStorage.removeItem('userProfile');
         return null;

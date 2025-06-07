@@ -9,7 +9,8 @@ from passlib.context import CryptContext
 
 from ..config import settings
 from ..config.settings import (ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM,
-                               PRIVATE_KEY, PUBLIC_KEY, SECRET_KEY)
+                               PRIVATE_KEY, PUBLIC_KEY, SECRET_KEY,
+                               REFRESH_TOKEN_EXPIRE_MINUTES)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth = OAuth()
@@ -29,31 +30,38 @@ def create_token(data: dict, expires_delta: timedelta) -> str:
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + expires_delta
     to_encode.update({"exp": expire})
-    if settings.ALGORITHM == "HS256":
+    if ALGORITHM == "HS256":
         return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    elif settings.ALGORITHM == "RS256":
-        return jwt.encode(to_encode, PRIVATE_KEY, algorithm=settings.ALGORITHM)
-    else: raise ValueError(f"Unsupported algorithm: {settings.ALGORITHM}")
+    elif ALGORITHM == "RS256":
+        return jwt.encode(to_encode, PRIVATE_KEY, algorithm=ALGORITHM)
+    else: raise ValueError(f"Unsupported algorithm: {ALGORITHM}")
 
 
 def create_access_token(data: dict) -> str:
     """Create a JWT access token with a default expiration time."""
-    return create_token(data, timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
+    return create_token(data, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
 
 def create_refresh_token(data: dict) -> str:
     """Create a JWT refresh token with a longer expiration time."""
-    return create_token(data, timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES))
+    return create_token(data, timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES))
 
 
-def verify_token(token: str) -> str:
+def verify_token(token: Optional[str]) -> str:
     """Verify a JWT token and return the payload with user info."""
+
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated: token missing",
+        )
+
     try:
-        if settings.ALGORITHM == "HS256":
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[settings.ALGORITHM])
-        elif settings.ALGORITHM == "RS256":
-            payload = jwt.decode(token, PUBLIC_KEY, algorithms=[settings.ALGORITHM])
+        if ALGORITHM == "HS256":
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        elif ALGORITHM == "RS256":
+            payload = jwt.decode(token, PUBLIC_KEY, algorithms=[ALGORITHM])
         else:
-            raise ValueError(f"Unsupported algorithm: {settings.ALGORITHM}")
+            raise ValueError(f"Unsupported algorithm: {ALGORITHM}")
     except JWTError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -112,24 +120,36 @@ def clear_refresh_cookie(response : Response):
 
 
 async def get_access_token_from_cookie(request: Request) -> Optional[str]:
-    """Extracts the access token from the request's cookies."""
+    """
+    Extracts the access token from the request's cookies.
+    NOTE! THIS FUNCTION WILL NOT RAISE AN EXCEPTION IF THE TOKEN IS MISSING.
+    It will return None if the access token is not found in the cookies.
+    This is useful for endpoints where the user may not be required to be logged in.
+    Or for future fallback mechanisms where the access token might be in a header or query parameter.
+    """
     access_token = request.cookies.get("access_token")
 
-    if not access_token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated: Access token missing",
-        )
+    #if not access_token:
+    #    raise HTTPException(
+    #        status_code=status.HTTP_401_UNAUTHORIZED,
+    #        detail="Not authenticated: Access token missing",
+    #    )
     return access_token
 
 async def get_refresh_token_from_cookie(request: Request) -> Optional[str]:
-    """Extracts the refresh token from the request's cookies."""
+    """
+    Extracts the refresh token from the request's cookies.
+    NOTE! THIS FUNCTION WILL NOT RAISE AN EXCEPTION IF THE TOKEN IS MISSING.
+    It will return None if the access token is not found in the cookies.
+    This is useful for endpoints where the user may not be required to be logged in.
+    Or for future fallback mechanisms where the access token might be in a header or query parameter.
+    """
     refresh_token = request.cookies.get("refresh_token")
-    if not refresh_token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated: Refresh token missing",
-        )
+    #if not refresh_token:
+    #    raise HTTPException(
+    #        status_code=status.HTTP_401_UNAUTHORIZED,
+    #        detail="Not authenticated: Refresh token missing",
+    #    )
     return refresh_token
     
 

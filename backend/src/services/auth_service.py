@@ -4,6 +4,7 @@ registration, and Google OAuth callback.
 """
 import base64
 import secrets
+from typing import Optional
 import uuid
 from logging import Logger
 
@@ -141,7 +142,7 @@ async def logout_user(_: user_schema.User, __: Session, response: Response) -> a
 
     return auth_schema.APIResponseStatus(status="success", msg="Successfully logged out")
     
-async def refresh_token(token: str, db: Session, response: Response) -> auth_schema.APIResponseStatus:
+async def refresh_token(token: Optional[str], db: Session, response: Response) -> auth_schema.APIResponseStatus:
     """Registers a new user and returns the created user data."""
     
     # Verify the token and extract user ID
@@ -170,7 +171,7 @@ async def refresh_token(token: str, db: Session, response: Response) -> auth_sch
 
 
 
-async def handle_oauth_callback(resp: Response, request: Request, db: Session, website: str = "google"):
+async def handle_oauth_callback(request: Request, db: Session, website: str = "google"):
     """Handles the callback from OAuth after user authentication."""
 
     # Get the OAuth client

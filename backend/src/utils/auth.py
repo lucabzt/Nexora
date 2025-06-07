@@ -35,7 +35,8 @@ def authenticate_user(db: Session, username: str, password: str) -> Optional[use
     return authenticated_db_user # Return the SQLAlchemy user model instance
 
 
-async def get_current_active_user(access_token: Optional[str] = Depends(get_access_token_from_cookie), db: Session = Depends(get_db)) -> user_model.User:
+async def get_current_active_user(access_token: Optional[str] = Depends(get_access_token_from_cookie),
+                                  db: Session = Depends(get_db)) -> user_model.User:
     """
     Get the current user based on the provided token.
     Ensures the user is active and returns the user model instance.
@@ -65,6 +66,21 @@ async def get_current_active_user(access_token: Optional[str] = Depends(get_acce
     return user
 
 
+async def get_current_user_optional(access_token: Optional[str] = Depends(get_access_token_from_cookie),
+                                           db: Session = Depends(get_db)) -> Optional[user_model.User]:
+    """
+    Get the current user based on the provided token.
+    Returns None if the user is not authenticated or not found.
+    This is useful for endpoints where the user may not be required to be logged in.
+    """
+    if not access_token:
+        return None  # No token means no user, which is acceptable in this context
+
+    # Verify the token and extract user ID
+    user_id = security.verify_token(access_token)
+    user = get_active_user_by_id(db, user_id)
+    return user # if user else None
+
 async def get_current_admin_user(current_db_user: user_model.User = Depends(get_current_active_user)) -> user_model.User:
     """Ensure the current user is an admin."""
      # Check if the user is an admin
@@ -75,33 +91,3 @@ async def get_current_admin_user(current_db_user: user_model.User = Depends(get_
             detail="The user doesn't have enough privileges"
         )
     return current_db_user
-
-
-async def get_optional_current_user(
-    request: Request, 
-    db: Session = Depends(get_db)
-) -> Optional[user_model.User]:
-    """
-    Get the current user based on the access token in cookies, if present and valid.
-    Returns the user model instance or None if not authenticated or user not found/active.
-    """
-    try:
-        access_token = await get_access_token_from_cookie(request)
-        if not access_token:
-            return None
-        
-        user_id = security.verify_token(access_token)
-        if not user_id:
-            return None
-            
-        user = get_active_user_by_id(db, user_id)
-        return user # This will be None if user not found or not active
-        
-    except HTTPException as e:
-        # Only suppress 401 errors, other errors might be relevant
-        if e.status_code == status.HTTP_401_UNAUTHORIZED:
-            return None
-        raise e # Re-raise other HTTPExceptions
-    except Exception:
-        # Catch any other unexpected errors during token processing/user fetching
-        return None
