@@ -10,6 +10,7 @@ class CourseStatus(enum.Enum):
     CREATING = "creating"
     UPDATING = "updating"
     FINISHED = "finished"
+    FAILED = "failed"
 
 
 class Course(Base):
