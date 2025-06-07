@@ -23,8 +23,9 @@
     "administrators": "Admins"
   },
   "table": {
-    "header": {
+    "headers": {
       "username": "Username",
+      "profilePicture": "Profile Picture",
       "email": "Email",
       "status": "Status",
       "role": "Role",
@@ -40,6 +41,8 @@
       "admin": "Admin",
       "user": "User"
     },
+    "profilePictureAlt": "Profile picture of {{username}}",
+    "noProfilePicture": "No image",
     "actions": {
       "editUser": "Edit User",
       "changePassword": "Change Password",

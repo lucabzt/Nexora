@@ -339,7 +339,7 @@ function AdminView() {
           })}
         >
           <TextInput
-            placeholder={t('search.placeholder')}
+            placeholder={t('searchPlaceholder')}
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.currentTarget.value)}
             icon={<IconSearch size={16} />}
