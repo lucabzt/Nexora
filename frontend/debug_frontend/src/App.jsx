@@ -64,7 +64,7 @@ function App() {
         <LanguageProvider>
           <AuthProvider>
             <ToolbarProvider>
-            <BrowserRouter>
+            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
               <Routes>
               {/* Public routes with MainLayout */}
               <Route element={<MainLayout />}>
