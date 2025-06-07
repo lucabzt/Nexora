@@ -42,8 +42,9 @@ apiWithCookies.interceptors.response.use(
         return apiWithCookies(originalRequest); // Ursprünglichen Request wiederholen
       } catch (refreshError) {
         processQueue(refreshError);
-        console.error('Token refresh failed. Redirecting to login.', refreshError);
-        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+        // Log the refresh error
+        if ( typeof window !== 'undefined' && 
+            window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
         return Promise.reject(refreshError);
@@ -60,6 +61,16 @@ apiWithCookies.interceptors.response.use(
 export const apiWithoutCookies = axios.create({
   baseURL: API_URL,
   withCredentials: false,          // Keine Cookies
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+
+
+export const apiWithCookiesNoRedirect = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,          // Keine Cookies
   headers: {
     'Content-Type': 'application/json',
   },
