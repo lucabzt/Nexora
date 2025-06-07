@@ -170,7 +170,7 @@ async def refresh_token(token: str, db: Session, response: Response) -> auth_sch
 
 
 
-async def handle_oauth_callback(request: Request, db: Session, website: str = "google"):
+async def handle_oauth_callback(resp: Response, request: Request, db: Session, website: str = "google"):
     """Handles the callback from OAuth after user authentication."""
 
     # Get the OAuth client
@@ -306,9 +306,9 @@ async def handle_oauth_callback(request: Request, db: Session, website: str = "g
     )
 
     # Set the access token in the response cookie
-    security.set_access_cookie(response, access_token)
+    security.set_access_cookie(resp, access_token)
     # Set the refresh token in the response cookie
-    security.set_refresh_cookie(response, refresh_token)
+    security.set_refresh_cookie(resp, refresh_token)
 
     # Update the user's last login time
     users_crud.update_user_last_login(db, user_id=str(db_user.id))
