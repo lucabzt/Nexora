@@ -39,7 +39,6 @@ PRIVATE_KEY: str =  os.getenv("PRIVATE_KEY", "")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "2440"))
 REFRESH_TOKEN_EXPIRE_MINUTES = int(os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES", "360000")) # 100h
 SECURE_COOKIE = os.getenv("SECURE_COOKIE", "true").lower() == "true"
-SAME_SITE = os.getenv("SAME_SITE", "lax")  # Options: 'lax', 'strict', 'none' Lax allows top-level navigation, Strict blocks cross-site entirely, None allows all but requires Secure.
 
 
 # Database settings

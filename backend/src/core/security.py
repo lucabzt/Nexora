@@ -88,7 +88,7 @@ def set_refresh_cookie(response : Response, refresh_token: str):
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
-        path="/auth/refresh",  # restrict refresh token cookie to this path
+        path="/api/auth/refresh",  # restrict refresh token cookie to this path
         httponly=True,
         secure=settings.SECURE_COOKIE,  # use secure cookies if configured
         samesite= "lax" #settings.SAME_SITE,  # use configured SameSite policy
@@ -107,18 +107,18 @@ def clear_refresh_cookie(response : Response):
     """Clear the refresh token cookie in the response."""
     response.delete_cookie(
         key="refresh_token",
-        path="/auth/refresh",  # restrict refresh token cookie to this path
+        path="/api/auth/refresh",  # restrict refresh token cookie to this path
     )
 
 
 async def get_access_token_from_cookie(request: Request) -> Optional[str]:
     """Extracts the access token from the request's cookies."""
     access_token = request.cookies.get("access_token")
+
     if not access_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated: Access token missing",
-            headers={"WWW-Authenticate": "Bearer"},
         )
     return access_token
 
@@ -129,7 +129,6 @@ async def get_refresh_token_from_cookie(request: Request) -> Optional[str]:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated: Refresh token missing",
-            headers={"WWW-Authenticate": "Bearer"},
         )
     return refresh_token
     

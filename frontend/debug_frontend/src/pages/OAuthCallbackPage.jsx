@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next'; // Added for translations
 function OAuthCallbackPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { fetchAndSetFullUser } = useAuth();
+  const { fetchAndSetCurrentUser } = useAuth();
   const { t } = useTranslation('auth'); // Initialize useTranslation for the 'auth' namespace
 
   useEffect(() => {
@@ -33,12 +33,12 @@ function OAuthCallbackPage() {
       // If no explicit OAuth error in query params, attempt to fetch user
       // This relies on the backend having set an HTTP-only cookie
       try {
-        console.log("OAuthCallbackPage: Calling fetchAndSetFullUser (expecting cookie)...");
+        console.log("OAuthCallbackPage: Calling fetchAndSetCurrentUser (expecting cookie)...");
         // fetchAndSetFullUser should now internally use the cookie to call /api/auth/me or similar
-        const user = await fetchAndSetFullUser(); 
+        const user = await fetchAndSetCurrentUser(); 
 
         if (user) {
-          console.log("OAuthCallbackPage: fetchAndSetFullUser successful, user:", user);
+          console.log("OAuthCallbackPage: fetchAndSetCurrentUser successful, user:", user);
           showNotification({
             title: t('notifications.oauthCallback.titleSuccess'),
             message: t('notifications.oauthCallback.messageSuccess', { username: user.username || t('notifications.oauthCallback.defaultUsername') }),
@@ -46,7 +46,7 @@ function OAuthCallbackPage() {
           });
           navigate('/'); // Redirect to dashboard or home page
         } else {
-          console.error("OAuthCallbackPage: fetchAndSetFullUser did not return a user (cookie auth). Possible session issue.");
+          console.error("OAuthCallbackPage: fetchAndSetCurrentUser did not return a user (cookie auth). Possible session issue.");
           showNotification({
             title: t('notifications.oauthCallback.titleErrorSession'),
             message: t('notifications.oauthCallback.messageErrorSession'),
@@ -55,7 +55,7 @@ function OAuthCallbackPage() {
           navigate('/login?error=session_verification_failed');
         }
       } catch (error) {
-        console.error('OAuthCallbackPage: Error during fetchAndSetFullUser (cookie auth):', error);
+        console.error('OAuthCallbackPage: Error during fetchAndSetCurrentUser (cookie auth):', error);
         showNotification({
           title: t('notifications.oauthCallback.titleErrorException'),
           message: t('notifications.oauthCallback.messageErrorException'),
@@ -66,7 +66,7 @@ function OAuthCallbackPage() {
     };
 
     processOAuthCallback();
-  }, [location, navigate, fetchAndSetFullUser, t]); // Added 't' to dependencies array
+  }, [location, navigate, fetchAndSetCurrentUser, t]); // Added 't' to dependencies array
 
   return (
     <Center style={{ height: '100vh', flexDirection: 'column' }}>

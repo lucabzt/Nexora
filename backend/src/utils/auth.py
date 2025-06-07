@@ -52,6 +52,7 @@ async def get_current_active_user(access_token: Optional[str] = Depends(get_acce
 
     # Verify the token and extract user ID
     user_id = security.verify_token(access_token)
+
     # Fetch the user from the database using the user ID
     user = get_active_user_by_id(db, user_id)
 
