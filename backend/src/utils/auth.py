@@ -16,11 +16,6 @@ from ..core.security import get_access_token_from_cookie
 
 from ..db.crud.users_crud import get_active_user_by_id
 
-
-# oauth2_scheme can be removed if Bearer token in Authorization header is no longer supported.
-# For now, it's kept in case it's used elsewhere or for future flexibility.
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False) # auto_error=False if we primarily rely on cookies
-
 class TokenData(BaseModel):
     """Schema for the token data."""
     username: Optional[str] = None

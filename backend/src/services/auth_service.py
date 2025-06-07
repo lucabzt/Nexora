@@ -2,30 +2,24 @@
 Authentication service for handling user login,
 registration, and Google OAuth callback.
 """
+import base64
 import secrets
 import uuid
-import base64
-import requests
-from datetime import timedelta, datetime
 from logging import Logger
 
-from fastapi import HTTPException, status, Request
+import requests
+from fastapi import HTTPException, Request, Response, status
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from fastapi import FastAPI, Response, Depends, Cookie
 
-
-
-from ..db.crud import users_crud
-from ..core import security
-from ..utils.oauth import oauth
-from ..db.models.db_user import User as UserModel
 from ..api.schemas import auth as auth_schema
 from ..api.schemas import user as user_schema
 from ..config import settings as settings
-from ..db.crud.users_crud import get_active_user_by_id
-
+from ..core import security
+from ..core.security import oauth
+from ..db.crud import users_crud
+from ..db.models.db_user import User as UserModel
 
 logger = Logger(__name__)
 
