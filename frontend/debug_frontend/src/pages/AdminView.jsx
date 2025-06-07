@@ -396,40 +396,52 @@ function AdminView() {
             <Table striped highlightOnHover withBorder withColumnBorders verticalSpacing="sm" sx={{ minWidth: 900 }}>
               <thead>
                 <tr>
-                  <th>{t('table.header.username')}</th>
-                  <th>{t('table.header.email')}</th>
-                  <th>{t('table.header.status')}</th>
-                  <th>{t('table.header.role')}</th>
-                  <th>{t('table.header.createdAt')}</th>
-                  <th>{t('table.header.lastLogin')}</th>
-                  <th>{t('table.header.actions')}</th>
+                  <Table.Th>{t('table.headers.username')}</Table.Th>
+                  <Table.Th>{t('table.headers.profilePicture')}</Table.Th>
+                  <Table.Th>{t('table.headers.email')}</Table.Th>
+                  <Table.Th>{t('table.header.status')}</Table.Th>
+                  <Table.Th>{t('table.header.role')}</Table.Th>
+                  <Table.Th>{t('table.header.createdAt')}</Table.Th>
+                  <Table.Th>{t('table.header.lastLogin')}</Table.Th>
+                  <Table.Th>{t('table.header.actions')}</Table.Th>
                 </tr>
               </thead>
               <tbody>
                 {filteredUsers.length > 0 ? (
                   filteredUsers.map((user) => (
-                    <tr key={user.id}>
-                      <td>{user.username}</td>
-                      <td>{user.email}</td>
-                      <td>
+                    <Table.Tr key={user.id}>
+                      <Table.Td>{user.username}</Table.Td>
+                      <Table.Td>
+                        {user.profile_image_base64 ? (
+                          <img 
+                            src={`data:image/png;base64,${user.profile_image_base64}`} 
+                            alt={t('table.profilePictureAlt', { username: user.username })} 
+                            style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} 
+                          />
+                        ) : (
+                          <Text size="sm" color="dimmed">{t('table.noProfilePicture')}</Text>
+                        )}
+                      </Table.Td>
+                      <Table.Td>{user.email}</Table.Td>
+                      <Table.Td>
                         <Badge
                           color={user.is_active ? 'green' : 'red'}
                           variant="light"
                         >
                           {user.is_active ? t('table.status.active') : t('table.status.inactive')}
                         </Badge>
-                      </td>
-                      <td>
+                      </Table.Td>
+                      <Table.Td>
                         <Badge
                           color={user.is_admin ? 'violet' : 'blue'}
                           variant="light"
                         >
                           {user.is_admin ? t('table.role.admin') : t('table.role.user')}
                         </Badge>
-                      </td>
-                      <td>{formatDate(user.created_at)}</td>
-                      <td>{formatDate(user.last_login)}</td>
-                      <td>
+                      </Table.Td>
+                      <Table.Td>{formatDate(user.created_at)}</Table.Td>
+                      <Table.Td>{formatDate(user.last_login)}</Table.Td>
+                      <Table.Td>
                         <Group spacing="xs">
                           <Tooltip label={t('table.actions.editUser')}>
                             <ActionIcon 
@@ -458,14 +470,14 @@ function AdminView() {
                             </ActionIcon>
                           </Tooltip>
                         </Group>
-                      </td>
-                    </tr>
+                      </Table.Td>
+                    </Table.Tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} style={{ textAlign: 'center', padding: '20px 0' }}>
+                    <Table.Td colSpan={8} style={{ textAlign: 'center', padding: '20px 0' }}>
                       {t('table.noUsersFound')}
-                    </td>
+                    </Table.Td>
                   </tr>
                 )}
               </tbody>
