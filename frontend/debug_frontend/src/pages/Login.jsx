@@ -62,7 +62,7 @@ function Login() {
       
       // If login is successful and returns a user object, navigate.
       if (user) {
-        navigate('/'); // Navigate to the home page or dashboard
+        navigate('/dashboard'); // Navigate to the dashboard
       }
       // No explicit 'else' needed here because if 'user' is not returned,
       // an error would have been thrown by the login() function and caught below.

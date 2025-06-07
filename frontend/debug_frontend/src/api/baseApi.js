@@ -44,9 +44,6 @@ apiWithCookies.interceptors.response.use(
         processQueue(refreshError);
         console.error('Token refresh failed. Redirecting to login.', refreshError);
         if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-          // You might want to dispatch a global event here that your AuthContext can listen to
-          // for a cleaner logout (e.g., clearing user state from context/localStorage).
-          // For now, a hard redirect will achieve a similar effect as the app re-initializes.
           window.location.href = '/login';
         }
         return Promise.reject(refreshError);

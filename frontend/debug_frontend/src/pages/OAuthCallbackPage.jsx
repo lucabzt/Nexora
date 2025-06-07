@@ -44,7 +44,7 @@ function OAuthCallbackPage() {
             message: t('notifications.oauthCallback.messageSuccess', { username: user.username || t('notifications.oauthCallback.defaultUsername') }),
             color: 'green',
           });
-          navigate('/'); // Redirect to dashboard or home page
+          navigate('/dashboard'); // Redirect to dashboard
         } else {
           console.error("OAuthCallbackPage: fetchAndSetCurrentUser did not return a user (cookie auth). Possible session issue.");
           showNotification({
