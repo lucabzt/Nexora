@@ -95,7 +95,7 @@ function CreateCourse() {
         progress: 25, 
         phase: 'info_received'
       });
-      toast.success(t('toast.courseCreationStartedRedirect'));
+      toast.success(t('toast.courseCreationStartedRedirect', { title: message.data.title }));
       navigate(`/dashboard/courses/${message.data.course_id}?creating=true`);
     } else if (message.type === 'chapter') {
       setChapters(prev => [...prev, message.data]);
@@ -109,7 +109,7 @@ function CreateCourse() {
 
   const handleWebSocketError = (errorData) => {
     console.error('[WebSocket] Error:', errorData);
-    const errorMessage = errorData.message || t('streaming.error.websocketGeneric');
+    const errorMessage = errorData.message || t('toast.websocketGenericError');
     setError(errorMessage);
     setStreamingProgress({
       status: t('streaming.status.errorOccurred'),
@@ -123,11 +123,11 @@ function CreateCourse() {
   const handleWebSocketComplete = (completionData) => {
     console.log('[WebSocket] Complete:', completionData);
     setStreamingProgress({
-      status: t('streaming.status.completed'),
+      status: t('streaming.status.complete'),
       progress: 100,
       phase: 'complete'
     });
-    toast.success(completionData.message || t('toast.courseCreatedSuccessfully'));
+    toast.success(t('toast.courseCreationComplete', { courseId: completionData.course_id }));
     setIsSubmitting(false);
     if (completionData.course_id && !courseInfo?.course_id) {
         navigate(`/dashboard/courses/${completionData.course_id}`);
@@ -222,8 +222,8 @@ function CreateCourse() {
           
           {courseInfo && streamingProgress.phase !== 'info_received' && (
             <Card withBorder mb="md">
-              <Text weight={500}>{t('streaming.courseInfo.titleLabel')}: {courseInfo.title}</Text>
-              <Text size="sm">{t('streaming.courseInfo.descriptionLabel')}: {courseInfo.description}</Text>
+              <Title order={3} mb="sm">{t('streaming.courseInfo.courseTitleLabel')}: {courseInfo.title}</Title>
+              <Text size="sm"><strong>{t('streaming.courseInfo.courseDescriptionLabel')}:</strong> {courseInfo.description}</Text>
             </Card>
           )}
 
@@ -244,15 +244,15 @@ function CreateCourse() {
              </Alert>
           )}
            {streamingProgress.phase === 'complete' && (
-             <Alert icon={<IconCheck size={16} />} title={t('streaming.status.completed')} color="green" mt="md">
-               {t('streaming.completeMessage')}
+             <Alert icon={<IconCheck size={16} />} title={t('streaming.completion.title')} color="green" mt="md">
+               <Text>{t('streaming.completion.message', { courseId: courseInfo?.course_id || chapters[0]?.course_id /* Fallback if completionData not directly available here */ })}</Text>
              </Alert>
           )}
         </Paper>
       ) : (
         <Paper shadow="md" p="xl" withBorder>
           <Stepper active={active} onStepClick={setActive} breakpoint="sm" mb="xl">
-            <Stepper.Step label={t('stepper.step1.label')} description={t('stepper.step1.description')}>
+            <Stepper.Step label={t('stepper.details.label')} description={t('stepper.details.description')}>
               <Textarea
                 label={t('form.topic.label')}
                 placeholder={t('form.topic.placeholder')}
@@ -273,7 +273,7 @@ function CreateCourse() {
               />
             </Stepper.Step>
 
-            <Stepper.Step label={t('stepper.step2.label')} description={t('stepper.step2.description')}>
+            <Stepper.Step label={t('stepper.uploads.label')} description={t('stepper.uploads.description')}>
               <Text size="sm" mb="xs">{t('form.uploads.description')}</Text>
               <Group grow align="start">
                 <div>
@@ -334,11 +334,11 @@ function CreateCourse() {
               )}
             </Stepper.Step>
 
-            <Stepper.Step label={t('stepper.step3.label')} description={t('stepper.step3.description')}>
+            <Stepper.Step label={t('stepper.review.label')} description={t('stepper.review.description')}>
               <Text mb="md">{t('form.review.title')}</Text>
               <Card withBorder p="md" mb="md">
                 <Text><strong>{t('form.topic.label')}:</strong> {form.values.query || t('form.review.notSet')}</Text>
-                <Text><strong>{t('form.duration.label')}:</strong> {form.values.time_hours ? t('form.duration.value', { hours: form.values.time_hours }) : t('form.review.notSet')}</Text>
+                <Text><strong>{t('form.duration.label')}:</strong> {form.values.time_hours ? t('form.duration.value', { count: form.values.time_hours }) : t('form.review.notSet')}</Text>
                 <Text><strong>{t('form.documents.uploadedTitle')}:</strong> {uploadedDocuments.length > 0 ? uploadedDocuments.map(d => d.filename).join(', ') : t('form.review.none')}</Text>
                 <Text><strong>{t('form.images.uploadedTitle')}:</strong> {uploadedImages.length > 0 ? uploadedImages.map(i => i.filename).join(', ') : t('form.review.none')}</Text>
               </Card>

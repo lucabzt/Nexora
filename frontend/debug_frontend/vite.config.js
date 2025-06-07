@@ -53,6 +53,28 @@ export default defineConfig({
           });
         },
       },
+      // ✅ WebSocket-Pfad separat (wichtig: ws: true!)
+      '/api/ws': {
+        target: 'ws://127.0.0.1:8000',
+        ws: true,
+        changeOrigin: true,
+        configure: (proxy, options) => {
+          proxy.on('error', (err, req, socket) => {
+            console.error(`[WS Proxy] Error on ${req.url}: ${err.message}`);
+            if (socket && socket.writable) {
+              socket.end('HTTP/1.1 500 WebSocket Proxy Error\r\n');
+            }
+          });
+
+          proxy.on('open', (proxySocket) => {
+            console.log('[WS Proxy] Connection opened');
+          });
+
+          proxy.on('close', (res, socket, head) => {
+            console.log('[WS Proxy] Connection closed');
+          });
+        },
+      },
     },
   },
   build: {
