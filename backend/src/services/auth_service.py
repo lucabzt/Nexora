@@ -305,20 +305,35 @@ async def handle_oauth_callback(resp: Response, request: Request, db: Session, w
               "email": db_user.email}
     )
 
-    # Set the access token in the response cookie
-    security.set_access_cookie(resp, access_token)
-    # Set the refresh token in the response cookie
-    security.set_refresh_cookie(resp, refresh_token)
-
     # Update the user's last login time
     users_crud.update_user_last_login(db, user_id=str(db_user.id))
 
-    # Redirect to the frontend with the access token
+    # Redirect to the frontend
     frontend_base_url = settings.FRONTEND_BASE_URL
     if not frontend_base_url:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail="Frontend base URL is not configured.")
 
-    # Similar to above, previous_last_login holds the value we need for the redirect.
-    return RedirectResponse(url=frontend_base_url)
+    redirect_response = RedirectResponse(url=frontend_base_url)
+
+    # Set the access token in the redirect_response cookie
+    redirect_response.set_cookie(
+        key="access_token",
+        value=access_token,
+        path="/",
+        httponly=True,
+        secure=settings.SECURE_COOKIE,
+        samesite="lax"
+    )
+    # Set the refresh token in the redirect_response cookie
+    redirect_response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        path="/api/auth/refresh",
+        httponly=True,
+        secure=settings.SECURE_COOKIE,
+        samesite="lax"
+    )
+
+    return redirect_response
 
