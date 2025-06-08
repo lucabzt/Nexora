@@ -40,6 +40,7 @@ RUN addgroup --system app && adduser --system --group app --home /home/app --she
 WORKDIR /opt/eslint-setup
 COPY ./src/agents/explainer_agent/package.json ./src/agents/explainer_agent/eslint.config.js ./
 RUN npm install
+RUN chown -R app:app /opt/eslint-setup
 
 # Set work directory
 WORKDIR /home/app/web
