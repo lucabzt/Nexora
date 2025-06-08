@@ -8,17 +8,25 @@ import tempfile
 import os
 import shutil
 
+
 class ESLintValidator:
     def __init__(self):
         """
-        Initializes the validator. The configuration files (`package.json` and
-        `eslint.config.js`) are expected to be in the same directory as this script.
+        Initializes the validator. The configuration files are expected to be
+        pre-installed in /opt/eslint-setup/
         """
         self.script_dir = os.path.dirname(os.path.realpath(__file__))
-        self.config_file_path = os.path.join(self.script_dir, 'eslint.config.js')
-        self.package_json_path = os.path.join(self.script_dir, 'package.json')
+        self.eslint_setup_dir = '/opt/eslint-setup'
 
-        # Check that the required config files exist on initialization
+        # Fallback to local files if running outside Docker
+        if not os.path.exists(self.eslint_setup_dir):
+            self.eslint_setup_dir = self.script_dir
+
+        self.config_file_path = os.path.join(self.eslint_setup_dir, 'eslint.config.js')
+        self.package_json_path = os.path.join(self.eslint_setup_dir, 'package.json')
+        self.node_modules_path = os.path.join(self.eslint_setup_dir, 'node_modules')
+
+        # Check that the required files exist
         if not os.path.exists(self.config_file_path):
             raise FileNotFoundError(f"Required file not found: {self.config_file_path}")
         if not os.path.exists(self.package_json_path):
@@ -26,44 +34,47 @@ class ESLintValidator:
 
     def validate_jsx(self, jsx_code):
         """
-        Validates JSX by creating a temporary, self-contained Node.js project.
-        This is the most robust method for running ESLint.
+        Validates JSX by creating a temporary directory and copying pre-installed dependencies.
         """
         jsx_code = find_react_code_in_response(jsx_code)
 
         if not (jsx_code.startswith("(") or jsx_code.startswith("const") or jsx_code.startswith("function")):
             return {
-                    'valid': False,
-                    'errors': [{'message':  """
-                    Your output is format is wrong. Your response should start with () => { and end with }, 
-                    but your response starts with """ + jsx_code[:10]
-                    }]
-                }
+                'valid': False,
+                'errors': [{'message': f"""
+                Your output format is wrong. Your response should start with () => {{ and end with }}, 
+                but your response starts with {jsx_code[:10]}
+                """}]
+            }
 
         with tempfile.TemporaryDirectory() as temp_dir:
             try:
-                # 1. Copy configuration into the temporary directory
+                # 1. Copy configuration files
                 shutil.copy(self.config_file_path, temp_dir)
                 shutil.copy(self.package_json_path, temp_dir)
 
-                # 2. Write the JSX code to be linted into the directory
+                # 2. Copy pre-installed node_modules instead of running npm install
+                if os.path.exists(self.node_modules_path):
+                    shutil.copytree(self.node_modules_path, os.path.join(temp_dir, 'node_modules'))
+                    print("EIERLECKER")
+                else:
+                    # Fallback: run npm install if node_modules doesn't exist (local development)
+                    subprocess.run(
+                        ['npm', 'install'],
+                        cwd=temp_dir,
+                        capture_output=True,
+                        text=True,
+                        check=True
+                    )
+
+                # 3. Write the JSX code to be linted
                 js_file_to_lint = os.path.join(temp_dir, 'temp.jsx')
                 with open(js_file_to_lint, 'w', encoding='utf-8') as f:
                     f.write(jsx_code)
 
-                # 3. CRUCIAL STEP: Install dependencies locally within the temp directory
-                # This creates the local `node_modules` folder that ESLint needs.
-                subprocess.run(
-                    ['npm', 'install'],
-                    cwd=temp_dir,
-                    capture_output=True,
-                    text=True,
-                    check=True # Raise an exception if npm install fails
-                )
-
-                # 4. Run ESLint. It now has everything it needs in its local directory.
+                # 4. Run ESLint
                 lint_process = subprocess.run([
-                    'eslint',
+                    'npx', 'eslint',  # Use npx to ensure we use the local version
                     '--quiet',
                     '--format', 'json',
                     js_file_to_lint
@@ -72,21 +83,19 @@ class ESLintValidator:
                 if lint_process.stdout:
                     return self._parse_eslint_output(lint_process.stdout)
 
-                # A fatal error occurred during linting
                 return {
                     'valid': False,
                     'errors': [{'message': lint_process.stderr.strip()}] if lint_process.stderr else []
                 }
 
             except subprocess.CalledProcessError as e:
-                # This catches errors from `npm install`
                 return {
                     'valid': False,
-                    'errors': [{'message': f"npm install failed: {e.stderr}"}]
+                    'errors': [{'message': f"ESLint execution failed: {e.stderr}"}]
                 }
             except Exception as e:
-                # Catch any other unexpected errors
                 return {'valid': False, 'errors': [{'message': f"An unexpected error occurred: {str(e)}"}]}
+
 
     def _parse_eslint_output(self, eslint_json_output):
         # This parsing logic remains the same
