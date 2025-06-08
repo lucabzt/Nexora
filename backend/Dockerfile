@@ -26,6 +26,7 @@ RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requir
 
 # --- Final Stage ---
 FROM python:3.10-slim
+RUN apt install nodejs npm
 
 # Create a non-root user
 RUN addgroup --system app && adduser --system --group app

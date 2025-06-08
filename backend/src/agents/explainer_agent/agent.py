@@ -7,9 +7,6 @@ import os
 from typing import AsyncGenerator, Optional, Dict, Any
 
 from google.adk.agents import LlmAgent, BaseAgent, LoopAgent
-from google.adk.agents.callback_context import CallbackContext
-from google.adk.agents.invocation_context import InvocationContext
-from google.adk.events import Event, EventActions
 from google.adk.models.lite_llm import LiteLlm
 from google.adk.runners import Runner
 from google.genai import types
@@ -27,17 +24,17 @@ class ExplainerAgent(StandardAgent):
         full_instructions = load_instructions_from_files(sorted(files))
 
         dynamic_instructions = """
-            - - -
-            ## Current course creation state
-            Initial Interaction:
-            Nexora: "What do you want to learn today?"
-            User: "{query}"
-            
-            All chapters, created by the Planner Agent:
-            {chapters_str}
-            
-            Please only include content about the chapter that is assigned to you in the following query.
-            """
+        - - -
+        ## Current course creation state
+        Initial Interaction:
+        Nexora: "What do you want to learn today?"
+        User: "{query}"
+        
+        All chapters, created by the Planner Agent:
+        {chapters_str}
+        
+        Please only include content about the chapter that is assigned to you in the following query.
+        """
 
         # LiteLlm("openai/gpt-4.1-2025-04-14")
         # gemini-2.5-pro-preview-05-06
