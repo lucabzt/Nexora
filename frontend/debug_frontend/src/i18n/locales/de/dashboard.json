@@ -1,6 +1,11 @@
 {
-  "deleteCourseConfirmation": "Sind Sie sicher, dass Sie diesen Kurs dauerhaft löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
   "deleteCourseError": "Fehler beim Löschen des Kurses. {{message}}",
+  "deleteCourseModal": {
+    "title": "Kurs löschen?",
+    "confirmationText": "Sind Sie sicher, dass Sie diesen Kurs endgültig löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "cancelButton": "Abbrechen",
+    "deleteButton": "Löschen"
+  },
   "loadCoursesError": "Kurse konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
   "status": {
     "creating": "Wird erstellt",
