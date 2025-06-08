@@ -20,11 +20,11 @@ class AuthService {
   }
 
   async register(username, email, password) {
-    return apiWithoutCookies.post('/auth/register', {
+    return (await apiWithoutCookies.post('/auth/register', {
       username,
       email,
       password,
-    });
+    })).data;
   }
 
   async logout() {
