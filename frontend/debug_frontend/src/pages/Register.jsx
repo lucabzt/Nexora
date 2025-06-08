@@ -66,14 +66,14 @@ function Register() {
       
       if (result.success) {
         // Automatically log in after registration
-        const loginResult = await login(values.username, values.password);
-        if (loginResult.success) {
-          navigate('/'); // Redirect to dashboard/home
-        } else {
-          // fallback: show error or fallback to login page
-          // toast.error(loginResult.message || 'Login failed after registration.');
+        const user = await login(values.username, values.password);
+
+        if (user) {
+          navigate('/dashboard'); // Navigate to the dashboard
         }
       }
+    } catch (error) {
+      console.error("Register page: Registration failed", error);
     } finally {
       setIsLoading(false);
     }

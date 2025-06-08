@@ -84,15 +84,25 @@ export const AuthProvider = ({ children }) => {
       const response = await authService.register(username, email, password);
       toast.success(t('notifications.registerSuccess'));
       console.log(`AuthContext: Registration successful for user: ${username}`);
-      return response; // Or { success: true, data: response }
+
+      // After successful login and cookies are set, fetch the full user details.
+      const loggedInUser = await fetchAndSetCurrentUser();
+
+      if (loggedInUser) {
+        toast.success(t('notifications.loginSuccess', { username: loggedInUser.username }));
+        return loggedInUser;
+      } else {
+        // This implies an issue fetching user data immediately after a successful login call.
+        throw new Error(t('notifications.loginErrorAfterSuccess'));
+      }
     } catch (error) {
-      const message = 
-        (error.response && error.response.data && error.response.data.detail) || 
-        error.message || 
-        t('notifications.registerError');
-      console.error(`AuthContext: Registration failed for user: ${username}. Error:`, message);
-      toast.error(message);
-      throw error;
+
+      console.error("AuthContext: Register process failed:", error);
+      const errorMessage = error.response?.data?.detail || error.message || t('notifications.registerError');
+      toast.error(errorMessage);
+      setUserState(null); // Ensure user state is cleared
+      localStorage.removeItem('userProfile');
+      throw error; // Re-throw for the calling component to handle
     } finally {
       setLoading(false);
     }
