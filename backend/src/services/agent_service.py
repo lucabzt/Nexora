@@ -50,7 +50,7 @@ class AgentService:
         task_id (str): The unique ID for this course creation task, used for WebSocket communication.
         ws_manager (WebSocketConnectionManager): Manager to send messages over WebSockets.
         """
-        course_db = None  # Initialize course_db for broader scope in try/except/finally
+        course_db = None
         try:
             print(f"[{task_id}] Starting course creation for user {user_id}")
             # Create a memory session for the course creation
@@ -125,32 +125,32 @@ class AgentService:
             # Save chapters to state
             self.state_manager.save_chapters(user_id, course_db.id, response_planner["chapters"])
 
-        # Process each chapter and stream as it's created
-        for idx, topic in enumerate(response_planner["chapters"]):
-            # Get response from coding agent
-            response_code = await self.coding_agent.run(
-                user_id=user_id,
-                state=self.state_manager.get_state(user_id=user_id, course_id=course_db.id),
-                content=self.query_service.get_explainer_query(user_id, course_db.id, idx),
-            )
+            # Process each chapter and stream as it's created
+            for idx, topic in enumerate(response_planner["chapters"]):
+                # Get response from coding agent
+                response_code = await self.coding_agent.run(
+                    user_id=user_id,
+                    state=self.state_manager.get_state(user_id=user_id, course_id=course_db.id),
+                    content=self.query_service.get_explainer_query(user_id, course_db.id, idx),
+                )
 
-            # Get response from tester agent
-            response_tester = await self.tester_agent.run(
-                user_id=user_id,
-                state=self.state_manager.get_state(user_id=user_id, course_id=course_db.id),
-                content=self.query_service.get_tester_query(user_id, course_db.id, idx, response_code["explanation"]),
-            )
+                # Get response from tester agent
+                response_tester = await self.tester_agent.run(
+                    user_id=user_id,
+                    state=self.state_manager.get_state(user_id=user_id, course_id=course_db.id),
+                    content=self.query_service.get_tester_query(user_id, course_db.id, idx, response_code["explanation"]),
+                )
 
-            # Save the chapter in db first
-            chapter_db = chapters_crud.create_chapter(
-                db=db,
-                course_id=course_db.id,
-                index=idx + 1,
-                caption=topic['caption'],
-                summary=json.dumps(topic['content'], indent=2),
-                content=response_code['explanation'],
-                time_minutes=topic['time'],
-            )
+                # Save the chapter in db first
+                chapter_db = chapters_crud.create_chapter(
+                    db=db,
+                    course_id=course_db.id,
+                    index=idx + 1,
+                    caption=topic['caption'],
+                    summary=json.dumps(topic['content'], indent=2),
+                    content=response_code['explanation'],
+                    time_minutes=topic['time'],
+                )
 
                 # Save questions in db
                 question_objects = []
@@ -176,21 +176,21 @@ class AgentService:
                         "correct_answer": q_db.correct_answer,
                         "explanation": q_db.explanation
                     })
-                print(f"[{task_id}] Saved {len(question_objects)} questions for chapter {chapter_db.id}.")
+                    print(f"[{task_id}] Saved {len(question_objects)} questions for chapter {chapter_db.id}.")
 
-                # Build chapter response data
-                chapter_response_data = {
-                    "id": chapter_db.id,
-                    "index": chapter_db.index,
-                    "caption": chapter_db.caption,
-                    "summary": chapter_db.summary, # This is JSON string from topic['content']
-                    "content": chapter_db.content,
-                    "mc_questions": question_objects,
-                    "time_minutes": chapter_db.time_minutes,
-                    "is_completed": chapter_db.is_completed
-                }
-                await ws_manager.send_json_message(task_id, {"type": "chapter", "data": chapter_response_data})
-                print(f"[{task_id}] Sent chapter update for chapter {chapter_db.id}.")
+                    # Build chapter response data
+                    chapter_response_data = {
+                        "id": chapter_db.id,
+                        "index": chapter_db.index,
+                        "caption": chapter_db.caption,
+                        "summary": chapter_db.summary, # This is JSON string from topic['content']
+                        "content": chapter_db.content,
+                        "mc_questions": question_objects,
+                        "time_minutes": chapter_db.time_minutes,
+                        "is_completed": chapter_db.is_completed
+                    }
+                    await ws_manager.send_json_message(task_id, {"type": "chapter", "data": chapter_response_data})
+                    print(f"[{task_id}] Sent chapter update for chapter {chapter_db.id}.")
 
             # Update course status to finished
             courses_crud.update_course_status(db, course_db.id, CourseStatus.FINISHED)
@@ -209,7 +209,6 @@ class AgentService:
             if course_db and course_db.id:
                 try:
                     courses_crud.update_course_status(db, course_db.id, CourseStatus.FAILED)
-                    db.commit()
                     print(f"[{task_id}] Course {course_db.id} status updated to FAILED due to error.")
                 except Exception as db_error:
                     print(f"[{task_id}] Additionally, failed to update course status to FAILED: {db_error}")
