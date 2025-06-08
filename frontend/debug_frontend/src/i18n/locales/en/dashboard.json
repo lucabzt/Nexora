@@ -1,6 +1,11 @@
 {
-  "deleteCourseConfirmation": "Are you sure you want to permanently delete this course? This action cannot be undone.",
   "deleteCourseError": "Failed to delete course. {{message}}",
+  "deleteCourseModal": {
+    "title": "Delete Course?",
+    "confirmationText": "Are you sure you want to permanently delete this course? This action cannot be undone.",
+    "cancelButton": "Cancel",
+    "deleteButton": "Delete"
+  },
   "loadCoursesError": "Failed to load courses. Please try again later.",
   "status": {
     "creating": "Creating",

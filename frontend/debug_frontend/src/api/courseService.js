@@ -77,137 +77,122 @@ export const courseService = {
     }
   },
 
-  // Create a course with streaming response
-  createCourse: async (data, onProgress) => {
+  createCourse: async (data, onProgress, onError, onComplete) => {
+    let ws; // WebSocket instance
+
     try {
-      let lastProcessedLength = 0; // Track the length of the raw responseText processed
-      let lineBuffer = ""; // Buffer for accumulating parts of lines across progress events
-      console.log('[Streaming] Initializing createCourse call');
-      
-      await apiWithCookies.post('/courses/create', data, {
-        responseType: 'text',
-        timeout: 1800000, // 30 minute timeout for course creation
-        onDownloadProgress: (progressEvent) => {
-          // console.log('[Streaming] onDownloadProgress triggered.');
-          
-          let currentResponseText = "";
-          if (progressEvent.event && progressEvent.event.target && typeof progressEvent.event.target.responseText === 'string') {
-            currentResponseText = progressEvent.event.target.responseText;
-          } else if (progressEvent.target && typeof progressEvent.target.responseText === 'string') {
-            currentResponseText = progressEvent.target.responseText; // Legacy path
-          } else if (typeof progressEvent.responseText === 'string') {
-            currentResponseText = progressEvent.responseText; // Fallback
-          } else {
-            console.warn('[Streaming] Could not find responseText in progressEvent.');
-            return; // Cannot process if no text
-          }
+      console.log('[WebSocket] Initiating createCourse POST request');
+      // Step 1: Make the initial POST request to get the task_id
+      const response = await apiWithCookies.post('/courses/create', data);
 
-          // Get only the new part of the stream text
-          const newTextChunk = currentResponseText.substring(lastProcessedLength);
-          lineBuffer += newTextChunk;
-          lastProcessedLength = currentResponseText.length; // Update for the next event
-
-          let newlinePos;
-          // Process all complete lines from the buffer
-          while ((newlinePos = lineBuffer.indexOf('\n')) !== -1) {
-            const lineToProcess = lineBuffer.substring(0, newlinePos);
-            lineBuffer = lineBuffer.substring(newlinePos + 1); // Keep the remainder in buffer
-
-            const trimmedLine = lineToProcess.trim();
-            if (trimmedLine === "") {
-              // console.log('[Streaming] Skipping empty line.');
-              continue;
-            }
-
-            // console.log(`[Streaming] Attempting to process line: "${trimmedLine.substring(0, 150)}${trimmedLine.length > 150 ? '...' : ''}"`);
-            try {
-              const parsedData = JSON.parse(trimmedLine);
-              // console.log('[Streaming] Successfully parsed JSON:', parsedData);
-              if (typeof onProgress === 'function') {
-                onProgress(parsedData); // Call as before, assuming onProgress expects the direct JSON object
-              }
-            } catch (e) {
-              console.error(`[Streaming] Error parsing JSON from line: "${trimmedLine.substring(0,150)}${trimmedLine.length > 150 ? '...' : ''}"`, e);
-              if (typeof onProgress === 'function') {
-                onProgress({
-                  type: 'error',
-                  data: {
-                    message: `Error parsing streaming data. Line content (first 100 chars): "${trimmedLine.substring(0, 100)}${trimmedLine.length > 100 ? '...' : ''}"`, 
-                    originalLine: trimmedLine, // Provide the problematic line
-                    errorDetails: e.toString()
-                  }
-                });
-              }
-            }
-          }
-          // After the loop, lineBuffer contains any trailing part of a line (if no newline at the end of the current chunk).
-          // This will be prepended to the new data in the next onDownloadProgress event.
+      if (response.status !== 202 || !response.data.task_id) {
+        console.error('[WebSocket] Failed to initiate course creation task.', response);
+        if (typeof onError === 'function') {
+          onError({ message: 'Failed to start course creation process.', details: response.data });
         }
-      });
+        return; // Exit if task_id is not received
+      }
+
+      const taskId = response.data.task_id;
+      console.log(`[WebSocket] Task ID received: ${taskId}. Connecting to WebSocket.`);
+
+      // Step 2: Construct WebSocket URL
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      let wsHost = window.location.host; // Default to current host
+      if (apiWithCookies.defaults.baseURL) {
+          try {
+            // Ensure baseURL is absolute or correctly relative for URL constructor
+            const base = apiWithCookies.defaults.baseURL.startsWith('/') ? window.location.origin : undefined;
+            const apiUrl = new URL(apiWithCookies.defaults.baseURL, base);
+            wsHost = apiUrl.host;
+          } catch (e) {
+            console.warn('[WebSocket] Could not parse baseURL for WebSocket host, defaulting to window.location.host. baseURL:', apiWithCookies.defaults.baseURL, e);
+          }
+      }
       
-      // After the stream is fully downloaded (Axios promise resolved),
-      // check if there's any remaining data in lineBuffer.
-      // This handles cases where the last JSON object in the stream might not be followed by a newline.
-      if (lineBuffer.trim() !== "") {
-        const trimmedFinalBuffer = lineBuffer.trim();
-        console.log('[Streaming] Processing remaining data in buffer after stream completion:', trimmedFinalBuffer.substring(0,150));
+      const wsUrl = `${wsProtocol}//${wsHost}/api/courses/ws/course_progress/${taskId}`;
+      console.log(`[WebSocket] Connecting to: ${wsUrl}`);
+      
+      // Step 3: Establish WebSocket connection
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        console.log(`[WebSocket] Connection opened for task_id: ${taskId}`);
+      };
+
+      ws.onmessage = (event) => {
         try {
-          const parsedData = JSON.parse(trimmedFinalBuffer);
-          if (typeof onProgress === 'function') {
-            onProgress(parsedData);
+          const message = JSON.parse(event.data);
+          console.log('[WebSocket] Message received:', message);
+
+          switch (message.type) {
+            case 'course_info':
+            case 'chapter':
+              if (typeof onProgress === 'function') {
+                onProgress(message); // Pass the whole message (includes type and data)
+              }
+              break;
+            case 'complete':
+              if (typeof onComplete === 'function') {
+                onComplete(message.data);
+              }
+              console.log('[WebSocket] Course creation complete. Closing WebSocket.');
+              ws.close(1000, "Course creation complete");
+              break;
+            case 'error':
+              console.error('[WebSocket] Error message from server:', message.data);
+              if (typeof onError === 'function') {
+                onError(message.data);
+              }
+              ws.close(1000, "Error received from server");
+              break;
+            default:
+              console.warn('[WebSocket] Received unknown message type:', message.type, message);
           }
         } catch (e) {
-          console.error(`[Streaming] Error parsing remaining JSON from buffer: "${trimmedFinalBuffer.substring(0,150)}${trimmedFinalBuffer.length > 150 ? '...' : ''}"`, e);
-          if (typeof onProgress === 'function') {
-            onProgress({
-              type: 'error',
-              data: {
-                message: `Error parsing final streaming data. Buffer content (first 100 chars): "${trimmedFinalBuffer.substring(0, 100)}${trimmedFinalBuffer.length > 100 ? '...' : ''}"`, 
-                originalLine: trimmedFinalBuffer,
-                errorDetails: e.toString()
-              }
-            });
+          console.error('[WebSocket] Error parsing message from server:', event.data, e);
+          if (typeof onError === 'function') {
+            onError({ message: 'Error processing message from server.', details: e.toString(), rawData: event.data });
           }
         }
-        lineBuffer = ""; // Clear buffer
-      }
+      };
 
-      console.log('[Streaming] createCourse call finished successfully.');
-      return true; // Success indicator, or perhaps some final status from the stream if applicable
-    } catch (error) {
-      console.error('[Streaming] Course creation error:', error);
-      console.error('[Streaming] Error details:', {
-        message: error.message,
-        code: error.code,
-        response: error.response,
-        stack: error.stack
-      });
-      
-      // Handle different types of errors
-      let errorMessage = 'Course creation failed';
-      
-      if (error.code === 'ECONNABORTED') {
-        errorMessage = 'Course creation timed out. Please try again.';
-      } else if (error.response?.status === 401) {
-        errorMessage = 'Authentication failed. Please log in again.';
-      } else if (error.response?.status >= 500) {
-        errorMessage = 'Server error. Please try again later.';
-      } else if (error.response?.data?.detail) {
-        errorMessage = error.response.data.detail;
-      } else if (error.message) {
-        errorMessage = error.message;
+      ws.onerror = (errorEvent) => {
+        console.error('[WebSocket] Connection error:', errorEvent);
+        if (typeof onError === 'function') {
+          onError({ message: 'WebSocket connection error. The connection attempt failed or was dropped.' });
+        }
+        if (ws && ws.readyState !== WebSocket.CLOSED) {
+            ws.close();
+        }
+      };
+
+      ws.onclose = (event) => {
+        console.log(`[WebSocket] Connection closed for task_id: ${taskId}. Code: ${event.code}, Reason: ${event.reason}, Was Clean: ${event.wasClean}`);
+        // Avoid duplicate error calls if 'complete' or 'error' types already handled closure.
+        if (event.reason !== "Course creation complete" && event.reason !== "Error received from server") {
+            if (!event.wasClean || event.code !== 1000) { // 1000 is normal closure
+                if (typeof onError === 'function') {
+                    onError({ message: `WebSocket connection closed unexpectedly. Code: ${event.code}, Reason: '${event.reason || 'No reason provided'}'` });
+                }
+            }
+        }
+      };
+
+    } catch (error) { // This catch block is for the initial POST request or WebSocket constructor errors
+      console.error('[WebSocket] Error in createCourse (initial POST or WebSocket setup):', error);
+      if (typeof onError === 'function') {
+        let errorMessage = 'Course creation failed during setup.';
+        if (error.response?.data?.detail) {
+          errorMessage = error.response.data.detail;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        onError({ message: errorMessage, details: error });
       }
-      
-      // Handle streaming errors
-      if (typeof onProgress === 'function') {
-        onProgress({
-          type: 'error',
-          data: {
-            message: errorMessage
-          }
-        });
+      if (ws && ws.readyState !== WebSocket.CLOSED && ws.readyState !== WebSocket.CLOSING) {
+        ws.close();
       }
-      throw error;
     }
   },
 

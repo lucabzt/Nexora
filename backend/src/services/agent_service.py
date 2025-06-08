@@ -20,6 +20,7 @@ from ..agents.tester_agent import TesterAgent
 from ..agents.utils import create_text_query, create_docs_query
 from ..db.models.db_course import CourseStatus
 from ..api.schemas.course import CourseRequest
+from ..utils.websocket_manager import WebSocketConnectionManager # Added import
 
 
 class AgentService:
@@ -38,85 +39,91 @@ class AgentService:
         self.info_agent = InfoAgent(self.app_name, self.session_service)
 
 
-    async def create_course(self, user_id: str, request: CourseRequest, db: Session):
+    async def create_course(self, user_id: str, request: CourseRequest, db: Session, task_id: str, ws_manager: WebSocketConnectionManager):
         """
-        main function for handling the course creation logic.
+        Main function for handling the course creation logic. Uses WebSocket for progress.
 
         Parameters:
         user_id (str): The unique identifier of the user who is creating the course.
-        request (CourseRequest): A CourseRequest object containing all necessary details for
-            creating a new course.
-
-        Yields JSON chunks in the format:
-        {"type": "course_info", "data": {...}}
-        {"type": "chapter", "data": {...}}
-        {"type": "error", "data": {"message": "..."}}
-        {"type": "complete", "data": {}}
+        request (CourseRequest): A CourseRequest object containing all necessary details for creating a new course.
+        db (Session): The SQLAlchemy database session.
+        task_id (str): The unique ID for this course creation task, used for WebSocket communication.
+        ws_manager (WebSocketConnectionManager): Manager to send messages over WebSockets.
         """
-        # create a memory session for the course creation
-        session = await self.session_service.create_session(
-            app_name=self.app_name,
-            user_id=user_id,
-            state={}
-        )
-        session_id = session.id
+        course_db = None  # Initialize course_db for broader scope in try/except/finally
+        try:
+            print(f"[{task_id}] Starting course creation for user {user_id}")
+            # Create a memory session for the course creation
+            session = await self.session_service.create_session(
+                app_name=self.app_name,
+                user_id=user_id,
+                state={}
+            )
+            session_id = session.id
+            print(f"[{task_id}] Session created: {session_id}")
 
-        # retrieve documents from database
-        docs = documents_crud.get_documents_by_ids(db, request.document_ids)
-        images = images_crud.get_images_by_ids(db, request.picture_ids)
+            # Retrieve documents from database
+            docs = documents_crud.get_documents_by_ids(db, request.document_ids)
+            images = images_crud.get_images_by_ids(db, request.picture_ids)
+            print(f"[{task_id}] Retrieved {len(docs)} documents and {len(images)} images.")
 
-        # get a short course title and description from the quick agent
-        info_response = await self.info_agent.run(
-            user_id=user_id,
-            state={},
-            content=self.query_service.get_info_query(request, docs, images)
-        )
+            # Get a short course title and description from the info_agent
+            info_response = await self.info_agent.run(
+                user_id=user_id,
+                state={},
+                content=self.query_service.get_info_query(request, docs, images)
+            )
+            print(f"[{task_id}] InfoAgent response: {info_response['title']}")
 
-        # Create course in database
-        course_db = courses_crud.create_course(
-            db=db,
-            session_id=session_id,
-            user_id=user_id,
-            title=info_response['title'],
-            description=info_response['description'],
-            total_time_hours=request.time_hours,
-            status=CourseStatus.CREATING
-        )
+            # Create course in database
+            course_db = courses_crud.create_course(
+                db=db,
+                session_id=session_id,
+                user_id=user_id,
+                title=info_response['title'],
+                description=info_response['description'],
+                total_time_hours=request.time_hours,
+                status=CourseStatus.CREATING
+            )
+            print(f"[{task_id}] Course created in DB with ID: {course_db.id}")
 
-        # Create initial state
-        init_state = CourseState(
-            query=request.query,
-            time_hours=request.time_hours,
-        )
-        self.state_manager.create_state(user_id, course_db.id, init_state)
+            # Create initial state
+            init_state = CourseState(
+                query=request.query,
+                time_hours=request.time_hours,
+            )
+            self.state_manager.create_state(user_id, course_db.id, init_state)
 
-        # bind documents to this course
-        for doc in docs:
-            documents_crud.update_document(db, int(doc.id), course_id=course_db.id)
-        for img in images:
-            images_crud.update_image(db, int(img.id), course_id=course_db.id)
+            # Bind documents to this course
+            for doc in docs:
+                documents_crud.update_document(db, int(doc.id), course_id=course_db.id)
+            for img in images:
+                images_crud.update_image(db, int(img.id), course_id=course_db.id)
+            print(f"[{task_id}] Documents and images bound to course.")
 
-        # Stream the course info first
-        course_info = {
-            "course_id": course_db.id,
-            "title": course_db.title,
-            "description": course_db.description,
-            "session_id": course_db.session_id,
-            "total_time_hours": course_db.total_time_hours
-        }
+            # Stream the course info first
+            course_info_data = {
+                "course_id": course_db.id,
+                "title": course_db.title,
+                "description": course_db.description,
+                "session_id": course_db.session_id,
+                "total_time_hours": course_db.total_time_hours,
+                "status": course_db.status.value
+            }
+            await ws_manager.send_json_message(task_id, {"type": "course_info", "data": course_info_data})
+            print(f"[{task_id}] Sent course_info update.")
 
-        yield json.dumps({"type": "course_info", "data": course_info}) + "\n"
+            # Query the planner agent
+            response_planner = await self.planner_agent.run(
+                user_id=user_id,
+                state=self.state_manager.get_state(user_id=user_id, course_id=course_db.id),
+                content=self.query_service.get_planner_query(request, docs, images),
+                debug=False
+            )
+            print(f"[{task_id}] PlannerAgent responded with {len(response_planner.get('chapters', []))} chapters.")
 
-        # Query the planner agent (returns a dict)
-        response_planner = await self.planner_agent.run(
-            user_id=user_id,
-            state=self.state_manager.get_state(user_id=user_id, course_id=course_db.id),
-            content=self.query_service.get_planner_query(request, docs, images),
-            debug=False
-        )
-
-        # Save chapters to state
-        self.state_manager.save_chapters(user_id, course_db.id, response_planner["chapters"])
+            # Save chapters to state
+            self.state_manager.save_chapters(user_id, course_db.id, response_planner["chapters"])
 
         # Process each chapter and stream as it's created
         for idx, topic in enumerate(response_planner["chapters"]):
@@ -145,51 +152,79 @@ class AgentService:
                 time_minutes=topic['time'],
             )
 
-            # Save questions in db
-            question_objects = []
-            for question in response_tester['questions']:
-                q = questions_crud.create_question(
-                    db=db,
-                    chapter_id=int(chapter_db.id),
-                    question=question['question'],
-                    answer_a=question['answer_a'],
-                    answer_b=question['answer_b'],
-                    answer_c=question['answer_c'],
-                    answer_d=question['answer_d'],
-                    correct_answer=question['correct_answer'],
-                    explanation=question['explanation']
-                )
-                question_objects.append({
-                    "question": q.question,
-                    "answer_a": q.answer_a,
-                    "answer_b": q.answer_b,
-                    "answer_c": q.answer_c,
-                    "answer_d": q.answer_d,
-                    "correct_answer": q.correct_answer,
-                    "explanation": q.explanation
-                })
+                # Save questions in db
+                question_objects = []
+                for q_data in response_tester['questions']:
+                    q_db = questions_crud.create_question(
+                        db=db,
+                        chapter_id=int(chapter_db.id),
+                        question=q_data['question'],
+                        answer_a=q_data['answer_a'],
+                        answer_b=q_data['answer_b'],
+                        answer_c=q_data['answer_c'],
+                        answer_d=q_data['answer_d'],
+                        correct_answer=q_data['correct_answer'],
+                        explanation=q_data['explanation']
+                    )
+                    question_objects.append({
+                        "id": q_db.id,
+                        "question": q_db.question,
+                        "answer_a": q_db.answer_a,
+                        "answer_b": q_db.answer_b,
+                        "answer_c": q_db.answer_c,
+                        "answer_d": q_db.answer_d,
+                        "correct_answer": q_db.correct_answer,
+                        "explanation": q_db.explanation
+                    })
+                print(f"[{task_id}] Saved {len(question_objects)} questions for chapter {chapter_db.id}.")
 
-            # Build chapter response
-            chapter_data = {
-                "id": chapter_db.id,
-                "index": chapter_db.index,
-                "caption": chapter_db.caption,
-                "summary": chapter_db.summary,
-                "content": chapter_db.content,
-                "mc_questions": question_objects,
-                "time_minutes": chapter_db.time_minutes,
-                "is_completed": chapter_db.is_completed
-            }
+                # Build chapter response data
+                chapter_response_data = {
+                    "id": chapter_db.id,
+                    "index": chapter_db.index,
+                    "caption": chapter_db.caption,
+                    "summary": chapter_db.summary, # This is JSON string from topic['content']
+                    "content": chapter_db.content,
+                    "mc_questions": question_objects,
+                    "time_minutes": chapter_db.time_minutes,
+                    "is_completed": chapter_db.is_completed
+                }
+                await ws_manager.send_json_message(task_id, {"type": "chapter", "data": chapter_response_data})
+                print(f"[{task_id}] Sent chapter update for chapter {chapter_db.id}.")
 
-            # Stream the chapter
-            yield json.dumps({"type": "chapter", "data": chapter_data}) + "\n"
+            # Update course status to finished
+            courses_crud.update_course_status(db, course_db.id, CourseStatus.FINISHED)
 
-        # Update course status to finished
-        courses_crud.update_course_status(db, course_db.id, CourseStatus.FINISHED)
+            # Send completion signal
+            await ws_manager.send_json_message(task_id, {
+                "type": "complete",
+                "data": {"course_id": course_db.id, "message": "Course created successfully"}
+            })
+            print(f"[{task_id}] Sent completion signal.")
 
-        # Send completion signal
-        yield json.dumps({"type": "complete", "data": {}}) + "\n"
+        except Exception as e:
+            error_message = f"Course creation failed: {str(e)}"
+            print(f"[{task_id}] Error during course creation: {error_message}")
+            # Log detailed error traceback here if possible, e.g., import traceback; traceback.print_exc()
+            if course_db and course_db.id:
+                try:
+                    courses_crud.update_course_status(db, course_db.id, CourseStatus.FAILED)
+                    db.commit()
+                    print(f"[{task_id}] Course {course_db.id} status updated to FAILED due to error.")
+                except Exception as db_error:
+                    print(f"[{task_id}] Additionally, failed to update course status to FAILED: {db_error}")
 
+            await ws_manager.send_json_message(task_id, {
+                "type": "error",
+                "data": {"message": error_message, "course_id": course_db.id if course_db else None}
+            })
+            # Re-raise the exception if you want the background task to show as 'failed' in FastAPI logs
+            # or if something upstream needs to handle it. For now, we handle it and inform client.
+            # raise e
 
-
+        finally:
+            print(f"[{task_id}] Finished processing create_course background task.")
+            # Ensure the database session is closed if it was passed specifically for this task
+            # and not managed by FastAPI's Depends. For now, assuming Depends handles it.
+            # db.close() # If db session is task-specific and not managed by Depends.
 

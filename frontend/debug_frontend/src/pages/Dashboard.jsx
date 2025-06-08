@@ -26,7 +26,8 @@ import {
   Overlay,
   rem,
   Tooltip,
-  Center
+  Center,
+  Modal 
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { 
@@ -61,18 +62,30 @@ function Dashboard() {
     totalHoursLearned: 24
   });
 
-  const handleDelete = async (courseId) => {
-    if (!window.confirm(t('deleteCourseConfirmation'))) {
-      return;
-    }
+  // State for delete confirmation modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [courseToDeleteId, setCourseToDeleteId] = useState(null);
+
+  // Opens the delete confirmation modal
+  const handleDelete = (courseId) => {
+    setCourseToDeleteId(courseId);
+    setDeleteModalOpen(true);
+  };
+
+  // Handles the actual deletion after confirmation
+  const confirmDeleteHandler = async () => {
+    if (!courseToDeleteId) return;
     try {
-      await courseService.deleteCourse(courseId);
-      setCourses(prevCourses => prevCourses.filter(course => course.course_id !== courseId));
+      await courseService.deleteCourse(courseToDeleteId);
+      setCourses(prevCourses => prevCourses.filter(course => course.course_id !== courseToDeleteId));
       // Optional: Show a success notification
     } catch (err) {
       setError(t('deleteCourseError', { message: err.message || '' }));
       console.error('Error deleting course:', err);
       // Optional: Show an error notification
+    } finally {
+      setDeleteModalOpen(false);
+      setCourseToDeleteId(null);
     }
   };
 
@@ -128,6 +141,37 @@ function Dashboard() {
   
   return (
     <Container size="lg" py="xl">
+      {/* Delete Confirmation Modal */}
+      <Modal
+        opened={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setCourseToDeleteId(null); // Reset on close as well
+        }}
+        title={t('deleteCourseModal.title')}
+        centered
+      >
+        <Text>{t('deleteCourseModal.confirmationText')}</Text>
+        <Group position="right" mt="md">
+          <Button 
+            variant="default" 
+            onClick={() => {
+              setDeleteModalOpen(false);
+              setCourseToDeleteId(null);
+            }}
+          >
+            {t('deleteCourseModal.cancelButton')}
+          </Button>
+          <Button 
+            color="red" 
+            onClick={confirmDeleteHandler}
+            leftIcon={<IconTrash size={rem(16)} />}
+          >
+            {t('deleteCourseModal.deleteButton')}
+          </Button>
+        </Group>
+      </Modal>
+
       {/* Header with motivational message */}
       <Box mb="xl">
         <Group position="apart" mb="md">

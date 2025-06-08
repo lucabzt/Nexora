@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, WebSocket, WebSocketDisconnect
+from fastapi.responses import JSONResponse
+import uuid
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -9,6 +10,7 @@ from ...utils.auth import get_current_active_user
 from ...db.database import get_db
 from ...db.crud import courses_crud, chapters_crud, users_crud, questions_crud
 
+from ...utils.websocket_manager import manager as ws_manager
 from ..schemas.course import (
     CourseInfo,
     CourseRequest,
@@ -24,7 +26,6 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 agent_service = AgentService()
-
 
 async def _verify_course_ownership(course_id: int, user_id: str, db: Session) -> Course:
     """
@@ -46,28 +47,32 @@ async def _verify_course_ownership(course_id: int, user_id: str, db: Session) ->
 
 
 @router.post("/create")
-async def create_course_streaming(
+async def create_course_request(
         course_request: CourseRequest,
+        background_tasks: BackgroundTasks,
         current_user: User = Depends(get_current_active_user),
         db: Session = Depends(get_db)
 ):
     """
-    Create a new course with streaming response.
-    Returns a stream of JSON objects in the format:
-    {"type": "course_info", "data": {...}}
-    {"type": "chapter", "data": {...}}
-    {"type": "complete", "data": {}}
-    {"type": "error", "data": {"message": "..."}}
+    Initiate course creation as a background task and return a task ID for WebSocket progress updates.
     """
-    return StreamingResponse(
-        agent_service.create_course(current_user.id, course_request, db),
-        # TODO look into this (vibe code)
-        media_type="application/x-ndjson",  # Newline Delimited JSON
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",  # Disable nginx buffering
-        }
+    task_id = str(uuid.uuid4())
+    
+    # Add the long-running course creation to background tasks
+    # The agent_service.create_course will need to be modified to accept ws_manager and task_id
+    # and use ws_manager.send_json_message(task_id, progress_data) to send updates.
+    background_tasks.add_task(
+        agent_service.create_course, 
+        user_id=current_user.id, 
+        request=course_request, 
+        db=db, 
+        task_id=task_id, 
+        ws_manager=ws_manager
+    )
+    
+    return JSONResponse(
+        status_code=status.HTTP_202_ACCEPTED,
+        content={"message": "Course creation started.", "task_id": task_id}
     )
 
 
@@ -89,12 +94,17 @@ async def get_user_courses(
               .limit(limit)
               .all())
     
-    return [CourseInfo(course_id = int(course.id), description = str(course.description),
-                        title = str(course.title),
-                        session_id=str(course.session_id),
-                        status=str(course.status)) for course in courses]
+    return [
+        CourseInfo(
+            course_id=int(course.id),
+            description=str(course.description),
+            title=str(course.title),
+            session_id=str(course.session_id) if course.session_id else None,
+            status=str(course.status) if course.status else None
+        ) for course in courses
+    ]
 
-    
+
 @router.get("/{course_id}", response_model=CourseSchema)
 async def get_course_by_id(
         course_id: int,
@@ -465,3 +475,29 @@ async def mark_chapter_incomplete(
         "chapter_id": chapter.id,
         "is_completed": updated_chapter.is_completed
     }
+
+
+@router.websocket("/ws/course_progress/{task_id}")
+async def websocket_course_progress(websocket: WebSocket, task_id: str):
+    await ws_manager.connect(websocket, task_id)
+    print(f"WebSocket connection established for task_id: {task_id}")
+    try:
+        while True:
+            # Keep the connection alive. 
+            # Client can send messages if needed, e.g., for acknowledgments or commands.
+            # For now, we'll just keep it open to send progress from the server.
+            # If the client sends a message, it will be received here.
+            # If the connection is closed by the client, WebSocketDisconnect will be raised.
+            data = await websocket.receive_text() # Or receive_bytes, receive_json
+            # print(f"Received message from {task_id}: {data}") # Optional: log client messages
+            # You might want to handle specific client messages here if your protocol requires it.
+    except WebSocketDisconnect:
+        print(f"WebSocket disconnected for task_id: {task_id} (client closed)")
+        # ws_manager.disconnect is called in the finally block
+    except Exception as e:
+        print(f"WebSocket error for task_id: {task_id}: {e}")
+        # ws_manager.disconnect is called in the finally block
+    finally:
+        # Ensure cleanup happens
+        ws_manager.disconnect(websocket, task_id)
+        print(f"WebSocket connection properly closed for task_id: {task_id}")

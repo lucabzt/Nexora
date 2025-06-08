@@ -15,7 +15,23 @@ export default defineConfig({
       '/api': {
         target: 'http://127.0.0.1:8000',
         changeOrigin: true,
+        
+        ws: true,
+
+
         configure: (proxy, options) => {
+
+            
+          proxy.on('open', (proxySocket) => {
+            console.log('[WS Proxy] Connection opened');
+          });
+
+          proxy.on('close', (res, socket, head) => {
+            console.log('[WS Proxy] Connection closed');
+          });
+
+
+
           proxy.on('proxyReq', (proxyReq, req) => {
             console.log(`[Proxy] Redirecting: ${req.method} ${req.url}`);
           });

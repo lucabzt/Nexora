@@ -1,6 +1,21 @@
 {
+  "title": "Neuen Lernkurs erstellen",
   "mainTitle": "Neuen Lernkurs erstellen",
   "form": {
+    "duration": {
+      "value": "{{count}} Stunde",
+      "value_plural": "{{count}} Stunden"
+    },
+    "review": {
+      "title": "Überprüfung Ihrer Kurseingaben",
+      "topic": "Thema:",
+      "duration": "Geschätzte Dauer:",
+      "documents": "Hochgeladene Dokumente:",
+      "images": "Hochgeladene Bilder:",
+      "none": "Keine",
+      "confirmation": "Bitte überprüfen Sie Ihre Eingaben sorgfältig, bevor Sie den Kurs erstellen. Nach dem Start kann der Prozess nicht mehr unterbrochen werden.",
+      "notSet": "Nicht festgelegt"
+    },
     "validation": {
       "topicRequired": "Thema ist erforderlich",
       "timePositive": "Zeit muss größer als 0 sein"
@@ -30,7 +45,8 @@
       "fileEntry": "{{fileName}} ({{sizeKB}} KB)"
     },
     "uploads": {
-      "personalizedExperience": "Ihre hochgeladenen Dateien werden verwendet, um ein persönlicheres Lernerlebnis zu generieren."
+      "personalizedExperience": "Ihre hochgeladenen Dateien werden verwendet, um ein persönlicheres Lernerlebnis zu generieren.",
+      "description": "Hier können Sie relevante Dokumente (PDF, DOCX, TXT) oder Bilder (JPG, PNG) hochladen, die zur Kurserstellung verwendet werden sollen."
     },
     "error": {
       "alertTitle": "Formularfehler!"
@@ -40,7 +56,10 @@
     "documentUploadSuccess": "Dokument \"{{fileName}}\" erfolgreich hochgeladen",
     "documentUploadError": "Fehler beim Hochladen des Dokuments: {{error}}",
     "imageUploadSuccess": "Bild \"{{fileName}}\" erfolgreich hochgeladen",
-    "imageUploadError": "Fehler beim Hochladen des Bildes: {{error}}"
+    "imageUploadError": "Fehler beim Hochladen des Bildes: {{error}}",
+    "courseCreationStartedRedirect": "Kurserstellung für '{{title}}' gestartet. Du wirst weitergeleitet...",
+    "websocketGenericError": "WebSocket-Verbindungsfehler. Bitte versuche es später erneut.",
+    "courseCreationComplete": "Kurs (ID: {{courseId}}) erfolgreich erstellt!"
   },
   "errors": {
     "unknown": "Unbekannter Fehler"
@@ -50,13 +69,17 @@
     "description": "Dies kann einige Minuten dauern. Unsere KI erstellt personalisierte Inhalte für Ihren Kurs.",
     "courseInfo": {
       "time": "Zeitinvestition:",
-      "hours": "Stunden"
+      "hours": "{{count}} Stunde",
+      "hours_plural": "{{count}} Stunden",
+      "courseTitleLabel": "Kurstitel",
+      "courseDescriptionLabel": "Beschreibung"
     },
     "chapters": {
       "title": "Erstellte Kapitel:",
       "expected": "Erwartet:",
-      "minutes": "Min.",
-      "questions": "Fragen"
+      "estimatedTime": "Geschätzte Zeit",
+      "minutesSuffix": "Min.",
+      "questionsCount": "Anzahl Fragen"
     },
     "button": {
       "goToCourse": "Zum Kurs gehen"
@@ -67,7 +90,14 @@
     },
     "status": {
       "errorOccurred": "Fehler bei der Kurserstellung",
-      "initializing": "Kurserstellung wird initialisiert..."
+      "initializing": "Kurserstellung wird initialisiert...",
+      "courseInfoReceived": "Kursinformationen erhalten: {{title}}",
+      "generatingChapter": "Generiere Kapitel {{num}} von {{total}}: {{title}}",
+      "complete": "Kurserstellung abgeschlossen!"
+    },
+    "completion": {
+      "title": "Kurs erfolgreich erstellt!",
+      "message": "Dein Kurs mit der ID {{courseId}} ist nun verfügbar."
     }
   },
   "stepper": {
@@ -82,6 +112,10 @@
     "uploads": {
       "label": "Inhalt hochladen (Optional)",
       "description": "Stellen Sie Dokumente oder Bilder bereit"
+    },
+    "review": {
+      "label": "Überprüfung",
+      "description": "Bestätigen Sie Ihre Eingaben"
     }
   },
   "alert": {

@@ -141,7 +141,7 @@ function LandingPage() {
                 </>
               ) : (
                 <Button 
-                  onClick={() => navigate('/')} 
+                  onClick={() => navigate('/dashboard')} 
                   size="lg" 
                   radius="md"
                   variant="gradient"
