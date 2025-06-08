@@ -60,23 +60,27 @@ function Register() {
 
   const handleSubmit = async (values) => {
     setIsLoading(true);
-    
     try {
+      // The login function from AuthContext now returns the user object on success
+      // or throws an error on failure.
       const result = await register(values.username, values.email, values.password);
       
-      if (result.success) {
-        // Automatically log in after registration
-        const loginResult = await login(values.username, values.password);
-        if (loginResult.success) {
-          navigate('/'); // Redirect to dashboard/home
-        } else {
-          // fallback: show error or fallback to login page
-          // toast.error(loginResult.message || 'Login failed after registration.');
-        }
+      // If login is successful and returns a user object, navigate.
+      if (result) {
+        navigate('/dashboard'); // Navigate to the dashboard
       }
+      
+      // No explicit 'else' needed here because if 'user' is not returned,
+      // an error would have been thrown by the login() function and caught below.
+    } catch (error) {
+      // Errors (e.g., invalid credentials, network issues) are already handled by 
+      // the login function in AuthContext (it shows a toast).
+      // You can add additional error handling specific to this page if needed.
+      console.error("Register page: reg failed", error);
     } finally {
       setIsLoading(false);
     }
+
   };
 
   const handleGoogleLogin = () => {
