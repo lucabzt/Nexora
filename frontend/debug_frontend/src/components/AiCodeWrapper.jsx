@@ -31,7 +31,6 @@ function AiCodeWrapper({ children }) {
         `
         ${header}
         ${children}
-        }
         `
     console.log(full_react_component)
     return (

@@ -31,6 +31,7 @@ class QueryService:
                 Time in Minutes: {chapter['time']}
                 Content Summary: \n{json.dumps(chapter['content'], indent=2)}
                 Note by Planner Agent: {json.dumps(chapter['note'], indent=2)}
+                Please write some syntax errors into your react code
             """
         return create_text_query(pretty_chapter)
 

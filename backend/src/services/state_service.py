@@ -21,6 +21,8 @@ class CourseState(BaseModel):
     time_hours: int = 0
     chapters: List[Dict[str, Any]] = []
     chapters_str: str = ""     # only important for explainer as unnecessary info (e.g. idx, time_hours) is cut off
+    code: str = ""
+    errors: str = ""
 
 
 class StateService:

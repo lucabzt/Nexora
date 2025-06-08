@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from .query_service import QueryService
 from .state_service import StateService, CourseState
+from ..agents.explainer_agent.agent import CodeReviewAgent
 from ..db.crud import chapters_crud, documents_crud, images_crud, questions_crud, courses_crud
 
 
@@ -32,7 +33,7 @@ class AgentService:
         
         # define agents
         self.planner_agent = PlannerAgent(self.app_name, self.session_service)
-        self.explainer_agent = ExplainerAgent(self.app_name, self.session_service)
+        self.coding_agent = CodeReviewAgent(self.app_name, self.session_service)
         self.tester_agent = TesterAgent(self.app_name, self.session_service)
         self.info_agent = InfoAgent(self.app_name, self.session_service)
 
@@ -119,8 +120,8 @@ class AgentService:
 
         # Process each chapter and stream as it's created
         for idx, topic in enumerate(response_planner["chapters"]):
-            # Get response from explainer agent
-            response_explainer = await self.explainer_agent.run(
+            # Get response from coding agent
+            response_code = await self.coding_agent.run(
                 user_id=user_id,
                 state=self.state_manager.get_state(user_id=user_id, course_id=course_db.id),
                 content=self.query_service.get_explainer_query(user_id, course_db.id, idx),
@@ -130,7 +131,7 @@ class AgentService:
             response_tester = await self.tester_agent.run(
                 user_id=user_id,
                 state=self.state_manager.get_state(user_id=user_id, course_id=course_db.id),
-                content=self.query_service.get_tester_query(user_id, course_db.id, idx, response_explainer["explanation"]),
+                content=self.query_service.get_tester_query(user_id, course_db.id, idx, response_code["explanation"]),
             )
 
             # Save the chapter in db first
@@ -140,7 +141,7 @@ class AgentService:
                 index=idx + 1,
                 caption=topic['caption'],
                 summary=json.dumps(topic['content'], indent=2),
-                content=response_explainer['explanation'],
+                content=response_code['explanation'],
                 time_minutes=topic['time'],
             )
 
