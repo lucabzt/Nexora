@@ -1,10 +1,12 @@
 services:
   app:
     container_name: nexora
-    image: m4rkus28/nexora:latest
+    #image: m4rkus28/nexora:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "8127:8000"
-      - "3306:3306"
+      - "8000:8000"
     env_file:
       - ./.env
     restart: always

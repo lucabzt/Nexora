@@ -51,6 +51,25 @@ class ESLintValidator:
                 with open(js_file_to_lint, 'w', encoding='utf-8') as f:
                     f.write(jsx_code)
 
+                # Create a well-defined environment for npm and eslint
+                npm_env = os.environ.copy()
+
+                # Ensure HOME is set correctly for the 'app' user.
+                # npm relies on this for defaults if not overridden by more specific NPM_CONFIG_* vars.
+                # The 'app' user's home directory in the Docker container is /home/app.
+                npm_env['HOME'] = '/home/app'
+
+                # Define a cache path within the temporary directory to ensure writability.
+                npm_cache_path = os.path.join(temp_dir, ".npm-cache")
+                os.makedirs(npm_cache_path, exist_ok=True) # Create it explicitly.
+                npm_env['NPM_CONFIG_CACHE'] = npm_cache_path
+
+                # Define a temporary directory for npm's own temporary files within our temp_dir.
+                # This might help with the "mkdir '/nonexistent'" during fetch.
+                npm_tmp_path = os.path.join(temp_dir, ".npm-tmp")
+                os.makedirs(npm_tmp_path, exist_ok=True)
+                npm_env['TMPDIR'] = npm_tmp_path # For npm and other tools respecting TMPDIR
+
                 # 3. CRUCIAL STEP: Install dependencies locally within the temp directory
                 # This creates the local `node_modules` folder that ESLint needs.
                 subprocess.run(
@@ -58,16 +77,28 @@ class ESLintValidator:
                     cwd=temp_dir,
                     capture_output=True,
                     text=True,
-                    check=True # Raise an exception if npm install fails
+                    check=True, # Raise an exception if npm install fails
+                    env=npm_env # Pass the modified environment
                 )
 
                 # 4. Run ESLint. It now has everything it needs in its local directory.
+                # Use the explicit path to the ESLint installed in temp_dir/node_modules/.bin/eslint
+                eslint_executable = os.path.join(temp_dir, 'node_modules', '.bin', 'eslint')
+
+                if not os.path.exists(eslint_executable):
+                    # This would be an unexpected state if npm install succeeded.
+                    return {
+                        'valid': False,
+                        'errors': [{'message': f"ESLint executable not found at {eslint_executable} after npm install."}]
+                    }
+                
                 lint_process = subprocess.run([
-                    'eslint',
+                    eslint_executable,
                     '--quiet',
                     '--format', 'json',
                     js_file_to_lint
-                ], capture_output=True, text=True, cwd=temp_dir)
+                ], capture_output=True, text=True, cwd=temp_dir, env=npm_env) # Pass env here too for consistency
+
 
                 if lint_process.stdout:
                     return self._parse_eslint_output(lint_process.stdout)

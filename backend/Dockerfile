@@ -27,6 +27,12 @@ RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requir
 # --- Final Stage ---
 FROM python:3.10-slim
 
+# Install Node.js and npm
+RUN apt-get update && apt-get install -y curl gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Create a non-root user
 RUN addgroup --system app && adduser --system --group app
 
