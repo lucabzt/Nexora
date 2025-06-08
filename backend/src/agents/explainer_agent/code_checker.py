@@ -36,7 +36,20 @@ class ESLintValidator:
         """
         Validates JSX by creating a temporary file and running ESLint from the pre-installed directory.
         """
-        jsx_code = find_react_code_in_response(jsx_code)
+        # jsx_code = find_react_code_in_response(jsx_code_input) # Bypass for now
+
+        # --- TEMPORARY TEST --- 
+        jsx_code = """() => {
+    const headerStyle = {
+        color: red, // Undefined variable
+        borderBottom: '2px solid #007bff'
+    };
+    return <div style={headerStyle}>Test<div>;
+}
+"""
+
+        print("Starting to parse jsx code:")
+        print(jsx_code)
 
         if not (jsx_code.startswith("(") or jsx_code.startswith("const") or jsx_code.startswith("function")):
             return {
@@ -80,10 +93,12 @@ class ESLintValidator:
 
                     lint_process = subprocess.run([
                         'npx', 'eslint',
-                        '--quiet',
                         '--format', 'json',
                         js_file_to_lint
                     ], capture_output=True, text=True, cwd=temp_dir)
+
+                print(f"--- ESLint STDOUT ---\n{lint_process.stdout}\n-----------------------")
+                print(f"--- ESLint STDERR ---\n{lint_process.stderr}\n-----------------------")
 
                 if lint_process.stdout:
                     return self._parse_eslint_output(lint_process.stdout)

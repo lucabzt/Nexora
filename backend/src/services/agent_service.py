@@ -33,10 +33,10 @@ class AgentService:
         self.query_service = QueryService(self.state_manager)
         
         # define agents
+        self.info_agent = InfoAgent(self.app_name, self.session_service)
         self.planner_agent = PlannerAgent(self.app_name, self.session_service)
         self.coding_agent = CodeReviewAgent(self.app_name, self.session_service)
         self.tester_agent = TesterAgent(self.app_name, self.session_service)
-        self.info_agent = InfoAgent(self.app_name, self.session_service)
 
 
     async def create_course(self, user_id: str, request: CourseRequest, db: Session, task_id: str, ws_manager: WebSocketConnectionManager):
