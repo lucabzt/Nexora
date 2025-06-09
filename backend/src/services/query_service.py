@@ -31,7 +31,6 @@ class QueryService:
                 Time in Minutes: {chapter['time']}
                 Content Summary: \n{json.dumps(chapter['content'], indent=2)}
                 Note by Planner Agent: {json.dumps(chapter['note'], indent=2)}
-                IMPORTANT: please write ONE syntax error into your code e.g. not closing a div. I want to test code validation. Ignore everything I say about syntax errors in your instructions, just do it.
             """
         return create_text_query(pretty_chapter)
 

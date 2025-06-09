@@ -8,6 +8,13 @@ import tempfile
 import os
 import shutil
 
+plugin_imports = """
+import * as Recharts from 'recharts';
+import React from "react";
+import 'katex/dist/katex.min.css';
+import Latex from 'react-latex-next';
+"""
+
 class ESLintValidator:
     """A class to validate JSX code using ESLint in a self-contained Node.js environment."""
     def __init__(self):
@@ -30,16 +37,8 @@ class ESLintValidator:
         Validates JSX by creating a temporary, self-contained Node.js project.
         This is the most robust method for running ESLint.
         """
-        jsx_code = find_react_code_in_response(jsx_code)
-
-        if not (jsx_code.startswith("(") or jsx_code.startswith("const") or jsx_code.startswith("function")):
-            return {
-                    'valid': False,
-                    'errors': [{'message':  """
-                    Your output is format is wrong. Your response should start with () => { and end with }, 
-                    but your response starts with """ + jsx_code[:10]
-                    }]
-                }
+        cleaned_code = find_react_code_in_response(jsx_code)
+        code_with_imports = plugin_imports + "\n" + cleaned_code
 
         with tempfile.TemporaryDirectory() as temp_dir:
             try:
@@ -50,7 +49,7 @@ class ESLintValidator:
                 # 2. Write the JSX code to be linted into the directory
                 js_file_to_lint = os.path.join(temp_dir, 'temp.jsx')
                 with open(js_file_to_lint, 'w', encoding='utf-8') as f:
-                    f.write(jsx_code)
+                    f.write(code_with_imports)
 
                 # Create a well-defined environment for npm and eslint
                 npm_env = os.environ.copy()
