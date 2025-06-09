@@ -1,3 +1,25 @@
 ## Code and Syntax Highlighting
 
 This plugin can be used to display syntax highlighted code to the user that can be copied
+You can use the react-code-blocks library via the CopyBlock element.
+
+Usage example:
+
+() => {
+    return (
+        <CopyBlock
+          text={<your-code-as-a-string>}
+          language={<coding_language>}
+          showLineNumbers={true}
+          wrapLines={true}
+        />
+      );
+}
+
+Props of the CopyBlock element:
+
+text, string, required, The code to be formatted
+language, string, "text", The language in which the code is written. See here for a list of supported languages
+showLineNumbers, boolean, true, Indicates whether or not to show line numbers
+theme, object, dracula, A theme object for the code block. See here for a list of supported themes
+highlight, string, "", Lines to highlight! For multiple lines, use a comma i.e highlight="1,6,7". For a range of lines, use a - i.e highlight="1-5" for highlighting lines 1-5.
