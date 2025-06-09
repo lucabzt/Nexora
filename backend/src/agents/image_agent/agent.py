@@ -14,11 +14,8 @@ from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioServerParamet
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
-from src.agents.utils import create_text_query
-from src.agents.agent import StandardAgent
-from src.agents.utils import load_instruction_from_file
-# REMOVED: No longer importing the local unsplash_tool
-# from ..tools.unsplash_tool import unsplash_tool
+from backend.src.agents.utils import create_text_query, load_instruction_from_file
+from backend.src.agents.agent import StandardAgent
 
 class ImageAgent(StandardAgent):
     def __init__(self, app_name: str, session_service):
@@ -28,24 +25,28 @@ class ImageAgent(StandardAgent):
         # Using a template path as requested.
         path_to_mcp_server = "../tools/unsplash_mcp_server.py"
 
-        # Create the toolset that will connect to your MCP server.
-        # This will automatically start your unsplash_mcp_server.py as a subprocess.
         unsplash_mcp_toolset = MCPToolset(
             connection_params=StdioServerParameters(
-                command='python3',  # The command to run your server
-                args=[os.path.abspath(path_to_mcp_server)], # The argument is the path to the script
+                command='uv',
+                args=[
+                    "run",
+                    "--with",
+                    "fastmcp",
+                    "fastmcp",
+                    "run",
+                    path_to_mcp_server  # You'll need the actual path to server.py
+                ],
+                env={
+                    **os.environ
+                }
             )
         )
-        # --- END NEW ---
-
         # Create the planner agent
         image_agent = LlmAgent(
             name="image_agent",
-            model="gemini-2.0-flash", # Consider gemini-2.0-flash if available
+            model="gemini-2.0-flash",
             description="Agent for searching an image for a course using an external service.",
             instruction=load_instruction_from_file("image_agent/instructions.txt"),
-            disallow_transfer_to_parent=True,
-            disallow_transfer_to_peers=True,
             # UPDATED: Use the MCP toolset instead of the local tool
             tools=[unsplash_mcp_toolset]
         )
@@ -65,7 +66,8 @@ async def main():
     print("Starting ImageAgent")
     # Renamed variable for clarity, as 'image_agent' is used inside __init__ for LlmAgent
     image_agent_instance = ImageAgent(app_name="Nexora", session_service=InMemorySessionService())
-    await image_agent_instance.run(user_id="test", state={}, content=create_text_query("test"))
+    response = await image_agent_instance.run(user_id="test", state={}, content=create_text_query("ein bild mit bergen"))
+    print(response)
     print("done")
 
 if __name__ == "__main__":
