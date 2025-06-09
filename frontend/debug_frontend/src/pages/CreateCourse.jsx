@@ -159,17 +159,15 @@ function CreateCourse() {
         phase: 'preparing'
       });
       
-      await courseService.createCourse(
+      re = await courseService.createCourse(
         { 
           query: form.values.query,
           time_hours: form.values.time_hours,
           document_ids: documentIds,
           picture_ids: imageIds,
-        },
-        handleWebSocketProgress, 
-        handleWebSocketError,    
-        handleWebSocketComplete  
+        }
       );
+
     } catch (err) { 
       console.error('Error initiating course creation:', err);
       const errorMessage = err.response?.data?.detail || err.message || t('errors.courseCreationDefault');
