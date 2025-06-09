@@ -28,12 +28,18 @@ class StandardAgent(ABC):
         :param debug: if true the method will print auxiliary outputs (all events)
         :return: the parsed dictionary response from the agent
         """
+
+        if debug:
+            print("[Debug] Running agent with state: " + json.dumps(state, indent=2))
+
+        # Create session
         session = await self.session_service.create_session(
             app_name=self.app_name,
             user_id=user_id,
             state=state
         )
         session_id = session.id
+
 
         # We iterate through events to find the final answer
         async for event in self.runner.run_async(user_id=user_id, session_id=session_id, new_message=content):
