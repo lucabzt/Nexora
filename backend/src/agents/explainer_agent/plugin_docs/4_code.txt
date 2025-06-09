@@ -1,0 +1,3 @@
+## Code and Syntax Highlighting
+
+This plugin can be used to display syntax highlighted code to the user that can be copied
