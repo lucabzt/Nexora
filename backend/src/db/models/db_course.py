@@ -25,6 +25,7 @@ class Course(Base):
     total_time_hours = Column(Integer, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     status = Column(Enum(CourseStatus), nullable=False, default=CourseStatus.CREATING)
+    image_url = Column(String(200), nullable=True)
 
     # Relationships
     chapters = relationship("Chapter", back_populates="course", cascade="all, delete-orphan")

@@ -2,6 +2,7 @@
 This file defines the service that coordinates the interaction between all the agents
 """
 import json
+import asyncio
 
 from sqlalchemy.orm import Session
 
@@ -16,11 +17,17 @@ from google.adk.sessions import InMemorySessionService
 from ..agents.planner_agent import PlannerAgent
 from ..agents.explainer_agent import ExplainerAgent
 from ..agents.info_agent.agent import InfoAgent
+
+from ..agents.image_agent.agent import ImageAgent
+
 from ..agents.tester_agent import TesterAgent
 from ..agents.utils import create_text_query, create_docs_query
 from ..db.models.db_course import CourseStatus
 from ..api.schemas.course import CourseRequest
 from ..utils.websocket_manager import WebSocketConnectionManager # Added import
+from ..db.models.db_course import Course
+from google.genai import types
+
 
 
 class AgentService:
@@ -37,6 +44,36 @@ class AgentService:
         self.planner_agent = PlannerAgent(self.app_name, self.session_service)
         self.coding_agent = CodeReviewAgent(self.app_name, self.session_service)
         self.tester_agent = TesterAgent(self.app_name, self.session_service)
+        self.image_agent = ImageAgent(self.app_name, self.session_service)
+
+    async def get_image(self, user_id: str, request, db: Session, task_id: str, ws_manager: WebSocketConnectionManager):
+        """
+        Main function for handling the course creation logic. Uses WebSocket for progress.
+
+        Parameters:
+        user_id (str): The unique identifier of the user who is creating the course.
+        request: info_response
+        db (Session): The SQLAlchemy database session.
+        task_id (str): The unique ID for this course creation task, used for WebSocket communication.
+        ws_manager (WebSocketConnectionManager): Manager to send messages over WebSockets.
+        """
+
+        print(f"[{task_id}] Starting ImageAgent")
+        image_response = await self.image_agent.run(
+            user_id=user_id,
+            state={},
+            content=types.Content(role="user", parts=[types.Part(text=(request["title"] + "\n\n" + request["description"] ))]),
+            debug=True
+        )
+
+        print(f"[{task_id}] ImageAgent response: {image_response['image_url']}")
+        
+        # Save Image to DB
+        db_image = db.query(Course).filter(Course.id == request.course_id).first()
+        db_image.image_url = image_response['image_url']
+        db.commit()
+        db.refresh(db_image)
+        return db_image
 
 
     async def create_course(self, user_id: str, request: CourseRequest, db: Session, task_id: str, ws_manager: WebSocketConnectionManager):
@@ -86,6 +123,10 @@ class AgentService:
                 status=CourseStatus.CREATING
             )
             print(f"[{task_id}] Course created in DB with ID: {course_db.id}")
+
+
+            # Start image Agent
+            task = asyncio.create_task(self.get_image(user_id, info_response, db, task_id, ws_manager))
 
             # Create initial state
             init_state = CourseState(
@@ -194,6 +235,9 @@ class AgentService:
 
             # Update course status to finished
             courses_crud.update_course_status(db, course_db.id, CourseStatus.FINISHED)
+
+            # Wait for image agent to finish
+            await task
 
             # Send completion signal
             await ws_manager.send_json_message(task_id, {

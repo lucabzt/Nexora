@@ -18,3 +18,4 @@ types-SQLAlchemy
 requests
 deprecated
 litellm
+asyncio

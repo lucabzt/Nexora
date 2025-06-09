@@ -479,7 +479,9 @@ async def mark_chapter_incomplete(
 
 @router.websocket("/ws/course_progress/{task_id}")
 async def websocket_course_progress(websocket: WebSocket, task_id: str):
+    
     await ws_manager.connect(websocket, task_id)
+    
     print(f"WebSocket connection established for task_id: {task_id}")
     try:
         while True:
