@@ -1,10 +1,8 @@
 import StringToReactComponent from 'string-to-react-component';
 import * as Recharts from 'recharts';
-import * as Chakra from "@chakra-ui/react"
 import React from "react";
 import Plot from 'react-plotly.js';
 import PaperBackground from "./PaperBackground.jsx";
-import { ChakraProvider } from "@chakra-ui/react"
 
 // Plugins/Libraries available to the agent
 
