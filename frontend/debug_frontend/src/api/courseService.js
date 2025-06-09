@@ -77,122 +77,43 @@ export const courseService = {
     }
   },
 
-  createCourse: async (data, onProgress, onError, onComplete) => {
-    let ws; // WebSocket instance
+  createCourse: async (data) => { // Removed onProgress, onError, onComplete
+    // let ws; // WebSocket instance - REMOVED
 
     try {
-      console.log('[WebSocket] Initiating createCourse POST request');
-      // Step 1: Make the initial POST request to get the task_id
+      console.log('[POST] Initiating createCourse POST request');
+      // Step 1: Make the initial POST request to get the course data (including ID)
       const response = await apiWithCookies.post('/courses/create', data);
 
-      if (response.status !== 202 || !response.data.task_id) {
-        console.error('[WebSocket] Failed to initiate course creation task.', response);
-        if (typeof onError === 'function') {
-          onError({ message: 'Failed to start course creation process.', details: response.data });
-        }
-        return; // Exit if task_id is not received
-      }
+      // Directly return the response data, which should include the course_id
+      // The backend should now return the course_id directly in the POST response
+      // if it's not a long-running task anymore.
+      console.log('[POST] Course creation request successful, response:', response.data);
+      return response.data; 
 
+      // All WebSocket related logic below is removed.
+      /*
+      if (response.status !== 202 || !response.data.task_id) { ... }
       const taskId = response.data.task_id;
-      console.log(`[WebSocket] Task ID received: ${taskId}. Connecting to WebSocket.`);
-
-      // Step 2: Construct WebSocket URL
-      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      let wsHost = window.location.host; // Default to current host
-      if (apiWithCookies.defaults.baseURL) {
-          try {
-            // Ensure baseURL is absolute or correctly relative for URL constructor
-            const base = apiWithCookies.defaults.baseURL.startsWith('/') ? window.location.origin : undefined;
-            const apiUrl = new URL(apiWithCookies.defaults.baseURL, base);
-            wsHost = apiUrl.host;
-          } catch (e) {
-            console.warn('[WebSocket] Could not parse baseURL for WebSocket host, defaulting to window.location.host. baseURL:', apiWithCookies.defaults.baseURL, e);
-          }
-      }
-      
-      const wsUrl = `${wsProtocol}//${wsHost}/api/courses/ws/course_progress/${taskId}`;
-      console.log(`[WebSocket] Connecting to: ${wsUrl}`);
-      
-      // Step 3: Establish WebSocket connection
+      ...
       ws = new WebSocket(wsUrl);
+      ...
+      ws.onopen = () => { ... };
+      ws.onmessage = (event) => { ... };
+      ws.onerror = (errorEvent) => { ... };
+      ws.onclose = (event) => { ... };
+      */
 
-      ws.onopen = () => {
-        console.log(`[WebSocket] Connection opened for task_id: ${taskId}`);
-      };
-
-      ws.onmessage = (event) => {
-        try {
-          const message = JSON.parse(event.data);
-          console.log('[WebSocket] Message received:', message);
-
-          switch (message.type) {
-            case 'course_info':
-            case 'chapter':
-              if (typeof onProgress === 'function') {
-                onProgress(message); // Pass the whole message (includes type and data)
-              }
-              break;
-            case 'complete':
-              if (typeof onComplete === 'function') {
-                onComplete(message.data);
-              }
-              console.log('[WebSocket] Course creation complete. Closing WebSocket.');
-              ws.close(1000, "Course creation complete");
-              break;
-            case 'error':
-              console.error('[WebSocket] Error message from server:', message.data);
-              if (typeof onError === 'function') {
-                onError(message.data);
-              }
-              ws.close(1000, "Error received from server");
-              break;
-            default:
-              console.warn('[WebSocket] Received unknown message type:', message.type, message);
-          }
-        } catch (e) {
-          console.error('[WebSocket] Error parsing message from server:', event.data, e);
-          if (typeof onError === 'function') {
-            onError({ message: 'Error processing message from server.', details: e.toString(), rawData: event.data });
-          }
-        }
-      };
-
-      ws.onerror = (errorEvent) => {
-        console.error('[WebSocket] Connection error:', errorEvent);
-        if (typeof onError === 'function') {
-          onError({ message: 'WebSocket connection error. The connection attempt failed or was dropped.' });
-        }
-        if (ws && ws.readyState !== WebSocket.CLOSED) {
-            ws.close();
-        }
-      };
-
-      ws.onclose = (event) => {
-        console.log(`[WebSocket] Connection closed for task_id: ${taskId}. Code: ${event.code}, Reason: ${event.reason}, Was Clean: ${event.wasClean}`);
-        // Avoid duplicate error calls if 'complete' or 'error' types already handled closure.
-        if (event.reason !== "Course creation complete" && event.reason !== "Error received from server") {
-            if (!event.wasClean || event.code !== 1000) { // 1000 is normal closure
-                if (typeof onError === 'function') {
-                    onError({ message: `WebSocket connection closed unexpectedly. Code: ${event.code}, Reason: '${event.reason || 'No reason provided'}'` });
-                }
-            }
-        }
-      };
-
-    } catch (error) { // This catch block is for the initial POST request or WebSocket constructor errors
-      console.error('[WebSocket] Error in createCourse (initial POST or WebSocket setup):', error);
-      if (typeof onError === 'function') {
-        let errorMessage = 'Course creation failed during setup.';
-        if (error.response?.data?.detail) {
-          errorMessage = error.response.data.detail;
-        } else if (error.message) {
-          errorMessage = error.message;
-        }
-        onError({ message: errorMessage, details: error });
-      }
+    } catch (error) { 
+      console.error('[POST] Error in createCourse (initial POST):', error);
+      // Let the calling component handle the error based on the thrown error object
+      throw error; 
+      /*
+      if (typeof onError === 'function') { ... }
       if (ws && ws.readyState !== WebSocket.CLOSED && ws.readyState !== WebSocket.CLOSING) {
         ws.close();
       }
+      */
     }
   },
 
