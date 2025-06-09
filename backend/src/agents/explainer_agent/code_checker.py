@@ -13,6 +13,7 @@ import * as Recharts from 'recharts';
 import React from "react";
 import 'katex/dist/katex.min.css';
 import Latex from 'react-latex-next';
+import Plot from 'react-plotly.js';
 """
 
 class ESLintValidator:
