@@ -10,7 +10,7 @@ from ...utils.auth import get_current_active_user
 from ...db.database import get_db
 from ...db.crud import courses_crud, chapters_crud, users_crud, questions_crud
 
-from ...utils.websocket_manager import manager as ws_manager
+from ...services.notifcation_service import manager as ws_manager
 from ..schemas.course import (
     CourseInfo,
     CourseRequest,
@@ -62,11 +62,11 @@ async def create_course_request(
     # The agent_service.create_course will need to be modified to accept ws_manager and task_id
     # and use ws_manager.send_json_message(task_id, progress_data) to send updates.
     background_tasks.add_task(
-        agent_service.create_course, 
-        user_id=current_user.id, 
-        request=course_request, 
-        db=db, 
-        task_id=task_id, 
+        agent_service.create_course,
+        user_id=str(current_user.id),
+        request=course_request,
+        db=db,
+        task_id=task_id,
         ws_manager=ws_manager
     )
     

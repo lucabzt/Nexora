@@ -24,7 +24,7 @@ from ..agents.tester_agent import TesterAgent
 from ..agents.utils import create_text_query, create_docs_query
 from ..db.models.db_course import CourseStatus
 from ..api.schemas.course import CourseRequest
-from ..utils.websocket_manager import WebSocketConnectionManager # Added import
+from ..services.notification_service import WebSocketConnectionManager
 from ..db.models.db_course import Course
 from google.genai import types
 
@@ -55,7 +55,7 @@ class AgentService:
         request: info_response
         db (Session): The SQLAlchemy database session.
         task_id (str): The unique ID for this course creation task, used for WebSocket communication.
-        ws_manager (WebSocketConnectionManager): Manager to send messages over WebSockets.
+        ws_manager (NotificationService): Manager to send messages over WebSockets.
         """
 
         print(f"[{task_id}] Starting ImageAgent")

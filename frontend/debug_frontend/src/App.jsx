@@ -6,6 +6,7 @@ import { MantineProvider, ColorSchemeProvider } from '@mantine/core';
 import { AuthProvider } from './contexts/AuthContext';
 import { ToolbarProvider } from './contexts/ToolbarContext';
 import { LanguageProvider } from './contexts/LanguageContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import './i18n/i18n'; // Import i18n configuration
 
 // Pages
@@ -63,42 +64,44 @@ function App() {
         },      }}>
         <LanguageProvider>
           <AuthProvider>
-            <ToolbarProvider>
-            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-              <Routes>
-              {/* Public routes with MainLayout */}
-              <Route element={<MainLayout />}>
-                <Route path="/" element={<LandingPage />} /> {/* LandingPage now at root */}
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
-                <Route path="/impressum" element={<Impressum />} />
-                <Route path="/about" element={<About />} />
-              </Route>
-                {/* Protected routes now based at /dashboard */}
-              <Route element={<ProtectedRoute />}>
-                <Route path="/dashboard" element={<AppLayout />}> {/* Base path for dashboard and other protected routes */}
-                  <Route index element={<Dashboard />} /> {/* This will be /dashboard */}
-                  <Route path="create-course" element={<CreateCourse />} /> {/* /dashboard/create-course */}
-                  <Route path="courses/:courseId" element={<CourseView />} /> {/* /dashboard/courses/:courseId */}
-                  <Route path="courses/:courseId/chapters/:chapterId" element={<ChapterView />} /> {/* /dashboard/courses/:courseId/chapters/:chapterId */}
-                  <Route path="settings" element={<SettingsPage />} /> {/* /dashboard/settings */}
-                  <Route path="statistics" element={<StatisticsPage />} /> {/* /dashboard/statistics */}
+            <NotificationProvider>
+              <ToolbarProvider>
+              <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+                <Routes>
+                {/* Public routes with MainLayout */}
+                <Route element={<MainLayout />}>
+                  <Route path="/" element={<LandingPage />} /> {/* LandingPage now at root */}
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
+                  <Route path="/impressum" element={<Impressum />} />
+                  <Route path="/about" element={<About />} />
                 </Route>
-              </Route>
-                {/* Admin-only routes - Using AppLayout for consistent interface */}
-              <Route element={<AdminProtectedRoute />}>
-                <Route path="/admin" element={<AppLayout />}>
-                  <Route index element={<AdminView />} />
-                  {/* Add other admin routes here */}
+                  {/* Protected routes now based at /dashboard */}
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/dashboard" element={<AppLayout />}> {/* Base path for dashboard and other protected routes */}
+                    <Route index element={<Dashboard />} /> {/* This will be /dashboard */}
+                    <Route path="create-course" element={<CreateCourse />} /> {/* /dashboard/create-course */}
+                    <Route path="courses/:courseId" element={<CourseView />} /> {/* /dashboard/courses/:courseId */}
+                    <Route path="courses/:courseId/chapters/:chapterId" element={<ChapterView />} /> {/* /dashboard/courses/:courseId/chapters/:chapterId */}
+                    <Route path="settings" element={<SettingsPage />} /> {/* /dashboard/settings */}
+                    <Route path="statistics" element={<StatisticsPage />} /> {/* /dashboard/statistics */}
+                  </Route>
                 </Route>
-              </Route>
+                  {/* Admin-only routes - Using AppLayout for consistent interface */}
+                <Route element={<AdminProtectedRoute />}>
+                  <Route path="/admin" element={<AppLayout />}>
+                    <Route index element={<AdminView />} />
+                    {/* Add other admin routes here */}
+                  </Route>
+                </Route>
 
-              {/* Old redirects removed as new routing handles root and protected areas explicitly */}
-              <Route path="*" element={<NotFoundPage />} /> {/* Catch-all route for 404 */}
-            </Routes>          </BrowserRouter>
-          <ToastContainer position="top-right" autoClose={3000} theme={colorScheme} />
-            </ToolbarProvider>
+                {/* Old redirects removed as new routing handles root and protected areas explicitly */}
+                <Route path="*" element={<NotFoundPage />} /> {/* Catch-all route for 404 */}
+              </Routes>          </BrowserRouter>
+            <ToastContainer position="top-right" autoClose={3000} theme={colorScheme} />
+              </ToolbarProvider>
+            </NotificationProvider>
           </AuthProvider>
         </LanguageProvider>
       </MantineProvider>
