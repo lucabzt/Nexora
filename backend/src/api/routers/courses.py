@@ -10,7 +10,7 @@ from ...utils.auth import get_current_active_user
 from ...db.database import get_db
 from ...db.crud import courses_crud, chapters_crud, users_crud, questions_crud
 
-from ...services.notifcation_service import manager as ws_manager
+from ...services.notification_service import manager as ws_manager
 from ..schemas.course import (
     CourseInfo,
     CourseRequest,
