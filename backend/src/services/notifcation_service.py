@@ -43,5 +43,22 @@ class WebSocketConnectionManager:
         else:
             print(f"No active WebSocket connection for client_id: {client_id} to send message.")
 
+    
+    async def broadcast_json_message(self, message: dict, from_client: str = None):
+        for client_id, connections in self.active_connections.items():
+            if from_client and client_id == from_client:
+                continue
+            for connection in connections:
+                try:
+                    await connection.send_json(message)
+                    # print(f"Broadcasted message to {client_id}: {json.dumps(message)[:100]}...")
+                except Exception as e:
+                    print(f"Error broadcasting message to WebSocket for client {client_id}: {e}. Marking for disconnection.")
+                    disconnected_sockets.append(connection)
+            
+            # Clean up disconnected sockets
+            for ws in disconnected_sockets:
+                self.disconnect(ws, client_id)
+
 # Global instance of the manager
 manager = WebSocketConnectionManager()
