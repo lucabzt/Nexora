@@ -24,7 +24,7 @@ class InfoAgent(StructuredAgent):
             description="Agent for creating a small info for a course",
             instruction=load_instruction_from_file("info_agent/instructions.txt"),
             disallow_transfer_to_parent=True,
-            disallow_transfer_to_peers=True
+            disallow_transfer_to_peers=True,
         )
 
         # Create necessary

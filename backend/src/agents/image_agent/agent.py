@@ -19,12 +19,9 @@ from backend.src.agents.agent import StandardAgent
 
 class ImageAgent(StandardAgent):
     def __init__(self, app_name: str, session_service):
-        
-        # --- NEW: Setup for MCP Toolset ---
-        # IMPORTANT: Replace this with the absolute path to your server script.
-        # Using a template path as requested.
         path_to_mcp_server = "../tools/unsplash_mcp_server.py"
 
+        # Define toolset for unsplash mcp server
         unsplash_mcp_toolset = MCPToolset(
             connection_params=StdioServerParameters(
                 command='uv',
@@ -47,7 +44,6 @@ class ImageAgent(StandardAgent):
             model="gemini-2.0-flash",
             description="Agent for searching an image for a course using an external service.",
             instruction=load_instruction_from_file("image_agent/instructions.txt"),
-            # UPDATED: Use the MCP toolset instead of the local tool
             tools=[unsplash_mcp_toolset]
         )
 
