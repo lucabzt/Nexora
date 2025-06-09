@@ -18,16 +18,4 @@ You will have access to the react library recharts via the object "Recharts".
 }
 <end of your output>
 
-This library is amazing for creating visual explanations, here is a list of charts you can create:
-
-AreaChart
-BarChart
-LineChart
-ComposedChart
-PieChart
-RadarChart
-RadialBarChart
-ScatterChart
-FunnelChart
-Treemap
-SankeyChart
+Please use this for creating simple charts
