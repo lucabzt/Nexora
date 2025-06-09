@@ -476,30 +476,3 @@ async def mark_chapter_incomplete(
         "is_completed": updated_chapter.is_completed
     }
 
-
-@router.websocket("/ws/course_progress/{task_id}")
-async def websocket_course_progress(websocket: WebSocket, task_id: str):
-    
-    await ws_manager.connect(websocket, task_id)
-    
-    print(f"WebSocket connection established for task_id: {task_id}")
-    try:
-        while True:
-            # Keep the connection alive. 
-            # Client can send messages if needed, e.g., for acknowledgments or commands.
-            # For now, we'll just keep it open to send progress from the server.
-            # If the client sends a message, it will be received here.
-            # If the connection is closed by the client, WebSocketDisconnect will be raised.
-            data = await websocket.receive_text() # Or receive_bytes, receive_json
-            # print(f"Received message from {task_id}: {data}") # Optional: log client messages
-            # You might want to handle specific client messages here if your protocol requires it.
-    except WebSocketDisconnect:
-        print(f"WebSocket disconnected for task_id: {task_id} (client closed)")
-        # ws_manager.disconnect is called in the finally block
-    except Exception as e:
-        print(f"WebSocket error for task_id: {task_id}: {e}")
-        # ws_manager.disconnect is called in the finally block
-    finally:
-        # Ensure cleanup happens
-        ws_manager.disconnect(websocket, task_id)
-        print(f"WebSocket connection properly closed for task_id: {task_id}")

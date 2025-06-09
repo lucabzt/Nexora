@@ -9,6 +9,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from .api.routers import auth as auth_router
 from .api.routers import courses, files, users, statistics  # Your existing users router
 from .api.routers import notes
+from .api.routers import notifications
 from .api.schemas import user as user_schema
 from .db.database import engine
 from .db.models import db_user as user_model
@@ -56,7 +57,7 @@ app.include_router(files.router)
 app.include_router(statistics.router)
 app.include_router(auth_router.api_router)
 app.include_router(notes.router)
-
+app.include_router(notifications.router)
 
 # The root path "/" is now outside the /api prefix
 @app.get("/")
