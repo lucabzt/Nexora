@@ -9,7 +9,7 @@ from ...db.models.db_user import User
 from ...services.agent_service import AgentService
 from ...utils.auth import get_current_active_user
 from ...db.database import get_db
-from ...services.notifcation_service import manager as ws_manager
+from ...services.notification_service import manager as ws_manager
 
 
 router = APIRouter(

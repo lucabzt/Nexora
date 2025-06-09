@@ -4,7 +4,7 @@ import userService from '../api/userService';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
 
-const AuthContext = createContext();
+export const AuthContext = createContext(); // Add export here
 
 export const AuthProvider = ({ children }) => {
   const { t } = useTranslation('auth');
