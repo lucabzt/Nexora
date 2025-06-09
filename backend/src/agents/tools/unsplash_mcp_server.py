@@ -4,23 +4,36 @@
 import os
 from dataclasses import dataclass
 from typing import Optional, List, Dict, Union
-from google.adk.tools import FunctionTool
 
 import httpx
 from dotenv import load_dotenv
+from fastmcp import FastMCP
 
 # Load environment variables
 load_dotenv()
 
+# Create an MCP server
+mcp = FastMCP("Unsplash MCP Server")
 
-def search_photos(
+
+@dataclass
+class UnsplashPhoto:
+    id: str
+    description: Optional[str]
+    urls: Dict[str, str]
+    width: int
+    height: int
+
+
+@mcp.tool()
+async def search_photos(
         query: str,
         page: Union[int, str] = 1,
         per_page: Union[int, str] = 10,
         order_by: str = "relevant",
         color: Optional[str] = None,
         orientation: Optional[str] = None
-) -> dict:
+) -> List[UnsplashPhoto]:
     """
     Search for Unsplash photos
     
@@ -33,25 +46,24 @@ def search_photos(
         orientation: Orientation filter (landscape, portrait, squarish)
     
     Returns:
-        dict: A dictionary containing photo object with the following properties:
+        List[UnsplashPhoto]: List of search results containing photo objects with the following properties:
             - id: Unique identifier for the photo
             - description: Optional text description of the photo
             - urls: Dictionary of available image URLs in different sizes
             - width: Original image width in pixels
             - height: Original image height in pixels
     """
-    
-    print("Searching for photos with query: " + query)
-
     access_key = os.getenv("UNSPLASH_ACCESS_KEY")
     if not access_key:
         raise ValueError("Missing UNSPLASH_ACCESS_KEY environment variable")
 
+    # 确保page是整数类型
     try:
         page_int = int(page)
     except (ValueError, TypeError):
         page_int = 1
 
+    # 确保per_page是整数类型
     try:
         per_page_int = int(per_page)
     except (ValueError, TypeError):
@@ -75,8 +87,8 @@ def search_photos(
     }
 
     try:
-        with httpx.Client() as client:
-            response = client.get(
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
                 "https://api.unsplash.com/search/photos",
                 params=params,
                 headers=headers
@@ -84,22 +96,19 @@ def search_photos(
             response.raise_for_status()
             data = response.json()
 
-            print("Received " + str(len(data["results"])) + " results: " + data["results"])
-
-            first_one = data["results"][0]
-            return {
-                    "id": first_one["id"],
-                    "description": first_one.get("description"),
-                    "urls": first_one["urls"],
-                    "width": first_one["width"],
-                    "height": first_one["height"]
-                }
+            return [
+                UnsplashPhoto(
+                    id=photo["id"],
+                    description=photo.get("description"),
+                    urls=photo["urls"],
+                    width=photo["width"],
+                    height=photo["height"]
+                )
+                for photo in data["results"]
+            ]
     except httpx.HTTPStatusError as e:
         print(f"HTTP error: {e.response.status_code} - {e.response.text}")
         raise
     except Exception as e:
         print(f"Request error: {str(e)}")
         raise
-
-
-unsplash_tool = FunctionTool(func=search_photos)

@@ -19,3 +19,5 @@ requests
 deprecated
 litellm
 asyncio
+fastmcp
+dataclasses

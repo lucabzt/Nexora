@@ -62,7 +62,7 @@ class AgentService:
         image_response = await self.image_agent.run(
             user_id=user_id,
             state={},
-            content=types.Content(role="user", parts=[types.Part(text=(request["title"] + "\n\n" + request["description"] ))]),
+            content=create_text_query(request["title"] + "\n\n" + request["description"]),
             debug=True
         )
 
