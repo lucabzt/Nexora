@@ -30,15 +30,15 @@ function CreateCourse() {
   const navigate = useNavigate();
   const { t } = useTranslation('createCourse');
   const [active, setActive] = useState(0);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
   const [uploadedImages, setUploadedImages] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [streamingProgress, setStreamingProgress] = useState(null);
-  const [courseInfo, setCourseInfo] = useState(null); 
-  const [chapters, setChapters] = useState([]); 
 
+  
   const form = useForm({
     initialValues: {
       query: '',
@@ -86,54 +86,6 @@ function CreateCourse() {
     }
   };  
 
-  const handleWebSocketProgress = (message) => {
-    console.log('[WebSocket] Progress Update:', message);
-    if (message.type === 'course_info') {
-      setCourseInfo(message.data); 
-      setStreamingProgress({
-        status: t('streaming.status.courseInfoReceived', { title: message.data.title }),
-        progress: 25, 
-        phase: 'info_received'
-      });
-      toast.success(t('toast.courseCreationStartedRedirect', { title: message.data.title }));
-      navigate(`/dashboard/courses/${message.data.course_id}?creating=true`);
-    } else if (message.type === 'chapter') {
-      setChapters(prev => [...prev, message.data]);
-      setStreamingProgress(prev => ({
-        status: t('streaming.status.generatingChapter', { num: message.data.chapter_number, title: message.data.title }),
-        progress: Math.min((prev?.progress || 25) + 70 / (form.values.time_hours * 4 || 8), 95), 
-        phase: 'generating_chapters'
-      }));
-    }
-  };
-
-  const handleWebSocketError = (errorData) => {
-    console.error('[WebSocket] Error:', errorData);
-    const errorMessage = errorData.message || t('toast.websocketGenericError');
-    setError(errorMessage);
-    setStreamingProgress({
-      status: t('streaming.status.errorOccurred'),
-      progress: streamingProgress?.progress || 0, 
-      phase: 'error'
-    });
-    toast.error(errorMessage);
-    setIsSubmitting(false);
-  };
-
-  const handleWebSocketComplete = (completionData) => {
-    console.log('[WebSocket] Complete:', completionData);
-    setStreamingProgress({
-      status: t('streaming.status.complete'),
-      progress: 100,
-      phase: 'complete'
-    });
-    toast.success(t('toast.courseCreationComplete', { courseId: completionData.course_id }));
-    setIsSubmitting(false);
-    if (completionData.course_id && !courseInfo?.course_id) {
-        navigate(`/dashboard/courses/${completionData.course_id}`);
-    }
-  };
-
   const handleSubmit = async () => {
     if (form.validate().hasErrors) {
       return;
@@ -141,25 +93,12 @@ function CreateCourse() {
 
     setIsSubmitting(true);
     setError(null);
-    setCourseInfo(null);
-    setChapters([]);
-    setStreamingProgress({
-      status: t('streaming.status.initializing'),
-      progress: 5,
-      phase: 'initializing'
-    });
 
     try {
       const documentIds = uploadedDocuments.map(doc => doc.id);
       const imageIds = uploadedImages.map(img => img.id);
 
-      setStreamingProgress({
-        status: t('streaming.status.preparing'),
-        progress: 10,
-        phase: 'preparing'
-      });
-      
-      re = await courseService.createCourse(
+      const data = await courseService.createCourse(
         { 
           query: form.values.query,
           time_hours: form.values.time_hours,
@@ -168,16 +107,14 @@ function CreateCourse() {
         }
       );
 
+      console.log('Course creation initiated:', data);
+      navigate(`/courses/${data.id}`);
+      
     } catch (err) { 
       console.error('Error initiating course creation:', err);
       const errorMessage = err.response?.data?.detail || err.message || t('errors.courseCreationDefault');
       setError(errorMessage);
       toast.error(errorMessage);
-      setStreamingProgress({
-        status: t('streaming.status.errorOccurred'),
-        progress: 0,
-        phase: 'error'
-      });
       setIsSubmitting(false);
     }
   };
@@ -201,51 +138,14 @@ function CreateCourse() {
     form.setFieldValue('images', [...form.values.images, ...files]);
   };
 
-  useEffect(() => {
-    return () => {
-      if (isSubmitting) {
-      }
-    };
-  }, [isSubmitting]);
-
   return (
     <Container size="md" py="xl">
       <Title order={1} align="center" mb="xl">{t('title')}</Title>
 
-      {isSubmitting && streamingProgress ? (
+      {isSubmitting ? (
         <Paper shadow="md" p="xl" withBorder>
           <Title order={3} align="center" mb="md">{t('streaming.title')}</Title>
-          <Text align="center" mb="sm">{streamingProgress.status}</Text>
-          <Progress value={streamingProgress.progress} striped animate mb="lg" size="xl" />
-          
-          {courseInfo && streamingProgress.phase !== 'info_received' && (
-            <Card withBorder mb="md">
-              <Title order={3} mb="sm">{t('streaming.courseInfo.courseTitleLabel')}: {courseInfo.title}</Title>
-              <Text size="sm"><strong>{t('streaming.courseInfo.courseDescriptionLabel')}:</strong> {courseInfo.description}</Text>
-            </Card>
-          )}
-
-          {chapters.length > 0 && streamingProgress.phase === 'generating_chapters' &&  (
-            <Card withBorder mt="md">
-              <Text weight={500} mb="xs">{t('streaming.chaptersBeingGenerated')}</Text>
-              <List size="sm">
-                {chapters.map((chap, index) => (
-                  <List.Item key={index}>{chap.chapter_number}. {chap.title}</List.Item>
-                ))}
-              </List>
-            </Card>
-          )}
-
-          {streamingProgress.phase === 'error' && error && (
-             <Alert icon={<IconAlertCircle size={16} />} title={t('form.error.alertTitle')} color="red" mt="md">
-               {error}
-             </Alert>
-          )}
-           {streamingProgress.phase === 'complete' && (
-             <Alert icon={<IconCheck size={16} />} title={t('streaming.completion.title')} color="green" mt="md">
-               <Text>{t('streaming.completion.message', { courseId: courseInfo?.course_id || chapters[0]?.course_id /* Fallback if completionData not directly available here */ })}</Text>
-             </Alert>
-          )}
+          <Text align="center" mb="md">{t('streaming.description')}</Text>
         </Paper>
       ) : (
         <Paper shadow="md" p="xl" withBorder>
