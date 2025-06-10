@@ -10,11 +10,9 @@ import {
   Badge,
   Box,
   useMantineTheme,
-  Divider,
   Tabs,
   Container,
   Paper,
-  Grid,
   RingProgress
 } from '@mantine/core';
 import {
@@ -25,39 +23,45 @@ import {
   IconSchool,
   IconChartBar,
   IconCalendar,
-  IconBooks,
   IconChartPie,
   IconChartLine
 } from '@tabler/icons-react';
 import statisticsService from '../api/statisticsService';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title as ChartTitle,
-  Tooltip,
-  Legend,
-  BarElement,
-  ArcElement,
-  RadialLinearScale
-} from 'chart.js';
-import { Line, Bar, Doughnut, Radar, PolarArea } from 'react-chartjs-2';
+import Plot from 'react-plotly.js';
 
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  RadialLinearScale,
-  ChartTitle,
-  Tooltip,
-  Legend
-);
+const StatsCard = ({ icon, color, label, value, total, percentage, subtitle }) => {
+  return (
+    <Card withBorder radius="md" p="md">
+      <Group position="apart">
+        <Text size="xs" color="dimmed" transform="uppercase" weight={700}>
+          {label}
+        </Text>
+        <Badge color={color} variant="light">
+          {subtitle ? subtitle : `${percentage}%`}
+        </Badge>
+      </Group>
+      <Group align="flex-end" spacing="xs" mt="sm">
+        <Text size="xl" weight={700}>
+          {value}
+        </Text>
+        {total && (
+          <Text color={color} weight={500}>
+            / {total}
+          </Text>
+        )}
+      </Group>
+      {percentage && !subtitle && (
+        <RingProgress
+          size={80}
+          thickness={8}
+          mt="sm"
+          sections={[{ value: parseFloat(percentage), color }]}
+          label={<Text color={color} weight={700} align="center" size="sm">{percentage}%</Text>}
+        />
+      )}
+    </Card>
+  );
+};
 
 function StatisticsPage() {
   const [stats, setStats] = useState(null);
@@ -66,9 +70,47 @@ function StatisticsPage() {
   const theme = useMantineTheme();
   const isDark = theme.colorScheme === 'dark';
 
-  // Set chart colors based on theme
+  useEffect(() => {
+    statisticsService.getStatistics().then((data) => {
+      setStats(data);
+      setLoading(false);
+    }).catch(error => {
+      console.error("Failed to load statistics:", error);
+      setLoading(false);
+    });
+  }, []);
 
-  // Early return if data is loading
+  const getPlotlyLayout = (title) => ({
+    title: {
+      text: title,
+      font: {
+        color: isDark ? '#C1C2C5' : '#333333',
+        family: theme.fontFamily,
+      },
+    },
+    paper_bgcolor: 'transparent',
+    plot_bgcolor: 'transparent',
+    font: {
+      color: isDark ? '#C1C2C5' : '#333333',
+      family: theme.fontFamily,
+    },
+    xaxis: {
+      gridcolor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+      zerolinecolor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
+    },
+    yaxis: {
+      gridcolor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+      zerolinecolor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
+    },
+    legend: {
+      orientation: 'h',
+      x: 0.5,
+      xanchor: 'center',
+    },
+    margin: { t: 40, b: 40, l: 40, r: 40 },
+    autosize: true,
+  });
+
   if (loading) {
     return (
       <Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -77,169 +119,20 @@ function StatisticsPage() {
     );
   }
 
-  // Early return if stats data is not available after loading (e.g., API error not caught, or empty response)
   if (!stats) {
     return (
       <Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <Text color="red">{t('error.noStatsData') || 'Statistics data could not be loaded.'}</Text>
+        <Text color="red">{t('error.noStatsData', 'Statistics data could not be loaded.')}</Text>
       </Container>
     );
   }
 
-  // Check specifically for userEngagement before destructuring if it's a nested object that might be missing
-  // This check was originally identified as needed around line 203 of the problematic snippet.
-  // Now, we ensure `stats` itself is loaded first.
-  if (!stats.userEngagement) {
-     console.warn("StatisticsPage: stats.userEngagement is missing after stats loaded.");
-     return (
-        <Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-          <Text color="orange">{t('error.noUserEngagementData') || 'User engagement data is missing.'}</Text>
-        </Container>
-      );
-  }
-
-  const chartColors = {
-    gridColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-    textColor: isDark ? '#C1C2C5' : '#333333',
-  };
-
-  useEffect(() => {
-    statisticsService.getStatistics().then((data) => {
-      setStats(data);
-      setLoading(false);
-    });
-  }, []);
-
-  // For all charts
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top',
-        labels: {
-          color: chartColors.textColor,
-          font: {
-            family: theme.fontFamily
-          }
-        }
-      },
-      title: {
-        display: false,
-      },
-      tooltip: {
-        backgroundColor: isDark ? '#2C2E33' : 'white',
-        titleColor: isDark ? '#C1C2C5' : '#333333',
-        bodyColor: isDark ? '#C1C2C5' : '#333333',
-        borderColor: isDark ? '#5C5F66' : '#CED4DA',
-        borderWidth: 1
-      }
-    },
-    scales: {
-      x: {
-        grid: {
-          color: chartColors.gridColor
-        },
-        ticks: {
-          color: chartColors.textColor
-        }
-      },
-      y: {
-        grid: {
-          color: chartColors.gridColor
-        },
-        ticks: {
-          color: chartColors.textColor
-        },
-        beginAtZero: true
-      }
-    }
-  };
-
-  // For the weekly chart with dual y-axes
-  const weeklyChartOptions = {
-    ...chartOptions,
-    scales: {
-      x: {
-        grid: {
-          color: chartColors.gridColor
-        },
-        ticks: {
-          color: chartColors.textColor
-        }
-      },
-      y: {
-        type: 'linear',
-        display: true,
-        position: 'left',
-        grid: {
-          color: chartColors.gridColor
-        },
-        ticks: {
-          color: chartColors.textColor
-        },
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: t('weeklyTab.studyTimeAxis'),
-          color: chartColors.textColor
-        }
-      },
-      y1: {
-        type: 'linear',
-        display: true,
-        position: 'right',
-        grid: {
-          drawOnChartArea: false,
-        },
-        ticks: {
-          color: chartColors.textColor
-        },
-        beginAtZero: true,
-        max: 100,
-        title: {
-          display: true,
-          text: t('weeklyTab.completionRateAxis'),
-          color: chartColors.textColor
-        }
-      }
-    }
-  };
-
-  // Custom options for doughnut chart
-  const doughnutOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    cutout: '70%',
-    plugins: {
-      legend: {
-        position: 'right',
-        labels: {
-          color: chartColors.textColor,
-          font: {
-            family: theme.fontFamily
-          }
-        }
-      }
-    }
-  };
-
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
-        <Loader size="xl" variant="dots" />
-      </Box>
-    );
-  }
-
   const { userEngagement } = stats;
-  const subjectKeysForCards = ['mathematics', 'programming', 'languages'];
 
   return (
     <Container fluid sx={{ maxWidth: '1200px', margin: '0 auto' }}>
-      <Title order={2} mb="lg">{t('pageTitle')}</Title>
-      
-      {/* Key Metrics Section */}
+      <Title order={2} mb="lg">{t('pageTitle', 'Statistics Overview')}</Title>
+
       <SimpleGrid cols={5} spacing="lg" breakpoints={[
         { maxWidth: 'md', cols: 3 },
         { maxWidth: 'sm', cols: 2 },
@@ -248,7 +141,7 @@ function StatisticsPage() {
         <StatsCard 
           icon={<IconUsers size={24} />} 
           color="blue" 
-          label={t('keyMetrics.activeUsers')}
+          label={t('keyMetrics.activeUsers', 'Active Users')}
           value={userEngagement.activeUsers} 
           total={userEngagement.totalUsers}
           percentage={(userEngagement.activeUsers / userEngagement.totalUsers * 100).toFixed(0)}
@@ -256,7 +149,7 @@ function StatisticsPage() {
         <StatsCard 
           icon={<IconSchool size={24} />} 
           color="teal" 
-          label={t('keyMetrics.completedCourses')}
+          label={t('keyMetrics.completedCourses', 'Completed Courses')}
           value={userEngagement.completedCourses} 
           total={userEngagement.totalCourses}
           percentage={(userEngagement.completedCourses / userEngagement.totalCourses * 100).toFixed(0)}
@@ -264,7 +157,7 @@ function StatisticsPage() {
         <StatsCard 
           icon={<IconBook size={24} />} 
           color="cyan" 
-          label={t('keyMetrics.chaptersProgress')}
+          label={t('keyMetrics.chaptersProgress', 'Chapters Progress')}
           value={userEngagement.completedChapters} 
           total={userEngagement.totalChapters}
           percentage={(userEngagement.completedChapters / userEngagement.totalChapters * 100).toFixed(0)}
@@ -272,7 +165,7 @@ function StatisticsPage() {
         <StatsCard 
           icon={<IconTrophy size={24} />} 
           color="grape" 
-          label={t('keyMetrics.quizSuccessRate')}
+          label={t('keyMetrics.quizSuccessRate', 'Quiz Success Rate')}
           value={userEngagement.quizzesPassed} 
           total={userEngagement.quizzesAttempted}
           percentage={(userEngagement.quizzesPassed / userEngagement.quizzesAttempted * 100).toFixed(0)}
@@ -280,13 +173,13 @@ function StatisticsPage() {
         <StatsCard 
           icon={<IconClock size={24} />} 
           color="orange" 
-          label={t('keyMetrics.studyTime')}
-          value={t('keyMetrics.studyTimeValue', { count: userEngagement.totalStudyTimeHours })} 
-          subtitle={t('keyMetrics.studyTimeSubtitle')}
+          label={t('keyMetrics.studyTime', 'Total Study Time')}
+          value={t('keyMetrics.studyTimeValue', { count: userEngagement.totalStudyTimeHours })}
+          subtitle={t('keyMetrics.studyTimeSubtitle', 'Hours')}
         />
       </SimpleGrid>
-      
-      {/* Tabs for different time periods */}      <Tabs defaultValue="daily" mt="xl" styles={{
+
+      <Tabs defaultValue="daily" mt="xl" styles={{
         tabsList: {
           borderBottom: `1px solid ${isDark ? theme.colors.dark[4] : theme.colors.gray[3]}`,
         },
@@ -298,221 +191,99 @@ function StatisticsPage() {
             borderColor: theme.colors.blue[isDark ? 5 : 7],
           },
         },
-        panel: {
-          width: '100%',
-        }
       }}>
         <Tabs.List grow>
-          <Tabs.Tab value="daily" icon={<IconChartBar size={16} />}>{t('tabs.daily')}</Tabs.Tab>
-          <Tabs.Tab value="weekly" icon={<IconChartLine size={16} />}>{t('tabs.weekly')}</Tabs.Tab>
-          <Tabs.Tab value="monthly" icon={<IconCalendar size={16} />}>{t('tabs.monthly')}</Tabs.Tab>
-          <Tabs.Tab value="subjects" icon={<IconChartPie size={16} />}>{t('tabs.subjects')}</Tabs.Tab>
-        </Tabs.List>        {/* Fixed size wrapper to prevent layout shifts */}
-        <Box sx={{ 
-          minHeight: 800, 
-          width: '100%',
-          maxWidth: '100%', 
-          margin: '0 auto',
-          position: 'relative'
-        }}>
+          <Tabs.Tab value="daily" icon={<IconChartBar size={16} />}>{t('tabs.daily', 'Daily')}</Tabs.Tab>
+          <Tabs.Tab value="weekly" icon={<IconChartLine size={16} />}>{t('tabs.weekly', 'Weekly')}</Tabs.Tab>
+          <Tabs.Tab value="monthly" icon={<IconCalendar size={16} />}>{t('tabs.monthly', 'Monthly')}</Tabs.Tab>
+          <Tabs.Tab value="subjects" icon={<IconChartPie size={16} />}>{t('tabs.subjects', 'Subjects')}</Tabs.Tab>
+        </Tabs.List>
+
+        <Box sx={{ minHeight: 450, width: '100%', position: 'relative' }}>
           <Tabs.Panel value="daily" pt="md">
-            <Grid>
-              <Grid.Col span={12}>
-                <Paper p="md" radius="md" withBorder sx={{ 
-                  height: 400, 
-                  borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
-                  backgroundColor: isDark ? theme.colors.dark[7] : theme.white
-                }}>
-                  <Title order={3} mb="md">{t('dailyTab.learningActivityTitle')}</Title>
-                  <Box sx={{ height: 300 }}>
-                    <Line 
-                      data={stats.dailyProgress} 
-                      options={chartOptions}
-                    />
-                  </Box>
-                </Paper>
-              </Grid.Col>
-            </Grid>
-            
-            <Grid mt="md">
-              <Grid.Col md={6}>
-                <Paper p="md" radius="md" withBorder sx={{ 
-                  height: 300, 
-                  borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
-                  backgroundColor: isDark ? theme.colors.dark[7] : theme.white
-                }}>
-                  <Group position="apart" mb="lg">
-                    <Title order={3}>{t('dailyTab.quizPerformanceTitle')}</Title>
-                    <Badge size="lg" color="green">{userEngagement.averageScore}{t('dailyTab.avgScoreSuffix')}</Badge>
-                  </Group>
-                  <Box sx={{ height: 200 }}>
-                    <RingProgress
-                      sections={[
-                        { value: userEngagement.quizzesPassed / userEngagement.quizzesAttempted * 100, color: 'green' },
-                      ]}
-                      label={
-                        <Text size="xl" align="center" weight={700}>
-                          {(userEngagement.quizzesPassed / userEngagement.quizzesAttempted * 100).toFixed(0)}%
-                        </Text>
-                      }
-                    />
-                  </Box>
-                </Paper>
-              </Grid.Col>
-              
-              <Grid.Col md={6}>
-                <Paper p="md" radius="md" withBorder sx={{ 
-                  height: 300, 
-                  borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
-                  backgroundColor: isDark ? theme.colors.dark[7] : theme.white
-                }}>
-                  <Title order={3} mb="lg">{t('dailyTab.activeHoursTitle')}</Title>
-                  <Box sx={{ height: 200 }}>
-                    <PolarArea 
-                      data={{
-                        labels: [t('dailyTab.polarArea.morning'), t('dailyTab.polarArea.afternoon'), t('dailyTab.polarArea.evening'), t('dailyTab.polarArea.night')],
-                        datasets: [
-                          {
-                            label: t('dailyTab.polarArea.hoursSpentLabel'),
-                            data: [3.5, 2.1, 1.8, 0.5],
-                            backgroundColor: [
-                              'rgba(255, 206, 86, 0.7)',
-                              'rgba(75, 192, 192, 0.7)',
-                              'rgba(153, 102, 255, 0.7)',
-                              'rgba(255, 159, 64, 0.7)'
-                            ],
-                          },
-                        ],
-                      }}
-                    />
-                  </Box>
-                </Paper>
-              </Grid.Col>
-            </Grid>
+            <Paper p="md" radius="md" withBorder sx={{ backgroundColor: isDark ? theme.colors.dark[7] : theme.white }}>
+              <Plot
+                data={stats.dailyProgress.datasets.map(d => ({ ...d, type: 'scatter', mode: 'lines+markers', x: stats.dailyProgress.labels, y: d.data }))}
+                layout={getPlotlyLayout(t('dailyTab.learningActivityTitle', 'Daily Learning Activity'))}
+                style={{ width: '100%', height: '400px' }}
+                useResizeHandler
+              />
+            </Paper>
           </Tabs.Panel>
 
           <Tabs.Panel value="weekly" pt="md">
-            <Grid align="center" justify="center">
-              <Grid.Col md={6} sm={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <Paper p="md" radius="md" withBorder sx={{ 
-                  height: 300, // Match other chart heights
-                  width: '100%',
-                  maxWidth: 600,
-                  margin: '0 auto',
-                  borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
-                  backgroundColor: isDark ? theme.colors.dark[7] : theme.white,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center'
-                }}>
-                  <Title order={3} mb="md">{t('weeklyTab.weeklyProgressTitle')}</Title>
-                  <Box sx={{ height: 200, width: '100%' }}>
-                    <Bar 
-                      data={stats.weeklyStats} 
-                      options={{
-                        ...weeklyChartOptions,
-                        responsive: true,
-                        maintainAspectRatio: false,
-                      }}
-                    />
-                  </Box>
-                </Paper>
-              </Grid.Col>
-              <Grid.Col md={6} sm={12}>
-                <Grid gutter="lg">
-                  <Grid.Col span={12} md={12} sm={12}>
-                    <Paper p="md" radius="md" withBorder sx={{ 
-                      height: 140, 
-                      borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
-                      backgroundColor: isDark ? theme.colors.dark[7] : theme.white,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      marginBottom: 12
-                    }}>
-                      <Title order={3} mb="md" size="h5">{t('weeklyTab.engagementTitle')}</Title>
-                      <Box sx={{ height: 80, width: '100%' }}>
-                        <Radar
-                          data={{
-                            labels: [t('weeklyTab.radarLabels.quizzes'), t('weeklyTab.radarLabels.reading'), t('weeklyTab.radarLabels.videos'), t('weeklyTab.radarLabels.practice'), t('weeklyTab.radarLabels.discussion'), t('weeklyTab.radarLabels.review')],
-                            datasets: [
-                              {
-                                label: t('weeklyTab.radarDatasetThisWeek'),
-                                data: [65, 78, 55, 70, 40, 50],
-                                backgroundColor: 'rgba(53, 162, 235, 0.2)',
-                                borderColor: 'rgb(53, 162, 235)',
-                                pointBackgroundColor: 'rgb(53, 162, 235)',
-                                pointBorderColor: '#fff',
-                                pointHoverBackgroundColor: '#fff',
-                                pointHoverBorderColor: 'rgb(53, 162, 235)'
-                              },
-                              {
-                                label: t('weeklyTab.radarDatasetLastWeek'),
-                                data: [50, 65, 40, 60, 35, 45],
-                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                                borderColor: 'rgb(255, 99, 132)',
-                                pointBackgroundColor: 'rgb(255, 99, 132)',
-                                pointBorderColor: '#fff',
-                                pointHoverBackgroundColor: '#fff',
-                                pointHoverBorderColor: 'rgb(255, 99, 132)'
-                              }
-                            ],
-                          }}
-                          options={{ ...chartOptions, maintainAspectRatio: false }}
-                        />
-                      </Box>
-                    </Paper>
-                  </Grid.Col>
-                  <Grid.Col span={12} md={12} sm={12}>
-                    <Paper p="md" radius="md" withBorder sx={{ 
-                      height: 140, 
-                      borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
-                      backgroundColor: isDark ? theme.colors.dark[7] : theme.white,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      alignItems: 'center'
-                    }}>
-                      <Title order={3} mb="md" size="h5">{t('weeklyTab.courseActivityTitle')}</Title>
-                      <Box sx={{ height: 80, width: '100%', display: 'flex', justifyContent: 'center' }}>
-                        <Doughnut 
-                          data={{
-                            labels: [t('weeklyTab.doughnutLabels.active'), t('weeklyTab.doughnutLabels.completedThisWeek'), t('weeklyTab.doughnutLabels.onHold')],
-                            datasets: [
-                              {
-                                data: [3, 1, 2],
-                                backgroundColor: [
-                                  'rgba(75, 192, 192, 0.7)',
-                                  'rgba(153, 102, 255, 0.7)',
-                                  'rgba(255, 159, 64, 0.7)'
-                                ],
-                                borderColor: [
-                                  'rgb(75, 192, 192)',
-                                  'rgb(153, 102, 255)',
-                                  'rgb(255, 159, 64)'
-                                ],
-                                borderWidth: 1
-                              }
-                            ]
-                          }}
-                          options={doughnutOptions}
-                        />
-                      </Box>
-                    </Paper>
-                  </Grid.Col>
-                </Grid>
-              </Grid.Col>
-            </Grid>
+            <Paper p="md" radius="md" withBorder sx={{ backgroundColor: isDark ? theme.colors.dark[7] : theme.white }}>
+              <Plot
+                data={[
+                  {
+                    x: stats.weeklyStats.labels,
+                    y: stats.weeklyStats.datasets.find(d => d.type === 'bar').data,
+                    type: 'bar',
+                    name: t('weeklyTab.studyTimeAxis', 'Study Time (hours)'),
+                  },
+                  {
+                    x: stats.weeklyStats.labels,
+                    y: stats.weeklyStats.datasets.find(d => d.type === 'line').data,
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    name: t('weeklyTab.completionRateAxis', 'Completion %'),
+                    yaxis: 'y2',
+                  },
+                ]}
+                layout={{
+                  ...getPlotlyLayout(t('weeklyTab.title', 'Weekly Statistics')),
+                  yaxis: { title: t('weeklyTab.studyTimeAxis', 'Study Time (hours)') },
+                  yaxis2: {
+                    title: t('weeklyTab.completionRateAxis', 'Completion %'),
+                    overlaying: 'y',
+                    side: 'right',
+                    gridcolor: 'transparent',
+                  },
+                }}
+                style={{ width: '100%', height: '400px' }}
+                useResizeHandler
+              />
+            </Paper>
           </Tabs.Panel>
 
           <Tabs.Panel value="monthly" pt="md">
-            <Paper p="md" radius="md" withBorder sx={{ 
-              height: 400, 
-              borderColor: isDark ? theme.colors.dark[4] : theme.colors.gray[3],
-              backgroundColor: isDark ? theme.colors.dark[7] : theme.white
-            }}>
+            <Paper p="md" radius="md" withBorder sx={{ backgroundColor: isDark ? theme.colors.dark[7] : theme.white }}>
+              <Plot
+                data={stats.monthlyProgress.datasets.map(d => ({ ...d, type: 'bar', x: stats.monthlyProgress.labels, y: d.data }))}
+                layout={{
+                  ...getPlotlyLayout(t('monthlyTab.title', 'Monthly Progress')),
+                  barmode: 'group',
+                }}
+                style={{ width: '100%', height: '400px' }}
+                useResizeHandler
+              />
+            </Paper>
+          </Tabs.Panel>
+
+          <Tabs.Panel value="subjects" pt="md">
+            <Paper p="md" radius="md" withBorder sx={{ backgroundColor: isDark ? theme.colors.dark[7] : theme.white }}>
+              <Plot
+                data={[{
+                  values: stats.subjectDistribution.datasets[0].data,
+                  labels: stats.subjectDistribution.labels,
+                  type: 'pie',
+                  hole: .7,
+                  textinfo: 'label+percent',
+                  insidetextorientation: 'radial',
+                }]}
+                layout={getPlotlyLayout(t('subjectsTab.title', 'Subject Distribution'))}
+                style={{ width: '100%', height: '400px' }}
+                useResizeHandler
+              />
+            </Paper>
+          </Tabs.Panel>
+        </Box>
+      </Tabs>
+    </Container>
+  );
+}
+
+export default StatisticsPage;
               <Title order={3} mb="md">{t('monthlyTab.monthlyProgressTitle')}</Title>
               <Box sx={{ height: 300 }}>
                 <Bar 

@@ -2,12 +2,20 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { Buffer } from 'buffer';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
       react(),
       tailwindcss(),
+      visualizer({
+        template: 'treemap', // or sunburst
+        open: true,
+        gzipSize: true,
+        brotliSize: true,
+        filename: 'stats.html', // analysis file
+      }),
   ],
   server: {
     port: 3000,
@@ -73,21 +81,21 @@ export default defineConfig({
   },
   build: {
     sourcemap: false, // Explicitly enable sourcemaps for builds
-    rollupOptions: {
+    /*rollupOptions: {
       output: {
         manualChunks(id) {
+          // This creates a separate chunk for each node module, which is useful for debugging bundle sizes.
           if (id.includes('node_modules')) {
-            if (id.includes('plotly.js')) return 'plotly';
-            if (id.includes('recharts')) return 'recharts';
-            if (id.includes('chart.js')) return 'chartjs';
-            if (id.includes('@mantine')) return '@mantine';
-            if (id.includes('react-icons')) return 'react-icons';
-            if (id.includes('@tabler/icons-react')) return 'tabler-icons';
-            if (id.includes('react') || id.includes('react-dom')) return 'react';
-            return 'vendor'; // All other node_modules
+            const packageNameMatch = id.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/);
+            if (packageNameMatch) {
+              const packageName = packageNameMatch[1];
+              // Create a chunk for each package.
+              // e.g. @mantine/core -> vendor-mantine-core
+              return `vendor-${packageName.replace('@', '').replace('/', '-')}`;
+            }
           }
         },
       },
-    },
+    },*/
   }
 })

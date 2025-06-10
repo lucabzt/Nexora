@@ -156,12 +156,12 @@ const generateMockData = () => {
 
 const statisticsService = {
   async getStatistics() {
-    // In a real app, you'd call the API
-    const response = await apiWithCookies.get('/statistics/');
-    return response.data;
-    
-    // For demo, return mock data
-    // return generateMockData(); // Kept for potential future use or testing
+    // For demo, return mock data by simulating an async API call
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve(generateMockData());
+      }, 500); // 500ms delay to simulate network latency
+    });
   },
 };
 
