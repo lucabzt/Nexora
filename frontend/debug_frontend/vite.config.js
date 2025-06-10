@@ -77,12 +77,14 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            // Split large libraries into their own chunks
+            if (id.includes('plotly.js')) return 'plotly';
+            if (id.includes('recharts')) return 'recharts';
+            if (id.includes('chart.js')) return 'chartjs';
             if (id.includes('@mantine')) return '@mantine';
             if (id.includes('react-icons')) return 'react-icons';
             if (id.includes('@tabler/icons-react')) return 'tabler-icons';
-            // Group other vendor libraries into a single chunk
-            return 'vendor';
+            if (id.includes('react') || id.includes('react-dom')) return 'react';
+            return 'vendor'; // All other node_modules
           }
         },
       },
