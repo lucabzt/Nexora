@@ -33,7 +33,7 @@ class Course(Base):
     title = Column(String(200), nullable=True)
     description = Column(Text, nullable=True)
     language = Column(String(50), nullable=True)
-    image_url = Column(String(200), nullable=True)
+    image_url = Column(String(2000), nullable=True)
     chapter_count = Column(Integer, nullable=True)
 
     # Relationships
