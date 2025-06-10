@@ -73,5 +73,19 @@ export default defineConfig({
   },
   build: {
     sourcemap: true, // Explicitly enable sourcemaps for builds
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            // Split large libraries into their own chunks
+            if (id.includes('@mantine')) return '@mantine';
+            if (id.includes('react-icons')) return 'react-icons';
+            if (id.includes('@tabler/icons-react')) return 'tabler-icons';
+            // Group other vendor libraries into a single chunk
+            return 'vendor';
+          }
+        },
+      },
+    },
   }
 })
