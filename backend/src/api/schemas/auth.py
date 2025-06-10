@@ -6,3 +6,4 @@ class APIResponseStatus(BaseModel):
     status: Literal["success", "error"]
     msg: str
     data: Optional[Any] = None
+
