@@ -3,7 +3,7 @@ import * as Recharts from 'recharts';
 import PaperBackground from "./PaperBackground.jsx";
 
 
-const Plot = lazy(() => import('react-plotly.js'));
+const LazyPlot = lazy(() => import('react-plotly.js'));
 // Plugins/Libraries available to the agent
 
 // 1. Latex
@@ -15,11 +15,13 @@ const plugins = "Latex, Recharts, Plot"
 const header = `(props) => {
       const {${plugins}}=props;
 `
-
+/*
 function TestComponent() {
     return (
-      <Suspense fallback={<div>Loading Plotly...</div>}>
-        <Plot
+      <Suspense fallback={
+        <div>Loading Plotly...</div>
+      } >
+        <LazyPlot
           data={[
             {
               x: [1, 2, 3],
@@ -35,9 +37,10 @@ function TestComponent() {
       </Suspense>
     );
 }
+*/
+
 
 const LazyStringToReactComponent = lazy(() => import('string-to-react-component'));
-const LazyPlot = lazy(() => import('react-plotly.js'));
 
 function AiCodeWrapper({ children }) {
     const full_react_component =

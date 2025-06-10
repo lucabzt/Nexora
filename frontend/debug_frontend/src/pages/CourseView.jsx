@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom'; // Removed useSearchParams as it wasn't used
 import { useTranslation } from 'react-i18next';
+import image_def_ka_austasuche from "../assets/wired-flat-2566-logo-discord-hover-wink.gif"
 import {
   Container,
   Title,
@@ -660,7 +661,7 @@ function CourseView() {
             ]}
           >
             {chapters.map((chapter, index) => {
-              const chapterImage = `https://source.unsplash.com/600x400/?education,study,${index + 1}`; // Dynamic per chapter
+              const chapterImage = chapter.image_url ? `url("${chapter.image_url}")` : image_def_ka_austasuche; // Dynamic per chapter
               return (
                 <Card
                   key={chapter.id || index}
@@ -799,7 +800,7 @@ function CourseView() {
                     <Card.Section>
                       <Box sx={{ position: 'relative' }}>
                         <Image
-                          src={`https://source.unsplash.com/600x400/?learning,education,${placeholderIndex + 50}`} // Add offset to avoid same images as real chapters
+                          src='url("https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png")' // Add offset to avoid same images as real chapters
                           height={180}
                           alt={t('creation.upcomingChapterAlt', { chapterNumber: placeholderIndex + 1 })}
                           sx={{ filter: 'blur(3px) grayscale(50%)' }}
