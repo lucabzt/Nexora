@@ -18,7 +18,7 @@ from src.agents.agent import StandardAgent
 
 class ImageAgent(StandardAgent):
     def __init__(self, app_name: str, session_service):
-        path_to_mcp_server = "C:\\Users\\Markus\\Nextcloud\\Projekte\\Fullstack\\TeachAI\\backend\\src\\agents\\tools\\unsplash_mcp_server.py" # "../tools/unsplash_mcp_server.py"
+        path_to_mcp_server = "../tools/unsplash_mcp_server.py" # "C:\\Users\\Markus\\Nextcloud\\Projekte\\Fullstack\\TeachAI\\backend\\src\\agents\\tools\\unsplash_mcp_server.py" # 
 
         # Define toolset for unsplash mcp server
         unsplash_mcp_toolset = MCPToolset(

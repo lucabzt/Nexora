@@ -84,11 +84,11 @@ class AgentService:
             print(f"[{task_id}] InfoAgent response: {info_response['title']}")
 
             # Get unsplash image url
-            ###image_response = await self.image_agent.run(
-            ###    user_id=user_id,
-            ###    state={},
-            ###    content=create_text_query(f"Title: {info_response['title']}, Description: {info_response['description']}")
-            ###)
+            image_response = await self.image_agent.run(
+                user_id=user_id,
+                state={},
+                content=create_text_query(f"Title: {info_response['title']}, Description: {info_response['description']}")
+            )
 
             # Update course in database
             course_db = courses_crud.update_course(
@@ -97,7 +97,7 @@ class AgentService:
                 session_id=session_id,
                 title=info_response['title'],
                 description=info_response['description'],
-                #image_url=image_response['explanation'],
+                image_url=image_response['explanation'],
                 total_time_hours=request.time_hours,
             )
             if not course_db:
