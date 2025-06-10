@@ -144,8 +144,8 @@ function CourseView() {
   }, [creationProgress, courseId, creationStatus, t]);
 
   // Calculate progress
-  const completedChapters = chapters.filter(chapter => chapter.is_completed).length;
-  const progress = chapters.length > 0 ? (completedChapters / chapters.length) * 100 : 0;
+  const completedChapters = course ? (course.chapters.length) || 0 : 0;
+  const progress = completedChapters == 0 ? 0 : (course ? (course.chapter_count / completedChapters) * 100 : 0);
   return (
     <Container size="lg" py="xl">
       {loading && (
@@ -291,14 +291,14 @@ function CourseView() {
               {creationProgress.chaptersCreated > 0 && (
                 <Group position="center" mt="md" spacing="xl">
                   <Box sx={{ textAlign: 'center' }}>
-                    <Text size="xl" weight={700}>{creationProgress.chaptersCreated}</Text>
+                    <Text size="xl" weight={700}>{(course.chapters.length)}</Text>
                     <Text size="xs" color="dimmed">{t('creation.chaptersCreatedLabel', { chaptersCreated: creationProgress.chaptersCreated, estimatedTotal: creationProgress.estimatedTotal })}</Text>
                   </Box>
                   
                   <Divider orientation="vertical" />
                   
                   <Box sx={{ textAlign: 'center' }}>
-                    <Text size="xl" weight={700}>{creationProgress.estimatedTotal}</Text>
+                    <Text size="xl" weight={700}>{course.chapter_count}</Text>
                     <Text size="xs" color="dimmed">{t('creation.estimatedTotalLabel')}</Text>
                   </Box>
                   
