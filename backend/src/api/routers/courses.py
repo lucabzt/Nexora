@@ -14,7 +14,6 @@ from ...services.notification_service import manager as ws_manager
 from ..schemas.course import (
     CourseInfo,
     CourseRequest,
-    Course as CourseSchema,
     Chapter as ChapterSchema,
     MultipleChoiceQuestion as MCQuestionSchema
 )
@@ -125,7 +124,7 @@ async def get_user_courses(
     ]
 
 
-@router.get("/{course_id}", response_model=CourseSchema)
+@router.get("/{course_id}", response_model=CourseInfo)
 async def get_course_by_id(
         course_id: int,
         current_user: User = Depends(get_current_active_user),
@@ -137,33 +136,7 @@ async def get_course_by_id(
     """
     course = await _verify_course_ownership(course_id, str(current_user.id), db)
     
-    # Build the complete course response with all required fields
-    chapters = []
-    for chapter in sorted(course.chapters, key=lambda x: x.index):
-        mc_questions = [
-            MCQuestionSchema(
-                question=q.question,
-                answer_a=q.answer_a,
-                answer_b=q.answer_b,
-                answer_c=q.answer_c,
-                answer_d=q.answer_d,
-                correct_answer=q.correct_answer,
-                explanation=q.explanation
-            ) for q in chapter.mc_questions
-        ]
-        
-        chapters.append(ChapterSchema(
-            id=chapter.id,  # Add this
-            index=chapter.index,
-            caption=chapter.caption,
-            summary=chapter.summary or "",
-            content=chapter.content,
-            mc_questions=mc_questions,
-            time_minutes=chapter.time_minutes,
-            is_completed=chapter.is_completed  # Add this
-        ))
-    
-    return CourseSchema(
+    return CourseInfo(
         course_id=int(course.id),
         total_time_hours=int(course.total_time_hours),
         status=str(course.status),
@@ -171,9 +144,7 @@ async def get_course_by_id(
         title=str(course.title),
         description=str(course.description),
         chapter_count=int(course.chapter_count) if course.chapter_count else None,
-        image_url= str(course.image_url) if course.image_url else None,
-
-        chapters=chapters
+        image_url= str(course.image_url) if course.image_url else None
     )
 
 # -------- CHAPTERS ----------
@@ -188,32 +159,41 @@ async def get_course_chapters(
     Only accessible if the course belongs to the current user.
     """
     course = await _verify_course_ownership(course_id, str(current_user.id), db)
-    
-    chapters = []
-    for chapter in sorted(course.chapters, key=lambda x: x.index):
-        mc_questions = [
-            MCQuestionSchema(
-                question=q.question,
-                answer_a=q.answer_a,
-                answer_b=q.answer_b,
-                answer_c=q.answer_c,
-                answer_d=q.answer_d,
-                correct_answer=q.correct_answer,
-                explanation=q.explanation
-            ) for q in chapter.mc_questions
-        ]
-        
-        chapters.append(ChapterSchema(
+   
+    chapters = course.chapters
+    if not chapters:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No chapters found for this course"
+        )
+    # Build chapter response with questions
+    chapters = [
+        ChapterSchema(
             id=chapter.id,  # Add this
             index=chapter.index,
             caption=chapter.caption,
             summary=chapter.summary or "",
             content=chapter.content,
-            mc_questions=mc_questions,
+            mc_questions=[
+                MCQuestionSchema(
+                    question=q.question,
+                    answer_a=q.answer_a,
+                    answer_b=q.answer_b,
+                    answer_c=q.answer_c,
+                    answer_d=q.answer_d,
+                    correct_answer=q.correct_answer,
+                    explanation=q.explanation
+                ) for q in chapter.mc_questions
+            ],
             time_minutes=chapter.time_minutes,
             is_completed=chapter.is_completed  # Add this
-        ))
-    
+        ) for chapter in chapters
+    ]
+    if not chapters:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No chapters found for this course"
+        )
     return chapters
 
 

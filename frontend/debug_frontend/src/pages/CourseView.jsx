@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom'; // Removed useSearchParams as it wasn't used
+import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import image_def_ka_austasuche from "../assets/wired-flat-2566-logo-discord-hover-wink.gif"
 import {
@@ -12,19 +12,16 @@ import {
   Progress,
   Badge,
   Button,
-  // List, // Not used
   ThemeIcon,
   Loader,
   Alert,
   Box,
   Paper,
   Image,
-  // ActionIcon, // Not used
   Grid,
   Divider,
   RingProgress,
   Overlay,
-  // useMantineTheme // Not used directly, but sx prop uses theme
 } from '@mantine/core';
 import {
   IconAlertCircle,
@@ -37,88 +34,15 @@ import {
   IconCheck,
   IconChevronRight
 } from '@tabler/icons-react';
-import { courseService } from '../api/courseService'; // Assuming Course and Chapter types are exported
-
-// Mock courseService if not available in this context
-// const courseService = {
-//   getCourseById: async (id: string): Promise<CourseType> => {
-//     console.log(`Mock API: Fetching course ${id}`);
-//     // Simulate API delay
-//     await new Promise(resolve => setTimeout(resolve, 500));
-//     // Simulate evolving course data
-//     const staticData = {
-//       course_id: parseInt(id),
-//       total_time_hours: 2,
-//       image_url: "https://plus.unsplash.com/premium_photo-1673468922221-4cae4d1aa748?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-//       session_id: "mock-session-123",
-//     };
-
-//     // Simulate different stages based on a counter or courseId
-//     // This is a simplified mock. A real test would require more dynamic data.
-//     if (! (window as any).mockCoursePolls) (window as any).mockCoursePolls = 0;
-//     (window as any).mockCoursePolls++;
-//     const pollCount = (window as any).mockCoursePolls;
-
-//     if (pollCount < 2) {
-//       return {
-//         ...staticData,
-//         status: 'CourseStatus.CREATING',
-//         title: null,
-//         description: null,
-//         chapter_count: null,
-//         chapters: [],
-//       };
-//     } else if (pollCount < 4) {
-//       return {
-//         ...staticData,
-//         status: 'CourseStatus.CREATING',
-//         title: 'My Awesome AI Course',
-//         description: 'A deeply engaging course created by AI.',
-//         chapter_count: 5,
-//         chapters: [
-//           { id: '1', caption: 'Chapter 1: Introduction', summary: 'Summary of Ch1', is_completed: false, mc_questions: [{id: 'q1', question: 'Q?'}], content: '' },
-//         ],
-//       };
-//     } else if (pollCount < 6) {
-//       return {
-//         ...staticData,
-//         status: 'CourseStatus.CREATING',
-//         title: 'My Awesome AI Course',
-//         description: 'A deeply engaging course created by AI.',
-//         chapter_count: 5,
-//         chapters: [
-//           { id: '1', caption: 'Chapter 1: Introduction', summary: 'Summary of Ch1', is_completed: true, mc_questions: [{id: 'q1', question: 'Q?'}], content: '' },
-//           { id: '2', caption: 'Chapter 2: Core Concepts', summary: 'Summary of Ch2', is_completed: false, mc_questions: [], content: '' },
-//           { id: '3', caption: 'Chapter 3: Advanced Topics', summary: 'Summary of Ch3', is_completed: false, mc_questions: [], content: '' },
-//         ],
-//       };
-//     } else {
-//       return {
-//         ...staticData,
-//         status: 'CourseStatus.FINISHED',
-//         title: 'My Awesome AI Course',
-//         description: 'A deeply engaging course created by AI.',
-//         chapter_count: 5,
-//         chapters: [
-//           { id: '1', caption: 'Chapter 1: Introduction', summary: 'Summary of Ch1', is_completed: true, mc_questions: [{id: 'q1', question: 'Q?'}], content: '' },
-//           { id: '2', caption: 'Chapter 2: Core Concepts', summary: 'Summary of Ch2', is_completed: false, mc_questions: [], content: '' },
-//           { id: '3', caption: 'Chapter 3: Advanced Topics', summary: 'Summary of Ch3', is_completed: false, mc_questions: [], content: '' },
-//           { id: '4', caption: 'Chapter 4: Practical Applications', summary: 'Summary of Ch4', is_completed: false, mc_questions: [], content: '' },
-//           { id: '5', caption: 'Chapter 5: Conclusion & Next Steps', summary: 'Summary of Ch5', is_completed: false, mc_questions: [], content: '' },
-//         ],
-//       };
-//     }
-//   }
-// };
-
+import { courseService } from '../api/courseService';
 
 function CourseView() {
   const { t } = useTranslation('courseView');
   const { courseId } = useParams();
   const navigate = useNavigate();
-  // const theme = useMantineTheme(); // Not directly used, sx prop uses theme from context
 
   const [course, setCourse] = useState(null);
+  const [chapters, setChapters] = useState([]); // ADDED: Dedicated state for chapters
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -141,27 +65,32 @@ function CourseView() {
       try {
         setLoading(true);
         console.log('Fetching initial course data for ID:', courseId);
-        const courseData = await courseService.getCourseById(courseId);
+        const [courseData, currentChaptersData] = await Promise.all([ // CHANGED: Renamed variable for clarity
+          courseService.getCourseById(courseId),
+          courseService.getCourseChapters(courseId)
+        ]);
+        const currentChapters = currentChaptersData || []; // Ensure chapters is an array
+
         setCourse(courseData);
+        setChapters(currentChapters); // ADDED: Populate the new chapters state
         setError(null);
 
         // Initialize creationProgressUI if course is in creating state
         if (courseData.status === 'CourseStatus.CREATING') {
-          const currentChapters = courseData.chapters || [];
           const totalChapters = courseData.chapter_count || 0;
           const progressPercent = totalChapters > 0 ? Math.round((currentChapters.length / totalChapters) * 100) : 0;
 
           setCreationProgressUI({
-            statusText: t('creation.statusCreatingChapters', { 
-              chaptersCreated: currentChapters.length, 
-              totalChapters: totalChapters || t('creation.unknownTotal') 
+            statusText: t('creation.statusCreatingChapters', {
+              chaptersCreated: currentChapters.length,
+              totalChapters: totalChapters || t('creation.unknownTotal')
             }),
             percentage: progressPercent,
             chaptersCreated: currentChapters.length,
             estimatedTotal: totalChapters,
           });
         }
-        console.log('Initial course data fetched:', courseData);
+        console.log('Initial data fetched:', courseData, 'Chapters:', currentChapters);
       } catch (err) {
         setError(t('errors.loadFailed'));
         console.error('Error fetching initial course:', err);
@@ -175,19 +104,25 @@ function CourseView() {
 
   // Polling effect for course creation
   useEffect(() => {
+    // Only poll if course exists and is in CREATING status
     if (!courseId || !course || course.status !== 'CourseStatus.CREATING') {
-      return; // Only poll if course exists and is in CREATING status
+      return;
     }
 
     console.log('Starting polling for course ID:', courseId, 'current status:', course.status);
     const pollInterval = setInterval(async () => {
       try {
-        const polledData = await courseService.getCourseById(courseId);
-        console.log('Polled course data:', polledData);
-        setCourse(polledData); // Update the main course state
+        const [polledData, polledChaptersData] = await Promise.all([ // CHANGED: Renamed variable
+          courseService.getCourseById(courseId),
+          courseService.getCourseChapters(courseId)
+        ]);
+        const currentChapters = polledChaptersData || [];
 
-        const currentChapters = polledData.chapters || [];
-        const totalChapters = polledData.chapter_count || 0; // Use 0 if null/undefined
+        console.log('Polled course data:', polledData, 'Polled chapters:', currentChapters);
+        setCourse(polledData);         // Update the main course state
+        setChapters(currentChapters);  // ADDED: Update the chapters state on each poll
+
+        const totalChapters = polledData.chapter_count || 0;
         const progressPercent = totalChapters > 0 ? Math.round((currentChapters.length / totalChapters) * 100) : 0;
 
         if (polledData.status === 'CourseStatus.FINISHED') {
@@ -201,53 +136,54 @@ function CourseView() {
           clearInterval(pollInterval);
         } else if (polledData.status === 'CourseStatus.CREATING') {
           setCreationProgressUI({
-            statusText: t('creation.statusCreatingChapters', { 
-                chaptersCreated: currentChapters.length, 
-                totalChapters: totalChapters || t('creation.unknownTotal') 
+            statusText: t('creation.statusCreatingChapters', {
+                chaptersCreated: currentChapters.length,
+                totalChapters: totalChapters || t('creation.unknownTotal')
             }),
             percentage: progressPercent,
             chaptersCreated: currentChapters.length,
             estimatedTotal: totalChapters,
           });
         } else {
-          // Course status is neither CREATING nor FINISHED (e.g., FAILED)
           console.log('Course status changed to:', polledData.status, '. Stopping poll.');
           clearInterval(pollInterval);
-          // Optionally update UI for other statuses like FAILED
         }
       } catch (err) {
         console.error('Error polling course data:', err);
-        // Decide if polling should stop or continue on error.
-        // For now, it continues, but you might want to stop after N retries or set an error.
-        // setError(t('errors.pollFailed')); // This might overwrite other errors.
       }
-    }, 2000); // Poll every 2 seconds
+    }, 2000);
 
     return () => {
       console.log('Cleaning up poll interval for course ID:', courseId);
       clearInterval(pollInterval);
     };
-  }, [course, courseId, t]); // Re-run if course object, courseId, or t changes
+  }, [course, courseId, t]); // The 'chapters' state is not needed here as it's an outcome, not a trigger for this effect.
 
-  const chapters = useMemo(() => course?.chapters || [], [course]);
-  
+  // REMOVED: This useMemo is no longer needed as we have a dedicated `chapters` state
+  // const chapters = useMemo(() => course?.chapters || [], [course]);
+
   // Learning progress calculation
   const { learningPercentage, actualCompletedLearningChapters, totalCourseChaptersForLearning } = useMemo(() => {
-    if (!course) {
+    // CHANGED: This logic now uses the separate `chapters` state
+    if (!course || !chapters) {
       return { learningPercentage: 0, actualCompletedLearningChapters: 0, totalCourseChaptersForLearning: 0 };
     }
-    const learnableChapters = course.chapters || [];
-    const completedCount = learnableChapters.filter(ch => ch.is_completed).length;
-    const totalCount = course.chapter_count || learnableChapters.length || 0;
+    const completedCount = chapters.filter(ch => ch.is_completed).length;
+    // We still get the total count from the main course object, which is good practice.
+    const totalCount = course.chapter_count || chapters.length || 0;
     const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-    return { 
-      learningPercentage: percentage, 
-      actualCompletedLearningChapters: completedCount, 
-      totalCourseChaptersForLearning: totalCount 
+    return {
+      learningPercentage: percentage,
+      actualCompletedLearningChapters: completedCount,
+      totalCourseChaptersForLearning: totalCount
     };
-  }, [course]);
+  }, [course, chapters]); // CHANGED: Dependency array now includes `chapters`
 
-  if (loading && !course) { // Show main loader only if no course data yet
+  // ... THE REST OF THE JSX REMAINS EXACTLY THE SAME ...
+  // No changes are needed in the return() statement because it was already
+  // correctly using the `chapters` variable, which now correctly points to your state.
+
+  if (loading && !course) {
     return (
       <Container size="lg" py="xl">
         <Box sx={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
@@ -257,7 +193,7 @@ function CourseView() {
     );
   }
 
-  if (error && !course) { // Show main error only if no course data (critical failure)
+  if (error && !course) {
     return (
       <Container size="lg" py="xl">
         <Alert
@@ -271,17 +207,16 @@ function CourseView() {
       </Container>
     );
   }
-  
-  // If there's a non-critical error but we have some course data, we can show it along with the course
+
   const showNonCriticalError = error && course;
 
   return (
     <Container size="lg" py="xl">
       {showNonCriticalError && (
-         <Alert 
+         <Alert
          icon={<IconAlertCircle size={16} />}
-         title={t('errors.genericTitle')} 
-         color="orange" 
+         title={t('errors.genericTitle')}
+         color="orange"
          mb="lg"
          withCloseButton
          onClose={() => setError(null)}
@@ -290,7 +225,6 @@ function CourseView() {
        </Alert>
       )}
 
-      {/* Creation In Progress Section */}
       {course?.status === "CourseStatus.CREATING" && (
         <Paper
           radius="md"
@@ -331,10 +265,10 @@ function CourseView() {
               </Badge>
               <Title
                 order={2}
-                sx={() => ({ // theme implicitly available in sx
+                sx={{
                   fontWeight: 800,
                   fontSize: '1.8rem',
-                })}
+                }}
               >
                 {t('creation.title')}
               </Title>
@@ -366,12 +300,12 @@ function CourseView() {
               radius="xl"
               color={creationProgressUI.percentage === 100 ? 'green' : 'teal'}
               animate={creationProgressUI.percentage > 0 && creationProgressUI.percentage < 100}
-              sx={() => ({ // theme implicitly available in sx
+              sx={{
                 height: 12,
                 '& .mantine-Progress-bar': creationProgressUI.percentage !== 100 ? {
                   background: 'linear-gradient(90deg, #36D1DC 0%, #5B86E5 100%)'
                 } : {}
-              })}
+              }}
             />
           </Box>
 
@@ -404,7 +338,7 @@ function CourseView() {
                   variant="gradient"
                   gradient={{ from: 'teal', to: 'green' }}
                   leftIcon={<IconArrowRight size={16} />}
-                  onClick={() => window.location.reload()} // Reload to get fresh state post-creation
+                  onClick={() => window.location.reload()}
                 >
                   {t('buttons.viewCompletedCourse')}
                 </Button>
@@ -437,10 +371,8 @@ function CourseView() {
         </Paper>
       )}
 
-      {/* Course Content Section - Render if course data is available */}
       {course && (
         <>
-          {/* Course Hero Section */}
           <Paper
             radius="md"
             p={0}
@@ -553,8 +485,6 @@ function CourseView() {
               <Grid.Col md={5} sx={{ position: 'relative' }}>
                 <Image
                   src={course.image_url || "https://plus.unsplash.com/premium_photo-1673468922221-4cae4d1aa748?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"}
-                  
-                  
                   height={400}
                   sx={{
                     objectFit: 'cover',
@@ -591,7 +521,6 @@ function CourseView() {
             </Grid>
           </Paper>
 
-          {/* Learning journey header */}
           <Group position="apart" align="center" mb="xl">
             <Box>
               <Title
@@ -637,7 +566,6 @@ function CourseView() {
             )}
           </Group>
 
-          {/* Show creation progress for chapters if no chapters loaded yet during creation */}
           {course.status === "CourseStatus.CREATING" && chapters.length === 0 && creationProgressUI.estimatedTotal === 0 && (
             <Paper withBorder p="xl" radius="md" mb="lg" sx={(theme) => ({
               backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.colors.gray[0],
@@ -651,7 +579,6 @@ function CourseView() {
             </Paper>
           )}
 
-          {/* Chapters Grid */}
           <SimpleGrid
             cols={3}
             spacing="lg"
@@ -661,7 +588,7 @@ function CourseView() {
             ]}
           >
             {chapters.map((chapter, index) => {
-              const chapterImage = chapter.image_url ? `url("${chapter.image_url}")` : image_def_ka_austasuche; // Dynamic per chapter
+              const chapterImage = chapter.image_url ? `url("${chapter.image_url}")` : image_def_ka_austasuche;
               return (
                 <Card
                   key={chapter.id || index}
@@ -683,7 +610,7 @@ function CourseView() {
                 >
                   <Card.Section sx={{ position: 'relative' }}>
                     <Image
-                      src={chapterImage} // Using the dynamic one
+                      src={chapterImage}
                       height={180}
                       alt={chapter.caption || t('chapters.defaultCaptionText', { chapterNumber: index + 1 })}
                     />
@@ -735,7 +662,7 @@ function CourseView() {
                       weight={700}
                       size="lg"
                       lineClamp={2}
-                      sx={{ minHeight: '3.2rem' }} // Ensure consistent height
+                      sx={{ minHeight: '3.2rem' }}
                     >
                       {chapter.caption || t('chapters.defaultTitleText', { chapterNumber: index + 1 })}
                     </Text>
@@ -745,7 +672,7 @@ function CourseView() {
                       size="sm"
                       mt="md"
                       lineClamp={3}
-                      sx={{ flex: 1, minHeight: '4.5rem' }} // Ensure consistent height
+                      sx={{ flex: 1, minHeight: '4.5rem' }}
                     >
                       {chapter.summary || t('chapters.defaultSummaryText')}
                     </Text>
@@ -758,9 +685,7 @@ function CourseView() {
                     mt="md"
                     rightIcon={chapter.is_completed ? <IconCircleCheck size={16} /> : <IconChevronRight size={16} />}
                     onClick={() => navigate(`/dashboard/courses/${courseId}/chapters/${chapter.id}`)}
-                    // Disable button for non-first chapters if course is still creating them.
-                    // Allow first chapter to be clickable as soon as it appears.
-                    disabled={course.status === "CourseStatus.CREATING" && index > (chapters.length -1) /* This logic might need refinement based on how "active" chapter is determined during creation */ }
+                    disabled={course.status === "CourseStatus.CREATING" && index > (chapters.length -1) }
                     sx={(theme) =>
                       chapter.is_completed
                         ? {}
@@ -777,7 +702,6 @@ function CourseView() {
               );
             })}
 
-            {/* Placeholder cards for chapters being created */}
             {course.status === "CourseStatus.CREATING" &&
               creationProgressUI.estimatedTotal > chapters.length &&
               Array.from({ length: creationProgressUI.estimatedTotal - chapters.length }).map((_,idx) => {
@@ -800,7 +724,7 @@ function CourseView() {
                     <Card.Section>
                       <Box sx={{ position: 'relative' }}>
                         <Image
-                          src='url("https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png")' // Add offset to avoid same images as real chapters
+                          src='url("https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png")'
                           height={180}
                           alt={t('creation.upcomingChapterAlt', { chapterNumber: placeholderIndex + 1 })}
                           sx={{ filter: 'blur(3px) grayscale(50%)' }}
@@ -829,7 +753,6 @@ function CourseView() {
                     <Box mt="md" sx={{ flex: 1 }}>
                       <Text weight={500} color="dimmed">{t('creation.placeholderChapterTitle', { chapterNumber: placeholderIndex + 1 })}</Text>
                       <Box mt="sm" mb="lg">
-                         {/* Mimic text loading */}
                         <Box sx={{height: '1rem', width: '80%', backgroundColor: 'rgba(128,128,128,0.2)', borderRadius: '4px', marginBottom: '0.5rem'}} />
                         <Box sx={{height: '1rem', width: '60%', backgroundColor: 'rgba(128,128,128,0.2)', borderRadius: '4px', marginBottom: '0.5rem'}} />
                         <Box sx={{height: '1rem', width: '70%', backgroundColor: 'rgba(128,128,128,0.2)', borderRadius: '4px'}} />

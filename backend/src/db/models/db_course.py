@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Boolean, Column, Integer, String, Text, DateTime, ForeignKey, Enum
+from sqlalchemy import Boolean, Column, Integer, String, Text, DateTime, ForeignKey, Enum, Index
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from ...db.database import Base
@@ -22,7 +22,7 @@ class Course(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     
     # Attributes from request
-    user_id = Column(String(50), ForeignKey("users.id"), nullable=False)
+    user_id = Column(String(50), ForeignKey("users.id"), nullable=False, index=True)
     query = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     status = Column(Enum(CourseStatus), nullable=False, default=CourseStatus.CREATING)
@@ -48,7 +48,8 @@ class Chapter(Base):
     __tablename__ = "chapters"
     
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
+    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False, index=True)
+
     index = Column(Integer, nullable=False)
     caption = Column(String(300), nullable=False)
     summary = Column(Text)
@@ -60,6 +61,11 @@ class Chapter(Base):
     # Relationships
     course = relationship("Course", back_populates="chapters")
     mc_questions = relationship("MultipleChoiceQuestion", back_populates="chapter", cascade="all, delete-orphan")
+
+    # This makes ordering chapters by their index for a given course very fast.
+    __table_args__ = (
+        Index('ix_chapter_course_id_index', 'course_id', 'index'),
+    )
 
 
 class MultipleChoiceQuestion(Base):

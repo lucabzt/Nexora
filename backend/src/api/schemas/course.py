@@ -43,18 +43,3 @@ class CourseInfo(BaseModel):
     description: Optional[str] = None
     chapter_count: Optional[int] = None
     image_url: Optional[str] = None
-
-class Course(BaseModel):
-    """Schema for a course."""
-    course_id: int
-    total_time_hours: int
-    status: str
-
-    # Information from the agent
-    title: Optional[str] = None
-    description: Optional[str] = None
-    chapter_count: Optional[int] = None
-    image_url: Optional[str] = None
-
-    # Chapters in the course
-    chapters: List[Chapter]
