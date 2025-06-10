@@ -95,6 +95,10 @@ export default defineConfig({
             }
           }
         },
+        //manualChunks: {
+        //  plotly: ['react-plotly.js', 'plotly.js'],
+        //  stringToReactComponent: ['string-to-react-component'],
+        //},
       },
     },*/
   }
