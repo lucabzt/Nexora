@@ -118,7 +118,7 @@ async def get_user_courses(
 
             title=str(course.title),
             description=str(course.description),
-            chapter_count=int(course.chapter_count) if course.chapter_count else None
+            chapter_count=int(course.chapter_count) if course.chapter_count else None,
             image_url= str(course.image_url) if course.image_url else None
 
         ) for course in courses
