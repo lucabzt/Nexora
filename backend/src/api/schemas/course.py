@@ -42,6 +42,7 @@ class CourseInfo(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     chapter_count: Optional[int] = None
+    image_url: Optional[str] = None
 
 class Course(BaseModel):
     """Schema for a course."""
