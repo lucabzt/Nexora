@@ -53,6 +53,7 @@ class Course(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     chapter_count: Optional[int] = None
-    
+    image_url: Optional[str] = None
+
     # Chapters in the course
     chapters: List[Chapter]
