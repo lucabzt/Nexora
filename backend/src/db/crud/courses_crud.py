@@ -25,7 +25,6 @@ def get_courses_by_status(db: Session, status: CourseStatus) -> List[Course]:
 
 
 def create_new_course(db: Session, user_id: str, total_time_hours: int, query_: str,
-                      picture_ids: List[int] = [], document_ids: List[int] = [],
                     status: CourseStatus = CourseStatus.CREATING) -> Course:
     """Create a new course"""
     db_course = Course(
@@ -33,8 +32,6 @@ def create_new_course(db: Session, user_id: str, total_time_hours: int, query_: 
         total_time_hours=total_time_hours,
         query=query_,
         status=status,
-        document_ids=document_ids,
-        picture_ids=picture_ids
     )
 
     db.add(db_course)

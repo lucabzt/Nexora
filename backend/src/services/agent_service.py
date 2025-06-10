@@ -102,10 +102,22 @@ class AgentService:
             )
             if not course_db:
                 raise ValueError(f"Failed to update course in DB for user {user_id} with course_id {course_id}")
-            print(f"[{task_id}] Course created in DB with ID: {course_id}")
+            print(f"[{task_id}] Course updated in DB with ID: {course_id}")
 
             # Send Notification to WebSocket
             ###await ws_manager.send_json_message(task_id, {"type": "course_info", "data": "updating course info"})
+
+            init_state = CourseState(
+                query=request.query,
+                time_hours=request.time_hours,
+                chapters=[],
+                chapters_str="",
+                code="",
+                errors=""
+            )
+            # Create initial state for the course
+            self.state_manager.create_state(user_id, course_id, init_state)
+            print(f"[{task_id}] Initial state created for course {course_id}.")
 
  
             # Bind documents to this course
@@ -209,6 +221,7 @@ class AgentService:
             print(f"[{task_id}] Sent completion signal.")
 
         except Exception as e:
+            
             error_message = f"Course creation failed: {str(e)}"
             print(f"[{task_id}] Error during course creation: {error_message}")
             # Log detailed error traceback here if possible, e.g., import traceback; traceback.print_exc()
@@ -220,7 +233,8 @@ class AgentService:
                     print(f"[{task_id}] Additionally, failed to update course status to FAILED: {db_error}")
             else:
                 print(f"[{task_id}] No course_db to update status, error occurred before course creation.")
-
+            raise e
+        
             #await ws_manager.send_json_message(task_id, {
             #    "type": "error",
             #    "data": {"message": error_message, "course_id": course_id if course_db else None}

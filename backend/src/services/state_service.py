@@ -45,6 +45,7 @@ class StateService:
             self.state[user_id][course_id].chapters_str += chapter_str
 
     def get_state(self, user_id: str, course_id: int) -> dict[str, Any]:
+        print(f"Getting state for user {user_id} and course {course_id}")
         return self.state[user_id][course_id].model_dump()
 
     def create_state(self, user_id: str, course_id: int, state: CourseState):

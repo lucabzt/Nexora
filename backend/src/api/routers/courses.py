@@ -63,8 +63,6 @@ async def create_course_request(
         user_id=str(current_user.id),
         total_time_hours=course_request.time_hours,
         query_=course_request.query,
-        picture_ids=course_request.picture_ids,
-        document_ids=course_request.document_ids,
         status=CourseStatus.CREATING  # Set initial status to CREATING
     )
     if not course:

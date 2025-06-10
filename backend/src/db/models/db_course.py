@@ -27,8 +27,6 @@ class Course(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     status = Column(Enum(CourseStatus), nullable=False, default=CourseStatus.CREATING)
     total_time_hours = Column(Integer, nullable=False)
-    document_ids: List[int] = Field(default=[], description="Document IDs")
-    picture_ids: List[int] = Field(default=[], description="Picture IDs")
 
     # Attributes filled by the agent
     session_id = Column(String(50), unique=True, index=True, nullable=True)
