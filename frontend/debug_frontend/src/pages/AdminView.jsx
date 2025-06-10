@@ -74,11 +74,6 @@ function AdminView() {
     admins: 0
   });
 
-  // Fetch users on component mount
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
   // Update filtered users when search term or active tab changes
   useEffect(() => {
     filterUsers();

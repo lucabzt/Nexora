@@ -45,7 +45,7 @@ function CourseView() {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const isCreating = searchParams.get('creating') === 'true';
+
   const theme = useMantineTheme();
   
   const [course, setCourse] = useState(null);
@@ -53,28 +53,31 @@ function CourseView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Streaming creation states
-  const [isStreamingActive, setIsStreamingActive] = useState(isCreating);
+  const [creationStatus, setCreationStatus] = useState(null);
   const [creationProgress, setCreationProgress] = useState({
     status: t('creation.statusInitializing'),
-    progress: 5,
+    progress: 0,
     chaptersCreated: 0,
-    estimatedTotal: 3
+    estimatedTotal: 0
   });
+
 
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
         setLoading(true);
         const courseData = await courseService.getCourseById(courseId);
+        
+        console.log('Fetched course data:', courseData);
         setCourse(courseData);
+        
+        setCreationStatus(courseData.status);
+        console.log('Course creation status:', courseData.status);
+
+
         setChapters(courseData.chapters || []);
         setError(null);
-        
-        // If course has chapters, creation is complete
-        if (courseData.chapters && courseData.chapters.length > 0) {
-          setIsStreamingActive(false);
-        }
+    
       } catch (error) {
         setError(t('errors.loadFailed'));
         console.error('Error fetching course:', error);
@@ -82,14 +85,16 @@ function CourseView() {
         setLoading(false);
       }
     };
-
     fetchCourseData();
+
+    console.log('CourseView mounted, fetching course data for ID:', courseId, 'creationStatus:', creationStatus);
     
     // If we're in creation mode, set up polling to check for new chapters
-    if (isCreating) {
+    if (creationStatus === 'CourseStatus.CREATING') {
       const pollInterval = setInterval(async () => {
         try {
           const courseData = await courseService.getCourseById(courseId);
+    
           if (courseData) {
             setCourse(courseData);
             const newChapters = courseData.chapters || [];
@@ -97,40 +102,43 @@ function CourseView() {
             
             // Update creation progress
             if (newChapters.length > 0) {
-              const estimatedTotal = Math.max(3, Math.ceil((courseData.total_time_hours || 2) * 1.5));
-              const progress = Math.min(90, (newChapters.length / estimatedTotal) * 85 + 15);
+              const totalChapters = courseData.chapter_count || 1;
+              const progress = (totalChapters / newChapters.length) * 100;
               
               setCreationProgress({
-                status: newChapters.length === estimatedTotal 
-                  ? t('creation.statusFinalizing')
-                  : t('creation.statusCreatingChapters', { chaptersCreated: newChapters.length, estimatedTotal }),
+                status: t('creation.statusCreatingChapters', { chaptersCreated: newChapters.length, totalChapters: totalChapters }),
                 progress: Math.round(progress),
                 chaptersCreated: newChapters.length,
-                estimatedTotal: estimatedTotal
+                estimatedTotal: totalChapters
               });
+
+              console.log('Current status:', courseData.status);
               
               // Check if creation is complete (course status is finished)
-              if (courseData.status === 'finished' || newChapters.length >= estimatedTotal) {
+              if (courseData.status === 'CourseStatus.FINISHED') {
+                console.log('Course creation completed');
+
+
                 setCreationProgress({
                   status: t('creation.statusComplete'),
                   progress: 100,
                   chaptersCreated: newChapters.length,
-                  estimatedTotal: estimatedTotal
+                  estimatedTotal: totalChapters
                 });
-                setIsStreamingActive(false);
                 clearInterval(pollInterval);
               }
             }
           }
         } catch (error) {
           console.error('Error polling course data:', error);
+          setError(t('errors.loadFailed'));
         }
       }, 2000); // Poll every 2 seconds
       
       // Cleanup interval on unmount
       return () => clearInterval(pollInterval);
     }
-  }, [courseId, isCreating]);
+  }, [creationProgress, courseId, creationStatus, t]);
 
   // Calculate progress
   const completedChapters = chapters.filter(chapter => chapter.is_completed).length;
@@ -156,7 +164,7 @@ function CourseView() {
 
       {!loading && !error && (
         <>          {/* {t('creation.title')} Section */}
-          {isStreamingActive && (
+          {creationStatus === "creating" && (
             <Paper 
               radius="md" 
               p="xl" 
@@ -328,7 +336,7 @@ function CourseView() {
                           {t('buttons.backToDashboard')}
                         </Button>
                         
-                        {isStreamingActive ? (
+                        {creationStatus === "creating" ? (
                           <Badge size="lg" color="blue" variant="filled" px="md" py="sm">
                             <IconClock size={16} style={{ marginRight: 6 }} />
                             {t('creation.statusCreatingCourse')}
@@ -396,7 +404,7 @@ function CourseView() {
                         </Box>
                       </Group>
                       
-                      {!isStreamingActive && chapters.length > 0 && (
+                      {!creationStatus === "creating" && chapters.length > 0 && (
                         <Button 
                           size="md"
                           variant="gradient"
@@ -466,7 +474,7 @@ function CourseView() {
                   </Text>
                 </Box>
                 
-                {!isStreamingActive && chapters.length > 0 && (
+                {!creationStatus === "creating" && chapters.length > 0 && (
                   <Group spacing="xs">
                     <ThemeIcon 
                       size={34} 
@@ -496,7 +504,7 @@ function CourseView() {
               </Group>
               
               {/* Show creation progress for chapters */}
-              {isStreamingActive && chapters.length === 0 && (
+              {creationStatus === "creating" && chapters.length === 0 && (
                 <Paper withBorder p="xl" radius="md" mb="lg" sx={(theme) => ({
                   backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.colors.gray[0],
                   textAlign: 'center',
@@ -615,7 +623,7 @@ function CourseView() {
                         mt="md"
                         rightIcon={chapter.is_completed ? <IconCircleCheck size={16} /> : <IconChevronRight size={16} />}
                         onClick={() => navigate(`/dashboard/courses/${courseId}/chapters/${chapter.id}`)}
-                        disabled={isStreamingActive && index > 0}
+                        disabled={creationStatus === "creating" && index > 0}
                         sx={(theme) => 
                           chapter.is_completed 
                             ? {} 
@@ -633,7 +641,7 @@ function CourseView() {
                 })}
                 
                 {/* Show placeholders for chapters being created */}
-                {isStreamingActive && creationProgress.estimatedTotal > chapters.length && 
+                {creationStatus === "creating" && creationProgress.estimatedTotal > chapters.length && 
                   Array.from({ length: creationProgress.estimatedTotal - chapters.length }).map((_, index) => (
                     <Card 
                       key={`placeholder-${index}`} 

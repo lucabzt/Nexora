@@ -47,7 +47,7 @@ class AgentService:
         self.image_agent = ImageAgent(self.app_name, self.session_service)
 
 
-    async def create_course(self, user_id: str, request: CourseRequest, db: Session, task_id: str, ws_manager: WebSocketConnectionManager):
+    async def create_course(self, user_id: str, course_id: int, request: CourseRequest, db: Session, task_id: str, ws_manager: WebSocketConnectionManager):
         """
         Main function for handling the course creation logic. Uses WebSocket for progress.
 
@@ -84,83 +84,84 @@ class AgentService:
             print(f"[{task_id}] InfoAgent response: {info_response['title']}")
 
             # Get unsplash image url
-            image_response = await self.image_agent.run(
-                user_id=user_id,
-                state={},
-                content=create_text_query(f"Title: {info_response['title']}, Description: {info_response['description']}")
-            )
+            ###image_response = await self.image_agent.run(
+            ###    user_id=user_id,
+            ###    state={},
+            ###    content=create_text_query(f"Title: {info_response['title']}, Description: {info_response['description']}")
+            ###)
 
-            # Create course in database
-            course_db = courses_crud.create_course(
+            # Update course in database
+            course_db = courses_crud.update_course(
                 db=db,
+                course_id=course_id,
                 session_id=session_id,
-                user_id=user_id,
                 title=info_response['title'],
                 description=info_response['description'],
-                image_url=image_response['explanation'],
+                #image_url=image_response['explanation'],
                 total_time_hours=request.time_hours,
-                status=CourseStatus.CREATING
             )
-            print(f"[{task_id}] Course created in DB with ID: {course_db.id}")
+            if not course_db:
+                raise ValueError(f"Failed to update course in DB for user {user_id} with course_id {course_id}")
+            print(f"[{task_id}] Course created in DB with ID: {course_id}")
 
-            # Create initial state
-            init_state = CourseState(
-                query=request.query,
-                time_hours=request.time_hours,
-            )
-            self.state_manager.create_state(user_id, course_db.id, init_state)
+            # Send Notification to WebSocket
+            ###await ws_manager.send_json_message(task_id, {"type": "course_info", "data": "updating course info"})
 
+ 
             # Bind documents to this course
             for doc in docs:
-                documents_crud.update_document(db, int(doc.id), course_id=course_db.id)
+                documents_crud.update_document(db, int(doc.id), course_id=course_id)
             for img in images:
-                images_crud.update_image(db, int(img.id), course_id=course_db.id)
+                images_crud.update_image(db, int(img.id), course_id=course_id)
             print(f"[{task_id}] Documents and images bound to course.")
 
-            # Stream the course info first
-            course_info_data = {
-                "course_id": course_db.id,
-                "title": course_db.title,
-                "description": course_db.description,
-                "session_id": course_db.session_id,
-                "total_time_hours": course_db.total_time_hours,
-                "status": course_db.status.value
-            }
-            await ws_manager.send_json_message(task_id, {"type": "course_info", "data": course_info_data})
-            print(f"[{task_id}] Sent course_info update.")
+            # Notify WebSocket about course info
+            ###await ws_manager.send_json_message(task_id, {"type": "course_info", "data": course_info_data})
+            ###print(f"[{task_id}] Sent course_info update.")
 
             # Query the planner agent
             response_planner = await self.planner_agent.run(
                 user_id=user_id,
-                state=self.state_manager.get_state(user_id=user_id, course_id=course_db.id),
+                state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
                 content=self.query_service.get_planner_query(request, docs, images),
-                debug=False
+                debug=True
             )
+            if not response_planner or "chapters" not in response_planner:
+                raise ValueError(f"PlannerAgent did not return valid chapters for user {user_id} with course_id {course_id}")
             print(f"[{task_id}] PlannerAgent responded with {len(response_planner.get('chapters', []))} chapters.")
 
+            # Update course in database
+            course_db = courses_crud.update_course(
+                db=db,
+                course_id=course_id,
+                chapter_count=len(response_planner["chapters"])
+            )
+            # Send notification to WebSocket that course info is being updated
+            ###await ws_manager.send_json_message(task_id, {"type": "course_info", "data": "updating course info"})
+
             # Save chapters to state
-            self.state_manager.save_chapters(user_id, course_db.id, response_planner["chapters"])
+            self.state_manager.save_chapters(user_id, course_id, response_planner["chapters"])
 
             # Process each chapter and stream as it's created
             for idx, topic in enumerate(response_planner["chapters"]):
                 # Get response from coding agent
                 response_code = await self.coding_agent.run(
                     user_id=user_id,
-                    state=self.state_manager.get_state(user_id=user_id, course_id=course_db.id),
-                    content=self.query_service.get_explainer_query(user_id, course_db.id, idx),
+                    state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
+                    content=self.query_service.get_explainer_query(user_id, course_id, idx),
                 )
 
                 # Get response from tester agent
                 response_tester = await self.tester_agent.run(
                     user_id=user_id,
-                    state=self.state_manager.get_state(user_id=user_id, course_id=course_db.id),
-                    content=self.query_service.get_tester_query(user_id, course_db.id, idx, response_code["explanation"]),
+                    state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
+                    content=self.query_service.get_tester_query(user_id, course_id, idx, response_code["explanation"]),
                 )
 
                 # Save the chapter in db first
                 chapter_db = chapters_crud.create_chapter(
                     db=db,
-                    course_id=course_db.id,
+                    course_id=course_id,
                     index=idx + 1,
                     caption=topic['caption'],
                     summary=json.dumps(topic['content'], indent=2),
@@ -194,45 +195,36 @@ class AgentService:
                     })
                     print(f"[{task_id}] Saved {len(question_objects)} questions for chapter {chapter_db.id}.")
 
-                    # Build chapter response data
-                    chapter_response_data = {
-                        "id": chapter_db.id,
-                        "index": chapter_db.index,
-                        "caption": chapter_db.caption,
-                        "summary": chapter_db.summary, # This is JSON string from topic['content']
-                        "content": chapter_db.content,
-                        "mc_questions": question_objects,
-                        "time_minutes": chapter_db.time_minutes,
-                        "is_completed": chapter_db.is_completed
-                    }
-                    await ws_manager.send_json_message(task_id, {"type": "chapter", "data": chapter_response_data})
-                    print(f"[{task_id}] Sent chapter update for chapter {chapter_db.id}.")
+                    #await ws_manager.send_json_message(task_id, {"type": "chapter", "data": chapter_response_data})
+                    #print(f"[{task_id}] Sent chapter update for chapter {chapter_db.id}.")
 
             # Update course status to finished
-            courses_crud.update_course_status(db, course_db.id, CourseStatus.FINISHED)
+            courses_crud.update_course_status(db, course_id, CourseStatus.FINISHED)
 
             # Send completion signal
-            await ws_manager.send_json_message(task_id, {
-                "type": "complete",
-                "data": {"course_id": course_db.id, "message": "Course created successfully"}
-            })
+            #await ws_manager.send_json_message(task_id, {
+            #    "type": "complete",
+            #    "data": {"course_id": course_id, "message": "Course created successfully"}
+            #})
             print(f"[{task_id}] Sent completion signal.")
 
         except Exception as e:
             error_message = f"Course creation failed: {str(e)}"
             print(f"[{task_id}] Error during course creation: {error_message}")
             # Log detailed error traceback here if possible, e.g., import traceback; traceback.print_exc()
-            if course_db and course_db.id:
+            if course_db:
                 try:
-                    courses_crud.update_course_status(db, course_db.id, CourseStatus.FAILED)
-                    print(f"[{task_id}] Course {course_db.id} status updated to FAILED due to error.")
+                    courses_crud.update_course_status(db, course_id, CourseStatus.FAILED)
+                    print(f"[{task_id}] Course {course_id} status updated to FAILED due to error.")
                 except Exception as db_error:
                     print(f"[{task_id}] Additionally, failed to update course status to FAILED: {db_error}")
+            else:
+                print(f"[{task_id}] No course_db to update status, error occurred before course creation.")
 
-            await ws_manager.send_json_message(task_id, {
-                "type": "error",
-                "data": {"message": error_message, "course_id": course_db.id if course_db else None}
-            })
+            #await ws_manager.send_json_message(task_id, {
+            #    "type": "error",
+            #    "data": {"message": error_message, "course_id": course_id if course_db else None}
+            #})
             # Re-raise the exception if you want the background task to show as 'failed' in FastAPI logs
             # or if something upstream needs to handle it. For now, we handle it and inform client.
             # raise e

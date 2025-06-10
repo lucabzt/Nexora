@@ -4,7 +4,8 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from ...db.database import Base
 from . import db_user as user_model
-
+from typing import List
+from pydantic import Field
 
 class CourseStatus(enum.Enum):
     CREATING = "creating"
@@ -17,18 +18,29 @@ class Course(Base):
     """Main course table containing all course information."""
     __tablename__ = "courses"
 
+    # Primary key and auto-incrementing ID
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    session_id = Column(String(50), unique=True, index=True, nullable=False)
+    
+    # Attributes from request
     user_id = Column(String(50), ForeignKey("users.id"), nullable=False)
-    title = Column(String(200), nullable=False)
-    description = Column(Text)
-    total_time_hours = Column(Integer, nullable=False)
+    query = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     status = Column(Enum(CourseStatus), nullable=False, default=CourseStatus.CREATING)
+    total_time_hours = Column(Integer, nullable=False)
+    document_ids: List[int] = Field(default=[], description="Document IDs")
+    picture_ids: List[int] = Field(default=[], description="Picture IDs")
+
+    # Attributes filled by the agent
+    session_id = Column(String(50), unique=True, index=True, nullable=True)
+    title = Column(String(200), nullable=True)
+    description = Column(Text, nullable=True)
+    language = Column(String(50), nullable=True)
     image_url = Column(String(200), nullable=True)
+    chapter_count = Column(Integer, nullable=True)
 
     # Relationships
     chapters = relationship("Chapter", back_populates="course", cascade="all, delete-orphan")
+    user = relationship("User", back_populates="courses")
     documents = relationship("Document", foreign_keys="Document.course_id", cascade="all, delete-orphan")
     images = relationship("Image", foreign_keys="Image.course_id", cascade="all, delete-orphan")
 

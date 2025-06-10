@@ -108,7 +108,7 @@ function CreateCourse() {
       );
 
       console.log('Course creation initiated:', data);
-      navigate(`/courses/${data.id}`);
+      navigate(`/dashboard/courses/${data.course_id}`);
       
     } catch (err) { 
       console.error('Error initiating course creation:', err);

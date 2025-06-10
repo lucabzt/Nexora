@@ -18,7 +18,7 @@ from ..schemas.course import (
     Chapter as ChapterSchema,
     MultipleChoiceQuestion as MCQuestionSchema
 )
-from ...db.models.db_course import Course, Chapter
+from ...db.models.db_course import Course, Chapter, CourseStatus
 
 router = APIRouter(
     prefix="/courses",
@@ -52,11 +52,27 @@ async def create_course_request(
         background_tasks: BackgroundTasks,
         current_user: User = Depends(get_current_active_user),
         db: Session = Depends(get_db)
-):
+) -> CourseInfo:
     """
     Initiate course creation as a background task and return a task ID for WebSocket progress updates.
     """
-    task_id = str(uuid.uuid4())
+   
+   # Create empty course in the database
+    course = courses_crud.create_new_course(
+        db=db,
+        user_id=str(current_user.id),
+        total_time_hours=course_request.time_hours,
+        query_=course_request.query,
+        picture_ids=course_request.picture_ids,
+        document_ids=course_request.document_ids,
+        status=CourseStatus.CREATING  # Set initial status to CREATING
+    )
+    if not course:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create course in the database"
+        )
+
     
     # Add the long-running course creation to background tasks
     # The agent_service.create_course will need to be modified to accept ws_manager and task_id
@@ -64,15 +80,17 @@ async def create_course_request(
     background_tasks.add_task(
         agent_service.create_course,
         user_id=str(current_user.id),
+        course_id=course.id,
         request=course_request,
         db=db,
-        task_id=task_id,
+        task_id=str(uuid.uuid4()),  # Generate a unique task ID
         ws_manager=ws_manager
     )
     
-    return JSONResponse(
-        status_code=status.HTTP_202_ACCEPTED,
-        content={"message": "Course creation started.", "task_id": task_id}
+    return CourseInfo(
+        course_id=int(course.id),
+        total_time_hours=course_request.time_hours,
+        status=course.status.value,  # Convert enum to string
     )
 
 
@@ -97,10 +115,12 @@ async def get_user_courses(
     return [
         CourseInfo(
             course_id=int(course.id),
-            description=str(course.description),
+            total_time_hours=int(course.total_time_hours),
+            status=str(course.status),
+
             title=str(course.title),
-            session_id=str(course.session_id) if course.session_id else None,
-            status=str(course.status) if course.status else None
+            description=str(course.description),
+            chapter_count=int(course.chapter_count) if course.chapter_count else None
         ) for course in courses
     ]
 
@@ -144,12 +164,14 @@ async def get_course_by_id(
         ))
     
     return CourseSchema(
-        course_id=int(course.id),  # Map database 'id' to schema 'course_id'
+        course_id=int(course.id),
+        total_time_hours=int(course.total_time_hours),
+        status=str(course.status),
+
         title=str(course.title),
-        description=course.description or "",
-        session_id=course.session_id,
-        status=course.status.value,  # Convert enum to string
-        total_time_hours=course.total_time_hours,
+        description=str(course.description),
+        chapter_count=int(course.chapter_count) if course.chapter_count else None,
+
         chapters=chapters
     )
 

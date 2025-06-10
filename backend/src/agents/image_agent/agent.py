@@ -13,12 +13,12 @@ from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioServerParamet
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
-from backend.src.agents.utils import create_text_query, load_instruction_from_file
-from backend.src.agents.agent import StandardAgent
+from src.agents.utils import create_text_query, load_instruction_from_file
+from src.agents.agent import StandardAgent
 
 class ImageAgent(StandardAgent):
     def __init__(self, app_name: str, session_service):
-        path_to_mcp_server = "../tools/unsplash_mcp_server.py"
+        path_to_mcp_server = "C:\\Users\\Markus\\Nextcloud\\Projekte\\Fullstack\\TeachAI\\backend\\src\\agents\\tools\\unsplash_mcp_server.py" # "../tools/unsplash_mcp_server.py"
 
         # Define toolset for unsplash mcp server
         unsplash_mcp_toolset = MCPToolset(
