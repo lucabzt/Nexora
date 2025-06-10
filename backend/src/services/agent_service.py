@@ -233,7 +233,7 @@ class AgentService:
                     print(f"[{task_id}] Additionally, failed to update course status to FAILED: {db_error}")
             else:
                 print(f"[{task_id}] No course_db to update status, error occurred before course creation.")
-            raise e
+            #raise e
         
             #await ws_manager.send_json_message(task_id, {
             #    "type": "error",

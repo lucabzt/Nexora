@@ -161,11 +161,7 @@ async def get_course_chapters(
     course = await _verify_course_ownership(course_id, str(current_user.id), db)
    
     chapters = course.chapters
-    if not chapters:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No chapters found for this course"
-        )
+
     # Build chapter response with questions
     chapters = [
         ChapterSchema(
@@ -189,12 +185,8 @@ async def get_course_chapters(
             is_completed=chapter.is_completed  # Add this
         ) for chapter in chapters
     ]
-    if not chapters:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No chapters found for this course"
-        )
-    return chapters
+
+    return chapters if chapters else []
 
 
 @router.get("/{course_id}/chapters/{chapter_id}", response_model=ChapterSchema)
