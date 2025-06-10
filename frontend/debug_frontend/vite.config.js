@@ -72,7 +72,7 @@ export default defineConfig({
     },
   },
   build: {
-    sourcemap: true, // Explicitly enable sourcemaps for builds
+    sourcemap: false, // Explicitly enable sourcemaps for builds
     rollupOptions: {
       output: {
         manualChunks(id) {
