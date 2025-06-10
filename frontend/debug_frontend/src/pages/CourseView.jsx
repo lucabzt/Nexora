@@ -97,6 +97,9 @@ function CourseView() {
     
           if (courseData) {
             setCourse(courseData);
+            setCreationStatus(courseData.status);
+            console.log('Polling course data:', courseData);
+
             const newChapters = courseData.chapters || [];
             setChapters(newChapters);
             
