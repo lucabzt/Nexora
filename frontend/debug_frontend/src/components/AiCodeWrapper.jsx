@@ -1,65 +1,90 @@
-import React, { Suspense, lazy } from "react";
-import * as Recharts from 'recharts';
+import React, {Suspense, lazy, useState} from "react";
 import PaperBackground from "./PaperBackground.jsx";
+import { ErrorBoundary } from 'react-error-boundary';
+const LazyStringToReactComponent = lazy(() => import('string-to-react-component'));
 
-
-const LazyPlot = lazy(() => import('react-plotly.js'));
 // Plugins/Libraries available to the agent
-
-// 1. Latex
 import 'katex/dist/katex.min.css';
 import Latex from 'react-latex-next';
 import { CopyBlock, dracula } from 'react-code-blocks';
+const LazyPlot = lazy(() => import('react-plotly.js'));
+import * as Recharts from 'recharts';
 
-const plugins = "Latex, Recharts, Plot, CopyBlock, dracula"
 
-const header = `(props) => {
-      const {${plugins}}=props;
-`
-/*
-function TestComponent() {
-    return (
-      <Suspense fallback={
-        <div>Loading Plotly...</div>
-      } >
-        <LazyPlot
-          data={[
-            {
-              x: [1, 2, 3],
-              y: [2, 6, 3],
-              type: 'scatter',
-              mode: 'lines+markers',
-              marker: {color: 'red'},
-            },
-            {type: 'bar', x: [1, 2, 3], y: [2, 5, 3]},
-          ]}
-          layout={ {width: 320, height: 240, title: {text: 'A Fancy Plot'}} }
+// Main function that shows the content
+function AiCodeWrapper({ children }) {
+  const plugins = "Latex, Recharts, Plot, CopyBlock, dracula";
+  const header = `(props) => 
+  { const {${plugins}} = props;`;
+
+  const full_react_component = `${header}${children}`;
+
+  return (
+    <PaperBackground>
+      <Suspense fallback={<div>Loading...</div>}>
+        <SafeComponent
+          code={full_react_component}
+          data={{
+            Latex,
+            Recharts,
+            Plot: LazyPlot,
+            CopyBlock,
+            dracula
+          }}
         />
       </Suspense>
-    );
+    </PaperBackground>
+  );
 }
-*/
 
 
-const LazyStringToReactComponent = lazy(() => import('string-to-react-component'));
+// Error Fallback Component
+const ErrorFallback = ({ error, resetErrorBoundary }) => (
+  <div style={{
+    padding: '20px',
+    border: '2px solid #ff6b6b',
+    borderRadius: '8px',
+    backgroundColor: '#ffe0e0'
+  }}>
+    <h3>❌ Code Error</h3>
+    <p>{error.message}</p>
+    <details style={{ whiteSpace: 'pre-wrap', marginTop: '10px' }}>
+      <summary>Error Details</summary>
+      {error.stack}
+    </details>
+    <button
+      onClick={resetErrorBoundary}
+      style={{
+        padding: '8px 16px',
+        backgroundColor: '#ff6b6b',
+        color: 'white',
+        border: 'none',
+        borderRadius: '4px',
+        marginTop: '10px'
+      }}
+    >
+      Try Again
+    </button>
+  </div>
+);
 
-function AiCodeWrapper({ children }) {
-    const full_react_component =
-        `
-        ${header}
-        ${children}
-        `
-    console.log(full_react_component)
 
-    return (
-        <PaperBackground>
-            <Suspense fallback={<div>Loading component...</div>}>
-                <LazyStringToReactComponent data={{Latex, Recharts, Plot: LazyPlot, CopyBlock, dracula}}>
-                    {full_react_component}
-                </LazyStringToReactComponent>
-            </Suspense>
-        </PaperBackground>
-    )
-}
+const SafeComponent = ({ code, data }) => {
+  return (
+    <ErrorBoundary
+      FallbackComponent={ErrorFallback}
+      onError={(error, errorInfo) => {
+        console.error('Code execution error:', error, errorInfo);
+      }}
+      onReset={() => {
+        // Optional: any cleanup logic when retrying
+      }}
+    >
+      <LazyStringToReactComponent data={data}>
+        {code}
+      </LazyStringToReactComponent>
+    </ErrorBoundary>
+  );
+};
 
 export default AiCodeWrapper

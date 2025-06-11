@@ -3,12 +3,18 @@ This is a small question-answer agent that functions like a standard gemini api 
 It is used for small requests like generating a course description.
 It also handles session creation itself, which sets it apart from the other agents.
 """
+import copy
 import json
-from typing import Dict, Any
+import os
+from typing import Dict, Any, Optional
 
 from google.adk.agents import LlmAgent
+from google.adk.agents.callback_context import CallbackContext
+from google.adk.models import LlmResponse
 from google.adk.runners import Runner
+from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioServerParameters
 from google.genai import types
+
 from .schema import CourseInfo
 from ..agent import StructuredAgent
 from ..utils import load_instruction_from_file
@@ -16,7 +22,7 @@ from ..utils import load_instruction_from_file
 
 class InfoAgent(StructuredAgent):
     def __init__(self, app_name: str, session_service):
-        # Create the planner agent
+        # Create the info agent
         info_agent = LlmAgent(
             name="info_agent",
             model="gemini-1.5-flash-8b",

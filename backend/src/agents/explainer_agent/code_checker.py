@@ -151,7 +151,7 @@ class ESLintValidator:
                         os.path.exists(os.path.join(location, 'eslint.config.js')) and
                         os.path.exists(os.path.join(location, 'node_modules'))):
                     self.eslint_base_dir = location
-                    print(f"EIERLECKER Found node project in {location}")
+                    print(f"Found node project in {location}")
                     break
 
             if not self.eslint_base_dir:
@@ -180,6 +180,12 @@ class ESLintValidator:
         """
         cleaned_code = find_react_code_in_response(jsx_code)
         code_with_imports = plugin_imports + "\n" + cleaned_code
+
+        if not cleaned_code:
+            return {
+                'valid': False,
+                'errors': [{'message': 'Your response does not match the required format. Start your response with () and end with }'}]
+            }
 
         # Create temporary file in our designated directory
         with tempfile.NamedTemporaryFile(
@@ -257,33 +263,6 @@ class ESLintValidator:
                 'errors': [{'message': f"Failed to parse ESLint output: {eslint_json_output}"}]
             }
 
-# --- TEST CASES ---
-def code_test():
-    # Example of code with a linting error (double quotes)
-    jsx_code_with_error = """
-    I am an idiot and dumb
-    import React from 'react';
-    () => { return (<div>Hello World<div>) };
-"""
-
-    # Example of valid code
-    jsx_code_correct = """
-    () => { return <div>Hello World</div> };
-    """
-
-    validator = ESLintValidator()
-
-    print("--- Validating code with a linting error ---")
-    result_error = validator.validate_jsx(jsx_code_with_error)
-    print(json.dumps(result_error, indent=2))
-
-    print("\n--- Validating correct code ---")
-    result_correct = validator.validate_jsx(jsx_code_correct)
-    print(json.dumps(result_correct, indent=2))
-
-if __name__ == "__main__":
-    code_test()
-
 import re
 
 
@@ -319,3 +298,30 @@ def clean_up_response(code_string):
             return re.sub(pattern, '', code_string).strip()
 
     return code_string.strip()
+
+#--- TEST CASES ---
+def code_test():
+    # Example of code with a linting error (double quotes)
+    jsx_code_with_error = """
+    I am an idiot and dumb
+    import React from 'react';
+    () => { return (<div>Hello World<div>) };
+"""
+
+    # Example of valid code
+    jsx_code_correct = """
+    () => { return <div>Hello World</div> }};
+    """
+
+    validator = ESLintValidator()
+
+    print("--- Validating code with a linting error ---")
+    result_error = validator.validate_jsx(jsx_code_with_error)
+    print(json.dumps(result_error, indent=2))
+
+    print("\n--- Validating correct code ---")
+    result_correct = validator.validate_jsx(jsx_code_correct)
+    print(json.dumps(result_correct, indent=2))
+
+if __name__ == "__main__":
+    code_test()
