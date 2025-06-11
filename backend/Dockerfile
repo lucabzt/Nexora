@@ -67,4 +67,5 @@ ENV NPM_CONFIG_PREFIX=/home/app/.npm-global
 ENV PATH=/home/app/.npm-global/bin:$PATH
 
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+# später workercount per variable setzen
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
