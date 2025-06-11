@@ -17,203 +17,6 @@ import Plot from 'react-plotly.js';
 import { CopyBlock, dracula } from 'react-code-blocks';
 """
 
-class ESLintValidator:
-    """A class to validate JSX code using ESLint in a self-contained Node.js environment."""
-    def __init__(self):
-        """
-        Initializes the validator. The configuration files (`package.json` and
-        `eslint.config.js`) are expected to be in the same directory as this script.
-        """
-        self.script_dir = os.path.dirname(os.path.realpath(__file__))
-        self.config_file_path = os.path.join(self.script_dir, 'eslint.config.js')
-        self.package_json_path = os.path.join(self.script_dir, 'package.json')
-
-        # Check that the required config files exist on initialization
-        if not os.path.exists(self.config_file_path):
-            raise FileNotFoundError(f"Required file not found: {self.config_file_path}")
-        if not os.path.exists(self.package_json_path):
-            raise FileNotFoundError(f"Required file not found: {self.package_json_path}")
-
-    def validate_jsx(self, jsx_code: str):
-        """
-        Validates JSX by creating a temporary, self-contained Node.js project.
-        This is the most robust method for running ESLint.
-        """
-        cleaned_code = find_react_code_in_response(jsx_code)
-        code_with_imports = plugin_imports + "\n" + cleaned_code
-
-        with tempfile.TemporaryDirectory() as temp_dir:
-            try:
-                # 1. Copy configuration into the temporary directory
-                shutil.copy(self.config_file_path, temp_dir)
-                shutil.copy(self.package_json_path, temp_dir)
-
-                # 2. Write the JSX code to be linted into the directory
-                js_file_to_lint = os.path.join(temp_dir, 'temp.jsx')
-                with open(js_file_to_lint, 'w', encoding='utf-8') as f:
-                    f.write(code_with_imports)
-
-                # Create a well-defined environment for npm and eslint
-                npm_env = os.environ.copy()
-
-                # Ensure HOME is set correctly for the 'app' user.
-                # npm relies on this for defaults if not overridden by more specific NPM_CONFIG_* vars.
-                # The 'app' user's home directory in the Docker container is /home/app.
-                npm_env['HOME'] = '/home/app'
-
-                # Define a cache path within the temporary directory to ensure writability.
-                npm_cache_path = os.path.join(temp_dir, ".npm-cache")
-                os.makedirs(npm_cache_path, exist_ok=True) # Create it explicitly.
-                npm_env['NPM_CONFIG_CACHE'] = npm_cache_path
-
-                # Define a temporary directory for npm's own temporary files within our temp_dir.
-                # This might help with the "mkdir '/nonexistent'" during fetch.
-                npm_tmp_path = os.path.join(temp_dir, ".npm-tmp")
-                os.makedirs(npm_tmp_path, exist_ok=True)
-                npm_env['TMPDIR'] = npm_tmp_path # For npm and other tools respecting TMPDIR
-
-                # 3. CRUCIAL STEP: Install dependencies locally within the temp directory
-                # This creates the local `node_modules` folder that ESLint needs.
-                subprocess.run(
-                    ['npm', 'install'],
-                    cwd=temp_dir,
-                    capture_output=True,
-                    text=True,
-                    check=True, # Raise an exception if npm install fails
-                    env=npm_env # Pass the modified environment
-                )
-
-                # 4. Run ESLint. It now has everything it needs in its local directory.
-                # Use the explicit path to the ESLint installed in temp_dir/node_modules/.bin/eslint
-                eslint_executable = os.path.join(temp_dir, 'node_modules', '.bin', 'eslint')
-
-                if not os.path.exists(eslint_executable):
-                    # This would be an unexpected state if npm install succeeded.
-                    return {
-                        'valid': False,
-                        'errors': [{'message': f"ESLint executable not found at {eslint_executable} after npm install."}]
-                    }
-                
-                lint_process = subprocess.run([
-                    eslint_executable,
-                    '--quiet',
-                    '--format', 'json',
-                    js_file_to_lint
-                ], capture_output=True, text=True, cwd=temp_dir, env=npm_env, check=False) # Pass env here too for consistency
-
-
-                if lint_process.stdout:
-                    return self._parse_eslint_output(lint_process.stdout)
-
-                # A fatal error occurred during linting
-                return {
-                    'valid': False,
-                    'errors': [{'message': lint_process.stderr.strip()}] if lint_process.stderr else []
-                }
-
-            except subprocess.CalledProcessError as e:
-                # This catches errors from `npm install`
-                return {
-                    'valid': False,
-                    'errors': [{'message': f"npm install failed: {e.stderr}"}]
-                }
-            except (OSError, RuntimeError) as e:
-                # Catch any other unexpected errors
-                return {'valid': False, 'errors': [{'message': f"An unexpected error occurred: {str(e)}"}]}
-
-    def _parse_eslint_output(self, eslint_json_output):
-        # This parsing logic remains the same
-        try:
-            data = json.loads(eslint_json_output)
-            if not data:
-                return {'valid': True, 'errors': [], 'warnings': []}
-
-            file_report = data[0]
-            if "fatal" in file_report and file_report["fatal"]:
-                return {'valid': False, 'errors': [file_report.get('message', 'Fatal ESLint error')]}
-
-            messages = file_report.get('messages', [])
-            errors = [msg for msg in messages if msg.get('severity') == 2]
-            warnings = [msg for msg in messages if msg.get('severity') == 1]
-
-            return {
-                'valid': len(errors) == 0,
-                'errors': errors,
-                'warnings': warnings
-            }
-        except (json.JSONDecodeError, IndexError):
-            return {
-                'valid': False,
-                'errors': [{'message': f"Failed to parse ESLint output: {eslint_json_output}"}]
-            }
-
-# --- TEST CASES ---
-def code_test():
-    # Example of code with a linting error (double quotes)
-    jsx_code_with_error = """
-    I am an idiot and dumb
-    import React from 'react';
-    const Component = () => <div>Hello World<div>;
-    export default Component;
-"""
-
-    # Example of valid code
-    jsx_code_correct = """
-    import React from 'react';
-    const Component = () => <div>Hello World</div>;
-    export default Component;
-    """
-
-    validator = ESLintValidator()
-
-    print("--- Validating code with a linting error ---")
-    result_error = validator.validate_jsx(jsx_code_with_error)
-    print(json.dumps(result_error, indent=2))
-
-    print("\n--- Validating correct code ---")
-    result_correct = validator.validate_jsx(jsx_code_correct)
-    print(json.dumps(result_correct, indent=2))
-
-if __name__ == "__main__":
-    code_test()
-
-def clean_up_response(code_string):
-    """
-    Comprehensive function header removal
-    Handles arrow functions, regular functions, and function expressions
-    """
-    code_string = find_react_code_in_response(code_string)
-
-    # Clean up any extra whitespace
-    code_string = code_string.strip()
-
-    patterns = [
-        # Arrow functions: () => {, (props) => {, ({prop1, prop2}) => {
-        r'^\s*\([^)]*\)\s*=>\s*\{',
-
-        # Regular functions: function() {, function name() {
-        r'^\s*function\s*[a-zA-Z_$][a-zA-Z0-9_$]*\s*\([^)]*\)\s*\{',
-        r'^\s*function\s*\([^)]*\)\s*\{',
-
-        # Function expressions: const name = () => {, const name = function() {
-        r'^\s*const\s+[a-zA-Z_$][a-zA-Z0-9_$]*\s*=\s*\([^)]*\)\s*=>\s*\{',
-        r'^\s*const\s+[a-zA-Z_$][a-zA-Z0-9_$]*\s*=\s*function\s*\([^)]*\)\s*\{',
-
-        # Let/var variations
-        r'^\s*let\s+[a-zA-Z_$][a-zA-Z0-9_$]*\s*=\s*\([^)]*\)\s*=>\s*\{',
-        r'^\s*var\s+[a-zA-Z_$][a-zA-Z0-9_$]*\s*=\s*\([^)]*\)\s*=>\s*\{',
-    ]
-
-    for pattern in patterns:
-        if re.match(pattern, code_string):
-            return re.sub(pattern, '', code_string).strip()
-
-    return code_string.strip()
-
-
-import re
-
-
 def find_react_code_in_response(text: str) -> str:
     """
     Extracts React component code from a text response.
@@ -317,3 +120,204 @@ def find_react_code_in_response(text: str) -> str:
         return candidates[0][1]
 
     return None
+
+class ESLintValidator:
+    """A class to validate JSX code using ESLint in a self-contained Node.js environment."""
+
+    def __init__(self, eslint_base_dir=None):
+        """
+        Initializes the validator.
+
+        Args:
+            eslint_base_dir: Directory containing pre-installed ESLint setup.
+                           If None, will look for it in common locations.
+        """
+        self.script_dir = os.path.dirname(os.path.realpath(__file__))
+
+        # Try to find the pre-installed ESLint directory
+        if eslint_base_dir:
+            self.eslint_base_dir = eslint_base_dir
+        else:
+            # Check common locations
+            possible_locations = [
+                '/opt/eslint-setup',  # Docker location
+                os.path.join(self.script_dir, 'eslint-setup'),  # Local development
+                self.script_dir  # Fallback to current directory
+            ]
+
+            self.eslint_base_dir = None
+            for location in possible_locations:
+                if (os.path.exists(os.path.join(location, 'package.json')) and
+                        os.path.exists(os.path.join(location, 'eslint.config.js')) and
+                        os.path.exists(os.path.join(location, 'node_modules'))):
+                    self.eslint_base_dir = location
+                    print(f"EIERLECKER Found node project in {location}")
+                    break
+
+            if not self.eslint_base_dir:
+                raise FileNotFoundError(
+                    f"Could not find pre-installed ESLint setup in any of: {possible_locations}"
+                )
+
+        # Verify required files exist
+        self.config_file_path = os.path.join(self.eslint_base_dir, 'eslint.config.js')
+        self.package_json_path = os.path.join(self.eslint_base_dir, 'package.json')
+        self.node_modules_path = os.path.join(self.eslint_base_dir, 'node_modules')
+        self.eslint_executable = os.path.join(self.node_modules_path, '.bin', 'eslint')
+
+        for required_path in [self.config_file_path, self.package_json_path,
+                              self.node_modules_path, self.eslint_executable]:
+            if not os.path.exists(required_path):
+                raise FileNotFoundError(f"Required file/directory not found: {required_path}")
+
+        # Create a temporary directory for JSX files (reused across validations)
+        self.temp_jsx_dir = os.path.join(self.eslint_base_dir, 'temp_jsx_files')
+        os.makedirs(self.temp_jsx_dir, exist_ok=True)
+
+    def validate_jsx(self, jsx_code: str):
+        """
+        Validates JSX using NamedTemporaryFile in a specific directory.
+        """
+        #cleaned_code = find_react_code_in_response(jsx_code)
+        cleaned_code = "() => { return (<div>Hello World<div>) };"
+        print(cleaned_code)
+        code_with_imports = plugin_imports + "\n" + cleaned_code
+
+        # Create temporary file in our designated directory
+        with tempfile.NamedTemporaryFile(
+                mode='w',
+                suffix='.jsx',
+                prefix='eslint_temp_',
+                dir=self.temp_jsx_dir,
+                delete=False,  # We'll delete manually after ESLint runs
+                encoding='utf-8'
+        ) as temp_file:
+            temp_file.write(code_with_imports)
+            temp_file_path = temp_file.name
+
+        try:
+            # Set up environment
+            eslint_env = os.environ.copy()
+            eslint_env['HOME'] = '/home/app'
+
+            # Run ESLint
+            lint_process = subprocess.run([
+                self.eslint_executable,
+                '--quiet',
+                '--format', 'json',
+                '--config', self.config_file_path,
+                temp_file_path
+            ],
+                capture_output=True,
+                text=True,
+                cwd=self.eslint_base_dir,
+                env=eslint_env,
+                check=False
+            )
+
+            if lint_process.stdout:
+                return self._parse_eslint_output(lint_process.stdout)
+
+            return {
+                'valid': False,
+                'errors': [{'message': lint_process.stderr.strip()}] if lint_process.stderr else []
+            }
+
+        except (OSError, RuntimeError) as e:
+            return {'valid': False, 'errors': [{'message': f"An unexpected error occurred: {str(e)}"}]}
+
+        finally:
+            # Clean up
+            try:
+                os.remove(temp_file_path)
+            except OSError:
+                pass
+
+    def _parse_eslint_output(self, eslint_json_output):
+        # This parsing logic remains the same
+        try:
+            data = json.loads(eslint_json_output)
+            if not data:
+                return {'valid': True, 'errors': [], 'warnings': []}
+
+            file_report = data[0]
+            if "fatal" in file_report and file_report["fatal"]:
+                return {'valid': False, 'errors': [file_report.get('message', 'Fatal ESLint error')]}
+
+            messages = file_report.get('messages', [])
+            errors = [msg for msg in messages if msg.get('severity') == 2]
+            warnings = [msg for msg in messages if msg.get('severity') == 1]
+
+            return {
+                'valid': len(errors) == 0,
+                'errors': errors,
+                'warnings': warnings
+            }
+        except (json.JSONDecodeError, IndexError):
+            return {
+                'valid': False,
+                'errors': [{'message': f"Failed to parse ESLint output: {eslint_json_output}"}]
+            }
+
+# --- TEST CASES ---
+def code_test():
+    # Example of code with a linting error (double quotes)
+    jsx_code_with_error = """
+    I am an idiot and dumb
+    import React from 'react';
+    () => { return (<div>Hello World<div>) };
+"""
+
+    # Example of valid code
+    jsx_code_correct = """
+    () => { return <div>Hello World</div> };
+    """
+
+    validator = ESLintValidator()
+
+    print("--- Validating code with a linting error ---")
+    result_error = validator.validate_jsx(jsx_code_with_error)
+    print(json.dumps(result_error, indent=2))
+
+    print("\n--- Validating correct code ---")
+    result_correct = validator.validate_jsx(jsx_code_correct)
+    print(json.dumps(result_correct, indent=2))
+
+if __name__ == "__main__":
+    code_test()
+
+import re
+
+
+def clean_up_response(code_string):
+    """
+    Comprehensive function header removal
+    Handles arrow functions, regular functions, and function expressions
+    """
+    code_string = find_react_code_in_response(code_string)
+
+    # Clean up any extra whitespace
+    code_string = code_string.strip()
+
+    patterns = [
+        # Arrow functions: () => {, (props) => {, ({prop1, prop2}) => {
+        r'^\s*\([^)]*\)\s*=>\s*\{',
+
+        # Regular functions: function() {, function name() {
+        r'^\s*function\s*[a-zA-Z_$][a-zA-Z0-9_$]*\s*\([^)]*\)\s*\{',
+        r'^\s*function\s*\([^)]*\)\s*\{',
+
+        # Function expressions: const name = () => {, const name = function() {
+        r'^\s*const\s+[a-zA-Z_$][a-zA-Z0-9_$]*\s*=\s*\([^)]*\)\s*=>\s*\{',
+        r'^\s*const\s+[a-zA-Z_$][a-zA-Z0-9_$]*\s*=\s*function\s*\([^)]*\)\s*\{',
+
+        # Let/var variations
+        r'^\s*let\s+[a-zA-Z_$][a-zA-Z0-9_$]*\s*=\s*\([^)]*\)\s*=>\s*\{',
+        r'^\s*var\s+[a-zA-Z_$][a-zA-Z0-9_$]*\s*=\s*\([^)]*\)\s*=>\s*\{',
+    ]
+
+    for pattern in patterns:
+        if re.match(pattern, code_string):
+            return re.sub(pattern, '', code_string).strip()
+
+    return code_string.strip()

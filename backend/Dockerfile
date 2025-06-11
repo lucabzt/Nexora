@@ -42,6 +42,9 @@ COPY ./src/agents/explainer_agent/package.json ./src/agents/explainer_agent/esli
 RUN npm install
 RUN chown -R app:app /opt/eslint-setup
 
+# Make this directory accessible to your app
+RUN chmod -R 755 /opt/eslint-setup
+
 # Set work directory
 WORKDIR /home/app/web
 
