@@ -178,9 +178,7 @@ class ESLintValidator:
         """
         Validates JSX using NamedTemporaryFile in a specific directory.
         """
-        #cleaned_code = find_react_code_in_response(jsx_code)
-        cleaned_code = "() => { return (<div>Hello World<div>) };"
-        print(cleaned_code)
+        cleaned_code = find_react_code_in_response(jsx_code)
         code_with_imports = plugin_imports + "\n" + cleaned_code
 
         # Create temporary file in our designated directory
