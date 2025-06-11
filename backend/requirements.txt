@@ -22,3 +22,5 @@ asyncio
 fastmcp
 dataclasses
 uv
+chromadb>=0.4.22
+sentence-transformers>=2.2.2  
