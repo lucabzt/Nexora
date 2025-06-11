@@ -22,6 +22,12 @@ export const courseService = {
       // Use the actual chapter ID, not index
     (await apiWithCookies.patch(`/courses/${courseId}/chapters/${chapterId}/complete`)).data,
 
+  getFiles: async (courseId) =>
+  (await apiWithCookies.get(`/documents?course_id=${courseId}`)).data,
+
+  getImages: async (courseId) =>
+    (await apiWithCookies.get(`/images?course_id=${courseId}`)).data,
+
   // Update a course's title and description
   updateCourse: async (courseId, title, description) => {
     const params = new URLSearchParams();

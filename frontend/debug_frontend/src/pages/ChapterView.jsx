@@ -32,6 +32,7 @@ function ChapterView() {
   const { toolbarOpen, toolbarWidth } = useToolbar(); // Get toolbar state from context
   const isMobile = useMediaQuery('(max-width: 768px)'); // Add mobile detection
   const [chapter, setChapter] = useState(null);
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('content');
