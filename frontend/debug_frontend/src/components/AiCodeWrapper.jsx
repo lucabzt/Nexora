@@ -1,35 +1,44 @@
-import React, {Suspense, lazy, useState} from "react";
+import React, {Suspense, lazy} from "react";
 import PaperBackground from "./PaperBackground.jsx";
 import { ErrorBoundary } from 'react-error-boundary';
 const LazyStringToReactComponent = lazy(() => import('string-to-react-component'));
+import he from 'he';
 
 // Plugins/Libraries available to the agent
 import 'katex/dist/katex.min.css';
 import Latex from 'react-latex-next';
-import { CopyBlock, dracula } from 'react-code-blocks';
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { dark } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 const LazyPlot = lazy(() => import('react-plotly.js'));
 import * as Recharts from 'recharts';
+import {MermaidDiagram} from "@lightenna/react-mermaid-diagram";
+import * as RF from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
 
 
 // Main function that shows the content
 function AiCodeWrapper({ children }) {
-  const plugins = "Latex, Recharts, Plot, CopyBlock, dracula";
+  const plugins = "Latex, Recharts, Plot, SyntaxHighlighter, dark, MermaidDiagram, RF";
   const header = `(props) => 
   { const {${plugins}} = props;`;
 
   const full_react_component = `${header}${children}`;
 
+  const decodedString = he.decode(full_react_component);
+
   return (
     <PaperBackground>
       <Suspense fallback={<div>Loading...</div>}>
         <SafeComponent
-          code={full_react_component}
+          code={decodedString}
           data={{
             Latex,
             Recharts,
             Plot: LazyPlot,
-            CopyBlock,
-            dracula
+            SyntaxHighlighter,
+            dark,
+            MermaidDiagram,
+            RF
           }}
         />
       </Suspense>
