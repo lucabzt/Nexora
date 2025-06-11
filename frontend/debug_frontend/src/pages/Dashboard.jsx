@@ -46,9 +46,13 @@ import {
   IconHeartHandshake,
   IconBrain,
   IconChevronRight,
+  IconPlaceholder,
   IconPencil
 } from '@tabler/icons-react';
 import { courseService } from '../api/courseService';
+
+
+import PlaceGolderImage from '../assets/place_holder_image.png'
 
 function Dashboard() {
   const { t } = useTranslation('dashboard');
@@ -154,15 +158,6 @@ function Dashboard() {
       default:
         return { color: 'gray', icon: IconBook, label: t('status.learning') };
     }
-  };
-
-  // Function to generate a placeholder image URL with a specific theme
-  const getPlaceholderImage = (index, title) => {
-    // Create a consistent seed based on the title
-    //const seed = title ? title.length : index;
-    const themes = ['education', 'technology', 'science', 'data', 'coding'];
-    const theme = themes[index % themes.length];
-    return "https://images.unsplash.com/photo-1745270917449-c2e2c5806586?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
   };
 
   // Function to calculate progress for a course (placeholder logic)
@@ -388,7 +383,7 @@ function Dashboard() {
           >          <Grid gutter={0}>
               <Grid.Col sm={5} order={isMobile ? 1 : 2} sx={{ position: 'relative' }}>
                 <Image 
-                  src={getPlaceholderImage(0, courses[0]?.title)}
+                  src={ courses[0]?.image_url ? courses[0]?.image_url : PlaceGolderImage}
                   height={isMobile ? 200 : 300}
                   sx={{ 
                     objectFit: 'cover',
@@ -490,7 +485,7 @@ function Dashboard() {
                   >
                     <Card.Section pos="relative">
                       <Image
-                        src={getPlaceholderImage(index + 1, course.title)}
+                        src={ course?.image_url ? course?.image_url : PlaceGolderImage}
                         height={160}
                         alt={course.title}
                       />
