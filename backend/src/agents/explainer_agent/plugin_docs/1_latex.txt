@@ -1,0 +1,23 @@
+## Latex
+
+You can use Latex in your code with the <Latex> tag.
+
+() => {
+    return (
+        <Latex>{"We give illustrations for the processes $e^+e^-$, gluon-gluon and $\\gamma\\gamma \\to W t\\bar b$."}</Latex>
+        <Latex>{"$2^3$"}</Latex>
+    );
+}
+
+Please use $ as a delimiter for every math expressions inside the <Latex> tag as you see in the example.
+
+Guidelines:
+- Wrap all the content you write in the <Latex> tags with a {""}.
+- Inside the {""} please do not use another " as it will close the first " and therefore lead to parsing issues.
+- This is the ONLY way to represent math expressions in your code, do not use something like.
+
+<th style={{padding: 7}}>Estimated $P(\\mathrm{Win}\\mid \\mathrm{Serve})$</th>
+
+This will result in an error. Instead, you would write this:
+
+<th style={{padding: 7}}>Estimated <Latex>{"$P(\\mathrm{Win}\\mid \\mathrm{Serve})$"}</Latex></th>

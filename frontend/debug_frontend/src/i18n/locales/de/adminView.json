@@ -23,11 +23,14 @@
     "administrators": "Administratoren"
   },
   "table": {
-    "header": {
+    "headers": {
       "username": "Benutzername",
+      "profilePicture": "Profilbild",
       "email": "E-Mail",
       "status": "Status",
       "role": "Rolle",
+      "createdAt": "Erstellt am",
+      "lastLogin": "Letzter Login",
       "actions": "Aktionen"
     },
     "status": {
@@ -38,6 +41,8 @@
       "admin": "Admin",
       "user": "Benutzer"
     },
+    "profilePictureAlt": "Profilbild von {{username}}",
+    "noProfilePicture": "Kein Bild",
     "actions": {
       "editUser": "Benutzer bearbeiten",
       "changePassword": "Passwort ändern",

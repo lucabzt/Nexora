@@ -27,13 +27,28 @@ RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requir
 # --- Final Stage ---
 FROM python:3.10-slim
 
-# Create a non-root user
-RUN addgroup --system app && adduser --system --group app
+# Install Node.js and npm
+RUN apt-get update && apt-get install -y curl gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Create a non-root user with proper home directory
+RUN addgroup --system app && adduser --system --group app --home /home/app --shell /bin/bash
+
+# Set up ESLint environment BEFORE switching users
+WORKDIR /opt/eslint-setup
+COPY ./src/agents/explainer_agent/package.json ./src/agents/explainer_agent/eslint.config.js ./
+RUN npm install
+RUN chown -R app:app /opt/eslint-setup
+
+# Make this directory accessible to your app
+RUN chmod -R 755 /opt/eslint-setup
 
 # Set work directory
 WORKDIR /home/app/web
 
-# Copy pre-built wheels and install
+# Copy pre-built wheels and install Python dependencies
 COPY --from=builder /usr/src/app/wheels /wheels
 COPY --from=builder /usr/src/app/requirements.txt .
 RUN pip install --no-cache /wheels/*
@@ -41,21 +56,19 @@ RUN pip install --no-cache /wheels/*
 # Copy project
 COPY ./src ./app
 
-# If you have a .env file you want to include in the image (NOT RECOMMENDED for secrets)
-# COPY ./.env ./.env
-
-# Chown the directory to the app user
-RUN chown -R app:app /home/app/web
+# Create npm directories and set proper ownership
+RUN mkdir -p /home/app/.npm /home/app/.config \
+    && chown -R app:app /home/app \
+    && chown -R app:app /home/app/web
 
 # Switch to the non-root user
 USER app
 
-# Expose port (ensure this matches the port Uvicorn runs on in run.py or directly)
-EXPOSE 8000
+# Set npm environment variables
+ENV NPM_CONFIG_CACHE=/home/app/.npm
+ENV NPM_CONFIG_PREFIX=/home/app/.npm-global
+ENV PATH=/home/app/.npm-global/bin:$PATH
 
-# Command to run the application
-# The run.py script handles Uvicorn with reload, which is fine for development.
-# For production, you might run uvicorn directly with more workers.
-# CMD ["python", "run_dev.py"]
-# Alternatively, for production with multiple workers:
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+EXPOSE 8000
+# später workercount per variable setzen
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "${WORKERS}"]

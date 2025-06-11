@@ -1,32 +1,44 @@
 import enum
-from sqlalchemy import Boolean, Column, Integer, String, Text, DateTime, ForeignKey, Enum
+from sqlalchemy import Boolean, Column, Integer, String, Text, DateTime, ForeignKey, Enum, Index
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from ...db.database import Base
 from . import db_user as user_model
-
+from typing import List
+from pydantic import Field
 
 class CourseStatus(enum.Enum):
     CREATING = "creating"
     UPDATING = "updating"
     FINISHED = "finished"
+    FAILED = "failed"
 
 
 class Course(Base):
     """Main course table containing all course information."""
     __tablename__ = "courses"
 
+    # Primary key and auto-incrementing ID
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    session_id = Column(String(50), unique=True, index=True, nullable=False)
-    user_id = Column(String(50), ForeignKey("users.id"), nullable=False)
-    title = Column(String(200), nullable=False)
-    description = Column(Text)
-    total_time_hours = Column(Integer, nullable=False)
+    
+    # Attributes from request
+    user_id = Column(String(50), ForeignKey("users.id"), nullable=False, index=True)
+    query = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     status = Column(Enum(CourseStatus), nullable=False, default=CourseStatus.CREATING)
+    total_time_hours = Column(Integer, nullable=False)
+
+    # Attributes filled by the agent
+    session_id = Column(String(50), unique=True, index=True, nullable=True)
+    title = Column(String(200), nullable=True)
+    description = Column(Text, nullable=True)
+    language = Column(String(50), nullable=True)
+    image_url = Column(String(2000), nullable=True)
+    chapter_count = Column(Integer, nullable=True)
 
     # Relationships
     chapters = relationship("Chapter", back_populates="course", cascade="all, delete-orphan")
+    user = relationship("User", back_populates="courses")
     documents = relationship("Document", foreign_keys="Document.course_id", cascade="all, delete-orphan")
     images = relationship("Image", foreign_keys="Image.course_id", cascade="all, delete-orphan")
 
@@ -36,7 +48,8 @@ class Chapter(Base):
     __tablename__ = "chapters"
     
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
+    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False, index=True)
+
     index = Column(Integer, nullable=False)
     caption = Column(String(300), nullable=False)
     summary = Column(Text)
@@ -48,6 +61,11 @@ class Chapter(Base):
     # Relationships
     course = relationship("Course", back_populates="chapters")
     mc_questions = relationship("MultipleChoiceQuestion", back_populates="chapter", cascade="all, delete-orphan")
+
+    # This makes ordering chapters by their index for a given course very fast.
+    __table_args__ = (
+        Index('ix_chapter_course_id_index', 'course_id', 'index'),
+    )
 
 
 class MultipleChoiceQuestion(Base):

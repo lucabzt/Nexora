@@ -65,7 +65,7 @@ function MainLayout() {
               order={2} 
               size="1.6rem"
               component={Link}
-              to="/home"
+              to="/"
               
               sx={(theme) => ({
                 fontWeight: 800,
@@ -110,7 +110,8 @@ function MainLayout() {
                       )}
                     </Group>
                   </Menu.Target>
-                  <Menu.Dropdown>                    <Menu.Item icon={<IconUser size={14} />} onClick={() => navigate('/')}>
+                  <Menu.Dropdown>                    
+                    <Menu.Item icon={<IconUser size={14} />} onClick={() => navigate('/dashboard')}>
                       {t('dashboard', { ns: 'navigation' })}
                     </Menu.Item>
                     <Menu.Item icon={<IconSettings size={14} />} onClick={() => navigate('/settings')}>

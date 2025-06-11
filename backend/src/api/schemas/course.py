@@ -36,18 +36,10 @@ class Chapter(BaseModel):
 class CourseInfo(BaseModel):
     """Schema for a list of courses."""
     course_id: int
-    title: str
-    description: str
-    session_id: str
-    status: str = "creating"  # creating, finished, updating
-    total_time_hours: Optional[int] = None
-
-class Course(BaseModel):
-    """Schema for a course."""
-    course_id: int
-    title: str
-    description: str
-    session_id: str
-    status: str = "creating"
-    total_time_hours: Optional[int] = None
-    chapters: List[Chapter]
+    total_time_hours: int
+    status: str
+    # Information from the agent
+    title: Optional[str] = None
+    description: Optional[str] = None
+    chapter_count: Optional[int] = None
+    image_url: Optional[str] = None

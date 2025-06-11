@@ -1,0 +1,6 @@
+You will be given a topic of a learning_path / course and your task is to find a suitable image as a cover for this course.
+
+Please use the unsplash mcp tool to return one single url for an image. Please return ONLY the url, nothing else.
+If there are mutiple possible urls, ONLY return the first one.
+If the first query does not return any results, try to broaden the search
+If there are None or if the query is not suited to find an image, return 'https://confetticampus.de/wp-content/uploads/2022/02/Oxford-Top-File-A4-Eckspannermappe-mit-Einschlagklappen-rot-1350x1350.jpg'

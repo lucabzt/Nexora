@@ -1,43 +1,4 @@
-import axios from 'axios';
-import authService from './authService';
-
-const API_URL = '/api';
-
-// Create axios instance with error handling
-const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Add request interceptor for auth headers
-api.interceptors.request.use(
-  (config) => {
-    const headers = authService.getAuthHeader();
-    if (headers.Authorization) {
-      config.headers.Authorization = headers.Authorization;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Add response interceptor for error handling
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // Handle 401 Unauthorized
-    if (error.response && error.response.status === 401) {
-      authService.logout();
-      window.location.href = '/login';
-    }
-    console.error('API Error:', error.response || error);
-    return Promise.reject(error);
-  }
-);
+import { apiWithCookies } from './baseApi';
 
 export const chatService = {
   // Send a message to the AI assistant and get streaming response
@@ -53,7 +14,7 @@ export const chatService = {
         message: message
       };
       
-      await api.post('/chat/message', data, {
+      await apiWithCookies.post('/chat/message', data, {
         responseType: 'text',
         timeout: 60000, // 1 minute timeout
         onDownloadProgress: (progressEvent) => {
@@ -135,7 +96,7 @@ export const chatService = {
   // Get chat history for a specific chapter
   getChatHistory: async (courseId, chapterId) => {
     try {
-      const response = await api.get(`/chat/history/${courseId}/${chapterId}`);
+      const response = await apiWithCookies.get(`/chat/history/${courseId}/${chapterId}`);
       return response.data;
     } catch (error) {
       throw error;

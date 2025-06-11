@@ -17,3 +17,8 @@ itsdangerous
 types-SQLAlchemy
 requests
 deprecated
+litellm
+asyncio
+fastmcp
+dataclasses
+uv

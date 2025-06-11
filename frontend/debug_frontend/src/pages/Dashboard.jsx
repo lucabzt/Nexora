@@ -26,7 +26,10 @@ import {
   Overlay,
   rem,
   Tooltip,
-  Center
+  Center,
+  Modal,
+  TextInput,
+  Textarea 
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { 
@@ -42,9 +45,14 @@ import {
   IconCertificate,
   IconHeartHandshake,
   IconBrain,
-  IconChevronRight
+  IconChevronRight,
+  IconPlaceholder,
+  IconPencil
 } from '@tabler/icons-react';
 import { courseService } from '../api/courseService';
+
+
+import PlaceGolderImage from '../assets/place_holder_image.png'
 
 function Dashboard() {
   const { t } = useTranslation('dashboard');
@@ -61,18 +69,62 @@ function Dashboard() {
     totalHoursLearned: 24
   });
 
-  const handleDelete = async (courseId) => {
-    if (!window.confirm(t('deleteCourseConfirmation'))) {
-      return;
-    }
+  // State for delete confirmation modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [courseToDeleteId, setCourseToDeleteId] = useState(null);
+
+  // State for rename modal
+  const [renameModalOpen, setRenameModalOpen] = useState(false);
+  const [courseToRename, setCourseToRename] = useState(null);
+  const [newTitle, setNewTitle] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+
+  // Opens the delete confirmation modal
+  const handleDelete = (courseId) => {
+    setCourseToDeleteId(courseId);
+    setDeleteModalOpen(true);
+  };
+
+  // Opens the rename modal
+  const handleRename = (course) => {
+    setCourseToRename(course);
+    setNewTitle(course.title || '');
+    setNewDescription(course.description || '');
+    setRenameModalOpen(true);
+  };
+
+  // Handles the actual deletion after confirmation
+  const confirmDeleteHandler = async () => {
+    if (!courseToDeleteId) return;
     try {
-      await courseService.deleteCourse(courseId);
-      setCourses(prevCourses => prevCourses.filter(course => course.course_id !== courseId));
+      await courseService.deleteCourse(courseToDeleteId);
+      setCourses(prevCourses => prevCourses.filter(course => course.course_id !== courseToDeleteId));
       // Optional: Show a success notification
     } catch (err) {
       setError(t('deleteCourseError', { message: err.message || '' }));
       console.error('Error deleting course:', err);
       // Optional: Show an error notification
+    } finally {
+      setDeleteModalOpen(false);
+      setCourseToDeleteId(null);
+    }
+  };
+
+  const confirmRenameHandler = async () => {
+    if (!courseToRename) return;
+
+    try {
+      const updatedCourse = await courseService.updateCourse(courseToRename.course_id, newTitle, newDescription);
+
+      setCourses(prevCourses =>
+        prevCourses.map(course =>
+          course.course_id === courseToRename.course_id ? updatedCourse : course
+        )
+      );
+      setRenameModalOpen(false);
+    } catch (err) {
+      setError(t('renameCourseError', { message: err.message || '' }));
+      console.error('Error renaming course:', err);
     }
   };
 
@@ -93,6 +145,7 @@ function Dashboard() {
 
     fetchCourses();
   }, []);
+
   // Helper function to get status badge color and icon
   const getStatusInfo = (status) => {
     switch (status) {
@@ -106,14 +159,6 @@ function Dashboard() {
         return { color: 'gray', icon: IconBook, label: t('status.learning') };
     }
   };
-  // Function to generate a placeholder image URL with a specific theme
-  const getPlaceholderImage = (index, title) => {
-    // Create a consistent seed based on the title
-    //const seed = title ? title.length : index;
-    const themes = ['education', 'technology', 'science', 'data', 'coding'];
-    const theme = themes[index % themes.length];
-    return "https://images.unsplash.com/photo-1745270917449-c2e2c5806586?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
-  };
 
   // Function to calculate progress for a course (placeholder logic)
   const calculateProgress = (course) => {
@@ -125,9 +170,70 @@ function Dashboard() {
     return Math.floor((String(course.course_id)?.charCodeAt(0) || 0) % 80) + 10;
   };
 
-  
   return (
     <Container size="lg" py="xl">
+      {/* Delete Confirmation Modal */}
+      <Modal
+        opened={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setCourseToDeleteId(null); // Reset on close as well
+        }}
+        title={t('deleteCourseModal.title')}
+        centered
+      >
+        <Text>{t('deleteCourseModal.confirmationText')}</Text>
+        <Group position="right" mt="md">
+          <Button 
+            variant="default" 
+            onClick={() => {
+              setDeleteModalOpen(false);
+              setCourseToDeleteId(null);
+            }}
+          >
+            {t('deleteCourseModal.cancelButton')}
+          </Button>
+          <Button 
+            color="red" 
+            onClick={confirmDeleteHandler}
+            leftIcon={<IconTrash size={rem(16)} />}
+          >
+            {t('deleteCourseModal.deleteButton')}
+          </Button>
+        </Group>
+      </Modal>
+
+      {/* Rename Modal */}
+      <Modal
+        opened={renameModalOpen}
+        onClose={() => setRenameModalOpen(false)}
+        title={t('renameCourseModal.title')}
+        centered
+      >
+        <Stack spacing="md">
+          <TextInput
+            label={t('renameCourseModal.newTitleLabel')}
+            placeholder={t('renameCourseModal.newTitlePlaceholder')}
+            value={newTitle}
+            onChange={(event) => setNewTitle(event.currentTarget.value)}
+          />
+          <Textarea
+            label={t('renameCourseModal.newDescriptionLabel')}
+            placeholder={t('renameCourseModal.newDescriptionPlaceholder')}
+            value={newDescription}
+            onChange={(event) => setNewDescription(event.currentTarget.value)}
+          />
+          <Group position="right" mt="md">
+            <Button variant="default" onClick={() => setRenameModalOpen(false)}>
+              {t('renameCourseModal.cancelButton')}
+            </Button>
+            <Button color="teal" onClick={confirmRenameHandler}>
+              {t('renameCourseModal.saveButton')}
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
       {/* Header with motivational message */}
       <Box mb="xl">
         <Group position="apart" mb="md">
@@ -138,7 +244,7 @@ function Dashboard() {
           <Button 
             size="md"
             color="teal" 
-            onClick={() => navigate('/create-course')}
+            onClick={() => navigate('/dashboard/create-course')}
             leftIcon={<IconBrain size={20} />}
             sx={(theme) => ({
               background: theme.colorScheme === 'dark' ? 
@@ -241,7 +347,7 @@ function Dashboard() {
             </Text>
             <Button 
               size="lg"
-              onClick={() => navigate('/create-course')} 
+              onClick={() => navigate('/dashboard/create-course')} 
               color="teal"
               leftIcon={<IconStars size={20} />}
               mt="md"
@@ -277,7 +383,7 @@ function Dashboard() {
           >          <Grid gutter={0}>
               <Grid.Col sm={5} order={isMobile ? 1 : 2} sx={{ position: 'relative' }}>
                 <Image 
-                  src={getPlaceholderImage(0, courses[0]?.title)}
+                  src={ courses[0]?.image_url ? courses[0]?.image_url : PlaceGolderImage}
                   height={isMobile ? 200 : 300}
                   sx={{ 
                     objectFit: 'cover',
@@ -328,7 +434,7 @@ function Dashboard() {
                     variant="gradient"
                     gradient={{ from: 'teal', to: 'cyan' }}
                     rightIcon={<IconChevronRight size={16} />}
-                    onClick={() => navigate(`/courses/${courses[0]?.course_id}`)}
+                    onClick={() => navigate(`/dashboard/courses/${courses[0]?.course_id}`)}
                     mt="lg"
                   >
                     {t('continueLearningButton')}
@@ -379,7 +485,7 @@ function Dashboard() {
                   >
                     <Card.Section pos="relative">
                       <Image
-                        src={getPlaceholderImage(index + 1, course.title)}
+                        src={ course?.image_url ? course?.image_url : PlaceGolderImage}
                         height={160}
                         alt={course.title}
                       />
@@ -421,17 +527,30 @@ function Dashboard() {
                         >
                           {statusInfo.label}
                         </Badge>
-                        <ActionIcon 
-                          color="red" 
-                          variant="subtle"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(course.course_id);
-                          }}
-                          title={t('deleteCourseTooltip')}
-                        >
-                          <IconTrash size={16} />
-                        </ActionIcon>
+                        <Group spacing="xs" position="right">
+                          <ActionIcon 
+                            color="red" 
+                            variant="subtle"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(course.course_id);
+                            }}
+                            title={t('deleteCourseTooltip')}
+                          >
+                            <IconTrash size={16} />
+                          </ActionIcon>
+                          <ActionIcon 
+                            color="blue" 
+                            variant="subtle"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRename(course);
+                            }}
+                            title={t('renameCourseTooltip')}
+                          >
+                            <IconPencil size={16} />
+                          </ActionIcon>
+                        </Group>
                       </Group>
                     </Card.Section>
 
@@ -461,8 +580,8 @@ function Dashboard() {
                       rightIcon={<IconChevronRight size={16} />}
                       onClick={() => navigate(
                         course.status === 'creating' 
-                          ? `/courses/${course.course_id}?creating=true`
-                          : `/courses/${course.course_id}`
+                          ? `/dashboard/courses/${course.course_id}?creating=true`
+                          : `/dashboard/courses/${course.course_id}`
                       )}
                     >
                       {course.status === 'creating' ? t('viewCreationProgressButton') : t('continueLearningButton')}

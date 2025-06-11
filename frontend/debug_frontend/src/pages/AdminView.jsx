@@ -74,11 +74,6 @@ function AdminView() {
     admins: 0
   });
 
-  // Fetch users on component mount
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
   // Update filtered users when search term or active tab changes
   useEffect(() => {
     filterUsers();
@@ -95,6 +90,50 @@ function AdminView() {
       });
     }
   }, [users]);
+
+  const formatDate = (dateString) => {
+    console.log("Given Date String: ", dateString);
+    if (!dateString) return '';
+    try {
+      let processedDateString = dateString;
+      if (typeof dateString === 'string') {
+        // Case 1: Input is 'YYYY-MM-DD HH:MM:SS(.sss)' (space separator)
+        // Convert to 'YYYY-MM-DDTHH:MM:SS(.sss)Z' to ensure UTC parsing
+        if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d*)?$/.test(dateString)) {
+          processedDateString = dateString.replace(' ', 'T') + 'Z';
+        }
+        // Case 2: Input is 'YYYY-MM-DDTHH:MM:SS(.sss)' (T separator, no Z or offset)
+        // Append 'Z' to ensure UTC parsing
+        else if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d*)?$/.test(dateString) &&
+                 !dateString.endsWith('Z') &&
+                 !/[+-]\d{2}:\d{2}$/.test(dateString) &&
+                 !/[+-]\d{4}$/.test(dateString)) { // Also check for +-HHMM offset
+          processedDateString = dateString + 'Z';
+        }
+      }
+  
+      const date = new Date(processedDateString);
+      console.log("Processed Date String: ", processedDateString);
+      console.log("Date Object: ", date);
+      
+      if (isNaN(date.getTime())) {
+        // Fallback if processing failed, try original string directly
+        const fallbackDate = new Date(dateString); 
+        if (isNaN(fallbackDate.getTime())) {
+          console.warn("Invalid date string received (tried processed and original):", dateString);
+          return ''; 
+        }
+        // Use fallbackDate for formatting
+        return fallbackDate.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      }
+  
+      // Format using the (UTC-parsed then localized) date object
+      return date.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch (error) {
+      console.error("Error formatting date:", dateString, error);
+      return '';
+    }
+  };
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -282,23 +321,46 @@ function AdminView() {
       </Box>
 
       <Paper shadow="xs" p="md" mb="md">
-        <Group position="apart" mb="md">
+        <Group
+          mb="md"
+          sx={(theme) => ({
+            flexDirection: 'column',
+            alignItems: 'stretch',
+            [theme.fn.largerThan('sm')]: {
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            },
+          })}
+        >
           <TextInput
-            placeholder={t('searchPlaceholder')}
-            icon={<IconSearch size="0.9rem" />}
+            placeholder={t('search.placeholder')}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ width: '300px' }}
+            onChange={(event) => setSearchTerm(event.currentTarget.value)}
+            icon={<IconSearch size={16} />}
+            sx={(theme) => ({ 
+              flexGrow: 1, 
+              [theme.fn.smallerThan('sm')]: { 
+                marginRight: 0, 
+                marginBottom: theme.spacing.sm 
+              },
+              [theme.fn.largerThan('sm')]: {
+                marginRight: theme.spacing.md,
+              }
+            })}
           />
-          <Group>
-            <Button 
-              leftIcon={<IconRefresh size="1rem" />}
-              onClick={fetchUsers}
-              variant="outline"
-            >
-              {t('buttons.refresh')}
-            </Button>
-          </Group>
+          <Button 
+            leftIcon={<IconRefresh size={16} />} 
+            onClick={fetchUsers} 
+            variant="outline" 
+            sx={(theme) => ({
+              [theme.fn.smallerThan('sm')]: {
+                width: '100%',
+              }
+            })}
+          >
+            {t('buttons.refresh')}
+          </Button>
         </Group>
 
         <Tabs value={activeTab} onTabChange={setActiveTab} mb="md">
@@ -322,84 +384,100 @@ function AdminView() {
             <Skeleton height={40} mb="sm" />
             <Skeleton height={40} mb="sm" />
             <Skeleton height={40} mb="sm" />
-          </>
+          </> // Corrected closing tag for JSX Fragment
         ) : (
-          <Table striped highlightOnHover>
-            <thead>
-              <tr>
-                <th>{t('table.header.username')}</th>
-                <th>{t('table.header.email')}</th>
-                <th>{t('table.header.status')}</th>
-                <th>{t('table.header.role')}</th>
-                <th>{t('table.header.actions')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((user) => (
-                  <tr key={user.id}>
-                    <td>{user.username}</td>
-                    <td>{user.email}</td>
-                    <td>
-                      <Badge
-                        color={user.is_active ? 'green' : 'red'}
-                        variant="light"
-                      >
-                        {user.is_active ? t('table.status.active') : t('table.status.inactive')}
-                      </Badge>
-                    </td>
-                    <td>
-                      <Badge
-                        color={user.is_admin ? 'violet' : 'blue'}
-                        variant="light"
-                      >
-                        {user.is_admin ? t('table.role.admin') : t('table.role.user')}
-                      </Badge>
-                    </td>
-                    <td>
-                      <Group spacing="xs">
-                        <Tooltip label={t('table.actions.editUser')}>
-                          <ActionIcon 
-                            color="blue" 
-                            onClick={() => openEditModal(user)}
-                            disabled={user.id === currentUser.id}
-                          >
-                            <IconEdit size="1rem" />
-                          </ActionIcon>
-                        </Tooltip>
-                        
-                        <Tooltip label={t('table.actions.changePassword')}>
-                          <ActionIcon 
-                            color="yellow" 
-                            onClick={() => openPasswordModal(user)}
-                            disabled={user.id === currentUser.id}
-                          >
-                            <IconLock size="1rem" />
-                          </ActionIcon>
-                        </Tooltip>
-                        
-                        <Tooltip label={t('table.actions.deleteUser')}>
-                          <ActionIcon 
-                            color="red" 
-                            onClick={() => openDeleteModal(user)}
-                            disabled={user.id === currentUser.id}
-                          >
-                            <IconTrash size="1rem" />
-                          </ActionIcon>
-                        </Tooltip>
-                      </Group>
+          // Table to display when not loading
+          <Box sx={{ overflowX: 'auto' }}>
+            <Table striped highlightOnHover withBorder withColumnBorders verticalSpacing="sm" sx={{ minWidth: 900 }}>
+              <thead>
+                <tr>
+                  <th>{t('table.header.profilePicture')}</th>
+                  <th>{t('table.header.username')}</th>
+                  <th>{t('table.header.email')}</th>
+                  <th>{t('table.header.status')}</th>
+                  <th>{t('table.header.role')}</th>
+                  <th>{t('table.header.createdAt')}</th>
+                  <th>{t('table.header.lastLogin')}</th>
+                  <th>{t('table.header.actions')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUsers.length > 0 ? (
+                  filteredUsers.map((user) => (
+                    <tr key={user.id}>
+                      <td>
+                        {user.profile_image_base64 ? (
+                          <img 
+                            src={`data:image/png;base64,${user.profile_image_base64}`} 
+                            alt={t('table.profilePictureAlt', { username: user.username })} 
+                            style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} 
+                          />
+                        ) : (
+                          <Text size="sm" color="dimmed">{t('table.noProfilePicture')}</Text>
+                        )}
+                      </td>
+                      <td>{user.username}</td>
+                      <td>{user.email}</td>
+                      <td>
+                        <Badge
+                          color={user.is_active ? 'green' : 'red'}
+                          variant="light"
+                        >
+                          {user.is_active ? t('table.status.active') : t('table.status.inactive')}
+                        </Badge>
+                      </td>
+                      <td>
+                        <Badge
+                          color={user.is_admin ? 'violet' : 'blue'}
+                          variant="light"
+                        >
+                          {user.is_admin ? t('table.role.admin') : t('table.role.user')}
+                        </Badge>
+                      </td>
+                      <td>{formatDate(user.created_at)}</td>
+                      <td>{formatDate(user.last_login)}</td>
+                      <td>
+                        <Group spacing="xs">
+                          <Tooltip label={t('table.actions.editUser')}>
+                            <ActionIcon 
+                              color="blue" 
+                              onClick={() => openEditModal(user)}
+                              disabled={user.id === currentUser.id && user.is_admin} // Prevent admin from editing their own core details if they are an admin
+                            >
+                              <IconEdit size="1rem" />
+                            </ActionIcon>
+                          </Tooltip>
+                          <Tooltip label={t('table.actions.changePassword')}>
+                            <ActionIcon 
+                              color="yellow" 
+                              onClick={() => openPasswordModal(user)}
+                            >
+                              <IconLock size="1rem" />
+                            </ActionIcon>
+                          </Tooltip>
+                          <Tooltip label={t('table.actions.deleteUser')}>
+                            <ActionIcon 
+                              color="red" 
+                              onClick={() => openDeleteModal(user)}
+                              disabled={user.id === currentUser.id} // Prevent self-deletion
+                            >
+                              <IconTrash size="1rem" />
+                            </ActionIcon>
+                          </Tooltip>
+                        </Group>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={7} style={{ textAlign: 'center', padding: '20px 0' }}>
+                      {t('table.noUsersFound')}
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '20px 0' }}>
-                    {t('table.noUsersFound')}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
+                )}
+              </tbody>
+            </Table>
+          </Box>
         )}
       </Paper>
 

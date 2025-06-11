@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, WebSocket, WebSocketDisconnect
+from fastapi.responses import JSONResponse
+import uuid
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -9,14 +10,14 @@ from ...utils.auth import get_current_active_user
 from ...db.database import get_db
 from ...db.crud import courses_crud, chapters_crud, users_crud, questions_crud
 
+from ...services.notification_service import manager as ws_manager
 from ..schemas.course import (
     CourseInfo,
     CourseRequest,
-    Course as CourseSchema,
     Chapter as ChapterSchema,
     MultipleChoiceQuestion as MCQuestionSchema
 )
-from ...db.models.db_course import Course, Chapter
+from ...db.models.db_course import Course, Chapter, CourseStatus
 
 router = APIRouter(
     prefix="/courses",
@@ -24,7 +25,6 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 agent_service = AgentService()
-
 
 async def _verify_course_ownership(course_id: int, user_id: str, db: Session) -> Course:
     """
@@ -46,28 +46,48 @@ async def _verify_course_ownership(course_id: int, user_id: str, db: Session) ->
 
 
 @router.post("/create")
-async def create_course_streaming(
+async def create_course_request(
         course_request: CourseRequest,
+        background_tasks: BackgroundTasks,
         current_user: User = Depends(get_current_active_user),
         db: Session = Depends(get_db)
-):
+) -> CourseInfo:
     """
-    Create a new course with streaming response.
-    Returns a stream of JSON objects in the format:
-    {"type": "course_info", "data": {...}}
-    {"type": "chapter", "data": {...}}
-    {"type": "complete", "data": {}}
-    {"type": "error", "data": {"message": "..."}}
+    Initiate course creation as a background task and return a task ID for WebSocket progress updates.
     """
-    return StreamingResponse(
-        agent_service.create_course(current_user.id, course_request, db),
-        # TODO look into this (vibe code)
-        media_type="application/x-ndjson",  # Newline Delimited JSON
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",  # Disable nginx buffering
-        }
+   
+   # Create empty course in the database
+    course = courses_crud.create_new_course(
+        db=db,
+        user_id=str(current_user.id),
+        total_time_hours=course_request.time_hours,
+        query_=course_request.query,
+        status=CourseStatus.CREATING  # Set initial status to CREATING
+    )
+    if not course:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create course in the database"
+        )
+
+    
+    # Add the long-running course creation to background tasks
+    # The agent_service.create_course will need to be modified to accept ws_manager and task_id
+    # and use ws_manager.send_json_message(task_id, progress_data) to send updates.
+    background_tasks.add_task(
+        agent_service.create_course,
+        user_id=str(current_user.id),
+        course_id=course.id,
+        request=course_request,
+        db=db,
+        task_id=str(uuid.uuid4()),  # Generate a unique task ID
+        ws_manager=ws_manager
+    )
+    
+    return CourseInfo(
+        course_id=int(course.id),
+        total_time_hours=course_request.time_hours,
+        status=course.status.value,  # Convert enum to string
     )
 
 
@@ -89,13 +109,22 @@ async def get_user_courses(
               .limit(limit)
               .all())
     
-    return [CourseInfo(course_id = int(course.id), description = str(course.description),
-                        title = str(course.title),
-                        session_id=str(course.session_id),
-                        status=str(course.status)) for course in courses]
+    return [
+        CourseInfo(
+            course_id=int(course.id),
+            total_time_hours=int(course.total_time_hours),
+            status=str(course.status),
 
-    
-@router.get("/{course_id}", response_model=CourseSchema)
+            title=str(course.title),
+            description=str(course.description),
+            chapter_count=int(course.chapter_count) if course.chapter_count else None,
+            image_url= str(course.image_url) if course.image_url else None
+
+        ) for course in courses
+    ]
+
+
+@router.get("/{course_id}", response_model=CourseInfo)
 async def get_course_by_id(
         course_id: int,
         current_user: User = Depends(get_current_active_user),
@@ -107,40 +136,15 @@ async def get_course_by_id(
     """
     course = await _verify_course_ownership(course_id, str(current_user.id), db)
     
-    # Build the complete course response with all required fields
-    chapters = []
-    for chapter in sorted(course.chapters, key=lambda x: x.index):
-        mc_questions = [
-            MCQuestionSchema(
-                question=q.question,
-                answer_a=q.answer_a,
-                answer_b=q.answer_b,
-                answer_c=q.answer_c,
-                answer_d=q.answer_d,
-                correct_answer=q.correct_answer,
-                explanation=q.explanation
-            ) for q in chapter.mc_questions
-        ]
-        
-        chapters.append(ChapterSchema(
-            id=chapter.id,  # Add this
-            index=chapter.index,
-            caption=chapter.caption,
-            summary=chapter.summary or "",
-            content=chapter.content,
-            mc_questions=mc_questions,
-            time_minutes=chapter.time_minutes,
-            is_completed=chapter.is_completed  # Add this
-        ))
-    
-    return CourseSchema(
-        course_id=int(course.id),  # Map database 'id' to schema 'course_id'
+    return CourseInfo(
+        course_id=int(course.id),
+        total_time_hours=int(course.total_time_hours),
+        status=str(course.status),
+
         title=str(course.title),
-        description=course.description or "",
-        session_id=course.session_id,
-        status=course.status.value,  # Convert enum to string
-        total_time_hours=course.total_time_hours,
-        chapters=chapters
+        description=str(course.description),
+        chapter_count=int(course.chapter_count) if course.chapter_count else None,
+        image_url= str(course.image_url) if course.image_url else None
     )
 
 # -------- CHAPTERS ----------
@@ -155,33 +159,34 @@ async def get_course_chapters(
     Only accessible if the course belongs to the current user.
     """
     course = await _verify_course_ownership(course_id, str(current_user.id), db)
-    
-    chapters = []
-    for chapter in sorted(course.chapters, key=lambda x: x.index):
-        mc_questions = [
-            MCQuestionSchema(
-                question=q.question,
-                answer_a=q.answer_a,
-                answer_b=q.answer_b,
-                answer_c=q.answer_c,
-                answer_d=q.answer_d,
-                correct_answer=q.correct_answer,
-                explanation=q.explanation
-            ) for q in chapter.mc_questions
-        ]
-        
-        chapters.append(ChapterSchema(
+   
+    chapters = course.chapters
+
+    # Build chapter response with questions
+    chapters = [
+        ChapterSchema(
             id=chapter.id,  # Add this
             index=chapter.index,
             caption=chapter.caption,
             summary=chapter.summary or "",
             content=chapter.content,
-            mc_questions=mc_questions,
+            mc_questions=[
+                MCQuestionSchema(
+                    question=q.question,
+                    answer_a=q.answer_a,
+                    answer_b=q.answer_b,
+                    answer_c=q.answer_c,
+                    answer_d=q.answer_d,
+                    correct_answer=q.correct_answer,
+                    explanation=q.explanation
+                ) for q in chapter.mc_questions
+            ],
             time_minutes=chapter.time_minutes,
             is_completed=chapter.is_completed  # Add this
-        ))
-    
-    return chapters
+        ) for chapter in chapters
+    ]
+
+    return chapters if chapters else []
 
 
 @router.get("/{course_id}/chapters/{chapter_id}", response_model=ChapterSchema)
@@ -272,6 +277,38 @@ async def mark_chapter_complete(
 
 
 # -------- COURSE CRUD OPERATIONS ----------
+
+@router.put("/{course_id}", response_model=CourseInfo)
+async def update_course_details(
+        course_id: int,
+        title: str = None,
+        description: str = None,
+        current_user: User = Depends(get_current_active_user),
+        db: Session = Depends(get_db)
+):
+    """
+    Update a course's title and description.
+    """
+    course = await _verify_course_ownership(course_id, str(current_user.id), db)
+
+    update_data = {}
+    if title:
+        update_data["title"] = title
+    if description:
+        update_data["description"] = description
+
+    updated_course = courses_crud.update_course(db, course_id, **update_data)
+
+    return CourseInfo(
+        course_id=int(updated_course.id),
+        total_time_hours=int(updated_course.total_time_hours),
+        status=str(updated_course.status),
+        title=str(updated_course.title),
+        description=str(updated_course.description),
+        chapter_count=int(updated_course.chapter_count) if updated_course.chapter_count else None,
+        image_url=str(updated_course.image_url) if updated_course.image_url else None
+    )
+
 
 @router.delete("/{course_id}")
 async def delete_course(

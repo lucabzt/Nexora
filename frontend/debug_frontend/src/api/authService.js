@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { apiWithCookies, apiWithoutCookies } from './baseApi';
 
 const API_URL = '/api';
 
@@ -8,58 +9,60 @@ class AuthService {
     formData.append('username', username);
     formData.append('password', password);
 
-    const response = await axios.post(`${API_URL}/token`, formData, {
+    // The backend at /auth/token should set an HTTP-only cookie upon successful login.
+    const response = await apiWithCookies.post('/auth/login', formData, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
     });
-    
-    if (response.data.access_token) {
-      localStorage.setItem('user', JSON.stringify(response.data));
-    }
-    
+    // User data (like username, roles) might be returned, but not the token for client storage.
     return response.data;
   }
 
   async register(username, email, password) {
-    return axios.post(`${API_URL}/register`, {
+    return (await apiWithoutCookies.post('/auth/register', {
       username,
       email,
       password,
-    });
+    })).data;
   }
 
-  logout() {
-    localStorage.removeItem('user');
+  async logout() {
+    // Call backend to invalidate session/cookie
+    try {
+      await apiWithCookies.post('/auth/logout');
+    } catch (error) {
+      console.error('Logout failed', error);
+      // Optionally, still attempt to clear any local user state if needed
+    }
   }
 
-  getCurrentUser() {
-    return JSON.parse(localStorage.getItem('user'));
-  }
-
-  getAuthHeader() {
-    const user = this.getCurrentUser();
-    if (user && user.access_token) {
-      return { Authorization: `Bearer ${user.access_token}` };
-    } else {
-      return {};
+  async getCurrentUser() {
+    try {
+      // Fetch user data from a protected endpoint. If cookie is valid, this will succeed.
+      const response = await apiWithCookies.get('/users/me');
+      return response.data; // Contains user profile information
+    } catch (error) {
+      // This can happen if the user is not authenticated or if there's a network issue.
+      // console.error('Error fetching current user:', error);
+      return null;
     }
   }
 
   // New method for Google OAuth
   redirectToGoogleOAuth() {
     // The backend URL that initiates the Google OAuth flow
-    window.location.href = `${API_URL}/login/google`;
+    window.location.href = `/api/auth/login/google`;
   }
 
   redirectToGithubOAuth() {
     // The backend URL that initiates the Google OAuth flow
-    window.location.href = `${API_URL}/login/github`;
+    window.location.href = `/api/auth/login/github`;
   }
 
   redirectToDiscordOAuth() {
     // The backend URL that initiates the Discord OAuth flow
-    window.location.href = `${API_URL}/login/discord`;
+    window.location.href = `/api/auth/login/discord`;
   }
 }
 

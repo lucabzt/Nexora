@@ -141,7 +141,7 @@ function LandingPage() {
                 </>
               ) : (
                 <Button 
-                  onClick={() => navigate('/')} 
+                  onClick={() => navigate('/dashboard')} 
                   size="lg" 
                   radius="md"
                   variant="gradient"
@@ -427,7 +427,7 @@ function LandingPage() {
                   </Button>
               ) : (
                 <Button
-                  onClick={() => navigate('/create-course')}
+                  onClick={() => navigate('/dashboard/create-course')}
                   size="xl"
                   radius="md"
                   variant="gradient"

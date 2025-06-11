@@ -19,11 +19,11 @@ import {
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { IconAlertCircle, IconBookmark, IconQuestionMark } from '@tabler/icons-react';
-import ReactMarkdown from 'react-markdown';
 import { toast } from 'react-toastify';
 import { courseService } from '../api/courseService';
 import ToolbarContainer from '../components/tools/ToolbarContainer';
 import { useToolbar } from '../contexts/ToolbarContext';
+import AiCodeWrapper from "../components/AiCodeWrapper.jsx";
 
 function ChapterView() {
   const { t } = useTranslation('chapterView');
@@ -109,7 +109,7 @@ function ChapterView() {
       // Using the ID from URL params
       await courseService.markChapterComplete(courseId, chapterId);
       toast.success(t('toast.markedCompleteSuccess'));
-      navigate(`/courses/${courseId}`);
+      navigate(`/dashboard/courses/${courseId}`);
     } catch (error) {
       toast.error(t('toast.markedCompleteError'));
       console.error('Error marking chapter complete:', error);
@@ -185,7 +185,7 @@ function ChapterView() {
               <Tabs.Panel value="content" pt="xs">
                 <Paper shadow="xs" p="md" withBorder>
                   <div className="markdown-content">
-                    <ReactMarkdown>{chapter.content}</ReactMarkdown>
+                    <AiCodeWrapper>{chapter.content}</AiCodeWrapper>
                   </div>
                 </Paper>
               </Tabs.Panel>
@@ -261,7 +261,7 @@ function ChapterView() {
             <Group position="apart">
               <Button 
                 variant="outline" 
-                onClick={() => navigate(`/courses/${courseId}`)}
+                onClick={() => navigate(`/dashboard/courses/${courseId}`)}
               >
                 {t('buttons.backToCourse')}
               </Button>

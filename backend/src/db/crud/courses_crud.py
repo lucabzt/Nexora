@@ -24,17 +24,16 @@ def get_courses_by_status(db: Session, status: CourseStatus) -> List[Course]:
     return db.query(Course).filter(Course.status == status).all()
 
 
-def create_course(db: Session, session_id: str, user_id: str, title: str,
-                  description: str, total_time_hours: int, status: CourseStatus = CourseStatus.CREATING) -> Course:
+def create_new_course(db: Session, user_id: str, total_time_hours: int, query_: str,
+                    status: CourseStatus = CourseStatus.CREATING) -> Course:
     """Create a new course"""
     db_course = Course(
-        session_id=session_id,
         user_id=user_id,
-        title=title,
-        description=description,
         total_time_hours=total_time_hours,
+        query=query_,
         status=status,
     )
+
     db.add(db_course)
     db.commit()
     db.refresh(db_course)

@@ -1,190 +1,173 @@
-import { createContext, useState, useEffect, useCallback, useContext } from 'react'; // Added useContext
+import { createContext, useState, useEffect, useCallback, useContext } from 'react';
 import authService from '../api/authService';
-import userService from '../api/userService'; // Import userService
-import { toast } from 'react-toastify'; // Ensure toast is imported
+import userService from '../api/userService';
+import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
 
-const AuthContext = createContext();
-
-
+export const AuthContext = createContext(); // Add export here
 
 export const AuthProvider = ({ children }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('auth');
   const [user, setUserState] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchAndSetFullUser = useCallback(async (tokenDataInput) => {
-    console.log("AuthContext: fetchAndSetFullUser called with:", tokenDataInput);
-    if (!tokenDataInput || !tokenDataInput.access_token) {
-      console.warn("AuthContext: fetchAndSetFullUser - No tokenData or access_token provided.");
-      setUserState(null);
-      localStorage.removeItem('user');
-      // Do not navigate here, let the caller decide
-      return null;
-    }
-
-    // Temporarily store the provided token data to ensure authService.getAuthHeader() works for the next call.
-    // This might be the minimal token from OAuth or a fuller object from login/localStorage.
-    localStorage.setItem('user', JSON.stringify(tokenDataInput));
-    console.log("AuthContext: Token data temporarily stored in localStorage.");
-
+  // Fetches current user details if a valid session cookie exists
+  const fetchAndSetCurrentUser = useCallback(async () => {
+    console.log("AuthContext: Attempting to fetch current user (cookie-based)...");
+    setLoading(true);
     try {
-      console.log("AuthContext: Attempting to fetch full user details from /api/users/me...");
-      // Fetch full user details from /api/users/me using the token now in localStorage.
-      const fullUserFromAPI = await userService.getMe(); // userService.getMe() will use the token
-      console.log("AuthContext: Received user details from API:", fullUserFromAPI);
+      // userService.getMe() uses apiWithCookies, which sends HttpOnly cookies automatically.
+      const currentUser = await userService.getMe();
 
-      if (fullUserFromAPI && fullUserFromAPI.id) {
-        // Combine the essential token parts with the full user details from the API.
-        const completeUser = {
-          access_token: tokenDataInput.access_token,
-          token_type: tokenDataInput.token_type || 'bearer',
-          ...fullUserFromAPI, // This includes id, username, email, is_admin etc.
-        };
-        
-        console.log("AuthContext: Successfully fetched and combined user data:", completeUser);
-        setUserState(completeUser);
-        localStorage.setItem('user', JSON.stringify(completeUser)); // Persist the complete user object
-        console.log("AuthContext: Complete user data stored in state and localStorage.");
-        return completeUser;
+      if (currentUser && currentUser.id) {
+        console.log("AuthContext: Successfully fetched user data:", currentUser);
+        setUserState(currentUser);
+        // Store non-sensitive user profile in localStorage for quick access if needed.
+        localStorage.setItem('userProfile', JSON.stringify(currentUser)); 
+        return currentUser;
       } else {
-        console.error("AuthContext: Failed to retrieve valid user details from server. API response:", fullUserFromAPI);
-        throw new Error("Failed to retrieve valid user details from server.");
+        console.info("AuthContext: No valid user session found or incomplete user data from API.");
+        setUserState(null);
+        localStorage.removeItem('userProfile');
+        return null;
       }
     } catch (error) {
-      console.error("Error in fetchAndSetFullUser:", error);
-      authService.logout(); // Clears localStorage and user state
-      setUserState(null);   // Ensure state is cleared
-      toast.error(error.message || t('auth.notifications.sessionExpired'));
+      console.error("AuthContext: Error fetching current user:", error);
+      // This error could be a 401 if cookies are invalid/expired and refresh failed.
+      // The interceptor in baseApi.js handles refresh attempts.
+      setUserState(null);
+      localStorage.removeItem('userProfile');
       return null;
+    } finally {
+      setLoading(false);
     }
-  }, []); // Dependencies: setUserState (from useState, stable), authService, userService, toast (imports, stable)
+  }, [t]); // t for potential future use in error messages
 
-  // Load user from localStorage on initial render and fetch full details
+  const login = useCallback(async (username, password) => {
+    console.log("AuthContext: login called for username:", username);
+    setLoading(true);
+    try {
+      // authService.login makes the API call. Backend sets HttpOnly cookies.
+      // The response data from authService.login might be minimal or just a success status.
+      await authService.login(username, password);
+      console.log("AuthContext: authService.login successful. Cookies should be set.");
+
+      // After successful login and cookies are set, fetch the full user details.
+      const loggedInUser = await fetchAndSetCurrentUser();
+
+      if (loggedInUser) {
+        toast.success(t('notifications.loginSuccess', { username: loggedInUser.username }));
+        return loggedInUser;
+      } else {
+        // This implies an issue fetching user data immediately after a successful login call.
+        throw new Error(t('notifications.loginErrorAfterSuccess'));
+      }
+    } catch (error) {
+      console.error("AuthContext: Login process failed:", error);
+      const errorMessage = error.response?.data?.detail || error.message || t('notifications.loginError');
+      toast.error(errorMessage);
+      setUserState(null); // Ensure user state is cleared
+      localStorage.removeItem('userProfile');
+      throw error; // Re-throw for the calling component to handle
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchAndSetCurrentUser, t]);
+
+  const register = useCallback(async (username, email, password) => {
+    console.log(`AuthContext: Attempting registration for user: ${username}, email: ${email}`);
+    setLoading(true);
+    try {
+      // authService.register makes the API call.
+      // Depending on backend, it might auto-login (set cookies) or just create the user.
+      // Assuming it does not auto-login here for simplicity.
+      const response = await authService.register(username, email, password);
+      toast.success(t('notifications.registerSuccess'));
+      console.log(`AuthContext: Registration successful for user: ${username}`);
+
+      // After successful login and cookies are set, fetch the full user details.
+      const loggedInUser = await fetchAndSetCurrentUser();
+
+      if (loggedInUser) {
+        toast.success(t('notifications.loginSuccess', { username: loggedInUser.username }));
+        return loggedInUser;
+      } else {
+        // This implies an issue fetching user data immediately after a successful login call.
+        throw new Error(t('notifications.loginErrorAfterSuccess'));
+      }
+    } catch (error) {
+
+      console.error("AuthContext: Register process failed:", error);
+      const errorMessage = error.response?.data?.detail || error.message || t('notifications.registerError');
+      toast.error(errorMessage);
+      setUserState(null); // Ensure user state is cleared
+      localStorage.removeItem('userProfile');
+      throw error; // Re-throw for the calling component to handle
+    } finally {
+      setLoading(false);
+    }
+  }, [t]);
+
+  const logout = useCallback(async () => {
+    console.log("AuthContext: logout called.");
+    setLoading(true);
+    try {
+      await authService.logout(); // Backend clears HttpOnly cookies
+      console.log("AuthContext: authService.logout successful.");
+    } catch (error) {
+      console.error("AuthContext: Error during authService.logout:", error);
+      // Still proceed to clear client-side state
+    } finally {
+      setUserState(null);
+      localStorage.removeItem('userProfile');
+      // Optionally, clear other related local storage items if any
+      console.log("AuthContext: Client-side user state and profile cleared.");
+      toast.info(t('notifications.logoutSuccess'));
+      setLoading(false);
+      // Navigation to login page can be handled by the component calling logout or a route guard.
+    }
+  }, [t]);
+
+  // Custom setUser function for profile updates (e.g., after editing user settings)
+  // This assumes newProfileData is the complete, updated user object from the backend.
+  const updateUserProfile = useCallback((newProfileData) => {
+    console.log("AuthContext: updateUserProfile called with newProfileData:", newProfileData);
+    if (newProfileData && newProfileData.id) {
+      setUserState(newProfileData);
+      localStorage.setItem('userProfile', JSON.stringify(newProfileData));
+      console.log("AuthContext: User profile updated in state and localStorage:", newProfileData);
+    } else {
+      console.warn("AuthContext updateUserProfile called with invalid or incomplete data:", newProfileData);
+    }
+  }, []);
+
+  // Initialize auth state on app load by trying to fetch the current user
   useEffect(() => {
     const initAuth = async () => {
       console.log("AuthContext: Initializing authentication...");
-      setLoading(true);
-      const storedUserTokenData = authService.getCurrentUser();
-      console.log("AuthContext: Stored user token data from localStorage:", storedUserTokenData);
-      if (storedUserTokenData && storedUserTokenData.access_token) {
-        console.log("AuthContext: Found stored token, calling fetchAndSetFullUser...");
-        await fetchAndSetFullUser(storedUserTokenData);
-      } else {
-        console.log("AuthContext: No stored token found or token invalid.");
-      }
-      setLoading(false);
-      console.log("AuthContext: Authentication initialization complete.");
+      await fetchAndSetCurrentUser();
+      // setLoading(false) is now handled within fetchAndSetCurrentUser's finally block
     };
     initAuth();
-  }, [fetchAndSetFullUser]);
+  }, [fetchAndSetCurrentUser]); // Dependency: fetchAndSetCurrentUser
 
-  // Login function
-  const login = async (username, password) => {
-    console.log(`AuthContext: Attempting login for user: ${username}`);
-    try {
-      // Step 1: Get token from /token endpoint
-      const tokenDataFromEndpoint = await authService.login(username, password);
-      console.log("AuthContext: Received data from /token endpoint:", tokenDataFromEndpoint);
-
-      if (tokenDataFromEndpoint && tokenDataFromEndpoint.access_token) {
-        // Step 2: Use the received token to fetch full user details via /users/me
-        // fetchAndSetFullUser will store the token and then call /users/me
-        console.log("AuthContext: Token received, calling fetchAndSetFullUser to get full user details...");
-        const userSession = await fetchAndSetFullUser(tokenDataFromEndpoint); // Pass the whole token data
-
-        if (userSession) {
-          console.log("AuthContext: Login successful, user session created:", userSession);
-          toast.success(t('auth.notifications.loginSuccess'));
-          return { success: true, user: userSession };
-        } else {
-          console.error("AuthContext: Login failed - fetchAndSetFullUser did not return a user session.");
-          // fetchAndSetFullUser handles its own errors including toast
-          return { success: false, message: t('auth.notifications.loginSessionError') };
-        }
-      } else {
-        console.error("AuthContext: Login failed - No access token received from /token endpoint.");
-        throw new Error(t('auth.notifications.loginNoToken'));
-      }
-    } catch (error) {
-      const message =
-        (error.response && error.response.data && error.response.data.detail) ||
-        error.message ||
-        error.toString();
-      console.error(`AuthContext: Login failed for user ${username}. Error:`, message);
-      toast.error(message);
-      // Ensure user state is cleared on login failure
-      setUserState(null);
-      localStorage.removeItem('user');
-      return { success: false, message };
-    }
-  };
-
-  // Register function - remains the same as it doesn't auto-login
-  const register = async (username, email, password) => {
-    console.log(`AuthContext: Attempting registration for user: ${username}, email: ${email}`);
-    try {
-      await authService.register(username, email, password);
-      toast.success(t('auth.notifications.registerSuccess'));
-      console.log(`AuthContext: Registration successful for user: ${username}`);
-      return { success: true };
-    } catch (error) {
-      const message = 
-        (error.response && error.response.data && error.response.data.detail) || 
-        error.message || 
-        error.toString();
-      console.error(`AuthContext: Registration failed for user: ${username}. Error:`, message);
-      toast.error(message);
-      return { success: false, message };
-    }
-  };
-
-  // Logout function
-  const logout = useCallback(() => {
-    console.log("AuthContext: Logging out user...");
-    authService.logout();
-    setUserState(null); // Use the internal setter
-    localStorage.removeItem('user'); // Ensure localStorage is also cleared on logout
-    toast.info(t('auth.notifications.logoutSuccess'));
-    console.log("AuthContext: User logged out.");
-  }, []);
-
-  // Custom setUser function that also updates localStorage
-  // Used by SettingsPage to update user profile information
-  const setUser = useCallback((newProfileData) => {
-    console.log("AuthContext: setUser called with newProfileData:", newProfileData);
-    setUserState(currentUserState => {
-      if (newProfileData && newProfileData.id) {
-        // This function is typically called after a profile update.
-        // It's important to merge with existing token info if newProfileData doesn't have it.
-        const updatedUser = {
-          ...currentUserState, // Keeps access_token, token_type from current state
-          ...newProfileData    // Overwrites with new profile details
-        };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        console.log("AuthContext: User profile updated in state and localStorage:", updatedUser);
-        return updatedUser;
-      } else {
-        // If data is invalid or incomplete, log and return current state to avoid issues
-        console.warn("AuthContext setUser called with invalid or incomplete data:", newProfileData);
-        return currentUserState;
-      }
-    });
-  }, []);
-
-
-  const value = {
+  // The context value that will be supplied to consuming components
+  const contextValue = {
     user,
-    setUser, // Expose the custom setUser
-    loading,
-    isAuthenticated: !!user && !!user.access_token && !!user.id, // More robust check
+    setUser: updateUserProfile, // Expose for profile updates
     login,
-    register,
     logout,
-    fetchAndSetFullUser // Expose fetchAndSetFullUser
+    register,
+    fetchAndSetCurrentUser, // Expose this if components need to refresh user data manually
+    loading,
+    isAuthenticated: !!user, // Simpler check: if user object exists, they are authenticated
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={contextValue}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => useContext(AuthContext);

@@ -1,4 +1,5 @@
-import secrets  # Added for generating random passwords/suffixes
+import secrets
+from typing import Optional  # Added for generating random passwords/suffixes
 
 from fastapi import FastAPI  # Ensure Request is imported
 from fastapi import Depends
@@ -8,6 +9,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from .api.routers import auth as auth_router
 from .api.routers import courses, files, users, statistics  # Your existing users router
 from .api.routers import notes
+from .api.routers import notifications
 from .api.schemas import user as user_schema
 from .db.database import engine
 from .db.models import db_user as user_model
@@ -43,8 +45,8 @@ app.add_middleware(
 )
 
 # Define /users/me BEFORE including users.router to ensure correct route matching
-@app.get("/users/me", response_model=user_schema.User, tags=["users"])
-async def read_users_me(current_user: user_model.User = Depends(auth.get_current_active_user)):
+@app.get("/users/me", response_model=Optional[user_schema.User], tags=["users"])
+async def read_users_me(current_user: Optional[user_model.User] = Depends(auth.get_current_user_optional)):
     """Get the current logged-in user's details."""
     return current_user
 
@@ -55,7 +57,7 @@ app.include_router(files.router)
 app.include_router(statistics.router)
 app.include_router(auth_router.api_router)
 app.include_router(notes.router)
-
+app.include_router(notifications.router)
 
 # The root path "/" is now outside the /api prefix
 @app.get("/")
