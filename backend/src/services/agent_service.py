@@ -87,7 +87,8 @@ class AgentService:
             image_response = await self.image_agent.run(
                 user_id=user_id,
                 state={},
-                content=create_text_query(f"Title: {info_response['title']}, Description: {info_response['description']}")
+                content=create_text_query(
+                    f"Title: {info_response['title']}, Description: {info_response['description']}")
             )
 
             # Update course in database
@@ -109,11 +110,7 @@ class AgentService:
 
             init_state = CourseState(
                 query=request.query,
-                time_hours=request.time_hours,
-                chapters=[],
-                chapters_str="",
-                code="",
-                errors=""
+                time_hours=request.time_hours
             )
             # Create initial state for the course
             self.state_manager.create_state(user_id, course_id, init_state)

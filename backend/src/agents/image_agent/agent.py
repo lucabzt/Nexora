@@ -3,6 +3,7 @@ This is a small question-answer agent that functions like a standard gemini api 
 It is used for small requests like generating a course description.
 It also handles session creation itself, which sets it apart from the other agents.
 """
+import json
 import os
 import asyncio
 from typing import Dict, Any
@@ -12,13 +13,16 @@ from google.adk.runners import Runner
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioServerParameters
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
+from openai.types.beta.threads import image_url
 
+from ..callbacks import get_url_from_response
 from ..utils import create_text_query, load_instruction_from_file
-from ..agent import StandardAgent
+from ..agent import StandardAgent, StructuredAgent
+
 
 class ImageAgent(StandardAgent):
     def __init__(self, app_name: str, session_service):
-        #path_to_mcp_server = "/home/app/web/app/agents/tools/unsplash_mcp_server.py" # "C:\\Users\\Markus\\Nextcloud\\Projekte\\Fullstack\\TeachAI\\backend\\src\\agents\\tools\\unsplash_mcp_server.py" #
+        # Have to do this outside of the image agent as image_agent sometimes will be used as a subagent
         path_to_mcp_server = os.path.join(os.path.dirname(__file__), "../tools/unsplash_mcp_server.py")
 
         # Define toolset for unsplash mcp server
@@ -38,13 +42,15 @@ class ImageAgent(StandardAgent):
                 }
             )
         )
-        # Create the planner agent
+
+        # Create the image agent
         image_agent = LlmAgent(
             name="image_agent",
             model="gemini-2.0-flash",
             description="Agent for searching an image for a course using an external service.",
             instruction=load_instruction_from_file("image_agent/instructions.txt"),
-            tools=[unsplash_mcp_toolset]
+            tools=[unsplash_mcp_toolset],
+            after_model_callback=get_url_from_response
         )
 
         # Create necessary
@@ -55,7 +61,6 @@ class ImageAgent(StandardAgent):
             app_name=self.app_name,
             session_service=self.session_service,
         )
-
 
 
 async def main():
