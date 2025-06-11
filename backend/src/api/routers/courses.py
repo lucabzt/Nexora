@@ -278,6 +278,38 @@ async def mark_chapter_complete(
 
 # -------- COURSE CRUD OPERATIONS ----------
 
+@router.put("/{course_id}", response_model=CourseInfo)
+async def update_course_details(
+        course_id: int,
+        title: str = None,
+        description: str = None,
+        current_user: User = Depends(get_current_active_user),
+        db: Session = Depends(get_db)
+):
+    """
+    Update a course's title and description.
+    """
+    course = await _verify_course_ownership(course_id, str(current_user.id), db)
+
+    update_data = {}
+    if title:
+        update_data["title"] = title
+    if description:
+        update_data["description"] = description
+
+    updated_course = courses_crud.update_course(db, course_id, **update_data)
+
+    return CourseInfo(
+        course_id=int(updated_course.id),
+        total_time_hours=int(updated_course.total_time_hours),
+        status=str(updated_course.status),
+        title=str(updated_course.title),
+        description=str(updated_course.description),
+        chapter_count=int(updated_course.chapter_count) if updated_course.chapter_count else None,
+        image_url=str(updated_course.image_url) if updated_course.image_url else None
+    )
+
+
 @router.delete("/{course_id}")
 async def delete_course(
         course_id: int,
@@ -470,4 +502,3 @@ async def mark_chapter_incomplete(
         "chapter_id": chapter.id,
         "is_completed": updated_chapter.is_completed
     }
-

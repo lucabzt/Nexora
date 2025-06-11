@@ -27,7 +27,9 @@ import {
   rem,
   Tooltip,
   Center,
-  Modal 
+  Modal,
+  TextInput,
+  Textarea 
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { 
@@ -43,7 +45,8 @@ import {
   IconCertificate,
   IconHeartHandshake,
   IconBrain,
-  IconChevronRight
+  IconChevronRight,
+  IconPencil
 } from '@tabler/icons-react';
 import { courseService } from '../api/courseService';
 
@@ -66,10 +69,24 @@ function Dashboard() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [courseToDeleteId, setCourseToDeleteId] = useState(null);
 
+  // State for rename modal
+  const [renameModalOpen, setRenameModalOpen] = useState(false);
+  const [courseToRename, setCourseToRename] = useState(null);
+  const [newTitle, setNewTitle] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+
   // Opens the delete confirmation modal
   const handleDelete = (courseId) => {
     setCourseToDeleteId(courseId);
     setDeleteModalOpen(true);
+  };
+
+  // Opens the rename modal
+  const handleRename = (course) => {
+    setCourseToRename(course);
+    setNewTitle(course.title || '');
+    setNewDescription(course.description || '');
+    setRenameModalOpen(true);
   };
 
   // Handles the actual deletion after confirmation
@@ -86,6 +103,24 @@ function Dashboard() {
     } finally {
       setDeleteModalOpen(false);
       setCourseToDeleteId(null);
+    }
+  };
+
+  const confirmRenameHandler = async () => {
+    if (!courseToRename) return;
+
+    try {
+      const updatedCourse = await courseService.updateCourse(courseToRename.course_id, newTitle, newDescription);
+
+      setCourses(prevCourses =>
+        prevCourses.map(course =>
+          course.course_id === courseToRename.course_id ? updatedCourse : course
+        )
+      );
+      setRenameModalOpen(false);
+    } catch (err) {
+      setError(t('renameCourseError', { message: err.message || '' }));
+      console.error('Error renaming course:', err);
     }
   };
 
@@ -106,6 +141,7 @@ function Dashboard() {
 
     fetchCourses();
   }, []);
+
   // Helper function to get status badge color and icon
   const getStatusInfo = (status) => {
     switch (status) {
@@ -119,6 +155,7 @@ function Dashboard() {
         return { color: 'gray', icon: IconBook, label: t('status.learning') };
     }
   };
+
   // Function to generate a placeholder image URL with a specific theme
   const getPlaceholderImage = (index, title) => {
     // Create a consistent seed based on the title
@@ -138,7 +175,6 @@ function Dashboard() {
     return Math.floor((String(course.course_id)?.charCodeAt(0) || 0) % 80) + 10;
   };
 
-  
   return (
     <Container size="lg" py="xl">
       {/* Delete Confirmation Modal */}
@@ -170,6 +206,37 @@ function Dashboard() {
             {t('deleteCourseModal.deleteButton')}
           </Button>
         </Group>
+      </Modal>
+
+      {/* Rename Modal */}
+      <Modal
+        opened={renameModalOpen}
+        onClose={() => setRenameModalOpen(false)}
+        title={t('renameCourseModal.title')}
+        centered
+      >
+        <Stack spacing="md">
+          <TextInput
+            label={t('renameCourseModal.newTitleLabel')}
+            placeholder={t('renameCourseModal.newTitlePlaceholder')}
+            value={newTitle}
+            onChange={(event) => setNewTitle(event.currentTarget.value)}
+          />
+          <Textarea
+            label={t('renameCourseModal.newDescriptionLabel')}
+            placeholder={t('renameCourseModal.newDescriptionPlaceholder')}
+            value={newDescription}
+            onChange={(event) => setNewDescription(event.currentTarget.value)}
+          />
+          <Group position="right" mt="md">
+            <Button variant="default" onClick={() => setRenameModalOpen(false)}>
+              {t('renameCourseModal.cancelButton')}
+            </Button>
+            <Button color="teal" onClick={confirmRenameHandler}>
+              {t('renameCourseModal.saveButton')}
+            </Button>
+          </Group>
+        </Stack>
       </Modal>
 
       {/* Header with motivational message */}
@@ -465,17 +532,30 @@ function Dashboard() {
                         >
                           {statusInfo.label}
                         </Badge>
-                        <ActionIcon 
-                          color="red" 
-                          variant="subtle"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(course.course_id);
-                          }}
-                          title={t('deleteCourseTooltip')}
-                        >
-                          <IconTrash size={16} />
-                        </ActionIcon>
+                        <Group spacing="xs" position="right">
+                          <ActionIcon 
+                            color="red" 
+                            variant="subtle"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(course.course_id);
+                            }}
+                            title={t('deleteCourseTooltip')}
+                          >
+                            <IconTrash size={16} />
+                          </ActionIcon>
+                          <ActionIcon 
+                            color="blue" 
+                            variant="subtle"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRename(course);
+                            }}
+                            title={t('renameCourseTooltip')}
+                          >
+                            <IconPencil size={16} />
+                          </ActionIcon>
+                        </Group>
                       </Group>
                     </Card.Section>
 

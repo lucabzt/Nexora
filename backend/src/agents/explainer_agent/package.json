@@ -6,12 +6,13 @@
     "eslint": "^9.2.0",
     "eslint-plugin-react": "^7.34.1",
     "eslint-plugin-react-hooks": "^5.0.0",
-    "globals": "^15.2.0",
-    "react-latex-next": "^3.0.0",
-    "recharts": "^2.15.3"
+    "globals": "^15.2.0"
   },
   "dependencies": {
     "plotly.js": "^3.0.1",
-    "react-plotly.js": "^2.6.0"
+    "react-plotly.js": "^2.6.0",
+    "react-code-blocks": "^0.1.6",
+    "react-latex-next": "^3.0.0",
+    "recharts": "^2.15.3"
   }
 }

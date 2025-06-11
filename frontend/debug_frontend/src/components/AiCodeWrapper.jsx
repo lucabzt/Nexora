@@ -9,9 +9,9 @@ const LazyPlot = lazy(() => import('react-plotly.js'));
 // 1. Latex
 import 'katex/dist/katex.min.css';
 import Latex from 'react-latex-next';
-import { CopyBlock } from 'react-code-blocks';
+import { CopyBlock, dracula } from 'react-code-blocks';
 
-const plugins = "Latex, Recharts, Plot, CopyBlock"
+const plugins = "Latex, Recharts, Plot, CopyBlock, dracula"
 
 const header = `(props) => {
       const {${plugins}}=props;
@@ -54,7 +54,7 @@ function AiCodeWrapper({ children }) {
     return (
         <PaperBackground>
             <Suspense fallback={<div>Loading component...</div>}>
-                <LazyStringToReactComponent data={{Latex, Recharts, Plot: LazyPlot, CopyBlock}}>
+                <LazyStringToReactComponent data={{Latex, Recharts, Plot: LazyPlot, CopyBlock, dracula}}>
                     {full_react_component}
                 </LazyStringToReactComponent>
             </Suspense>

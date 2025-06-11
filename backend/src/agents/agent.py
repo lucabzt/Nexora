@@ -8,7 +8,7 @@ from typing import Dict, Any
 
 
 import logging
-logging.getLogger("google_adk.google.adk.models.google_llm").setLevel(logging.WARNING)
+#logging.getLogger("google_adk.google.adk.models.google_llm").setLevel(logging.WARNING)
 
 
 
