@@ -23,10 +23,10 @@ export const courseService = {
     (await apiWithCookies.patch(`/courses/${courseId}/chapters/${chapterId}/complete`)).data,
 
   getFiles: async (courseId) =>
-  (await apiWithCookies.get(`/documents?course_id=${courseId}`)).data,
+  (await apiWithCookies.get(`/files/documents?course_id=${courseId}`)).data,
 
   getImages: async (courseId) =>
-    (await apiWithCookies.get(`/images?course_id=${courseId}`)).data,
+    (await apiWithCookies.get(`/files/images?course_id=${courseId}`)).data,
 
   // Update a course's title and description
   updateCourse: async (courseId, title, description) => {
