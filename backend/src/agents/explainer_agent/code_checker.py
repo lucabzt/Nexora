@@ -14,6 +14,7 @@ import React from "react";
 import 'katex/dist/katex.min.css';
 import Latex from 'react-latex-next';
 import Plot from 'react-plotly.js';
+import { CopyBlock } from 'react-code-blocks';
 """
 
 class ESLintValidator:
