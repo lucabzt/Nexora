@@ -2,20 +2,20 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { Buffer } from 'buffer';
-import { visualizer } from 'rollup-plugin-visualizer';
+//import { visualizer } from 'rollup-plugin-visualizer';
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
       react(),
-      tailwindcss(),
-      visualizer({
-        template: 'treemap', // or sunburst
-        open: true,
-        gzipSize: true,
-        brotliSize: true,
-        filename: 'stats.html', // analysis file
-      }),
+      tailwindcss()//,
+     // visualizer({
+     //   template: 'treemap', // or sunburst
+     //   open: true,
+     //   gzipSize: true,
+     //   brotliSize: true,
+     //   filename: 'stats.html', // analysis file
+     // }),
   ],
   server: {
     port: 3000,
