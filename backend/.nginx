@@ -1,3 +1,6 @@
+
+// -----------------------------------> 1 Server Configuration <-----------------------------------
+# This file is used to configure the Nginx server for the Nexora AI application.
 server {
   listen 80;
   listen [::]:80;
@@ -129,3 +132,201 @@ server {
   }
   
 }
+
+
+
+// -----------------------------------> 2 Reverse Proxy Configuration <-----------------------------------
+// Worker processes: //!!!! DENY .env files!!!!!!!!!!!!!!!
+server {
+  listen 80;
+  listen [::]:80;
+  listen 443 quic;
+  listen 443 ssl;
+  listen [::]:443 quic;
+  listen [::]:443 ssl;
+  http2 off;
+  http3 on;
+  {{ssl_certificate_key}}
+  {{ssl_certificate}}
+  server_name worker.nexora-ai.de;
+  {{root}}
+
+
+
+  {{nginx_access_log}}
+  {{nginx_error_log}}
+
+  # Redirect all HTTP to HTTPS
+  if ($scheme != "https") {
+    rewrite ^ https://$host$request_uri permanent;
+  }
+
+  # Reverse Proxy für /api/ *
+  location ^~ /api/ {
+    proxy_pass {{reverse_proxy_url}};
+    proxy_http_version 1.1;
+    proxy_set_header X-Forwarded-Host $host;
+    proxy_set_header X-Forwarded-Server $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $host;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "Upgrade";
+    proxy_ssl_server_name on;
+    proxy_ssl_name $host;
+    proxy_pass_request_headers on;
+    proxy_max_temp_file_size 0;
+    proxy_connect_timeout 900;
+    proxy_send_timeout 900;
+    proxy_read_timeout 900;
+    proxy_buffer_size 128k;
+    proxy_buffers 4 256k;
+    proxy_busy_buffers_size 256k;
+    proxy_temp_file_write_size 256k;
+  }
+
+  # Deny access to .env
+  location ~ /\.env {
+    deny all;
+  }
+
+  # Allow .well-known for ACME challenges etc.
+  location ^~ /.well-known {
+    auth_basic off;
+    allow all;
+    try_files $uri =404;
+  }
+
+  # Block everything else with 403
+  location / {
+    return 403;
+  }
+
+  {{settings}}
+
+  include /etc/nginx/global_settings;
+
+  add_header Cache-Control no-transform;
+
+  index index.html;
+}
+
+// Proxy VHost
+// not working yet!
+upstream backend_api {
+  server worker.nexora-ai.de;
+}
+
+# Block 1: Redirect all HTTP traffic to HTTPS on the canonical 'www' domain
+server {
+  listen 80;
+  listen [::]:80;
+  server_name nexora-ai.de www.nexora-ai.de;
+  
+  # A single rule to handle all HTTP requests and send them to the correct final destination
+  return 301 https://www.nexora-ai.de$request_uri;
+}
+
+# Block 2: Redirect non-www HTTPS to www HTTPS for canonical URL
+server {
+  listen 443 ssl http2;
+  listen [::]:443 ssl http2;
+  # QUIC (HTTP/3) listeners can be added here as well if needed
+  # listen 443 quic;
+  # listen [::]:443 quic;
+
+  server_name nexora-ai.de;
+
+  # SSL certificates are required here too for the redirect to work
+  {{ssl_certificate}}
+  {{ssl_certificate_key}}
+
+  return 301 https://www.nexora-ai.de$request_uri;
+}
+
+# Block 3: The main server block that handles all application logic
+server {
+  listen 443 ssl http2;
+  listen [::]:443 ssl http2;
+  listen 443 quic;
+  listen [::]:443 quic;
+  http3 on; # Recommended to turn on if QUIC is enabled
+
+  server_name www.nexora-ai.de;
+
+  # SSL, Root, and Logging
+  {{ssl_certificate}}
+  {{ssl_certificate_key}}
+  {{root}} # Note: This root is only used if other locations don't specify their own.
+  {{nginx_access_log}}
+  {{nginx_error_log}}
+
+  # Global settings and headers
+  include /etc/nginx/global_settings;
+  add_header Cache-Control no-transform;
+  index index.html;
+
+  # Location for Let's Encrypt SSL renewal
+  location ^~ /.well-known/acme-challenge/ {
+    # This should point to the directory where certbot places challenge files
+    root /var/www/certbot; 
+    # Or if it's within your main project root:
+    # root /home/nexora-ai/htdocs/www.nexora-ai.de; 
+    allow all;
+  }
+
+  # Block access to sensitive files
+  location ~ /\.env {
+    deny all;
+  }
+  
+  # Location for WebSocket connections
+  location /api/notifications/ws {
+    proxy_pass https://backend_api/api/notifications/ws; # Keep the full path for this specific endpoint
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_read_timeout 86400; # Long timeout for persistent connections
+  }
+
+  # Location for all other API calls.
+  # The trailing slash on proxy_pass is CRITICAL for removing the /api/ prefix.
+  location ^~ /api/ {
+    # Pass the full path to the backend
+    proxy_pass https://217.154.223.224; 
+
+    # --- These two lines are essential for your SSL proxy to work ---
+    proxy_ssl_server_name on;
+    proxy_ssl_name worker.nexora-ai.de;
+    proxy_ssl_session_reuse on;
+
+    
+    # --- Standard proxy headers ---
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; 
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+
+  # Serve static assets with long cache times
+  location /assets/ {
+    # Alias is good, but check if root works better for your setup
+    root /home/nexora-ai/htdocs/www.nexora-ai.de/dist;
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+    try_files $uri =404; # Serve file or 404, don't fall back to index.html
+  }
+
+  # Serve the frontend application (React, Vue, etc.)
+  # This is the catch-all for any request that didn't match above
+  location / {
+    root /home/nexora-ai/htdocs/www.nexora-ai.de/dist;
+    try_files $uri /index.html;
+  }
+}
+
