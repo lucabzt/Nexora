@@ -22,6 +22,19 @@ export const courseService = {
       // Use the actual chapter ID, not index
     (await apiWithCookies.patch(`/courses/${courseId}/chapters/${chapterId}/complete`)).data,
 
+  // Update a course's title and description
+  updateCourse: async (courseId, title, description) => {
+    const params = new URLSearchParams();
+    if (title !== undefined) {
+      params.append('title', title);
+    }
+    if (description !== undefined) {
+      params.append('description', description);
+    }
+    const response = await apiWithCookies.put(`/courses/${courseId}?${params.toString()}`);
+    return response.data;
+  },
+
   // Delete a course by ID
   deleteCourse: async (courseId) => {
     try {
