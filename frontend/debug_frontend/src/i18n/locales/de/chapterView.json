@@ -8,8 +8,9 @@
   },
   "tabs": {
     "content": "Inhalt",
-    "quizWithCount_one": "Quiz ({{count}} Frage)",
-    "quizWithCount_other": "Quiz ({{count}} Fragen)"
+    "quiz": "Quiz ({{count}} questions)",
+    "images": "Bilder",
+    "files": "Dokumente"
   },
   "badge": {
     "completed": "Abgeschlossen"

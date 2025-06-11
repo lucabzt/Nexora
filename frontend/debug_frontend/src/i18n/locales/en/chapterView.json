@@ -8,8 +8,9 @@
   },
   "tabs": {
     "content": "Content",
-    "quizWithCount_one": "Quiz ({{count}} Question)",
-    "quizWithCount_other": "Quiz ({{count}} Questions)"
+    "quiz": "Quiz ({{count}} questions)",
+    "images": "View Images",
+    "files": "Download Files"
   },
   "badge": {
     "completed": "Completed"

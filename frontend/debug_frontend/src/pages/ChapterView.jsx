@@ -16,9 +16,11 @@ import {
   Loader,
   Paper,
   Badge,
+  SimpleGrid,
+  Image
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
-import { IconAlertCircle, IconBookmark, IconQuestionMark } from '@tabler/icons-react';
+import { IconAlertCircle, IconBookmark, IconQuestionMark, IconPhoto, IconFileText } from '@tabler/icons-react';
 import { toast } from 'react-toastify';
 import { courseService } from '../api/courseService';
 import ToolbarContainer from '../components/tools/ToolbarContainer';
@@ -32,7 +34,8 @@ function ChapterView() {
   const { toolbarOpen, toolbarWidth } = useToolbar(); // Get toolbar state from context
   const isMobile = useMediaQuery('(max-width: 768px)'); // Add mobile detection
   const [chapter, setChapter] = useState(null);
-  
+  const [images, setImages] = useState([]);
+  const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('content');
@@ -40,20 +43,26 @@ function ChapterView() {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState(0);
   const [markingComplete, setMarkingComplete] = useState(false);
-  // Effect to handle resize when toolbar changes
+
   useEffect(() => {
-    // This will trigger a re-render when toolbar state changes
     console.log("Toolbar state changed:", { open: toolbarOpen, width: toolbarWidth });
     // We could add additional logic here if needed
   }, [toolbarOpen, toolbarWidth]);
 
   useEffect(() => {
-    const fetchChapter = async () => {
+    const fetchChapterAndMedia = async () => {
       try {
         setLoading(true);
         // Using the ID from URL params
-        const chapterData = await courseService.getChapter(courseId, chapterId);
+        const [chapterData, imagesData, filesData] = await Promise.all([
+          courseService.getChapter(courseId, chapterId),
+          courseService.getImages(courseId),
+          courseService.getFiles(courseId)
+        ]);
+
         setChapter(chapterData);
+        setImages(imagesData);
+        setFiles(filesData);
         
         // Initialize quiz answers
         if (chapterData.mc_questions) {
@@ -67,14 +76,14 @@ function ChapterView() {
         setError(null);
       } catch (error) {
         setError(t('errors.loadFailed'));
-        console.error('Error fetching chapter:', error);
+        console.error('Error fetching chapter, images, or files:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchChapter();
-  }, [courseId, chapterId]);
+    fetchChapterAndMedia();
+  }, [courseId, chapterId, t]);
 
   const handleAnswerChange = (questionIndex, value) => {
     setQuizAnswers((prev) => ({
@@ -116,11 +125,14 @@ function ChapterView() {
       console.error('Error marking chapter complete:', error);
     } finally {
       setMarkingComplete(false);
-    }  };  // Calculate container width and positioning based on toolbar state and mobile
+    }  
+  };
+
   const sidebarWidth = isMobile 
     ? (toolbarOpen ? window.innerWidth : 0) // Full screen on mobile when open, hidden when closed
     : (toolbarOpen ? toolbarWidth : 40); // Desktop shows normal width when open, 40px when closed
-    return (
+
+  return (
     <div style={{ 
       display: 'flex',
       position: 'relative',
@@ -128,7 +140,8 @@ function ChapterView() {
       height: 'calc(100vh - 70px)', // Adjust for header height
       marginTop: 0,
       overflow: 'hidden' // Prevent page-level scrolling issues
-    }}>      {/* Main content with dynamic positioning - centered in available space */}
+    }}>
+      {/* Main content with dynamic positioning - centered in available space */}
       <Container size="lg" py="xl" style={{ 
         flexGrow: 1,
         maxWidth: `calc(100% - ${sidebarWidth}px)`, // Limit max width to available space
@@ -178,9 +191,17 @@ function ChapterView() {
             <Tabs value={activeTab} onTabChange={setActiveTab} mb="xl">
               <Tabs.List>
                 <Tabs.Tab value="content" icon={<IconBookmark size={14} />}>{t('tabs.content')}</Tabs.Tab>
-                <Tabs.Tab value="quiz" icon={<IconQuestionMark size={14} />}>
-                  {t('tabs.quizWithCount', { count: chapter.mc_questions?.length || 0 })}
-                </Tabs.Tab>
+                {images.length > 0 && (
+                    <Tabs.Tab value="images" icon={<IconPhoto size={14} />}>{t('tabs.images')}</Tabs.Tab>
+                )}
+                {files.length > 0 && (
+                    <Tabs.Tab value="files" icon={<IconFileText size={14} />}>{t('tabs.files')}</Tabs.Tab>
+                )}
+                {chapter?.mc_questions?.length > 0 && (
+                  <Tabs.Tab value="quiz" icon={<IconQuestionMark size={14} />}>
+                    {t('tabs.quiz', { count: chapter.mc_questions.length })}
+                  </Tabs.Tab>
+                )}
               </Tabs.List>
 
               <Tabs.Panel value="content" pt="xs">
@@ -190,6 +211,43 @@ function ChapterView() {
                   </div>
                 </Paper>
               </Tabs.Panel>
+
+              <Tabs.Panel value="images" pt="xs">
+                <Paper shadow="xs" p="md" withBorder>
+                  <SimpleGrid cols={isMobile ? 1 : 3} spacing="md">
+                    {images.map((image) => (
+                      <Card key={image.id} shadow="sm" padding="lg" radius="md" withBorder>
+                        <Card.Section>
+                          <Image
+                            src={image.url}
+                            height={160}
+                            alt={image.filename}
+                          />
+                        </Card.Section>
+                        <Text weight={500} mt="md">{image.filename}</Text>
+                      </Card>
+                    ))}
+                  </SimpleGrid>
+                </Paper>
+              </Tabs.Panel>
+
+              <Tabs.Panel value="files" pt="xs">
+                <Paper shadow="xs" p="md" withBorder>
+                  <List spacing="xs" size="sm" center>
+                    {files.map((file) => (
+                      <List.Item key={file.id}>
+                        <a href={file.url} target="_blank" rel="noopener noreferrer">{file.filename}</a>
+                        {file.filename.endsWith('.pdf') && (
+                           <Paper withBorder radius="md" mt="sm">
+                             <iframe src={file.url} style={{ width: '100%', height: '500px', border: 'none' }} title={file.filename} />
+                           </Paper>
+                        )}
+                      </List.Item>
+                    ))}
+                  </List>
+                </Paper>
+              </Tabs.Panel>
+
               <Tabs.Panel value="quiz" pt="xs">
                 <Paper shadow="xs" p="md" withBorder>
                   {quizSubmitted && (
@@ -257,6 +315,40 @@ function ChapterView() {
                   )}
                 </Paper>
               </Tabs.Panel>
+
+              <Tabs.Panel value="images" pt="xs">
+                <Paper shadow="xs" p="md" withBorder>
+                  <Group>
+                    {images.map(image => (
+                      <Card key={image.id} shadow="sm" p="lg" radius="md" withBorder>
+                        <Card.Section>
+                          <img src={image.url} alt={image.filename} height={160} />
+                        </Card.Section>
+                        <Text weight={500} size="sm" mt="md">
+                          {image.filename}
+                        </Text>
+                      </Card>
+                    ))}
+                  </Group>
+                </Paper>
+              </Tabs.Panel>
+
+              <Tabs.Panel value="files" pt="xs">
+                <Paper shadow="xs" p="md" withBorder>
+                  <List spacing="xs" size="sm" center>
+                    {files.map(file => (
+                      <List.Item key={file.id}>
+                        <a href={file.url} target="_blank" rel="noopener noreferrer">{file.filename}</a>
+                        {file.filename.endsWith('.pdf') && (
+                           <iframe src={file.url} width="100%" height="500px" style={{ border: 'none', marginTop: '10px' }}>
+                             <p>Your browser does not support PDFs. Please download the PDF to view it: <a href={file.url}>Download PDF</a>.</p>
+                           </iframe>
+                        )}
+                      </List.Item>
+                    ))}
+                  </List>
+                </Paper>
+              </Tabs.Panel>
             </Tabs>
 
             <Group position="apart">
@@ -271,7 +363,8 @@ function ChapterView() {
               )}
             </Group>
           </>
-        )}      </Container>
+        )}      
+      </Container>
       
       {/* Toolbar Container with all interactive tools */}
       <ToolbarContainer courseId={courseId} chapterId={chapterId} />
