@@ -609,10 +609,15 @@ function CourseView() {
                 >
                   <Card.Section sx={{ position: 'relative' }}>
                     <img
-                      src={chapter.image_url || image_def_ka_austasuche}
-                      height={180}
+                      src={`${chapter.image_url}` || image_def_ka_austasuche}
                       alt={chapter.caption || t('chapters.defaultCaptionText', { chapterNumber: index + 1 })}
-                      style={{ width: '100%', objectFit: 'cover' }}
+                      style={{
+                        objectFit: 'cover',
+                        height: '180px',
+                        width: '100%',
+                        maxHeight: '180px',
+                        maxWidth: '100%',
+                      }}
                     />
 
                     {chapter.is_completed && (
