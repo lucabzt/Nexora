@@ -12,8 +12,6 @@ from google.adk.agents import LlmAgent
 from google.adk.runners import Runner
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioServerParameters
 from google.adk.sessions import InMemorySessionService
-from google.genai import types
-from openai.types.beta.threads import image_url
 
 from ..callbacks import get_url_from_response
 from ..utils import create_text_query, load_instruction_from_file
@@ -67,7 +65,7 @@ async def main():
     print("Starting ImageAgent")
     # Renamed variable for clarity, as 'image_agent' is used inside __init__ for LlmAgent
     image_agent_instance = ImageAgent(app_name="Nexora", session_service=InMemorySessionService())
-    response = await image_agent_instance.run(user_id="test", state={}, content=create_text_query("ein bild mit bergen"))
+    response = await image_agent_instance.run(user_id="test", state={}, content=create_text_query("ein vector-bild zum thema branch and bound algorithmus"))
     print(response)
     print("done")
 
