@@ -18,6 +18,8 @@ from .db.models import db_user as user_model
 from .utils import auth
 
 from .core.routines import update_stuck_courses
+from .config.settings import SESSION_SECRET_KEY  # Ensure this is imported from your settings
+
 
 # Create database tables
 user_model.Base.metadata.create_all(bind=engine)
@@ -25,10 +27,6 @@ user_model.Base.metadata.create_all(bind=engine)
 # Create the main app instance
 app = FastAPI(title="User Management API", root_path="/api")
 
-# Add SessionMiddleware - THIS MUST BE ADDED
-# Generate a random secret key for session middleware (ensure this is consistent if you have multiple instances or restart often, consider moving to settings)
-# For production, you'd want to set this from an environment variable or a config file.
-SESSION_SECRET_KEY = secrets.token_hex(32)
 app.add_middleware(
     SessionMiddleware,
     secret_key=SESSION_SECRET_KEY

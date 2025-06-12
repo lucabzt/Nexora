@@ -193,7 +193,7 @@ async def handle_oauth_callback(request: Request, db: Session, website: str = "g
     except Exception as error:
         logger.error("OAuth callback error for %s: %s", website, traceback.format_exc())
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="Could not validate credentials: " + ("None" if oauth_client else website)) from error
+                            detail="Could not validate credentials") from error
 
     # Fetch user info from the token
     if website == "github":

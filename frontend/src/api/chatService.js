@@ -3,6 +3,14 @@ import { apiWithCookies } from './baseApi';
 export const chatService = {
   // Send a message to the AI assistant and get streaming response
   sendMessage: async (courseId, chapterId, message, onProgress) => {
+
+    const result = await apiWithCookies.post(`/chat/${courseId}`, {
+      message: message,
+    });
+
+
+    return result.data;
+
     try {
       let lastProcessedLength = 0;
       console.log('[ChatStreaming] Initializing chat message');

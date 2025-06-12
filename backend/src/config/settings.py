@@ -24,6 +24,8 @@ SPECIAL_CHARACTERS_REGEX_PATTERN = r"[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?~`]"
 # JWT settings
 ALGORITHM = "HS256"
 SECRET_KEY = os.getenv("SECRET_KEY", "a_very_secret_key_please_change_me")
+SESSION_SECRET_KEY = os.getenv("SESSION_SECRET_KEY", "fallback-key-for-dev")
+
 
 ######
 #ALGORITHM: str = "RS256"
