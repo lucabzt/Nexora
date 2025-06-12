@@ -50,7 +50,7 @@ function App() {
   }, [colorScheme]);
   return (
     <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
-      <MantineProvider withGlobalStyles withNormalizeCSS theme={{ 
+      <MantineProvider withGlobalStyles withNormalizeCSS theme={{
         colorScheme: colorScheme,
         primaryColor: 'cyan',
         components: {
@@ -61,7 +61,8 @@ function App() {
               },
             },
           },
-        },      }}>
+        },
+      }}>
         <LanguageProvider>
           <AuthProvider>
             <NotificationProvider>
