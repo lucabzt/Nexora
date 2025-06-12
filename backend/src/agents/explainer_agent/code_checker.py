@@ -16,7 +16,7 @@ import Latex from 'react-latex-next';
 import Plot from 'react-plotly.js';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { dark } from 'react-syntax-highlighter/dist/esm/styles/hljs'
-import {MermaidDiagram} from "@lightenna/react-mermaid-diagram";
+import mermaid from 'mermaid';
 import * as RF from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 """
@@ -317,10 +317,23 @@ def code_test():
     () => { return <div>Hello World</div> }};
     """
 
+    mermaid_example = """
+    () => {
+    const [chartCode, setChartCode] = React.useState('graph TD;\n  A[Start] --> B{Is it Friday?};\n  B -- Yes --> C[Awesome!];\n  B -- No --> D[Keep working...];\n  C --> E[Have a great weekend!];\n  D --> E;');
+    return (<Mermaid chart={`
+    graph TD;
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+    `/>)
+    }
+    """
+
     validator = ESLintValidator()
 
     print("--- Validating code with a linting error ---")
-    result_error = validator.validate_jsx(jsx_code_with_error)
+    result_error = validator.validate_jsx(mermaid_example)
     print(json.dumps(result_error, indent=2))
 
     print("\n--- Validating correct code ---")
