@@ -1,42 +1,33 @@
-## Diagrams / Flowcharts / Mermaid
+## Diagrams / Flowcharts
 
-You will have access to the mermaid library
-Please use this for everything related to diagrams, flowcharts, etc. You will have to initialize it though.
+For diagrams or flowcharts you will have access to the React Flow library via the RF object.
 
-Usage Examples:
-
-() => {
-    React.useEffect(() => {
-    mermaid.initialize({ startOnLoad: false });
-    mermaid.init();
-    }, []);
-
-  return (
-    <div className="mermaid">
-      {`graph TD; A-->B; A-->C; B-->D; C-->D;`}
-    </div>
-  );
-}
-
-Interactive example: (Have to remove data-processed attribute for rerendering)
+Usage examples:
 
 () => {
-  const [count, setCount] = React.useState(1);
+    const initialNodes = [
+      { id: '1', position: { x: 0, y: 0 }, data: { label: '1' } },
+      { id: '2', position: { x: 0, y: 100 }, data: { label: '2' } },
+    ];
+    const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
 
-  React.useEffect(() => {
-    mermaid.initialize({});
-    document.getElementById(id)?.removeAttribute("data-processed");
-    mermaid.contentLoaded();
-  }, [count]);
-
-  return (
-    <div>
-      <button onClick={() => setCount(c => c + 1)}>Add Node</button>
-      <div className="mermaid">
-        {`graph TD; ${Array.from({length: count}, (_, i) => `N${i}-->N${i+1}`).join('; ')};`}
+    return (
+      <div style={{ width: '100vw', height: '100vh' }}>
+        <RF.ReactFlow nodes={initialNodes} edges={initialEdges} />
       </div>
-    </div>
-  );
+    );
 }
 
-This is a great module for creating visual explanations
+() => {
+    return (
+        <RF.ReactFlow nodes={[...]} edges={[...]}>
+          <RF.Controls>
+            <RF.ControlButton onClick={() => alert('Something magical just happened. ✨')}>
+              <RF.MagicWand />
+            </RF.ControlButton>
+          </RF.Controls>
+        </RF.ReactFlow>
+      )
+}
+
+This library is perfect for visual explanations

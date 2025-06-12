@@ -11,13 +11,14 @@ import SyntaxHighlighter from 'react-syntax-highlighter';
 import { dark } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 const LazyPlot = lazy(() => import('react-plotly.js'));
 import * as Recharts from 'recharts';
-import mermaid from 'mermaid';
+import {MermaidDiagram} from "@lightenna/react-mermaid-diagram";
+import * as RF from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 
 // Main function that shows the content
 function AiCodeWrapper({ children }) {
-  const plugins = "Latex, Recharts, Plot, SyntaxHighlighter, dark, mermaid";
+  const plugins = "Latex, Recharts, Plot, SyntaxHighlighter, dark, MermaidDiagram, RF";
   const header = `(props) => 
   { const {${plugins}} = props;`;
 
@@ -36,7 +37,8 @@ function AiCodeWrapper({ children }) {
             Plot: LazyPlot,
             SyntaxHighlighter,
             dark,
-            mermaid
+            MermaidDiagram,
+            RF
           }}
         />
       </Suspense>
