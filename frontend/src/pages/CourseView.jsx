@@ -246,7 +246,7 @@ function CourseView() {
               width: '50%',
               height: '100%',
               opacity: 0.05,
-              backgroundImage: (course && course.image_url) ? `url("${course.image_url}")` : 'url("https://plus.unsplash.com/premium_photo-1673468922221-4cae4d1aa748?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")',
+              backgroundImage: (course && course.image_url) ? `url("${course.image_url}")` : 'url("https://cdn-icons-png.flaticon.com/512/8136/8136031.png")',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               [theme.fn.smallerThan('md')]: {
