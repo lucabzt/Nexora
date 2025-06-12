@@ -9,6 +9,8 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import './i18n/i18n'; // Import i18n configuration
 
+
+
 // Pages
 import Dashboard from './pages/Dashboard';
 import CreateCourse from './pages/CreateCourse';
@@ -65,7 +67,7 @@ function App() {
       }}>
         <LanguageProvider>
           <AuthProvider>
-            <NotificationProvider>
+            {/*<NotificationProvider>*/}
               <ToolbarProvider>
               <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
                 <Routes>
@@ -102,7 +104,7 @@ function App() {
               </Routes>          </BrowserRouter>
             <ToastContainer position="top-right" autoClose={3000} theme={colorScheme} />
               </ToolbarProvider>
-            </NotificationProvider>
+            {/*</NotificationProvider>*/}
           </AuthProvider>
         </LanguageProvider>
       </MantineProvider>
