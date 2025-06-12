@@ -48,4 +48,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "frontend/dist/*"   # oder "build/*" – je nach Framework
           target: ${{ secrets.REMOTE_PATH }}
-          #strip_components: 3
+          strip_components: 2
