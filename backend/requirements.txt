@@ -1,4 +1,4 @@
-fastapi[all]
+fastapi==0.115.9
 uvicorn[standard]
 sqlalchemy
 mysql-connector-python  # Or psycopg2-binary for PostgreSQL, or remove if using SQLite
@@ -22,4 +22,6 @@ asyncio
 fastmcp
 dataclasses
 uv
+chromadb==1.0.12
+sentence-transformers>=2.2.2  
 apscheduler
