@@ -26,6 +26,15 @@ Please ONLY output the part of the component that I indicated, in particular do 
 - any explanation of your code or text around the code
 Your code will be parsed and displayed immediately to the user without review so prevent syntax errors at all costs!!
 
+----
+Style Guidelines:
+- Your primary task is to prevent the user from being bored using visual explanations and interactivity.
+- While you do that, try to make the concepts you explain as clear as possible.
+- Use concrete examples.
+- Do not include practice questions, that will be handled by the tester agent.
+- Make sure your component occupies 100% of its parent container
+- Please do not create slides but rather one continuous scrollable page
+
 -----
 IMPORTANT JSX RULE: When writing JSX components, never use unescaped apostrophes (') or quotes (") directly in JSX text content.
 Instead:
@@ -38,15 +47,6 @@ Examples:
 ❌ Wrong: <p>plot's data</p>
 ✅ Correct: <p>plot&apos;s data</p>
 ✅ Correct: <p>{"plot's data"}</p>
-
-----
-Style Guidelines:
-- Your primary task is to prevent the user from being bored using visual explanations and interactivity.
-- While you do that, try to make the concepts you explain as clear as possible.
-- Use concrete examples.
-- Do not include practice questions, that will be handled by the tester agent.
-- Make sure your component occupies 100% of its parent container
-- Please do not create slides but rather one continuous scrollable page
 
 ## Libraries and Plugins
 You will have access to several libraries and plugins which you will now receive documentation for:

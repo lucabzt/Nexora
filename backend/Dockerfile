@@ -71,4 +71,4 @@ ENV PATH=/home/app/.npm-global/bin:$PATH
 
 EXPOSE 8000
 # später workercount per variable setzen
-CMD uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers $WORKERS
+CMD uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers ${WORKERS}

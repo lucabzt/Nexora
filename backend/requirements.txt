@@ -24,3 +24,4 @@ dataclasses
 uv
 chromadb==1.0.12
 sentence-transformers>=2.2.2  
+apscheduler

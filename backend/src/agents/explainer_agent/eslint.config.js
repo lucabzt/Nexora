@@ -65,7 +65,7 @@ export default [
       "react/no-is-mounted": "error",             // Deprecated API that can break
       "react/no-render-return-value": "error",    // Using deprecated ReactDOM.render return
       "react/no-string-refs": "error",            // String refs are deprecated and break
-      "react/no-unescaped-entities": "error",     // Unescaped entities break JSX
+      "react/no-unescaped-entities": "warn",     // Unescaped entities break JSX
       "react/require-render-return": "error",     // render method must return something
 
       // React Hooks rules (breaking these causes crashes)

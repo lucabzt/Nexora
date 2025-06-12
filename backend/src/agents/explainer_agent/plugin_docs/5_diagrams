@@ -1,0 +1,33 @@
+## Diagrams / Flowcharts
+
+For diagrams or flowcharts you will have access to the React Flow library via the RF object.
+
+Usage examples:
+
+() => {
+    const initialNodes = [
+      { id: '1', position: { x: 0, y: 0 }, data: { label: '1' } },
+      { id: '2', position: { x: 0, y: 100 }, data: { label: '2' } },
+    ];
+    const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
+
+    return (
+      <div style={{ width: '100vw', height: '100vh' }}>
+        <RF.ReactFlow nodes={initialNodes} edges={initialEdges} />
+      </div>
+    );
+}
+
+() => {
+    return (
+        <RF.ReactFlow nodes={[...]} edges={[...]}>
+          <RF.Controls>
+            <RF.ControlButton onClick={() => alert('Something magical just happened. ✨')}>
+              <RF.MagicWand />
+            </RF.ControlButton>
+          </RF.Controls>
+        </RF.ReactFlow>
+      )
+}
+
+This library is perfect for visual explanations

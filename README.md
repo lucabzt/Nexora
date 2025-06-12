@@ -56,7 +56,7 @@ Follow these instructions to set up the Nexora AI project for local development.
 ### Prerequisites
 
 *   **Python:** Version 3.10+
-*   **Node.js:** Version 18.x or later (Check `frontend/debug_frontend/package.json` engines field if specified)
+*   **Node.js:** Version 18.x or later (Check `frontend/package.json` engines field if specified)
 *   **npm:** Version 8.x or later (Usually comes with Node.js)
 *   **Git:** For cloning the repository.
 *   **(Optional) Docker:** If you plan to use Docker for running the backend.
@@ -100,8 +100,8 @@ Follow these instructions to set up the Nexora AI project for local development.
 3.  **Frontend Setup:**
     Navigate to the frontend directory:
     ```bash
-    cd ../frontend/debug_frontend # Assuming you are in the backend directory
-    # Or from root: cd frontend/debug_frontend
+    cd ../frontend/ # Assuming you are in the backend directory
+    # Or from root: cd frontend/
     ```
     Install dependencies:
     ```bash
@@ -120,7 +120,7 @@ Follow these instructions to set up the Nexora AI project for local development.
 The project is organized into main directories:
 
 *   `backend/`: Contains all the Python (FastAPI) server-side code, API logic, database interactions, and Docker configurations.
-*   `frontend/debug_frontend/`: Contains the client-side React application code, built with Vite.
+*   `frontend//`: Contains the client-side React application code, built with Vite.
 *   The existing README also mentioned a `server/` directory for "Zusätzliche Server-Komponenten und Agenten". You may want to detail its contents here if it's a key part of the project.
 
 ```
@@ -133,7 +133,7 @@ nexora-project/
 │   ├── requirements.txt
 │   ├── run.sh                # Script to run backend
 │   └── ...
-├── frontend/debug_frontend/
+├── frontend/
 │   ├── src/                  # Main frontend source code (components, pages, etc.)
 │   ├── public/               # Static assets
 │   ├── node_modules/         # Node.js dependencies (ignored by git)
