@@ -588,7 +588,6 @@ function CourseView() {
             ]}
           >
             {chapters.map((chapter, index) => {
-              const chapterImage = chapter.image_url ? chapter.image_url : image_def_ka_austasuche;
               return (
                 <Card
                   key={chapter.id || index}
@@ -609,10 +608,11 @@ function CourseView() {
                   })}
                 >
                   <Card.Section sx={{ position: 'relative' }}>
-                    <Image
-                      src={chapterImage}
+                    <img
+                      src={chapter.image_url || image_def_ka_austasuche}
                       height={180}
-                      alt={chapter.caption || t('chapters.defaultCaptionText', { chapterNumber: index + 1 })}
+                      alt={chapter.title}
+                      style={{ width: '100%', objectFit: 'cover' }}
                     />
 
                     {chapter.is_completed && (
