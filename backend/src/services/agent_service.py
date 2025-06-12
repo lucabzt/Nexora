@@ -3,6 +3,7 @@ This file defines the service that coordinates the interaction between all the a
 """
 import json
 import asyncio
+import traceback
 
 from sqlalchemy.orm import Session
 
@@ -217,14 +218,15 @@ class AgentService:
             #})
             print(f"[{task_id}] Sent completion signal.")
 
-        except Exception as e:
+        except Exception as _:
             
-            error_message = f"Course creation failed: {str(e)}"
+            error_message = f"Course creation failed: {str(traceback.format_exc())}"
             print(f"[{task_id}] Error during course creation: {error_message}")
             # Log detailed error traceback here if possible, e.g., import traceback; traceback.print_exc()
             if course_db:
                 try:
                     courses_crud.update_course_status(db, course_id, CourseStatus.FAILED)
+                    courses_crud.update_course(db, course_id, error_msg=error_message)
                     print(f"[{task_id}] Course {course_id} status updated to FAILED due to error.")
                 except Exception as db_error:
                     print(f"[{task_id}] Additionally, failed to update course status to FAILED: {db_error}")

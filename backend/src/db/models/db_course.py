@@ -35,6 +35,7 @@ class Course(Base):
     language = Column(String(50), nullable=True)
     image_url = Column(String(2000), nullable=True)
     chapter_count = Column(Integer, nullable=True)
+    error_msg = Column(Text, nullable=True)
 
     # Relationships
     chapters = relationship("Chapter", back_populates="course", cascade="all, delete-orphan")
