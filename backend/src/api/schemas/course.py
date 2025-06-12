@@ -31,6 +31,7 @@ class Chapter(BaseModel):
     mc_questions: List[MultipleChoiceQuestion]
     time_minutes: int
     is_completed: bool = False  # Also useful for the frontend
+    image_url: Optional[str] = None  # Optional image URL for the chapter
 
 
 class CourseInfo(BaseModel):
