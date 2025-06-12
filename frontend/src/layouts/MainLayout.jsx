@@ -60,7 +60,7 @@ function MainLayout() {
         },
       }}
       header={
-        <Header height={{ base: 70, sm: 80 }} p="md">
+        <Header height="3.25rem" p="md">
           <div style={{  display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>              <Title 
               order={2} 
               size="1.6rem"
