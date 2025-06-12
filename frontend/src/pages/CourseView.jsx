@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import image_def_ka_austasuche from "../assets/wired-flat-2566-logo-discord-hover-wink.gif"
+
 import {
   Container,
   Title,
@@ -607,7 +607,9 @@ function CourseView() {
                     }
                   })}
                 >
+
                   <Card.Section sx={{ position: 'relative' }}>
+                    <Text>test</Text>
                     <Image
                       src={chapter.image_url || "https://cdn.prod.website-files.com/62b5697fd4d1b864ed69a0ac/636b26c56d140b27f7c14c1f_Blogthumbnail%20Kursstruktur%20plain%20(1)%20(1).png"}
                       alt={chapter.caption || t('chapters.defaultCaptionText', { chapterNumber: index + 1 })}
