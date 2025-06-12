@@ -154,6 +154,14 @@ class AgentService:
 
             # Process each chapter and stream as it's created
             for idx, topic in enumerate(response_planner["chapters"]):
+                # Start Unslpash image search
+                image_task = self.image_agent.run(
+                    user_id=user_id,
+                    state={},
+                    content=self.query_service.get_explainer_query(user_id, course_id, idx)
+                )
+
+
                 # Get response from coding agent
                 response_code = await self.coding_agent.run(
                     user_id=user_id,
@@ -168,6 +176,8 @@ class AgentService:
                     content=self.query_service.get_tester_query(user_id, course_id, idx, response_code["explanation"]),
                 )
 
+                image_response = await image_task
+
                 # Save the chapter in db first
                 chapter_db = chapters_crud.create_chapter(
                     db=db,
@@ -177,6 +187,7 @@ class AgentService:
                     summary=json.dumps(topic['content'], indent=2),
                     content=response_code['explanation'],
                     time_minutes=topic['time'],
+                    image_url=image_response['explanation'],
                 )
 
                 # Save questions in db

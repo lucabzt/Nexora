@@ -58,7 +58,8 @@ class Chapter(Base):
     time_minutes = Column(Integer, nullable=False)
     is_completed = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
+    image_url = Column(Text, nullable=True)
+
     # Relationships
     course = relationship("Course", back_populates="chapters")
     mc_questions = relationship("MultipleChoiceQuestion", back_populates="chapter", cascade="all, delete-orphan")
