@@ -47,7 +47,8 @@ import {
   IconBrain,
   IconChevronRight,
   IconPlaceholder,
-  IconPencil
+  IconPencil,
+  IconLoader
 } from '@tabler/icons-react';
 import { courseService } from '../api/courseService';
 
@@ -382,11 +383,12 @@ function Dashboard() {
             p={0}
             withBorder 
             mb="xl" 
-            sx={(theme) => ({
+            sx={{
               overflow: 'hidden',
               position: 'relative',
-            })}
-          >          <Grid gutter={0}>
+            }}
+          >
+           <Grid gutter={0}>
               <Grid.Col sm={5} order={isMobile ? 1 : 2} sx={{ position: 'relative' }}>
                 <Image 
                   src={ courses[0]?.image_url ? courses[0]?.image_url : PlaceGolderImage}

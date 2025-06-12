@@ -588,7 +588,7 @@ function CourseView() {
             ]}
           >
             {chapters.map((chapter, index) => {
-              const chapterImage = chapter.image_url ? `url("${chapter.image_url}")` : image_def_ka_austasuche;
+              const chapterImage = chapter.image_url ? chapter.image_url : image_def_ka_austasuche;
               return (
                 <Card
                   key={chapter.id || index}
@@ -724,7 +724,7 @@ function CourseView() {
                     <Card.Section>
                       <Box sx={{ position: 'relative' }}>
                         <Image
-                          src='url("https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png")'
+                          src="https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png"
                           height={180}
                           alt={t('creation.upcomingChapterAlt', { chapterNumber: placeholderIndex + 1 })}
                           sx={{ filter: 'blur(3px) grayscale(50%)' }}
