@@ -1,47 +1,56 @@
 {
-  "deleteCourseError": "Failed to delete course. {{message}}",
-  "deleteCourseModal": {
-    "title": "Delete Course?",
-    "confirmationText": "Are you sure you want to permanently delete this course? This action cannot be undone.",
-    "cancelButton": "Cancel",
-    "deleteButton": "Delete"
-  },
-  "loadCoursesError": "Failed to load courses. Please try again later.",
-  "status": {
-    "creating": "Creating",
-    "finished": "Finished",
-    "updating": "Updating",
-    "learning": "Learning"
-  },
   "myLearningJourney": "My Learning Journey",
-  "motivationalMessage": "Continue your path to knowledge and growth",
-  "createNewCourseButton": "Create New Course",
+  "welcomeMessage": "Welcome back! Let's continue your learning journey.",
+  "loadCoursesError": "Failed to load your courses. Please try again later.",
+  "deleteCourseError": "Failed to delete the course. {{message}}",
+  "renameCourseError": "Failed to rename the course. {{message}}",
+
   "stats": {
-    "currentStreak": "Current Streak",
-    "daysUnit": "Days",
-    "currentStreakDescription": "Keep it up! You're building great habits.",
     "coursesCompleted": "Courses Completed",
-    "coursesCompletedDescription": "You've already mastered {{count}} courses!",
-    "totalHoursLearned": "Total Learning Hours",
-    "hoursUnit": "hrs",
-    "totalHoursLearnedDescription": "That's {{hours}} hours of valuable knowledge!"
+    "currentStreak": "Current Streak",
+    "days": "days",
+    "totalHoursLearned": "Total Hours Learned",
+    "currentStreakDescription": "Keep it up to build your learning habit.",
+    "coursesCompletedDescription": "Each course is a step forward in your journey.",
+    "totalHoursLearnedDescription": "Time well spent investing in your knowledge."
   },
-  "errorAlertTitle": "Error!",
-  "beginYourLearningJourney": "Begin Your Learning Journey",
-  "noCoursesFound": "You don't have any courses yet. Create your first personalized course to start expanding your knowledge!",
-  "createMyFirstCourse": "Create My First Course",
-  "continueLearning": "Continue Learning",
-  "recommendedForYou": "Recommended For You",
-  "featuredCourse": {
-    "defaultTitle": "Introduction to Machine Learning",
-    "defaultDescription": "Learn the fundamentals of machine learning and AI. Perfect for beginners wanting to understand core concepts."
+
+  "continueLearningTitle": "Continue Where You Left Off",
+
+  "viewAllButton": "View All",
+  "viewLessButton": "View Less",
+  
+  "deleteModal": {
+    "title": "Delete Course",
+    "message": "Are you sure you want to delete this course? This action is irreversible.",
+    "cancelButton": "Cancel",
+    "confirmButton": "Delete"
   },
-  "yourProgress": "Your progress:",
-  "yourCoursesTitle": "My Courses",
-  "viewAllCoursesButton": "View All",
-  "showFewerCoursesButton": "Show Featured",
+
+  "renameModal": {
+    "title": "Rename Course",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Enter the new course title",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Enter the new course description",
+    "cancelButton": "Cancel",
+    "saveButton": "Save Changes"
+  },
+
+  "status": {
+    "inProgress": "In Progress",
+    "creating": "Creating...",
+    "completed": "Completed"
+  },
+  
+  "myCourses": "My Courses",
+  "noCoursesMessage": "You haven't created any courses yet. Get started now!",
+  "createNewCourse": "Create New Course",
+
   "courseProgressTooltip": "{{progress}}% complete",
   "deleteCourseTooltip": "Delete course",
+  "renameCourseTooltip": "Rename course",
+  
   "estimatedTime": "Est. time: {{hours}} hours",
   "viewCreationProgressButton": "View Creation Progress",
   "continueLearningButton": "Continue Learning"

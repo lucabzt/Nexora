@@ -101,7 +101,7 @@ function Dashboard() {
       setCourses(prevCourses => prevCourses.filter(course => course.course_id !== courseToDeleteId));
       // Optional: Show a success notification
     } catch (err) {
-      setError(t('deleteCourseError', { message: err.message || '' }));
+      setError(t('errors.deleteCourse', { message: err.message || '' }));
       console.error('Error deleting course:', err);
       // Optional: Show an error notification
     } finally {
@@ -123,7 +123,7 @@ function Dashboard() {
       );
       setRenameModalOpen(false);
     } catch (err) {
-      setError(t('renameCourseError', { message: err.message || '' }));
+      setError(t('errors.renameCourse', { message: err.message || '' }));
       console.error('Error renaming course:', err);
     }
   };
@@ -136,7 +136,7 @@ function Dashboard() {
         setCourses(coursesData);
         setError(null);
       } catch (error) {
-        setError(t('loadCoursesError'));
+        setError(t('errors.loadCourses'));
         console.error('Error fetching courses:', error);
       } finally {
         setLoading(false);
@@ -148,23 +148,31 @@ function Dashboard() {
 
   // Helper function to get status badge color and icon
   const getStatusInfo = (status) => {
+
+
+    const label = t(`status.${status}`, { defaultValue: status });
+
     switch (status) {
-      case 'creating':
-        return { color: 'blue', icon: IconClock, label: t('status.creating') };
-      case 'finished':
-        return { color: 'green', icon: IconCheck, label: t('status.finished') };
-      case 'updating':
-        return { color: 'orange', icon: IconClock, label: t('status.updating') };
+      case 'CourseStatus.CREATING':
+        return { label, color: 'blue', Icon: IconClock };
+      case 'CourseStatus.CREATING':
+        return { label, color: 'yellow', Icon: IconLoader };
+      case 'CourseStatus.FINISHED':
+      case 'CourseStatus.COMPLETED':
+        return { label, color: 'green', Icon: IconCheck };
+      case 'CourseStatus.FAILED':
+        return { label, color: 'red', Icon: IconAlertCircle };
       default:
-        return { color: 'gray', icon: IconBook, label: t('status.learning') };
+        return { label, color: 'gray', Icon: IconBook };
     }
   };
 
   // Function to calculate progress for a course (placeholder logic)
   const calculateProgress = (course) => {
+    console.log(course.status, " sollte so was wie CourseStatus.FAILED sein");
     // This is placeholder logic - in a real app, this would come from actual user progress data
-    if (course.status === 'finished') return 100;
-    if (course.status === 'creating') return 0;
+    if (course.status === 'CourseStatus.COMPLETED') return 100;
+    if (course.status === 'CourseStatus.CREATING') return 0;
     
     // For in-progress courses, generate a random progress between 10-90%
     return Math.floor((String(course.course_id)?.charCodeAt(0) || 0) % 80) + 10;
@@ -179,10 +187,10 @@ function Dashboard() {
           setDeleteModalOpen(false);
           setCourseToDeleteId(null); // Reset on close as well
         }}
-        title={t('deleteCourseModal.title')}
+        title={t('deleteModal.title')}
         centered
       >
-        <Text>{t('deleteCourseModal.confirmationText')}</Text>
+        <Text>{t('deleteModal.message', { courseName: courses.find(c => c.course_id === courseToDeleteId)?.title || '' })}</Text>
         <Group position="right" mt="md">
           <Button 
             variant="default" 
@@ -191,14 +199,14 @@ function Dashboard() {
               setCourseToDeleteId(null);
             }}
           >
-            {t('deleteCourseModal.cancelButton')}
+            {t('deleteModal.cancelButton')}
           </Button>
           <Button 
             color="red" 
             onClick={confirmDeleteHandler}
             leftIcon={<IconTrash size={rem(16)} />}
           >
-            {t('deleteCourseModal.deleteButton')}
+            {t('deleteModal.confirmButton')}
           </Button>
         </Group>
       </Modal>
@@ -207,28 +215,28 @@ function Dashboard() {
       <Modal
         opened={renameModalOpen}
         onClose={() => setRenameModalOpen(false)}
-        title={t('renameCourseModal.title')}
+        title={t('renameModal.title')}
         centered
       >
         <Stack spacing="md">
           <TextInput
-            label={t('renameCourseModal.newTitleLabel')}
-            placeholder={t('renameCourseModal.newTitlePlaceholder')}
+            label={t('renameModal.titleLabel')}
+            placeholder={t('renameModal.titlePlaceholder')}
             value={newTitle}
             onChange={(event) => setNewTitle(event.currentTarget.value)}
           />
           <Textarea
-            label={t('renameCourseModal.newDescriptionLabel')}
-            placeholder={t('renameCourseModal.newDescriptionPlaceholder')}
+            label={t('renameModal.descriptionLabel')}
+            placeholder={t('renameModal.descriptionPlaceholder')}
             value={newDescription}
             onChange={(event) => setNewDescription(event.currentTarget.value)}
           />
           <Group position="right" mt="md">
             <Button variant="default" onClick={() => setRenameModalOpen(false)}>
-              {t('renameCourseModal.cancelButton')}
+              {t('renameModal.cancelButton')}
             </Button>
             <Button color="teal" onClick={confirmRenameHandler}>
-              {t('renameCourseModal.saveButton')}
+              {t('renameModal.saveButton')}
             </Button>
           </Group>
         </Stack>
@@ -239,7 +247,7 @@ function Dashboard() {
         <Group position="apart" mb="md">
           <Box>
             <Title order={1} mb={5}>{t('myLearningJourney')}</Title>
-            <Text color="dimmed" size="lg">{t('motivationalMessage')}</Text>
+            <Text color="dimmed" size="lg">{t('welcomeMessage')}</Text>
           </Box>
           <Button 
             size="md"
@@ -256,7 +264,7 @@ function Dashboard() {
               },
             })}
           >
-            {t('createNewCourseButton')}
+            {t('createNewCourse')}
           </Button>
         </Group>
       </Box>
@@ -341,9 +349,9 @@ function Dashboard() {
             <ThemeIcon size={100} radius={100} color="teal" variant="light">
               <IconBook size={60} />
             </ThemeIcon>
-            <Title order={2} align="center">{t('beginYourLearningJourney')}</Title>
+            <Title order={2} align="center">{t('emptyState.title')}</Title>
             <Text align="center" size="lg" maw={500} mx="auto" color="dimmed">
-              {t('noCoursesFound')}
+              {t('emptyState.message')}
             </Text>
             <Button 
               size="lg"
@@ -361,7 +369,7 @@ function Dashboard() {
                 },
               })}
             >
-              {t('createMyFirstCourse')}
+              {t('emptyState.button')}
             </Button>
           </Stack>
         </Paper>
@@ -370,7 +378,7 @@ function Dashboard() {
       {/* Featured Course (if available) */}
       {!loading && !error && courses.length > 0 && (
         <>
-          <Title order={2} mb="md">{t('continueLearning')}</Title>
+          <Title order={2} mb="md">{t('continueLearningTitle')}</Title>
           <Paper 
             radius="md" 
             p={0}
@@ -448,21 +456,21 @@ function Dashboard() {
       {!loading && !error && courses.length > 0 && (
         <>
           <Group position="apart" mb="md">
-            <Title order={2} mb="lg">{t('yourCoursesTitle')}</Title>
+            <Title order={2} mb="lg">{t('myCourses')}</Title>
             <Button 
               variant="subtle" 
               color="blue" 
               rightIcon={<IconArrowUpRight size={16} />}
               onClick={() => setViewAllCourses(!viewAllCourses)}
             >
-              {viewAllCourses ? t('showFewerCoursesButton') : t('viewAllCoursesButton')}
+              {viewAllCourses ? t('viewLess') : t('viewAll')}
             </Button>
           </Group>
 
           <Grid>
             {(viewAllCourses ? courses : courses.slice(0, 6)).map((course, index) => {
               const statusInfo = getStatusInfo(course.status);
-              const StatusIcon = statusInfo.icon;
+              const StatusIcon = statusInfo.Icon;
               const progress = calculateProgress(course);
               
               return (
@@ -573,18 +581,14 @@ function Dashboard() {
                     )}
 
                     <Button
-                      variant={course.status === 'creating' ? 'light' : 'filled'}
-                      color={course.status === 'creating' ? 'blue' : 'teal'}
+                      variant={course.status === 'CourseStatus.CREATING' ? 'light' : 'filled'}
+                      color={course.status === 'CourseStatus.CREATING' ? 'blue' : 'teal'}
                       fullWidth
                       mt="auto"
                       rightIcon={<IconChevronRight size={16} />}
-                      onClick={() => navigate(
-                        course.status === 'creating' 
-                          ? `/dashboard/courses/${course.course_id}?creating=true`
-                          : `/dashboard/courses/${course.course_id}`
-                      )}
+                      onClick={() => navigate(`/dashboard/courses/${course.course_id}`)}
                     >
-                      {course.status === 'creating' ? t('viewCreationProgressButton') : t('continueLearningButton')}
+                      {course.status === 'CourseStatus.CREATING' ? t('viewCreationProgressButton') : t('continueLearningButton')}
                     </Button>
                   </Card>
                 </Grid.Col>

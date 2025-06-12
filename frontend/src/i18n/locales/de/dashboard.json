@@ -1,47 +1,56 @@
 {
-  "deleteCourseError": "Fehler beim Löschen des Kurses. {{message}}",
-  "deleteCourseModal": {
-    "title": "Kurs löschen?",
-    "confirmationText": "Sind Sie sicher, dass Sie diesen Kurs endgültig löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
-    "cancelButton": "Abbrechen",
-    "deleteButton": "Löschen"
-  },
-  "loadCoursesError": "Kurse konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
-  "status": {
-    "creating": "Wird erstellt",
-    "finished": "Abgeschlossen",
-    "updating": "Wird aktualisiert",
-    "learning": "Lernen"
-  },
   "myLearningJourney": "Meine Lernreise",
-  "motivationalMessage": "Setze deinen Weg zu Wissen und Wachstum fort",
-  "createNewCourseButton": "Neuen Kurs erstellen",
+  "welcomeMessage": "Willkommen zurück! Lass uns deine Lernreise fortsetzen.",
+  "loadCoursesError": "Deine Kurse konnten nicht geladen werden. Bitte versuche es später erneut.",
+  "deleteCourseError": "Der Kurs konnte nicht gelöscht werden. {{message}}",
+  "renameCourseError": "Der Kurs konnte nicht umbenannt werden. {{message}}",
+
   "stats": {
-    "currentStreak": "Aktuelle Serie",
-    "daysUnit": "Tage",
-    "currentStreakDescription": "Weiter so! Du baust großartige Gewohnheiten auf.",
     "coursesCompleted": "Abgeschlossene Kurse",
-    "coursesCompletedDescription": "Du hast bereits {{count}} Kurse gemeistert!",
+    "currentStreak": "Aktuelle Serie",
+    "days": "Tage",
     "totalHoursLearned": "Gesamte Lernstunden",
-    "hoursUnit": "Std.",
-    "totalHoursLearnedDescription": "Das sind {{hours}} Stunden wertvolles Wissen!"
+    "currentStreakDescription": "Bleib dran, um deine Lerngewohnheit aufzubauen.",
+    "coursesCompletedDescription": "Jeder Kurs ist ein Schritt nach vorne auf deiner Reise.",
+    "totalHoursLearnedDescription": "Gut investierte Zeit in dein Wissen."
   },
-  "errorAlertTitle": "Fehler!",
-  "beginYourLearningJourney": "Beginne deine Lernreise",
-  "noCoursesFound": "Du hast noch keine Kurse. Erstelle deinen ersten personalisierten Kurs, um dein Wissen zu erweitern!",
-  "createMyFirstCourse": "Meinen ersten Kurs erstellen",
-  "continueLearning": "Weiterlernen",
-  "recommendedForYou": "Für dich empfohlen",
-  "featuredCourse": {
-    "defaultTitle": "Einführung in Maschinelles Lernen",
-    "defaultDescription": "Lerne die Grundlagen des maschinellen Lernens und der KI. Perfekt für Anfänger, die Kernkonzepte verstehen wollen."
+
+  "continueLearningTitle": "Mach da weiter, wo du aufgehört hast",
+
+  "viewAllButton": "Alle anzeigen",
+  "viewLessButton": "Weniger anzeigen",
+  
+  "deleteModal": {
+    "title": "Kurs löschen",
+    "message": "Möchtest du diesen Kurs wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "cancelButton": "Abbrechen",
+    "confirmButton": "Löschen"
   },
-  "yourProgress": "Dein Fortschritt:",
-  "yourCoursesTitle": "Meine Kurse",
-  "viewAllCoursesButton": "Alle anzeigen",
-  "showFewerCoursesButton": "Empfohlene anzeigen",
+
+  "renameModal": {
+    "title": "Kurs umbenennen",
+    "titleLabel": "Titel",
+    "titlePlaceholder": "Gib den neuen Kurstitel ein",
+    "descriptionLabel": "Beschreibung",
+    "descriptionPlaceholder": "Gib die neue Kursbeschreibung ein",
+    "cancelButton": "Abbrechen",
+    "saveButton": "Änderungen speichern"
+  },
+
+  "status": {
+    "inProgress": "In Bearbeitung",
+    "creating": "Wird erstellt...",
+    "completed": "Abgeschlossen"
+  },
+  
+  "myCourses": "Meine Kurse",
+  "noCoursesMessage": "Du hast noch keine Kurse erstellt. Leg jetzt los!",
+  "createNewCourse": "Neuen Kurs erstellen",
+
   "courseProgressTooltip": "{{progress}}% abgeschlossen",
   "deleteCourseTooltip": "Kurs löschen",
+  "renameCourseTooltip": "Kurs umbenennen",
+  
   "estimatedTime": "Gesch. Zeit: {{hours}} Stunden",
   "viewCreationProgressButton": "Erstellungsfortschritt anzeigen",
   "continueLearningButton": "Weiterlernen"
