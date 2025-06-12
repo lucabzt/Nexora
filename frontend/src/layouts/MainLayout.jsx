@@ -1,4 +1,4 @@
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import { 
   AppShell, 
   Header, 
@@ -31,6 +31,7 @@ function MainLayout() {
   const { user, logout, isAuthenticated } = useAuth(); // Ensure isAuthenticated is destructured
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const { t } = useTranslation(['app', 'navigation']); // Initialize translation hook for app and navigation namespaces
+  const { pathname } = useLocation();
   const dark = colorScheme === 'dark';
 
   // Logic to determine avatar source
@@ -60,7 +61,7 @@ function MainLayout() {
         },
       }}
       header={
-        <Header height={{ base: 70, sm: 80 }} p="md">
+        <Header height="3.25rem" p="md">
           <div style={{  display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>              <Title 
               order={2} 
               size="1.6rem"
@@ -123,39 +124,43 @@ function MainLayout() {
                   </Menu.Dropdown>
                 </Menu>
               ) : (
-                <>                  <Button 
-                    component={RouterLink} 
-                    to="/login" 
-                    variant="outline"
-                    radius="md"
-                    sx={(theme) => ({
-                      [theme.fn.smallerThan('sm')]: {
-                        paddingLeft: theme.spacing.xs,
-                        paddingRight: theme.spacing.xs,
-                        fontSize: theme.fontSizes.xs,
-                      },
-                    })}
-                  >
-                    {t('login', { ns: 'navigation' })}
-                  </Button>
-                  
-                  <Button 
-                    component={RouterLink} 
-                    to="/register" 
-                    variant="filled"
-                    radius="md"
-                    color="teal"
-                    sx={(theme) => ({
-                      [theme.fn.smallerThan('sm')]: {
-                        paddingLeft: theme.spacing.xs,
-                        paddingRight: theme.spacing.xs,
-                        fontSize: theme.fontSizes.xs,
-                      },
-                    })}
-                  >
-                    {t('register', { ns: 'navigation' })}
-                  </Button>
-                  {/* Theme toggle for non-authenticated users is removed from here */}
+                <>
+                  {!['/login', '/register'].includes(pathname) && (
+                    <>
+                      <Button
+                        component={RouterLink}
+                        to="/login"
+                        variant="outline"
+                        radius="md"
+                        sx={(theme) => ({
+                          [theme.fn.smallerThan('sm')]: {
+                            paddingLeft: theme.spacing.xs,
+                            paddingRight: theme.spacing.xs,
+                            fontSize: theme.fontSizes.xs,
+                          },
+                        })}
+                      >
+                        {t('login', { ns: 'navigation' })}
+                      </Button>
+
+                      <Button
+                        component={RouterLink}
+                        to="/register"
+                        variant="filled"
+                        radius="md"
+                        color="teal"
+                        sx={(theme) => ({
+                          [theme.fn.smallerThan('sm')]: {
+                            paddingLeft: theme.spacing.xs,
+                            paddingRight: theme.spacing.xs,
+                            fontSize: theme.fontSizes.xs,
+                          },
+                        })}
+                      >
+                        {t('register', { ns: 'navigation' })}
+                      </Button>
+                    </>
+                  )}
                 </>
               )}
             </Group>
