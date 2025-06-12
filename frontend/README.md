@@ -1,43 +1,12 @@
-# Nexora Frontend
+# React + Vite
 
-## Übersicht
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Das Frontend von Nexora ist eine moderne Webanwendung, die mit Vite und React entwickelt wurde. Es bietet eine benutzerfreundliche Oberfläche zur Interaktion mit den Backend-Services.
+Currently, two official plugins are available:
 
-## Projektstruktur
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-- `src/` – Quellcode der Anwendung
-- `public/` – Statische Dateien
-- `index.html` – Einstiegspunkt
-- `App.jsx` – Hauptkomponente
+## Expanding the ESLint configuration
 
-## Installation & Start
-
-1. Navigiere ins Frontend-Verzeichnis:
-
-   ```bash
-   cd frontend/
-   ```
-
-2. Installiere die Abhängigkeiten:
-
-   ```bash
-   npm install
-   ```
-
-3. Starte die Entwicklungsumgebung:
-
-   ```bash
-   npm run dev
-   ```
-
-## Build für Produktion
-
-```bash
-npm run build
-```
-
-## Weitere Hinweise
-
-- Stelle sicher, dass das Backend läuft, um alle Funktionen nutzen zu können.
-- Anpassungen an der API-URL können in den Umgebungsvariablen vorgenommen werden.
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
