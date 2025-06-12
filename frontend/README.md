@@ -16,7 +16,7 @@ Das Frontend von Nexora ist eine moderne Webanwendung, die mit Vite und React en
 1. Navigiere ins Frontend-Verzeichnis:
 
    ```bash
-   cd frontend/debug_frontend
+   cd frontend/
    ```
 
 2. Installiere die Abhängigkeiten:

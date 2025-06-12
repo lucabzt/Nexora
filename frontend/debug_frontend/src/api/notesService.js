@@ -1,4 +1,4 @@
-// frontend/debug_frontend/src/api/notesService.js
+// frontend/src/api/notesService.js
 import { apiWithCookies } from './baseApi';
 
 
