@@ -611,7 +611,7 @@ function CourseView() {
                     <img
                       src={chapter.image_url || image_def_ka_austasuche}
                       height={180}
-                      alt={chapter.title}
+                      alt={chapter.caption || t('chapters.defaultCaptionText', { chapterNumber: index + 1 })}
                       style={{ width: '100%', objectFit: 'cover' }}
                     />
 
