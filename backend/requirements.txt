@@ -22,3 +22,4 @@ asyncio
 fastmcp
 dataclasses
 uv
+apscheduler
