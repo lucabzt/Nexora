@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, 
 from fastapi.responses import JSONResponse
 import uuid
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from ...db.models.db_user import User
 from ...services.agent_service import AgentService
@@ -170,6 +170,7 @@ async def get_course_chapters(
             caption=chapter.caption,
             summary=chapter.summary or "",
             content=chapter.content,
+            image_url=chapter.image_url,
             mc_questions=[
                 MCQuestionSchema(
                     question=q.question,
@@ -235,6 +236,7 @@ async def get_chapter_by_id(
         content=chapter.content,
         mc_questions=mc_questions,
         time_minutes=chapter.time_minutes,
+        image_url=chapter.image_url,
         is_completed=chapter.is_completed  # Add this
     )
 
@@ -348,6 +350,7 @@ async def update_chapter(
         summary: str,
         content: str,
         time_minutes: int,
+        image_url: Optional[str] = None,
         current_user: User = Depends(get_current_active_user),
         db: Session = Depends(get_db)
 ):
@@ -379,6 +382,8 @@ async def update_chapter(
         update_data["content"] = content
     if time_minutes is not None:
         update_data["time_minutes"] = time_minutes
+    if image_url is not None:
+        update_data["image_url"] = image_url
 
     if not update_data:
         raise HTTPException(
@@ -416,7 +421,8 @@ async def update_chapter(
         content=updated_chapter.content,
         mc_questions=mc_questions,
         time_minutes=updated_chapter.time_minutes,
-        is_completed=updated_chapter.is_completed
+        is_completed=updated_chapter.is_completed,
+        image_url=updated_chapter.image_url
     )
 
 
