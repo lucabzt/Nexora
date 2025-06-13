@@ -358,6 +358,14 @@ function ChapterView() {
               >
                 {t('buttons.backToCourse')}
               </Button>
+              <Button 
+                color="green" 
+                onClick={markChapterComplete} 
+                loading={markingComplete}
+                disabled={markingComplete}
+              >
+                {t('buttons.markComplete')}
+              </Button>
               {chapter.is_completed && (
                 <Badge color="green" size="lg">{t('badge.completed')}</Badge>
               )}
