@@ -31,6 +31,7 @@ import ToolbarContainer from '../components/tools/ToolbarContainer';
 import { useToolbar } from '../contexts/ToolbarContext';
 import AiCodeWrapper from "../components/AiCodeWrapper.jsx";
 import { downloadChapterContentAsPDF, prepareElementForPDF } from '../utils/pdfDownload';
+import FullscreenContentWrapper from '../components/FullscreenContentWrapper';
 
 function ChapterView() {
   const { t } = useTranslation('chapterView');
@@ -426,11 +427,13 @@ function ChapterView() {
               </Tabs.List>
 
               <Tabs.Panel value="content" pt="xs">
-                <Paper shadow="xs" p="md" withBorder ref={contentRef}>
-                  <div className="markdown-content">
-                    <AiCodeWrapper>{chapter.content}</AiCodeWrapper>
-                  </div>
-                </Paper>
+                <FullscreenContentWrapper>
+                  <Paper shadow="xs" p="md" withBorder ref={contentRef}>
+                    <div className="markdown-content">
+                      <AiCodeWrapper>{chapter.content}</AiCodeWrapper>
+                    </div>
+                  </Paper>
+                </FullscreenContentWrapper>
               </Tabs.Panel>
 
                 <Tabs.Panel value="images" pt="xs">
