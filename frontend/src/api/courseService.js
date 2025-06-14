@@ -25,6 +25,12 @@ export const courseService = {
   getFiles: async (courseId) =>
   (await apiWithCookies.get(`/files/documents?course_id=${courseId}`)).data,
 
+  downloadFile: async (fileId) =>
+    (await apiWithCookies.get(`/files/documents/${fileId}`)).data,
+
+  downloadImage: async (imageId) =>
+    (await apiWithCookies.get(`/files/images/${imageId}`)).data,
+
   getImages: async (courseId) =>
     (await apiWithCookies.get(`/files/images?course_id=${courseId}`)).data,
 

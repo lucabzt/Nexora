@@ -3,6 +3,8 @@
   "mainTitle": "Create a New Learning Course",
   "form": {
     "duration": {
+      "label": "Course Duration",
+      "description": "Estimated duration of the course in hours",
       "value": "{{count}} hour",
       "value_plural": "{{count}} hours"
     },

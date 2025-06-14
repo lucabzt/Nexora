@@ -3,6 +3,8 @@
   "mainTitle": "Neuen Lernkurs erstellen",
   "form": {
     "duration": {
+      "label": "Kursdauer",
+      "description": "Geschätzte Dauer des Kurses in Stunden",
       "value": "{{count}} Stunde",
       "value_plural": "{{count}} Stunden"
     },
