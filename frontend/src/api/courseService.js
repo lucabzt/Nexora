@@ -94,7 +94,7 @@ export const courseService = {
   },
 
   // Upload an image and get image ID
-uploadImage: async (file) => {
+  uploadImage: async (file) => {
     const formData = new FormData();
     formData.append('file', file);
     
@@ -107,7 +107,15 @@ uploadImage: async (file) => {
     return response.data; // Contains image ID and other info
   },
 
+  // Delete a document by ID
+  deleteDocument: async (fileId) => {
+    await apiWithCookies.delete(`/files/documents/${fileId}`);
+  },
 
+  // Delete an image by ID
+  deleteImage: async (imageId) => {
+    await apiWithCookies.delete(`/files/images/${imageId}`);
+  },
 
 };
 

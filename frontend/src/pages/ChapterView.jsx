@@ -17,10 +17,14 @@ import {
   Paper,
   Badge,
   SimpleGrid,
-  Image
+  Image,
 } from '@mantine/core';
+import { IconDownload } from '@tabler/icons-react';
+
 import { useMediaQuery } from '@mantine/hooks';
-import { IconAlertCircle, IconBookmark, IconQuestionMark, IconPhoto, IconFileText, IconDownload } from '@tabler/icons-react';
+import { IconAlertCircle, IconBookmark, IconQuestionMark, IconPhoto, IconFileText } from '@tabler/icons-react';
+import { MediaGallery } from '../components/media/MediaGallery';
+import { FileList } from '../components/media/FileList';
 import { toast } from 'react-toastify';
 import { courseService } from '../api/courseService';
 import ToolbarContainer from '../components/tools/ToolbarContainer';
@@ -46,6 +50,7 @@ function ChapterView() {
   const [quizScore, setQuizScore] = useState(0);
   const [markingComplete, setMarkingComplete] = useState(false);
   const [downloadingPDF, setDownloadingPDF] = useState(false);
+  const [deletingItem, setDeletingItem] = useState(null); // Track which item is being deleted
 
   // Ref for the content area that we want to download as PDF
   const contentRef = useRef(null);
@@ -105,9 +110,18 @@ function ChapterView() {
     fetchChapterAndMediaInfo();
   }, [courseId, chapterId, t]);
 
+  // Track if this is the initial load
+  const initialLoad = useRef(true);
+
   // Fetch actual media files
   useEffect(() => {
     if (loading) return; // Wait for initial data to load
+    
+    // Only run on initial load or when media data changes
+    if (!initialLoad.current && images.every(img => img.objectUrl || img.error) && 
+        files.every(file => file.objectUrl || file.error)) {
+      return;
+    }
     
     const fetchMedia = async () => {
       console.log('Starting media fetch...');
@@ -118,7 +132,6 @@ function ChapterView() {
         console.log('Processing images...', images);
         const updatedImages = await Promise.all(
           images.map(async (image) => {
-            console.log(`Processing image ${image.id} - ${image.filename}`);
             if (image.objectUrl || image.error) {
               console.log(`Skipping image ${image.id} - already ${image.objectUrl ? 'loaded' : 'errored'}`);
               return image;
@@ -149,7 +162,6 @@ function ChapterView() {
         console.log('Processing files...', files);
         const updatedFiles = await Promise.all(
           files.map(async (file) => {
-            console.log(`Processing file ${file.id} - ${file.filename}`);
             if (file.objectUrl || file.error) {
               console.log(`Skipping file ${file.id} - already ${file.objectUrl ? 'loaded' : 'errored'}`);
               return file;
@@ -179,6 +191,7 @@ function ChapterView() {
         console.log('Media fetch complete, updating state...');
         setImages(updatedImages);
         setFiles(updatedFiles);
+        initialLoad.current = false;
       } catch (error) {
         console.error('Unexpected error in media fetch:', error);
         toast.error(t('errors.mediaLoadFailed'));
@@ -189,19 +202,71 @@ function ChapterView() {
     };
 
     fetchMedia();
-    
-    // Cleanup function to revoke object URLs when component unmounts
+  }, [loading, t]); // Removed images and files from dependencies
+
+  // Separate effect for cleanup on unmount
+  useEffect(() => {
     return () => {
-      console.log('Cleaning up media URLs...');
+      console.log('Cleaning up media URLs on unmount...');
       const allMedia = [...images, ...files];
       allMedia.forEach(item => {
-        if (item && item.objectUrl) {
+        if (item?.objectUrl) {
           console.log(`Revoking URL for ${item.id} (${item.filename})`);
           URL.revokeObjectURL(item.objectUrl);
         }
       });
     };
-  }, [loading, images.length, files.length, t]);
+  }, []); // Empty dependency array means this only runs on unmount
+
+  const handleDeleteImage = async (imageId) => {
+    if (!window.confirm(t('confirmDeleteImage'))) return;
+    
+    try {
+      setDeletingItem(`image-${imageId}`);
+      await courseService.deleteImage(imageId);
+      
+      // Optimistically update the UI
+      setImages(prevImages => prevImages.filter(img => img.id !== imageId));
+      
+      // Clean up the object URL
+      const imageToDelete = images.find(img => img.id === imageId);
+      if (imageToDelete?.objectUrl) {
+        URL.revokeObjectURL(imageToDelete.objectUrl);
+      }
+      
+      toast.success(t('imageDeleted'));
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      toast.error(t('errors.deleteFailed'));
+    } finally {
+      setDeletingItem(null);
+    }
+  };
+
+  const handleDeleteFile = async (fileId) => {
+    if (!window.confirm(t('confirmDeleteFile'))) return;
+    
+    try {
+      setDeletingItem(`file-${fileId}`);
+      await courseService.deleteDocument(fileId);
+      
+      // Optimistically update the UI
+      setFiles(prevFiles => prevFiles.filter(file => file.id !== fileId));
+      
+      // Clean up the object URL
+      const fileToDelete = files.find(file => file.id === fileId);
+      if (fileToDelete?.objectUrl) {
+        URL.revokeObjectURL(fileToDelete.objectUrl);
+      }
+      
+      toast.success(t('fileDeleted'));
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      toast.error(t('errors.deleteFailed'));
+    } finally {
+      setDeletingItem(null);
+    }
+  };
 
   const handleAnswerChange = (questionIndex, value) => {
     setQuizAnswers((prev) => ({
@@ -372,103 +437,27 @@ function ChapterView() {
                 </Paper>
               </Tabs.Panel>
 
-              <Tabs.Panel value="images" pt="xs">
-                <Paper shadow="xs" p="md" withBorder>
-                  {mediaLoading && images.length === 0 ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
-                      <Loader size="md" />
-                    </Box>
-                  ) : images.length === 0 ? (
-                    <Text color="dimmed" align="center">{t('noImages')}</Text>
-                  ) : (
-                    <SimpleGrid cols={isMobile ? 1 : 3} spacing="md">
-                      {images.map((image) => (
-                        <Card key={image.id} shadow="sm" padding="lg" radius="md" withBorder>
-                          <Card.Section>
-                            {image.loading ? (
-                              <Box style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <Loader size="sm" />
-                              </Box>
-                            ) : image.error ? (
-                              <Box style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8f9fa' }}>
-                                <Text color="red" align="center">{image.error}</Text>
-                              </Box>
-                            ) : (
-                              <Image
-                                src={image.objectUrl}
-                                height={160}
-                                alt={image.filename}
-                                fit="contain"
-                                style={{ backgroundColor: '#f8f9fa' }}
-                              />
-                            )}
-                          </Card.Section>
-                          <Text weight={500} mt="md" lineClamp={1} title={image.filename}>
-                            {image.filename}
-                          </Text>
-                        </Card>
-                      ))}
-                    </SimpleGrid>
-                  )}
-                </Paper>
-              </Tabs.Panel>
+                <Tabs.Panel value="images" pt="xs">
+                  <Paper shadow="xs" p="md" withBorder>
+                    <MediaGallery 
+                      images={images} 
+                      onDelete={handleDeleteImage} 
+                      deletingItem={deletingItem} 
+                      isMobile={isMobile} 
+                    />
+                  </Paper>
+                </Tabs.Panel>
 
-              <Tabs.Panel value="files" pt="xs">
-                <Paper shadow="xs" p="md" withBorder>
-                  {mediaLoading && files.length === 0 ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
-                      <Loader size="md" />
-                    </Box>
-                  ) : files.length === 0 ? (
-                    <Text color="dimmed" align="center">{t('noFiles')}</Text>
-                  ) : (
-                    <Box sx={{ 
-                      '& .mantine-List-itemWrapper': {
-                        width: '100% !important'
-                      }
-                    }}>
-                      <List spacing="md" size="md">
-                      {files.map((file) => (
-                        <List.Item key={file.id}>
-                          <Group spacing="sm">
-                            {file.loading ? (
-                              <Loader size="xs" />
-                            ) : file.error ? (
-                              <Text color="red" size="sm">{file.error}</Text>
-                            ) : (
-                              <>
-                                <a 
-                                  href={file.objectUrl} 
-                                  download={file.filename}
-                                  style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-                                >
-                                  <IconDownload size={16} />
-                                  {file.filename}
-                                </a>
-                                {file.content_type === 'application/pdf' && file.objectUrl && (
-                                  <Paper withBorder radius="md" mt="sm" style={{ width: '100%' }}>
-                                    <iframe 
-                                      src={`${file.objectUrl}#toolbar=0&view=FitH`} 
-                                      style={{ 
-                                        width: '85%', 
-                                        height: '1200px', 
-                                        border: 'none',
-                                        backgroundColor: '#f8f9fa'
-                                      }} 
-                                      title={file.filename} 
-                                    />
-                                  </Paper>
-                                )}
-                              </>
-                            )}
-                          </Group>
-                        </List.Item>
-                      ))}
-                    </List>
-                  </Box>
-                )}
-              </Paper>
-            </Tabs.Panel>
+                <Tabs.Panel value="files" pt="xs">
+                  <Paper shadow="xs" p="md" withBorder>
+                    <FileList 
+                      files={files} 
+                      onDelete={handleDeleteFile} 
+                      deletingItem={deletingItem} 
+                      mediaLoading={mediaLoading} 
+                    />
+                  </Paper>
+                </Tabs.Panel>
 
               <Tabs.Panel value="quiz" pt="xs">
                 <Paper shadow="xs" p="md" withBorder>

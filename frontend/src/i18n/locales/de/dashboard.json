@@ -20,6 +20,12 @@
   "viewAllButton": "Alle anzeigen",
   "viewLessButton": "Weniger anzeigen",
   
+  "emptyState": {
+    "title": "Noch keine Kurse",
+    "message": "Erstelle deinen ersten Kurs, um mit deiner Lernreise zu beginnen.",
+    "button": "Ersten Kurs erstellen"
+  },
+  
   "deleteModal": {
     "title": "Kurs löschen",
     "message": "Möchtest du diesen Kurs wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
