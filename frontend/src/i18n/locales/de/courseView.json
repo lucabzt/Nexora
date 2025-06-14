@@ -34,7 +34,8 @@
     "backToDashboard": "Zurück zum Dashboard",
     "startLearning": "Lernen beginnen",
     "continueLearning": "Weiterlernen",
-    "reviewChapter": "Kapitel wiederholen"
+    "reviewChapter": "Kapitel wiederholen",
+    "startChapter": "Kapitel starten"
   },
   "progress": {
     "percentageComplete": "{{percentage}}% abgeschlossen",

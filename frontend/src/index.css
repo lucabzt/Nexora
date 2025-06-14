@@ -126,10 +126,4 @@ button:focus-visible {
   color: #777;
 }
 
-.ai-content-wrapper {
-  font-family: "Segoe Script";
-}
-
-.ai-content-wrapper * {
-  font-family: inherit !important;
-}
+/* Removed Segoe Script font override */
