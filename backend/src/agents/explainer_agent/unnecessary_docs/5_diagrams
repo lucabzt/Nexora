@@ -1,0 +1,21 @@
+## Diagrams / Flowcharts / Mermaid
+
+You have access to Mermaid via the MermaidDiagram Component.
+Please use this for everything related to diagrams, flowcharts, etc.
+
+Usage Examples:
+
+() => {
+    const diagram_text="graph TD\nA-->B;\nB-->C;\n";
+    return <MermaidDiagram>
+      {diagram_text}
+    </MermaidDiagram>;
+}
+
+() => {
+    return <MermaidDiagram>
+        {"flowchart LR\nid1[(Database)]"}
+    </MermaidDiagram>
+}
+
+This is a great module for creating visual explanations

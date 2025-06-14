@@ -24,11 +24,11 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        working-directory: frontend/debug_frontend
+        working-directory: frontend
 
       - name: Build frontend
         run: npm run build
-        working-directory: frontend/debug_frontend
+        working-directory: frontend
 
 
       #- name: Clean remote target directory
@@ -46,6 +46,6 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "frontend/debug_frontend/dist/*"   # oder "build/*" – je nach Framework
+          source: "frontend/dist/*"   # oder "build/*" – je nach Framework
           target: ${{ secrets.REMOTE_PATH }}
-          strip_components: 3
+          strip_components: 2

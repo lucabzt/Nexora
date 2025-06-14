@@ -35,6 +35,7 @@ class Course(Base):
     language = Column(String(50), nullable=True)
     image_url = Column(String(2000), nullable=True)
     chapter_count = Column(Integer, nullable=True)
+    error_msg = Column(Text, nullable=True)
 
     # Relationships
     chapters = relationship("Chapter", back_populates="course", cascade="all, delete-orphan")
@@ -57,7 +58,8 @@ class Chapter(Base):
     time_minutes = Column(Integer, nullable=False)
     is_completed = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
+    image_url = Column(Text, nullable=True)
+
     # Relationships
     course = relationship("Course", back_populates="chapters")
     mc_questions = relationship("MultipleChoiceQuestion", back_populates="chapter", cascade="all, delete-orphan")

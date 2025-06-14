@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Request, Response
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from typing import List
@@ -152,17 +152,74 @@ async def get_course_documents(
 
 @router.get("/documents/{doc_id}")
 async def download_document(
+        request: Request,
         doc_id: int,
         current_user: User = Depends(get_current_active_user),
         db: Session = Depends(get_db)
 ):
-    """Download a specific document."""
+    """Download a specific document with range request support."""
     document = await verify_document_ownership(doc_id, current_user.id, db)
-
-    return StreamingResponse(
-        io.BytesIO(document.file_data),
-        media_type=document.content_type,
-        headers={"Content-Disposition": f"attachment; filename={document.filename}"}
+    file_data = document.file_data
+    file_size = len(file_data)
+    
+    # Determine content disposition based on file type
+    content_disposition = "inline" if document.content_type == "application/pdf" else f"attachment; filename={document.filename}"
+    
+    # Common headers
+    headers = {
+        "Content-Disposition": content_disposition,
+        "Content-Length": str(file_size),
+        "Accept-Ranges": "bytes",
+        "Content-Type": document.content_type,
+    }
+    
+    # Handle range requests
+    range_header = request.headers.get("Range")
+    if range_header:
+        try:
+            # Parse range header (e.g., "bytes=0-999")
+            range_type, range_spec = range_header.split('=')
+            if range_type.strip().lower() != 'bytes':
+                raise ValueError("Invalid range type")
+                
+            start_end = range_spec.split('-')
+            start = int(start_end[0]) if start_end[0] else 0
+            end = (int(start_end[1]) if len(start_end) > 1 and start_end[1] 
+                  else file_size - 1)
+            
+            start = max(0, start)
+            end = min(end, file_size - 1)
+            
+            if start >= file_size or end < start:
+                return Response(
+                    status_code=416,  # Range Not Satisfiable
+                    headers={"Content-Range": f"bytes */{file_size}"}
+                )
+            
+            content_length = end - start + 1
+            headers.update({
+                "Content-Range": f"bytes {start}-{end}/{file_size}",
+                "Content-Length": str(content_length)
+            })
+            
+            return Response(
+                content=file_data[start:end+1],
+                status_code=206,  # Partial Content
+                headers=headers,
+                media_type=document.content_type
+            )
+            
+        except (ValueError, IndexError):
+            return Response(
+                status_code=400,  # Bad Request
+                content="Invalid range header"
+            )
+    
+    # Full file response
+    return Response(
+        content=file_data,
+        headers=headers,
+        media_type=document.content_type
     )
 
 
@@ -262,17 +319,71 @@ async def get_course_images(
 
 @router.get("/images/{image_id}")
 async def download_image(
+        request: Request,
         image_id: int,
         current_user: User = Depends(get_current_active_user),
         db: Session = Depends(get_db)
 ):
-    """Download a specific image."""
+    """Download a specific image with range request support."""
     image = await verify_image_ownership(image_id, current_user.id, db)
-
-    return StreamingResponse(
-        io.BytesIO(image.image_data),
-        media_type=image.content_type,
-        headers={"Content-Disposition": f"inline; filename={image.filename}"}
+    image_data = image.image_data
+    file_size = len(image_data)
+    
+    # Common headers with cache control
+    headers = {
+        "Content-Disposition": f"inline; filename={image.filename}",
+        "Content-Length": str(file_size),
+        "Content-Type": image.content_type,
+        "Cache-Control": "public, max-age=31536000",  # Cache for 1 year
+        "Accept-Ranges": "bytes"
+    }
+    
+    # Handle range requests
+    range_header = request.headers.get("Range")
+    if range_header:
+        try:
+            range_type, range_spec = range_header.split('=')
+            if range_type.strip().lower() != 'bytes':
+                raise ValueError("Invalid range type")
+                
+            start_end = range_spec.split('-')
+            start = int(start_end[0]) if start_end[0] else 0
+            end = (int(start_end[1]) if len(start_end) > 1 and start_end[1] 
+                  else file_size - 1)
+            
+            start = max(0, start)
+            end = min(end, file_size - 1)
+            
+            if start >= file_size or end < start:
+                return Response(
+                    status_code=416,  # Range Not Satisfiable
+                    headers={"Content-Range": f"bytes */{file_size}"}
+                )
+            
+            content_length = end - start + 1
+            headers.update({
+                "Content-Range": f"bytes {start}-{end}/{file_size}",
+                "Content-Length": str(content_length)
+            })
+            
+            return Response(
+                content=image_data[start:end+1],
+                status_code=206,  # Partial Content
+                headers=headers,
+                media_type=image.content_type
+            )
+            
+        except (ValueError, IndexError):
+            return Response(
+                status_code=400,  # Bad Request
+                content="Invalid range header"
+            )
+    
+    # Full file response
+    return Response(
+        content=image_data,
+        headers=headers,
+        media_type=image.content_type
     )
 
 

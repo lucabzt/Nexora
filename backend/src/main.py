@@ -1,5 +1,7 @@
 import secrets
 from typing import Optional  # Added for generating random passwords/suffixes
+from logging import getLogger
+import logging
 
 from fastapi import FastAPI  # Ensure Request is imported
 from fastapi import Depends
@@ -15,16 +17,16 @@ from .db.database import engine
 from .db.models import db_user as user_model
 from .utils import auth
 
+from .core.routines import update_stuck_courses
+from .config.settings import SESSION_SECRET_KEY  # Ensure this is imported from your settings
+
+
 # Create database tables
 user_model.Base.metadata.create_all(bind=engine)
 
 # Create the main app instance
 app = FastAPI(title="User Management API", root_path="/api")
 
-# Add SessionMiddleware - THIS MUST BE ADDED
-# Generate a random secret key for session middleware (ensure this is consistent if you have multiple instances or restart often, consider moving to settings)
-# For production, you'd want to set this from an environment variable or a config file.
-SESSION_SECRET_KEY = secrets.token_hex(32)
 app.add_middleware(
     SessionMiddleware,
     secret_key=SESSION_SECRET_KEY
@@ -58,6 +60,27 @@ app.include_router(statistics.router)
 app.include_router(auth_router.api_router)
 app.include_router(notes.router)
 app.include_router(notifications.router)
+
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from contextlib import asynccontextmanager
+scheduler = AsyncIOScheduler()
+
+import logging
+
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    scheduler.add_job(update_stuck_courses, 'interval', hours=1)
+    scheduler.start()
+    logging.info("Scheduler started.")
+    yield
+    # Shutdown
+    scheduler.shutdown()
+    logging.info("Scheduler stopped.")
+
+app.router.lifespan_context = lifespan
 
 # The root path "/" is now outside the /api prefix
 @app.get("/")

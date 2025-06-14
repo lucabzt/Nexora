@@ -9,10 +9,12 @@
     "globals": "^15.2.0"
   },
   "dependencies": {
+    "@xyflow/react": "^12.7.0",
+    "motion": "^12.18.1",
     "plotly.js": "^3.0.1",
-    "react-plotly.js": "^2.6.0",
     "react-code-blocks": "^0.1.6",
     "react-latex-next": "^3.0.0",
+    "react-plotly.js": "^2.6.0",
     "recharts": "^2.15.3"
   }
 }

@@ -1,0 +1,135 @@
+{
+  "title": "Neuen Lernkurs erstellen",
+  "mainTitle": "Neuen Lernkurs erstellen",
+  "form": {
+    "duration": {
+      "label": "Kursdauer",
+      "description": "Geschätzte Dauer des Kurses in Stunden",
+      "value": "{{count}} Stunde",
+      "value_plural": "{{count}} Stunden"
+    },
+    "review": {
+      "title": "Überprüfung Ihrer Kurseingaben",
+      "topic": "Thema:",
+      "duration": "Geschätzte Dauer:",
+      "documents": "Hochgeladene Dokumente:",
+      "images": "Hochgeladene Bilder:",
+      "none": "Keine",
+      "confirmation": "Bitte überprüfen Sie Ihre Eingaben sorgfältig, bevor Sie den Kurs erstellen. Nach dem Start kann der Prozess nicht mehr unterbrochen werden.",
+      "notSet": "Nicht festgelegt"
+    },
+    "validation": {
+      "topicRequired": "Thema ist erforderlich",
+      "timePositive": "Zeit muss größer als 0 sein"
+    },
+    "topic": {
+      "label": "Über welches Thema möchten Sie lernen?",
+      "placeholder": "z.B. Einführung in die Quantenphysik",
+      "description": "Seien Sie spezifisch für bessere Ergebnisse. Sie können Unterthemen oder gewünschte Schwerpunkte angeben.",
+      "descriptionLabel": "Zusätzliche Details (Optional)",
+      "descriptionPlaceholder": "Gibt es spezielle Aspekte oder Schwerpunkte?"
+    },
+    "time": {
+      "label": "Geschätzte Lernzeit (Stunden)",
+      "placeholder": "z.B. 2",
+      "description": "Wie lange soll der Kurs dauern? (z.B. 2 für einen kurzen Überblick, 10 für mehr Tiefe)"
+    },
+    "documents": {
+      "label": "Dokumente hochladen (Optional)",
+      "placeholder": "PDF, DOC, TXT, etc. hochladen",
+      "uploadedTitle": "Hochgeladene Dokumente:",
+      "fileEntry": "{{fileName}} ({{sizeKB}} KB)"
+    },
+    "images": {
+      "label": "Bilder hochladen (Optional)",
+      "placeholder": "JPG, PNG, etc. hochladen",
+      "uploadedTitle": "Hochgeladene Bilder:",
+      "fileEntry": "{{fileName}} ({{sizeKB}} KB)"
+    },
+    "uploads": {
+      "personalizedExperience": "Ihre hochgeladenen Dateien werden verwendet, um ein persönlicheres Lernerlebnis zu generieren.",
+      "description": "Hier können Sie relevante Dokumente (PDF, DOCX, TXT) oder Bilder (JPG, PNG) hochladen, die zur Kurserstellung verwendet werden sollen."
+    },
+    "error": {
+      "alertTitle": "Formularfehler!"
+    }
+  },
+  "toast": {
+    "documentUploadSuccess": "Dokument \"{{fileName}}\" erfolgreich hochgeladen",
+    "documentUploadError": "Fehler beim Hochladen des Dokuments: {{error}}",
+    "imageUploadSuccess": "Bild \"{{fileName}}\" erfolgreich hochgeladen",
+    "imageUploadError": "Fehler beim Hochladen des Bildes: {{error}}",
+    "courseCreationStartedRedirect": "Kurserstellung für '{{title}}' gestartet. Du wirst weitergeleitet...",
+    "websocketGenericError": "WebSocket-Verbindungsfehler. Bitte versuche es später erneut.",
+    "courseCreationComplete": "Kurs (ID: {{courseId}}) erfolgreich erstellt!"
+  },
+  "errors": {
+    "unknown": "Unbekannter Fehler"
+  },
+  "streaming": {
+    "title": "Dein Kurs wird erstellt",
+    "description": "Dies kann einige Minuten dauern. Unsere KI erstellt personalisierte Inhalte für Ihren Kurs.",
+    "courseInfo": {
+      "time": "Zeitinvestition:",
+      "hours": "{{count}} Stunde",
+      "hours_plural": "{{count}} Stunden",
+      "courseTitleLabel": "Kurstitel",
+      "courseDescriptionLabel": "Beschreibung"
+    },
+    "chapters": {
+      "title": "Erstellte Kapitel:",
+      "expected": "Erwartet:",
+      "estimatedTime": "Geschätzte Zeit",
+      "minutesSuffix": "Min.",
+      "questionsCount": "Anzahl Fragen"
+    },
+    "button": {
+      "goToCourse": "Zum Kurs gehen"
+    },
+    "error": {
+      "generic": "Während der Kurserstellung ist ein Fehler aufgetreten",
+      "title": "Streaming-Fehler!"
+    },
+    "status": {
+      "errorOccurred": "Fehler bei der Kurserstellung",
+      "initializing": "Kurserstellung wird initialisiert...",
+      "courseInfoReceived": "Kursinformationen erhalten: {{title}}",
+      "generatingChapter": "Generiere Kapitel {{num}} von {{total}}: {{title}}",
+      "complete": "Kurserstellung abgeschlossen!"
+    },
+    "completion": {
+      "title": "Kurs erfolgreich erstellt!",
+      "message": "Dein Kurs mit der ID {{courseId}} ist nun verfügbar."
+    }
+  },
+  "stepper": {
+    "details": {
+      "label": "Kursdetails",
+      "description": "Definieren Sie Ihr Thema und Ihren Umfang"
+    },
+    "time": {
+      "label": "Zeit",
+      "description": "Wie viel Zeit haben Sie?"
+    },
+    "uploads": {
+      "label": "Inhalt hochladen (Optional)",
+      "description": "Stellen Sie Dokumente oder Bilder bereit"
+    },
+    "review": {
+      "label": "Überprüfung",
+      "description": "Bestätigen Sie Ihre Eingaben"
+    }
+  },
+  "alert": {
+    "uploading": {
+      "title": "Datei wird hochgeladen",
+      "message": "Bitte warten Sie, während Ihre Datei hochgeladen wird..."
+    }
+  },
+  "buttons": {
+    "back": "Zurück",
+    "nextStep": "Nächster Schritt",
+    "createCourse": "Kurs erstellen",
+    "creating": "Erstelle..."
+  }
+}

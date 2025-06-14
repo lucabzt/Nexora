@@ -7,6 +7,9 @@ import secrets
 from typing import Optional
 import uuid
 from logging import Logger
+import traceback
+
+
 
 import requests
 from fastapi import HTTPException, Request, Response, status
@@ -184,9 +187,11 @@ async def handle_oauth_callback(request: Request, db: Session, website: str = "g
         )
 
     # Authorize access token from 
+
     try:
         token = await oauth_client.authorize_access_token(request)
     except Exception as error:
+        logger.error("OAuth callback error for %s: %s", website, traceback.format_exc())
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Could not validate credentials") from error
 

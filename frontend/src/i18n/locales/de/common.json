@@ -1,0 +1,22 @@
+{
+  "loading": "Lädt...",
+  "error": "Fehler",
+  "save": "Speichern",
+  "cancel": "Abbrechen",
+  "delete": "Löschen",
+  "edit": "Bearbeiten",
+  "create": "Erstellen",
+  "submit": "Absenden",
+  "confirmDelete": {
+    "title": "Löschen bestätigen",
+    "message": "Sind Sie sicher, dass Sie dieses Element löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "confirm": "Löschen",
+    "cancel": "Abbrechen"
+  },
+  "file": {
+    "deleteConfirm": "Sind Sie sicher, dass Sie die Datei '{{filename}}' löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+  },
+  "image": {
+    "deleteConfirm": "Sind Sie sicher, dass Sie dieses Bild löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+  }
+}
