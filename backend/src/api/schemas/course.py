@@ -20,6 +20,11 @@ class MultipleChoiceQuestion(BaseModel):
     correct_answer: str
     explanation: str
 
+class OpenTextQuestion(BaseModel):
+    """Schema for an open-text question."""
+    question: str
+    correct_answer: str
+
 
 class Chapter(BaseModel):
     """Schema for a chapter in the course."""
