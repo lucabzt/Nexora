@@ -25,11 +25,19 @@ export const courseService = {
   getFiles: async (courseId) =>
   (await apiWithCookies.get(`/files/documents?course_id=${courseId}`)).data,
 
-  downloadFile: async (fileId) =>
-    (await apiWithCookies.get(`/files/documents/${fileId}`)).data,
+  downloadFile: async (fileId) => {
+    const response = await apiWithCookies.get(`/files/documents/${fileId}`, {
+      responseType: 'blob',
+    });
+    return response.data;
+  },
 
-  downloadImage: async (imageId) =>
-    (await apiWithCookies.get(`/files/images/${imageId}`)).data,
+  downloadImage: async (imageId) => {
+    const response = await apiWithCookies.get(`/files/images/${imageId}`, {
+      responseType: 'blob',
+    });
+    return response.data;
+  },
 
   getImages: async (courseId) =>
     (await apiWithCookies.get(`/files/images?course_id=${courseId}`)).data,
