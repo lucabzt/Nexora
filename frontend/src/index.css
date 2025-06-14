@@ -125,3 +125,11 @@ button:focus-visible {
   margin-left: 0;
   color: #777;
 }
+
+.ai-content-wrapper {
+  font-family: "Segoe Script";
+}
+
+.ai-content-wrapper * {
+  font-family: inherit !important;
+}

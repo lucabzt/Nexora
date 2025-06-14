@@ -11,14 +11,22 @@ import SyntaxHighlighter from 'react-syntax-highlighter';
 import { dark } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 const LazyPlot = lazy(() => import('react-plotly.js'));
 import * as Recharts from 'recharts';
-import {MermaidDiagram} from "@lightenna/react-mermaid-diagram";
 import * as RF from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { motion } from "motion/react"
+import CustomReactFlow from "./ai_helper_components/CustomReactFlow.jsx";
+import TestComponent from "./ai_helper_components/playground2.jsx";
 
+
+// Create a modified RF object with custom ReactFlow defaults
+const ModifiedRF = {
+  ...RF,
+  ReactFlow: CustomReactFlow
+};
 
 // Main function that shows the content
 function AiCodeWrapper({ children }) {
-  const plugins = "Latex, Recharts, Plot, SyntaxHighlighter, dark, MermaidDiagram, RF";
+  const plugins = "Latex, Recharts, Plot, SyntaxHighlighter, dark, RF, motion";
   const header = `(props) => 
   { const {${plugins}} = props;`;
 
@@ -37,8 +45,8 @@ function AiCodeWrapper({ children }) {
             Plot: LazyPlot,
             SyntaxHighlighter,
             dark,
-            MermaidDiagram,
-            RF
+            RF: ModifiedRF,
+            motion
           }}
         />
       </Suspense>
@@ -89,9 +97,11 @@ const SafeComponent = ({ code, data }) => {
         // Optional: any cleanup logic when retrying
       }}
     >
-      <LazyStringToReactComponent data={data}>
-        {code}
-      </LazyStringToReactComponent>
+      <div className="ai-content-wrapper">
+        <LazyStringToReactComponent data={data} >
+          {code}
+        </LazyStringToReactComponent>
+      </div>
     </ErrorBoundary>
   );
 };

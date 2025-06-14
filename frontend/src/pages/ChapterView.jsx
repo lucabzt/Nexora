@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { 
-  Container, 
-  Title, 
-  Text, 
-  Card, 
+import {
+  Container,
+  Title,
+  Text,
+  Card,
   Group,
   Button,
   Tabs,
@@ -20,12 +20,13 @@ import {
   Image
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
-import { IconAlertCircle, IconBookmark, IconQuestionMark, IconPhoto, IconFileText } from '@tabler/icons-react';
+import { IconAlertCircle, IconBookmark, IconQuestionMark, IconPhoto, IconFileText, IconDownload } from '@tabler/icons-react';
 import { toast } from 'react-toastify';
 import { courseService } from '../api/courseService';
 import ToolbarContainer from '../components/tools/ToolbarContainer';
 import { useToolbar } from '../contexts/ToolbarContext';
 import AiCodeWrapper from "../components/AiCodeWrapper.jsx";
+import { downloadChapterContentAsPDF, prepareElementForPDF } from '../utils/pdfDownload';
 
 function ChapterView() {
   const { t } = useTranslation('chapterView');
@@ -43,6 +44,10 @@ function ChapterView() {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState(0);
   const [markingComplete, setMarkingComplete] = useState(false);
+  const [downloadingPDF, setDownloadingPDF] = useState(false);
+
+  // Ref for the content area that we want to download as PDF
+  const contentRef = useRef(null);
 
   useEffect(() => {
     console.log("Toolbar state changed:", { open: toolbarOpen, width: toolbarWidth });
@@ -63,7 +68,7 @@ function ChapterView() {
         setChapter(chapterData);
         setImages(imagesData);
         setFiles(filesData);
-        
+
         // Initialize quiz answers
         if (chapterData.mc_questions) {
           const initialAnswers = {};
@@ -72,7 +77,7 @@ function ChapterView() {
           });
           setQuizAnswers(initialAnswers);
         }
-        
+
         setError(null);
       } catch (error) {
         setError(t('errors.loadFailed'));
@@ -94,18 +99,18 @@ function ChapterView() {
 
   const handleSubmitQuiz = () => {
     if (!chapter?.mc_questions) return;
-    
+
     let correct = 0;
     chapter.mc_questions.forEach((question, index) => {
       if (quizAnswers[index] === question.correct_answer) {
         correct++;
       }
     });
-    
+
     const scorePercentage = Math.round((correct / chapter.mc_questions.length) * 100);
     setQuizScore(scorePercentage);
     setQuizSubmitted(true);
-    
+
     if (scorePercentage >= 70) {
       toast.success(t('toast.quizGreatJob', { scorePercentage }));
     } else {
@@ -125,15 +130,45 @@ function ChapterView() {
       console.error('Error marking chapter complete:', error);
     } finally {
       setMarkingComplete(false);
-    }  
+    }
   };
 
-  const sidebarWidth = isMobile 
+  const handleDownloadPDF = async () => {
+    if (!contentRef.current || !chapter) {
+      toast.error('Content not available for download');
+      return;
+    }
+
+    try {
+      setDownloadingPDF(true);
+
+      // Prepare element for PDF generation (temporarily adjust styles)
+      const cleanup = prepareElementForPDF(contentRef.current);
+
+      // Give the browser a moment to apply the style changes
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Download the PDF
+      await downloadChapterContentAsPDF(contentRef.current, chapter.caption || 'Chapter');
+
+      // Cleanup styles
+      cleanup();
+
+      toast.success('Chapter content downloaded as PDF');
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      toast.error('Failed to download PDF. Please try again.');
+    } finally {
+      setDownloadingPDF(false);
+    }
+  };
+
+  const sidebarWidth = isMobile
     ? (toolbarOpen ? window.innerWidth : 0) // Full screen on mobile when open, hidden when closed
     : (toolbarOpen ? toolbarWidth : 40); // Desktop shows normal width when open, 40px when closed
 
   return (
-    <div style={{ 
+    <div style={{
       display: 'flex',
       position: 'relative',
       width: '100%',
@@ -142,7 +177,7 @@ function ChapterView() {
       overflow: 'hidden' // Prevent page-level scrolling issues
     }}>
       {/* Main content with dynamic positioning - centered in available space */}
-      <Container size="lg" py="xl" style={{ 
+      <Container size="lg" py="xl" style={{
         flexGrow: 1,
         maxWidth: `calc(100% - ${sidebarWidth}px)`, // Limit max width to available space
         width: `calc(100% - ${sidebarWidth}px)`, // Use calculated width
@@ -161,10 +196,10 @@ function ChapterView() {
         )}
 
         {error && !loading && (
-          <Alert 
+          <Alert
             icon={<IconAlertCircle size={16} />}
-            title={t('errors.genericTitle')} 
-            color="red" 
+            title={t('errors.genericTitle')}
+            color="red"
             mb="lg"
           >
             {error}
@@ -178,14 +213,26 @@ function ChapterView() {
                 <Title order={1}>{chapter.caption}</Title>
                 <Text color="dimmed">{t('estimatedTime', { minutes: chapter.time_minutes })}</Text>
               </div>
-              <Button 
-                color="green" 
-                onClick={markChapterComplete} 
-                loading={markingComplete}
-                disabled={markingComplete}
-              >
-                {t('buttons.markComplete')}
-              </Button>
+              <Group spacing="sm">
+                <Button
+                  variant="outline"
+                  color="blue"
+                  leftIcon={<IconDownload size={16} />}
+                  onClick={handleDownloadPDF}
+                  loading={downloadingPDF}
+                  disabled={downloadingPDF || activeTab !== 'content'}
+                >
+                  Download PDF
+                </Button>
+                <Button
+                  color="green"
+                  onClick={markChapterComplete}
+                  loading={markingComplete}
+                  disabled={markingComplete}
+                >
+                  {t('buttons.markComplete')}
+                </Button>
+              </Group>
             </Group>
 
             <Tabs value={activeTab} onTabChange={setActiveTab} mb="xl">
@@ -205,7 +252,7 @@ function ChapterView() {
               </Tabs.List>
 
               <Tabs.Panel value="content" pt="xs">
-                <Paper shadow="xs" p="md" withBorder>
+                <Paper shadow="xs" p="md" withBorder ref={contentRef}>
                   <div className="markdown-content">
                     <AiCodeWrapper>{chapter.content}</AiCodeWrapper>
                   </div>
@@ -251,9 +298,9 @@ function ChapterView() {
               <Tabs.Panel value="quiz" pt="xs">
                 <Paper shadow="xs" p="md" withBorder>
                   {quizSubmitted && (
-                    <Alert 
+                    <Alert
                       color={quizScore >= 70 ? "green" : "yellow"}
-                      title={quizScore >= 70 ? t('quiz.alert.greatJobTitle') : t('quiz.alert.keepPracticingTitle')} 
+                      title={quizScore >= 70 ? t('quiz.alert.greatJobTitle') : t('quiz.alert.keepPracticingTitle')}
                       mb="lg"
                     >
                       <Group>
@@ -264,11 +311,11 @@ function ChapterView() {
                       </Group>
                     </Alert>
                   )}
-                  
+
                   {chapter.mc_questions?.map((question, qIndex) => (
                     <Card key={qIndex} mb="md" withBorder>
                       <Text weight={500} mb="md">{qIndex + 1}. {question.question}</Text>
-                      
+
                       <Radio.Group
                         value={quizAnswers[qIndex]}
                         onChange={(value) => handleAnswerChange(qIndex, value)}
@@ -281,9 +328,9 @@ function ChapterView() {
                         <Radio value="c" label={question.answer_c} mb="xs" />
                         <Radio value="d" label={question.answer_d} mb="xs" />
                       </Radio.Group>
-                      
+
                       {quizSubmitted && (
-                        <Alert 
+                        <Alert
                           color={quizAnswers[qIndex] === question.correct_answer ? "green" : "red"}
                           title={quizAnswers[qIndex] === question.correct_answer ? t('quiz.alert.correctTitle') : t('quiz.alert.incorrectTitle')}
                         >
@@ -299,14 +346,14 @@ function ChapterView() {
                       )}
                     </Card>
                   ))}
-                  
+
                   {!quizSubmitted && (
-                    <Button 
+                    <Button
                       onClick={handleSubmitQuiz}
-                      fullWidth 
+                      fullWidth
                       mt="md"
                       disabled={
-                        !chapter.mc_questions || 
+                        !chapter.mc_questions ||
                         Object.values(quizAnswers).some(a => a === '')
                       }
                     >
@@ -315,52 +362,38 @@ function ChapterView() {
                   )}
                 </Paper>
               </Tabs.Panel>
-
-              <Tabs.Panel value="images" pt="xs">
-                <Paper shadow="xs" p="md" withBorder>
-                  <Group>
-                    {images.map(image => (
-                      <Card key={image.id} shadow="sm" p="lg" radius="md" withBorder>
-                        <Card.Section>
-                          <img src={image.url} alt={image.filename} height={160} />
-                        </Card.Section>
-                        <Text weight={500} size="sm" mt="md">
-                          {image.filename}
-                        </Text>
-                      </Card>
-                    ))}
-                  </Group>
-                </Paper>
-              </Tabs.Panel>
-
-              <Tabs.Panel value="files" pt="xs">
-                <Paper shadow="xs" p="md" withBorder>
-                  <List spacing="xs" size="sm" center>
-                    {files.map(file => (
-                      <List.Item key={file.id}>
-                        <a href={file.url} target="_blank" rel="noopener noreferrer">{file.filename}</a>
-                        {file.filename.endsWith('.pdf') && (
-                           <iframe src={file.url} width="100%" height="500px" style={{ border: 'none', marginTop: '10px' }}>
-                             <p>Your browser does not support PDFs. Please download the PDF to view it: <a href={file.url}>Download PDF</a>.</p>
-                           </iframe>
-                        )}
-                      </List.Item>
-                    ))}
-                  </List>
-                </Paper>
-              </Tabs.Panel>
             </Tabs>
 
             <Group position="apart">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => navigate(`/dashboard/courses/${courseId}`)}
               >
                 {t('buttons.backToCourse')}
               </Button>
-              {chapter.is_completed && (
-                <Badge color="green" size="lg">{t('badge.completed')}</Badge>
-              )}
+              <Group spacing="sm">
+                <Button
+                  variant="outline"
+                  color="blue"
+                  leftIcon={<IconDownload size={16} />}
+                  onClick={handleDownloadPDF}
+                  loading={downloadingPDF}
+                  disabled={downloadingPDF || activeTab !== 'content'}
+                >
+                  Download PDF
+                </Button>
+                <Button
+                  color="green"
+                  onClick={markChapterComplete}
+                  loading={markingComplete}
+                  disabled={markingComplete}
+                >
+                  {t('buttons.markComplete')}
+                </Button>
+                {chapter.is_completed && (
+                  <Badge color="green" size="lg">{t('badge.completed')}</Badge>
+                )}
+              </Group>
             </Group>
           </>
         )}      
