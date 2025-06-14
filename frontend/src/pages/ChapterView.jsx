@@ -219,8 +219,6 @@ function ChapterView() {
   }, []); // Empty dependency array means this only runs on unmount
 
   const handleDeleteImage = async (imageId) => {
-    if (!window.confirm(t('confirmDeleteImage'))) return;
-    
     try {
       setDeletingItem(`image-${imageId}`);
       await courseService.deleteImage(imageId);
@@ -244,8 +242,6 @@ function ChapterView() {
   };
 
   const handleDeleteFile = async (fileId) => {
-    if (!window.confirm(t('confirmDeleteFile'))) return;
-    
     try {
       setDeletingItem(`file-${fileId}`);
       await courseService.deleteDocument(fileId);

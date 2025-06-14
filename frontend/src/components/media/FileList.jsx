@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { List, Group, Text, Button, Paper, Box } from '@mantine/core';
 import { IconDownload, IconTrash } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { Loader } from '@mantine/core';
-
+import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
 
 export function FileList({ 
   files, 
@@ -11,7 +11,27 @@ export function FileList({
   deletingItem, 
   mediaLoading 
 }) {
-  const { t } = useTranslation('chapterView');
+  const { t } = useTranslation(['chapterView', 'common']);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const handleDeleteClick = (file) => {
+    setItemToDelete(file);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (itemToDelete) {
+      onDelete(itemToDelete.id);
+    }
+    setIsDeleteModalOpen(false);
+    setItemToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setIsDeleteModalOpen(false);
+    setItemToDelete(null);
+  };
 
   if (mediaLoading && files.length === 0) {
     return (
@@ -26,11 +46,22 @@ export function FileList({
   }
 
   return (
-    <Box sx={{ 
-      '& .mantine-List-itemWrapper': {
-        width: '100% !important'
-      }
-    }}>
+    <>
+      <ConfirmDeleteModal
+        opened={isDeleteModalOpen}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        title={t('common:confirmDelete.title')}
+        message={itemToDelete ? t('common:file.deleteConfirm', { filename: itemToDelete.filename }) : ''}
+        confirmLabel={t('common:confirmDelete.confirm')}
+        cancelLabel={t('common:confirmDelete.cancel')}
+        loading={!!deletingItem}
+      />
+      <Box sx={{ 
+        '& .mantine-List-itemWrapper': {
+          width: '100% !important'
+        }
+      }}>
       <List spacing="md" size="md">
         {files.map((file) => (
           <List.Item key={file.id}>
@@ -55,7 +86,10 @@ export function FileList({
                       variant="subtle"
                       color="red"
                       size="xs"
-                      onClick={() => onDelete(file.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteClick(file);
+                      }}
                       loading={deletingItem === `file-${file.id}`}
                       disabled={!!deletingItem}
                     >
@@ -94,6 +128,7 @@ export function FileList({
         ))}
       </List>
     </Box>
+    </>
   );
 }
 

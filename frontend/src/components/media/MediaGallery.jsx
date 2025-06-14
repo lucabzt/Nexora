@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SimpleGrid, Card, Image, Text, Group, Button, Box } from '@mantine/core';
 import { IconTrash } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { Loader } from '@mantine/core';
+import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
 
 export function MediaGallery({ 
   images, 
@@ -10,7 +11,27 @@ export function MediaGallery({
   deletingItem, 
   isMobile 
 }) {
-  const { t } = useTranslation('chapterView');
+  const { t } = useTranslation(['chapterView', 'common']);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const handleDeleteClick = (image) => {
+    setItemToDelete(image);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (itemToDelete) {
+      onDelete(itemToDelete.id);
+    }
+    setIsDeleteModalOpen(false);
+    setItemToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setIsDeleteModalOpen(false);
+    setItemToDelete(null);
+  };
 
   if (images.length === 0) {
     return (
@@ -21,7 +42,18 @@ export function MediaGallery({
   }
 
   return (
-    <SimpleGrid cols={isMobile ? 1 : 3} spacing="md">
+    <>
+      <ConfirmDeleteModal
+        opened={isDeleteModalOpen}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        title={t('common:confirmDelete.title')}
+        message={t('common:image.deleteConfirm')}
+        confirmLabel={t('common:confirmDelete.confirm')}
+        cancelLabel={t('common:confirmDelete.cancel')}
+        loading={!!deletingItem}
+      />
+      <SimpleGrid cols={isMobile ? 1 : 3} spacing="md">
       {images.map((image) => (
         <Card key={image.id} shadow="sm" padding="lg" radius="md" withBorder>
           <Card.Section>
@@ -57,7 +89,10 @@ export function MediaGallery({
               variant="subtle"
               color="red"
               size="xs"
-              onClick={() => onDelete(image.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteClick(image);
+              }}
               loading={deletingItem === `image-${image.id}`}
               disabled={!!deletingItem}
             >
@@ -67,6 +102,7 @@ export function MediaGallery({
         </Card>
       ))}
     </SimpleGrid>
+    </>
   );
 }
 

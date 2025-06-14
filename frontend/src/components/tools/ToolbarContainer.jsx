@@ -19,7 +19,8 @@ function ToolbarContainer({ courseId, chapterId }) {
   const { t } = useTranslation('toolbarContainer');  
   const theme = useMantineTheme();  
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const { toolbarOpen, setToolbarOpen, toolbarWidth, setToolbarWidth } = useToolbar();  const [activeTab, setActiveTab] = useState(TOOL_TABS.PLOTTER); // Use constant for tab value
+  const { toolbarOpen, setToolbarOpen, toolbarWidth, setToolbarWidth } = useToolbar();
+  const [activeTab, setActiveTab] = useState(TOOL_TABS.CHAT); // Use constant for tab value
 
   useEffect(() => {
     // Handle toolbar width based on screen size and state
@@ -206,16 +207,8 @@ function ToolbarContainer({ courseId, chapterId }) {
               zIndex: 11
             }}
           >
-            <Tabs.List>                <Tabs.Tab 
-                value={TOOL_TABS.PLOTTER}
-                icon={<IconChartLine size={20} />} aria-label={t('tabs.plotter')}
-                sx={{
-                  borderRadius: '0 4px 4px 0',
-                  marginTop: '15px',
-                  marginBottom: '15px'
-                }}
-              />
-              <Tabs.Tab 
+            <Tabs.List>             
+            <Tabs.Tab 
                 value={TOOL_TABS.CHAT}
                 icon={<IconMessage size={20} />} aria-label={t('tabs.chat')}
                 sx={{
@@ -224,6 +217,17 @@ function ToolbarContainer({ courseId, chapterId }) {
 
                 }}
               />
+
+              <Tabs.Tab 
+                value={TOOL_TABS.PLOTTER}
+                icon={<IconChartLine size={20} />} aria-label={t('tabs.plotter')}
+                sx={{
+                  borderRadius: '0 4px 4px 0',
+                  marginTop: '15px',
+                  marginBottom: '15px'
+                }}
+              />
+
               <Tabs.Tab 
                 value={TOOL_TABS.NOTES}
                 icon={<IconNote size={20} />} aria-label={t('tabs.notes')}
