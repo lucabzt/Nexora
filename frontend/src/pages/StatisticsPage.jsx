@@ -66,6 +66,23 @@ function StatisticsPage() {
   const theme = useMantineTheme();
   const isDark = theme.colorScheme === 'dark';
 
+  // Fetch statistics when component mounts
+  useEffect(() => {
+    console.log("Fetching statistics...");
+    
+    statisticsService.getStatistics()
+      .then(data => {
+        setStats(data);
+      })
+      .catch(error => {
+        console.error("Failed to fetch statistics:", error);
+        // Optionally set an error state here to show a message to the user
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
   // Set chart colors based on theme
 
   // Early return if data is loading
@@ -77,38 +94,26 @@ function StatisticsPage() {
     );
   }
 
-  // Early return if stats data is not available after loading (e.g., API error not caught, or empty response)
-  if (!stats) {
-    return (
-      <Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <Text color="red">{t('error.noStatsData') || 'Statistics data could not be loaded.'}</Text>
-      </Container>
-    );
-  }
-
-  // Check specifically for userEngagement before destructuring if it's a nested object that might be missing
-  // This check was originally identified as needed around line 203 of the problematic snippet.
-  // Now, we ensure `stats` itself is loaded first.
-  if (!stats.userEngagement) {
-     console.warn("StatisticsPage: stats.userEngagement is missing after stats loaded.");
-     return (
-        <Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-          <Text color="orange">{t('error.noUserEngagementData') || 'User engagement data is missing.'}</Text>
-        </Container>
-      );
-  }
-
   const chartColors = {
     gridColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
     textColor: isDark ? '#C1C2C5' : '#333333',
   };
 
-  useEffect(() => {
-    statisticsService.getStatistics().then((data) => {
-      setStats(data);
-      setLoading(false);
-    });
-  }, []);
+  if (loading) {
+    return (
+      <Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Loader size="xl" />
+      </Container>
+    );
+  }
+
+  if (!stats || !stats.userEngagement) {
+    return (
+      <Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Text color="orange">{t('error.noUserEngagementData', 'User engagement data is not available.')}</Text>
+      </Container>
+    );
+  }
 
   // For all charts
   const chartOptions = {

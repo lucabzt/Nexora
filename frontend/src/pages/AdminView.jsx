@@ -74,14 +74,23 @@ function AdminView() {
     admins: 0
   });
 
-  // Fetch users on initial render
+  // Fetch users on initial render and update filtered users when search term or active tab changes
   useEffect(() => {
-    fetchUsers();
+    const loadUsers = async () => {
+      await fetchUsers();
+      // Filter users after they are loaded
+      filterUsers();
+    };
+    
+    loadUsers();
   }, []);
 
-  // Update filtered users when search term or active tab changes
+  // Update filtered users when search term, users, or active tab changes
   useEffect(() => {
-    filterUsers();
+    // Only filter if users are already loaded
+    if (users.length > 0) {
+      filterUsers();
+    }
   }, [searchTerm, users, activeTab]);
 
   // Calculate user stats when users change
