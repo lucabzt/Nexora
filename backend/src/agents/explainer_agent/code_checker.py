@@ -16,9 +16,9 @@ import Latex from 'react-latex-next';
 import Plot from 'react-plotly.js';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { dark } from 'react-syntax-highlighter/dist/esm/styles/hljs'
-import {MermaidDiagram} from "@lightenna/react-mermaid-diagram";
 import * as RF from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { motion } from "motion/react"
 """
 
 def find_react_code_in_response(text: str) -> str:

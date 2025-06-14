@@ -24,16 +24,17 @@ class ExplainerAgent(StandardAgent):
         full_instructions = load_instructions_from_files(sorted(files))
 
         dynamic_instructions = """
-        - - -
-        ## Current course creation state
-        Initial Interaction:
-        Nexora: "What do you want to learn today?"
-        User: "{query}"
-        
-        All chapters, created by the Planner Agent:
-        {chapters_str}
-        
-        Please only include content about the chapter that is assigned to you in the following query.
+END OF INSTRUCTIONS
+- - - - - -
+## Current course creation state
+Initial Interaction:
+Nexora: "What do you want to learn today?"
+User: "{query}"
+
+All chapters, created by the Planner Agent:
+{chapters_str}
+
+Please only include content about the chapter that is assigned to you in the following query.
         """
 
         # LiteLlm("openai/gpt-4.1-2025-04-14")
@@ -46,7 +47,7 @@ class ExplainerAgent(StandardAgent):
             )"""
         explainer_agent = LlmAgent(
             name="explainer_agent",
-            model="gemini-2.5-flash-preview-05-20",
+            model="gemini-2.5-pro-preview-05-06",
             description="Agent for creating engaging visual explanations using react",
             global_instruction=lambda _: full_instructions,
             instruction=dynamic_instructions,

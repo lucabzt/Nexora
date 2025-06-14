@@ -23,7 +23,6 @@ function CustomReactFlow (props) {
       {...props}
       zoomOnScroll={false}
       panOnScroll={false}
-      panOnDrag={false}
       onWheel={(event) => {
         // Prevent ReactFlow from handling the wheel event
         event.preventDefault();
