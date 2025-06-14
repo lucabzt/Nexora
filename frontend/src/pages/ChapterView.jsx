@@ -26,6 +26,7 @@ import { courseService } from '../api/courseService';
 import ToolbarContainer from '../components/tools/ToolbarContainer';
 import { useToolbar } from '../contexts/ToolbarContext';
 import AiCodeWrapper from "../components/AiCodeWrapper.jsx";
+import FullscreenContentWrapper from "../components/FullscreenContentWrapper.jsx";
 
 function ChapterView() {
   const { t } = useTranslation('chapterView');
@@ -63,7 +64,7 @@ function ChapterView() {
         setChapter(chapterData);
         setImages(imagesData);
         setFiles(filesData);
-        
+
         // Initialize quiz answers
         if (chapterData.mc_questions) {
           const initialAnswers = {};
@@ -72,7 +73,7 @@ function ChapterView() {
           });
           setQuizAnswers(initialAnswers);
         }
-        
+
         setError(null);
       } catch (error) {
         setError(t('errors.loadFailed'));
@@ -94,18 +95,18 @@ function ChapterView() {
 
   const handleSubmitQuiz = () => {
     if (!chapter?.mc_questions) return;
-    
+
     let correct = 0;
     chapter.mc_questions.forEach((question, index) => {
       if (quizAnswers[index] === question.correct_answer) {
         correct++;
       }
     });
-    
+
     const scorePercentage = Math.round((correct / chapter.mc_questions.length) * 100);
     setQuizScore(scorePercentage);
     setQuizSubmitted(true);
-    
+
     if (scorePercentage >= 70) {
       toast.success(t('toast.quizGreatJob', { scorePercentage }));
     } else {
@@ -125,15 +126,15 @@ function ChapterView() {
       console.error('Error marking chapter complete:', error);
     } finally {
       setMarkingComplete(false);
-    }  
+    }
   };
 
-  const sidebarWidth = isMobile 
+  const sidebarWidth = isMobile
     ? (toolbarOpen ? window.innerWidth : 0) // Full screen on mobile when open, hidden when closed
     : (toolbarOpen ? toolbarWidth : 40); // Desktop shows normal width when open, 40px when closed
 
   return (
-    <div style={{ 
+    <div style={{
       display: 'flex',
       position: 'relative',
       width: '100%',
@@ -142,7 +143,7 @@ function ChapterView() {
       overflow: 'hidden' // Prevent page-level scrolling issues
     }}>
       {/* Main content with dynamic positioning - centered in available space */}
-      <Container size="lg" py="xl" style={{ 
+      <Container size="lg" py="xl" style={{
         flexGrow: 1,
         maxWidth: `calc(100% - ${sidebarWidth}px)`, // Limit max width to available space
         width: `calc(100% - ${sidebarWidth}px)`, // Use calculated width
@@ -161,10 +162,10 @@ function ChapterView() {
         )}
 
         {error && !loading && (
-          <Alert 
+          <Alert
             icon={<IconAlertCircle size={16} />}
-            title={t('errors.genericTitle')} 
-            color="red" 
+            title={t('errors.genericTitle')}
+            color="red"
             mb="lg"
           >
             {error}
@@ -178,9 +179,9 @@ function ChapterView() {
                 <Title order={1}>{chapter.caption}</Title>
                 <Text color="dimmed">{t('estimatedTime', { minutes: chapter.time_minutes })}</Text>
               </div>
-              <Button 
-                color="green" 
-                onClick={markChapterComplete} 
+              <Button
+                color="green"
+                onClick={markChapterComplete}
                 loading={markingComplete}
                 disabled={markingComplete}
               >
@@ -205,11 +206,13 @@ function ChapterView() {
               </Tabs.List>
 
               <Tabs.Panel value="content" pt="xs">
-                <Paper shadow="xs" p="md" withBorder>
-                  <div className="markdown-content">
-                    <AiCodeWrapper>{chapter.content}</AiCodeWrapper>
-                  </div>
-                </Paper>
+                <FullscreenContentWrapper>
+                  <Paper shadow="xs" p="md" withBorder>
+                    <div className="markdown-content">
+                      <AiCodeWrapper>{chapter.content}</AiCodeWrapper>
+                    </div>
+                  </Paper>
+                </FullscreenContentWrapper>
               </Tabs.Panel>
 
               <Tabs.Panel value="images" pt="xs">
