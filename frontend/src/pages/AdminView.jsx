@@ -74,6 +74,11 @@ function AdminView() {
     admins: 0
   });
 
+  // Fetch users on initial render
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   // Update filtered users when search term or active tab changes
   useEffect(() => {
     filterUsers();
