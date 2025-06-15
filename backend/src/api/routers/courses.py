@@ -14,8 +14,8 @@ from ...services.notification_service import manager as ws_manager
 from ..schemas.course import (
     CourseInfo,
     CourseRequest,
-    ChapterResponse,
-    QuestionResponse
+    Chapter as ChapterSchema,
+    MultipleChoiceQuestion as MCQuestionSchema
 )
 from ...db.models.db_course import Course, Chapter, CourseStatus
 
@@ -148,7 +148,7 @@ async def get_course_by_id(
     )
 
 # -------- CHAPTERS ----------
-@router.get("/{course_id}/chapters", response_model=List[ChapterResponse])
+@router.get("/{course_id}/chapters", response_model=List[ChapterSchema])
 async def get_course_chapters(
         course_id: int,
         current_user: User = Depends(get_current_active_user),
@@ -163,54 +163,34 @@ async def get_course_chapters(
     chapters = course.chapters
 
     # Build chapter response with questions
-    response_chapters = []
-    for chapter in chapters:
-        all_questions = []
-        for q in chapter.mc_questions:
-            all_questions.append(QuestionResponse(
-                id=q.id,
-                question_type='mc',
-                question=q.question,
-                answer_a=q.answer_a,
-                answer_b=q.answer_b,
-                answer_c=q.answer_c,
-                answer_d=q.answer_d,
-                correct_answer=q.correct_answer,
-                explanation=q.explanation,
-                created_at=q.created_at
-            ))
-        for q in chapter.ot_questions:
-            all_questions.append(QuestionResponse(
-                id=q.id,
-                question_type='ot',
-                question=q.question,
-                correct_answer=q.correct_answer,
-                created_at=q.created_at
-            ))
+    chapters = [
+        ChapterSchema(
+            id=chapter.id,  # Add this
+            index=chapter.index,
+            caption=chapter.caption,
+            summary=chapter.summary or "",
+            content=chapter.content,
+            image_url=chapter.image_url,
+            mc_questions=[
+                MCQuestionSchema(
+                    question=q.question,
+                    answer_a=q.answer_a,
+                    answer_b=q.answer_b,
+                    answer_c=q.answer_c,
+                    answer_d=q.answer_d,
+                    correct_answer=q.correct_answer,
+                    explanation=q.explanation
+                ) for q in chapter.mc_questions
+            ],
+            time_minutes=chapter.time_minutes,
+            is_completed=chapter.is_completed  # Add this
+        ) for chapter in chapters
+    ]
 
-        # Sort questions by creation time and assign index
-        all_questions.sort(key=lambda x: x.created_at)
-        for i, q in enumerate(all_questions):
-            q.index = i
-
-        response_chapters.append(
-            ChapterResponse(
-                id=chapter.id,
-                index=chapter.index,
-                caption=chapter.caption,
-                summary=chapter.summary or "",
-                content=chapter.content,
-                image_url=chapter.image_url,
-                questions=all_questions,
-                time_minutes=chapter.time_minutes,
-                is_completed=chapter.is_completed
-            )
-        )
-
-    return response_chapters if response_chapters else []
+    return chapters if chapters else []
 
 
-@router.get("/{course_id}/chapters/{chapter_id}", response_model=ChapterResponse)
+@router.get("/{course_id}/chapters/{chapter_id}", response_model=ChapterSchema)
 async def get_chapter_by_id(
         course_id: int,
         chapter_id: int,
@@ -236,44 +216,28 @@ async def get_chapter_by_id(
         )
     
     # Build chapter response with questions
-    all_questions = []
-    for q in chapter.mc_questions:
-        all_questions.append(QuestionResponse(
-            id=q.id,
-            question_type='mc',
+    mc_questions = [
+        MCQuestionSchema(
             question=q.question,
             answer_a=q.answer_a,
             answer_b=q.answer_b,
             answer_c=q.answer_c,
             answer_d=q.answer_d,
             correct_answer=q.correct_answer,
-            explanation=q.explanation,
-            created_at=q.created_at
-        ))
-    for q in chapter.ot_questions:
-        all_questions.append(QuestionResponse(
-            id=q.id,
-            question_type='ot',
-            question=q.question,
-            correct_answer=q.correct_answer,
-            created_at=q.created_at
-        ))
-
-    # Sort questions by creation time and assign index
-    all_questions.sort(key=lambda x: x.created_at)
-    for i, q in enumerate(all_questions):
-        q.index = i
-
-    return ChapterResponse(
-        id=chapter.id,
+            explanation=q.explanation
+        ) for q in chapter.mc_questions
+    ]
+    
+    return ChapterSchema(
+        id=chapter.id,  # Add this
         index=chapter.index,
         caption=chapter.caption,
         summary=chapter.summary or "",
         content=chapter.content,
-        questions=all_questions,
+        mc_questions=mc_questions,
         time_minutes=chapter.time_minutes,
         image_url=chapter.image_url,
-        is_completed=chapter.is_completed
+        is_completed=chapter.is_completed  # Add this
     )
 
 
