@@ -8,6 +8,8 @@ class CourseRequest(BaseModel):
     time_hours: int = Field(..., description="Time investment in hours")
     document_ids: List[int] = Field(default=[], description="Document IDs")
     picture_ids: List[int] = Field(default=[], description="Picture IDs")
+    language: str = Field(..., description="Language")
+    difficulty: str = Field(..., description="Difficulty")
 
 
 class Chapter(BaseModel):

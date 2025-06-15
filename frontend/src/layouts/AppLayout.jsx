@@ -28,6 +28,9 @@ import { useMediaQuery } from '@mantine/hooks';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from '../components/LanguageSelector';
+import AppFooter from '../components/AppFooter';
+import SearchBar from '../components/SearchBar';
+
 import {
   IconHome2,
   IconPlus,
@@ -266,7 +269,26 @@ function AppLayout() {
               </Title>
             </Group>
             
-            <Box sx={{ flexGrow: 1 }} /> {/* Spacer */}
+            <Box sx={{ flexGrow: 1 }} />
+            
+            {/* Search Bar - Centered */}
+            <Box sx={{
+              position: 'absolute',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '100%',
+              maxWidth: 500,
+              padding: '0 20px',
+              zIndex: 1,
+              '@media (max-width: 900px)': {
+                display: 'none',
+              },
+            }}>
+              <SearchBar />
+            </Box>
+            
+            {/* Spacer to balance the flex layout */}
+            <Box sx={{ flex: 1, '@media (min-width: 901px)': { visibility: 'hidden' } }} />
             
             <Group spacing="xs">
               {user ? (
@@ -461,7 +483,10 @@ function AppLayout() {
         </Navbar>
       }
     >
-      <Outlet />
+      <Box sx={{ flex: 1 }}>
+        <Outlet />
+      </Box>
+      <AppFooter />
     </AppShell>
   );
 }

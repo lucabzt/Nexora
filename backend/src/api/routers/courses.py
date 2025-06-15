@@ -18,6 +18,9 @@ from ..schemas.course import (
     Chapter as ChapterSchema,
 )
 
+
+
+
 router = APIRouter(
     prefix="/courses",
     tags=["courses"],

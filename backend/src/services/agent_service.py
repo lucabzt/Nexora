@@ -5,6 +5,7 @@ import json
 import asyncio
 import traceback
 
+from google.adk.sessions import InMemorySessionService
 from sqlalchemy.orm import Session
 
 from .query_service import QueryService
@@ -106,7 +107,7 @@ class AgentService:
             info_response = await self.info_agent.run(
                 user_id=user_id,
                 state={},
-                content=self.query_service.get_info_query(request, docs, images)
+                content=self.query_service.get_info_query(request, docs, images,)
             )
             print(f"[{task_id}] InfoAgent response: {info_response['title']}")
 
@@ -190,7 +191,7 @@ class AgentService:
                 image_task = self.image_agent.run(
                     user_id=user_id,
                     state={},
-                    content=self.query_service.get_explainer_query(user_id, course_id, idx)
+                    content=self.query_service.get_explainer_image_query(user_id, course_id, idx)
                 )
 
                 # Await both tasks to complete in parallel

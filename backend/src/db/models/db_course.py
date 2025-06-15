@@ -27,12 +27,13 @@ class Course(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     status = Column(Enum(CourseStatus), nullable=False, default=CourseStatus.CREATING)
     total_time_hours = Column(Integer, nullable=False)
+    language = Column(String(50), nullable=False)
+    difficulty = Column(String(50), nullable=False)
 
     # Attributes filled by the agent
     session_id = Column(String(50), unique=True, index=True, nullable=True)
     title = Column(String(200), nullable=True)
     description = Column(Text, nullable=True)
-    language = Column(String(50), nullable=True)
     image_url = Column(String(2000), nullable=True)
     chapter_count = Column(Integer, nullable=True)
     error_msg = Column(Text, nullable=True)
@@ -63,6 +64,7 @@ class Chapter(Base):
     # Relationships
     course = relationship("Course", back_populates="chapters")
     questions = relationship("PracticeQuestion", back_populates="chapter", cascade="all, delete-orphan")
+    notes = relationship("Note", back_populates="chapter", cascade="all, delete-orphan")
 
     # This makes ordering chapters by their index for a given course very fast.
     __table_args__ = (
