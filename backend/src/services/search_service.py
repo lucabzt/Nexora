@@ -28,8 +28,11 @@ async def search_courses_and_chapters(
         return []
     
     # Search for matching courses and chapters using CRUD functions
+    print("Searching for courses and chapters...")
     courses = search_courses(db, query, user_id=user_id, limit=limit)
+    print("Found courses:", len(courses))
     chapters = search_chapters(db, query, user_id=user_id, limit=limit)
+    print("Found chapters:", len(chapters))
     
     # Convert courses to search results
     course_results = [
@@ -41,14 +44,14 @@ async def search_courses_and_chapters(
             course_id=str(course.id)  # For consistency with chapters
         )
         for course in courses
-        if course.is_public or str(course.user_id) == user_id
+        if str(course.user_id) == user_id
     ]
     
     # Convert chapters to search results
     chapter_results = []
     for chapter in chapters:
         # Skip chapters from courses the user doesn't have access to
-        if not chapter.course or (not chapter.course.is_public and str(chapter.course.user_id) != user_id):
+        if not chapter.course or (str(chapter.course.user_id) != user_id):
             continue
             
         chapter_results.append(

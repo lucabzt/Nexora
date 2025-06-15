@@ -32,7 +32,7 @@ export const searchCoursesAndChapters = async (query) => {
   
   try {
     console.debug(`Searching for: "${trimmedQuery}"`);
-    const response = await apiWithCookies.get('/search', {
+    const response = await apiWithCookies.get('/search/', {
       params: { 
         query: trimmedQuery,
         // Add cache buster to prevent caching of search results

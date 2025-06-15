@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
-from ..models.db_course import Chapter
+from ..models.db_course import Chapter, Course
 
 
 
@@ -106,7 +106,7 @@ def search_chapters(db: Session, query: str, user_id: str, limit: int = 10) -> L
         db.query(Chapter)
         .join(Chapter.course)  # Join with Course for access control
         .filter(
-            (Chapter.user_id == user_id)
+            (Course.user_id == user_id)
         )
         .filter(
             (Chapter.caption.ilike(search)) | 

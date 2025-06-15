@@ -7,6 +7,9 @@ from ...api.schemas.search import SearchResult
 from ...services.search_service import search_courses_and_chapters
 from ...utils.auth import get_current_active_user
 from ...db.models.db_user import User
+import traceback
+
+
 
 router = APIRouter(
     prefix="/search",
@@ -34,7 +37,8 @@ async def search(
         results = await search_courses_and_chapters(db=db, query=query, user_id=str(current_user.id))
         return results
     except Exception as e:
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"An error occurred during search: {str(e)}"
+            detail=f"An error occurred during search: {str(traceback.format_exc())}"
         )
