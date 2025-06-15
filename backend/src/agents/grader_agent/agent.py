@@ -10,7 +10,7 @@ from google.genai import types
 
 from ..agent import StructuredAgent
 from ..utils import load_instruction_from_file
-from .schema import Test
+from .schema import Grading
 
 
 class GraderAgent(StructuredAgent):
@@ -20,7 +20,7 @@ class GraderAgent(StructuredAgent):
             name="tester_agent",
             model="gemini-2.0-flash",
             description="Agent for testing the user on studied material",
-            output_schema=Test,
+            output_schema=Grading,
             instruction=load_instruction_from_file("tester_agent/instructions.txt"),
             disallow_transfer_to_parent=True,
             disallow_transfer_to_peers=True
@@ -30,7 +30,7 @@ class GraderAgent(StructuredAgent):
         self.app_name = app_name
         self.session_service = session_service
         self.runner = Runner(
-            agent=tester_agent,
+            agent=grader_agent,
             app_name=self.app_name,
             session_service=self.session_service,
         )

@@ -17,7 +17,6 @@ class Chapter(BaseModel):
     caption: str
     summary: str
     content: str
-    questions: List[QuestionResponse]
     time_minutes: int
     is_completed: bool = False  # Also useful for the frontend
     image_url: Optional[str] = None  # Optional image URL for the chapter

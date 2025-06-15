@@ -10,19 +10,19 @@ from sqlalchemy.orm import Session
 from .query_service import QueryService
 from .state_service import StateService, CourseState
 from ..agents.explainer_agent.agent import CodeReviewAgent
+from ..agents.grader_agent.agent import GraderAgent
 from ..db.crud import chapters_crud, documents_crud, images_crud, questions_crud, courses_crud
 
 
 from google.adk.sessions import InMemorySessionService
 
 from ..agents.planner_agent import PlannerAgent
-from ..agents.explainer_agent import ExplainerAgent
 from ..agents.info_agent.agent import InfoAgent
 
 from ..agents.image_agent.agent import ImageAgent
 
 from ..agents.tester_agent import TesterAgent
-from ..agents.utils import create_text_query, create_docs_query
+from ..agents.utils import create_text_query
 from ..db.models.db_course import CourseStatus
 from ..api.schemas.course import CourseRequest
 from ..services.notification_service import WebSocketConnectionManager
@@ -46,6 +46,7 @@ class AgentService:
         self.coding_agent = CodeReviewAgent(self.app_name, self.session_service)
         self.tester_agent = TesterAgent(self.app_name, self.session_service)
         self.image_agent = ImageAgent(self.app_name, self.session_service)
+        self.grader_agent = GraderAgent(self.app_name, self.session_service)
 
 
     @staticmethod
@@ -260,11 +261,11 @@ class AgentService:
             # and not managed by FastAPI's Depends. For now, assuming Depends handles it.
             # db.close() # If db session is task-specific and not managed by Depends.
 
-    async def grade_question(self, question: str, correct_answer: str, users_answer: str):
+    async def grade_question(self, user_id: str, question: str, correct_answer: str, users_answer: str):
         """ Receives an open text question plus answer from the user and returns received points and short feedback """
         query = self.query_service.get_grader_query(question, correct_answer, users_answer)
-        grader_response = await self.info_agent.run(
-            user_id="grader",
+        grader_response = await self.grader_agent.run(
+            user_id=user_id,
             state={},
             content=query
         )

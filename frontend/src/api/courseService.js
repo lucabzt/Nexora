@@ -17,6 +17,17 @@ export const courseService = {
   getChapter: async (courseId, chapterId) =>
     (await apiWithCookies.get(`/courses/${courseId}/chapters/${chapterId}`)).data,
 
+  // Get questions for a specific chapter
+  getChapterQuestions: async (courseId, chapterId) =>
+    (await apiWithCookies.get(`/chapters/${courseId}/chapters/${chapterId}`)).data,
+
+  // Get feedback for an open text question
+  getQuestionFeedback: async (courseId, chapterId, questionId, userAnswer) => {
+    const params = new URLSearchParams();
+    params.append('users_answer', userAnswer);
+    return (await apiWithCookies.get(`/chapters/${courseId}/chapters/${chapterId}/${questionId}/feedback?${params.toString()}`)).data;
+  },
+
   // Mark a chapter as complete
   markChapterComplete: async (courseId, chapterId) =>
       // Use the actual chapter ID, not index
@@ -62,20 +73,20 @@ export const courseService = {
     // Step 1: Make the initial POST request to get the course data (including ID)
     const response = await apiWithCookies.post('/courses/create', data);
     console.log('[POST] Course creation request successful, response:', response.data);
-    return response.data; 
+    return response.data;
   },
 
   // Upload a document and get document ID
   uploadDocument: async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     const response = await apiWithCookies.post('/files/documents', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     });
-    
+
     return response.data; // Contains document ID and other info
   },
 
@@ -83,17 +94,15 @@ export const courseService = {
 uploadImage: async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     const response = await apiWithCookies.post('/files/images', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     });
-    
+
     return response.data; // Contains image ID and other info
   },
-
-
 
 };
 
