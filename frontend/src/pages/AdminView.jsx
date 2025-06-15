@@ -405,14 +405,14 @@ function AdminView() {
             <Table striped highlightOnHover withBorder withColumnBorders verticalSpacing="sm" sx={{ minWidth: 900 }}>
               <thead>
                 <tr>
-                  <th>{t('table.header.profilePicture')}</th>
-                  <th>{t('table.header.username')}</th>
-                  <th>{t('table.header.email')}</th>
-                  <th>{t('table.header.status')}</th>
-                  <th>{t('table.header.role')}</th>
-                  <th>{t('table.header.createdAt')}</th>
-                  <th>{t('table.header.lastLogin')}</th>
-                  <th>{t('table.header.actions')}</th>
+                  <th>{t('table.headers.profilePicture')}</th>
+                  <th>{t('table.headers.username')}</th>
+                  <th>{t('table.headers.email')}</th>
+                  <th>{t('table.headers.status')}</th>
+                  <th>{t('table.headers.role')}</th>
+                  <th>{t('table.headers.createdAt')}</th>
+                  <th>{t('table.headers.lastLogin')}</th>
+                  <th>{t('table.headers.actions')}</th>
                 </tr>
               </thead>
               <tbody>
