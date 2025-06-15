@@ -16,18 +16,12 @@ class MultipleChoiceQuestion(BaseModel):
     explanation: str
     created_at: datetime
 
-    class Config:
-        orm_mode = True
-
 class OpenTextQuestion(BaseModel):
     """Schema for an open-text question."""
     id: int
     question: str
     correct_answer: str
     created_at: datetime
-
-    class Config:
-        orm_mode = True
 
 class Chapter(BaseModel):
     """Schema for a chapter in the course."""
@@ -42,9 +36,6 @@ class Chapter(BaseModel):
     is_completed: bool = False
     image_url: Optional[str] = None
 
-    class Config:
-        orm_mode = True
-
 # Request Schemas
 
 class CourseRequest(BaseModel):
@@ -58,7 +49,6 @@ class CourseRequest(BaseModel):
 
 class QuestionResponse(BaseModel):
     """Schema for a single question in the response."""
-    index: int
     id: int
     question_type: str
     question: str
