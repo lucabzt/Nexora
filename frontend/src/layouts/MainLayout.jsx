@@ -126,9 +126,6 @@ function MainLayout() {
             
             <Box sx={{ flexGrow: 1 }} />
             
-            {/* Search Bar */}
-            <SearchBar />
-            
             <Box sx={{ flexGrow: 1, '@media (min-width: 769px)': { display: 'none' } }} />
             
             <Group spacing="md">

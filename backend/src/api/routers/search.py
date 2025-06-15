@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from ...db.database import get_db
-from ...schemas.search import SearchResult
+from ...api.schemas.search import SearchResult
 from ...services.search_service import search_courses_and_chapters
 from ...utils.auth import get_current_active_user
 from ...db.models.db_user import User

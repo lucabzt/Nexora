@@ -267,7 +267,21 @@ function AppLayout() {
               </Title>
             </Group>
             
-            <Box sx={{ flexGrow: 1 }} /> {/* Spacer */}
+            <Box sx={{ flexGrow: 1 }} />
+            
+            {/* Search Bar */}
+            <Box sx={{ 
+              flex: 1, 
+              maxWidth: 500, 
+              margin: '0 20px',
+              '@media (max-width: 900px)': {
+                display: 'none',
+              },
+            }}>
+              <SearchBar />
+            </Box>
+            
+            <Box sx={{ flexGrow: 1, '@media (min-width: 901px)': { display: 'none' } }} />
             
             <Group spacing="xs">
               {user ? (
