@@ -15,7 +15,6 @@ import {
   Divider,
   UnstyledButton,
   Text,
-  Badge
 } from '@mantine/core';
 import { 
   IconSettings,
