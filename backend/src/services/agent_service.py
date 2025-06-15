@@ -159,6 +159,7 @@ class AgentService:
                     state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
                     content=self.query_service.get_explainer_query(user_id, course_id, idx, request.language, request.difficulty),
                 )
+                
 
                 # Get response from tester agent
                 response_tester = await self.tester_agent.run(
