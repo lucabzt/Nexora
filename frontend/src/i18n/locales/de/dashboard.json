@@ -49,6 +49,12 @@
     "completed": "Abgeschlossen"
   },
   
+  "errors": {
+    "deleteCourse": "Beim Löschen des Kurses ist ein Fehler aufgetreten. Bitte versuche es später erneut."
+  },
+  
+  "errorAlertTitle": "Fehler",
+  
   "myCourses": "Meine Kurse",
   "noCoursesMessage": "Du hast noch keine Kurse erstellt. Leg jetzt los!",
   "createNewCourse": "Neuen Kurs erstellen",

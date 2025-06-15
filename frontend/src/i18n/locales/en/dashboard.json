@@ -49,6 +49,12 @@
     "completed": "Completed"
   },
   
+  "errors": {
+    "deleteCourse": "An error occurred while deleting the course. Please try again."
+  },
+  
+  "errorAlertTitle": "Error",
+  
   "myCourses": "My Courses",
   "noCoursesMessage": "You haven't created any courses yet. Get started now!",
   "createNewCourse": "Create New Course",
