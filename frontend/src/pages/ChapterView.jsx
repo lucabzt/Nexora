@@ -203,7 +203,7 @@ function ChapterView() {
     };
 
     fetchMedia();
-  }, [loading, t]); // Removed images and files from dependencies
+  }, [loading, t, images, files]); // Include images and files in dependencies
 
   // Separate effect for cleanup on unmount
   useEffect(() => {

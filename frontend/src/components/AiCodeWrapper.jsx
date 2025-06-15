@@ -3,6 +3,8 @@ import PaperBackground from "./PaperBackground.jsx";
 import { ErrorBoundary } from 'react-error-boundary';
 const LazyStringToReactComponent = lazy(() => import('string-to-react-component'));
 import he from 'he';
+import { useTranslation } from 'react-i18next';
+
 
 // Plugins/Libraries available to the agent
 import 'katex/dist/katex.min.css';
