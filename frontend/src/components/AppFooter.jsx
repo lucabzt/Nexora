@@ -1,15 +1,15 @@
 import { Text, Box } from '@mantine/core';
 import LanguageSelector from '../components/LanguageSelector'; // Import LanguageSelector
 import { useTranslation } from 'react-i18next';
-import { useAuth, logout } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 function AppFooter() {
   const currentYear = new Date().getFullYear();
   const { t } = useTranslation(['footer', 'navigation']);
-  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  
+  const { isAuthenticated, logout } = useAuth();
+
   const handleLogout = () => {
     logout();
     navigate('/login');
