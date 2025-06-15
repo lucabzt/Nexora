@@ -137,7 +137,7 @@ function About() {
               order={1}
               size="2.6rem"
             >
-              {t('mainTitle.about')} <span className={classes.highlight}>{t('mainTitle.nexora')}</span>
+              {t('mainTitle.about')} {t('mainTitle.nexora')}
             </Title>
 
 
