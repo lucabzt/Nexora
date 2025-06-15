@@ -1,10 +1,12 @@
 import { Text, Box } from '@mantine/core';
 import LanguageSelector from '../components/LanguageSelector'; // Import LanguageSelector
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../contexts/AuthContext';
 
 function AppFooter() {
   const currentYear = new Date().getFullYear();
   const { t } = useTranslation(['footer', 'navigation']);
+  const { isAuthenticated } = useAuth();
   
   return (
     <Box 
@@ -19,13 +21,19 @@ function AppFooter() {
         }`,
       })}
     >
-      <LanguageSelector />
+      {!isAuthenticated && (
+        <LanguageSelector />
+      )}
       
       <Text size="sm" color="dimmed">
         {t('copyright', { year: currentYear, ns: 'footer' })} {' | '}
         <a href="/impressum" style={{ color: 'inherit', textDecoration: 'underline', margin: '0 8px' }}>{t('impressum', { ns: 'navigation' })}</a>
         {' | '}
         <a href="/about" style={{ color: 'inherit', textDecoration: 'underline', margin: '0 8px' }}>{t('about', { ns: 'navigation' })}</a>
+        {' | '}
+        {isAuthenticated && (
+          <a href="/logout" style={{ color: 'inherit', textDecoration: 'underline', margin: '0 8px' }}>{t('logout', { ns: 'navigation' })}</a>
+        )}
       </Text>
     </Box>
   );
