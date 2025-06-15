@@ -288,16 +288,6 @@ function About() {
                     </Text>
                     <Text size="xs" mt={4}>{t('journey.event4.date')}</Text>
                   </Timeline.Item>
-
-                   <Timeline.Item 
-                    bullet={<IconHeart size={12} />}
-                    title={t('journey.event5.title')}
-                  >
-                    <Text color="dimmed" size="sm">
-                        {t('journey.event5.description')}
-                    </Text>
-                    <Text size="xs" mt={4}>{t('journey.event5.date')}</Text>
-                  </Timeline.Item>
                   
                 </Timeline>
               </Grid.Col>
