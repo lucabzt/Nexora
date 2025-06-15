@@ -28,6 +28,7 @@ import { useMediaQuery } from '@mantine/hooks';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from '../components/LanguageSelector';
+import AppFooter from '../components/AppFooter';
 import {
   IconHome2,
   IconPlus,
@@ -461,7 +462,10 @@ function AppLayout() {
         </Navbar>
       }
     >
-      <Outlet />
+      <Box sx={{ flex: 1 }}>
+        <Outlet />
+      </Box>
+      <AppFooter />
     </AppShell>
   );
 }
