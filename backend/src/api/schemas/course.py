@@ -10,17 +10,6 @@ class CourseRequest(BaseModel):
     picture_ids: List[int] = Field(default=[], description="Picture IDs")
 
 
-class MultipleChoiceQuestion(BaseModel):
-    """Schema for a multiple-choice question."""
-    question: str
-    answer_a: str
-    answer_b: str
-    answer_c: str
-    answer_d: str
-    correct_answer: str
-    explanation: str
-
-
 class Chapter(BaseModel):
     """Schema for a chapter in the course."""
     id: int  # Add this line to include the database ID
@@ -28,7 +17,6 @@ class Chapter(BaseModel):
     caption: str
     summary: str
     content: str
-    mc_questions: List[MultipleChoiceQuestion]
     time_minutes: int
     is_completed: bool = False  # Also useful for the frontend
     image_url: Optional[str] = None  # Optional image URL for the chapter

@@ -11,6 +11,15 @@ class QueryService:
     def __init__(self, state_manager):
         self.sm = state_manager
 
+    @staticmethod
+    def get_grader_query(question: str, correct_answer: str, users_answer: str):
+        query = f"""
+Practice Question: {question}
+Correct Answer: {correct_answer}
+User Answer: {users_answer}
+"""
+        return create_text_query(query)
+
     def get_tester_query(self, user_id: str, course_id: int, chapter_idx: int, explanation: str):
         chapter = self.sm.get_state(user_id, course_id)['chapters'][chapter_idx]
         pretty_chapter = \

@@ -10,19 +10,19 @@ from sqlalchemy.orm import Session
 from .query_service import QueryService
 from .state_service import StateService, CourseState
 from ..agents.explainer_agent.agent import CodeReviewAgent
+from ..agents.grader_agent.agent import GraderAgent
 from ..db.crud import chapters_crud, documents_crud, images_crud, questions_crud, courses_crud
 
 
 from google.adk.sessions import InMemorySessionService
 
 from ..agents.planner_agent import PlannerAgent
-from ..agents.explainer_agent import ExplainerAgent
 from ..agents.info_agent.agent import InfoAgent
 
 from ..agents.image_agent.agent import ImageAgent
 
 from ..agents.tester_agent import TesterAgent
-from ..agents.utils import create_text_query, create_docs_query
+from ..agents.utils import create_text_query
 from ..db.models.db_course import CourseStatus
 from ..api.schemas.course import CourseRequest
 from ..services.notification_service import WebSocketConnectionManager
@@ -46,6 +46,32 @@ class AgentService:
         self.coding_agent = CodeReviewAgent(self.app_name, self.session_service)
         self.tester_agent = TesterAgent(self.app_name, self.session_service)
         self.image_agent = ImageAgent(self.app_name, self.session_service)
+        self.grader_agent = GraderAgent(self.app_name, self.session_service)
+
+
+    @staticmethod
+    async def save_questions(db, questions, chapter_id):
+        """ Save questions to database."""
+        for q_data in questions:
+            if 'answer_a' in q_data.keys():
+                questions_crud.create_mc_question(
+                    db=db,
+                    chapter_id=chapter_id,
+                    question=q_data['question'],
+                    answer_a=q_data['answer_a'],
+                    answer_b=q_data['answer_b'],
+                    answer_c=q_data['answer_c'],
+                    answer_d=q_data['answer_d'],
+                    correct_answer=q_data['correct_answer'],
+                    explanation=q_data['explanation']
+                )
+            else:
+                questions_crud.create_ot_question(
+                    db=db,
+                    chapter_id=chapter_id,
+                    question=q_data['question'],
+                    correct_answer=q_data['correct_answer']
+                )
 
 
     async def create_course(self, user_id: str, course_id: int, request: CourseRequest, db: Session, task_id: str, ws_manager: WebSocketConnectionManager):
@@ -154,29 +180,24 @@ class AgentService:
 
             # Process each chapter and stream as it's created
             for idx, topic in enumerate(response_planner["chapters"]):
-                # Start Unslpash image search
+                # Schedule image and coding agents to run concurrently as they do not depend on each other
+                coding_task = self.coding_agent.run(
+                    user_id=user_id,
+                    state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
+                    content=self.query_service.get_explainer_query(user_id, course_id, idx),
+                )
+
                 image_task = self.image_agent.run(
                     user_id=user_id,
                     state={},
                     content=self.query_service.get_explainer_query(user_id, course_id, idx)
                 )
 
-
-                # Get response from coding agent
-                response_code = await self.coding_agent.run(
-                    user_id=user_id,
-                    state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
-                    content=self.query_service.get_explainer_query(user_id, course_id, idx),
+                # Await both tasks to complete in parallel
+                response_code, image_response = await asyncio.gather(
+                    coding_task,
+                    image_task
                 )
-
-                # Get response from tester agent
-                response_tester = await self.tester_agent.run(
-                    user_id=user_id,
-                    state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
-                    content=self.query_service.get_tester_query(user_id, course_id, idx, response_code["explanation"]),
-                )
-
-                image_response = await image_task
 
                 # Save the chapter in db first
                 chapter_db = chapters_crud.create_chapter(
@@ -190,34 +211,15 @@ class AgentService:
                     image_url=image_response['explanation'],
                 )
 
-                # Save questions in db
-                question_objects = []
-                for q_data in response_tester['questions']:
-                    q_db = questions_crud.create_question(
-                        db=db,
-                        chapter_id=int(chapter_db.id),
-                        question=q_data['question'],
-                        answer_a=q_data['answer_a'],
-                        answer_b=q_data['answer_b'],
-                        answer_c=q_data['answer_c'],
-                        answer_d=q_data['answer_d'],
-                        correct_answer=q_data['correct_answer'],
-                        explanation=q_data['explanation']
-                    )
-                    question_objects.append({
-                        "id": q_db.id,
-                        "question": q_db.question,
-                        "answer_a": q_db.answer_a,
-                        "answer_b": q_db.answer_b,
-                        "answer_c": q_db.answer_c,
-                        "answer_d": q_db.answer_d,
-                        "correct_answer": q_db.correct_answer,
-                        "explanation": q_db.explanation
-                    })
-                    print(f"[{task_id}] Saved {len(question_objects)} questions for chapter {chapter_db.id}.")
+                # Get response from tester agent
+                response_tester = await self.tester_agent.run(
+                    user_id=user_id,
+                    state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
+                    content=self.query_service.get_tester_query(user_id, course_id, idx, response_code["explanation"]),
+                )
 
-                    #await ws_manager.send_json_message(task_id, {"type": "chapter", "data": chapter_response_data})
-                    #print(f"[{task_id}] Sent chapter update for chapter {chapter_db.id}.")
+                # Save questions in db
+                await self.save_questions(db, response_tester['questions'], chapter_db.id)
 
             # Update course status to finished
             courses_crud.update_course_status(db, course_id, CourseStatus.FINISHED)
@@ -258,4 +260,14 @@ class AgentService:
             # Ensure the database session is closed if it was passed specifically for this task
             # and not managed by FastAPI's Depends. For now, assuming Depends handles it.
             # db.close() # If db session is task-specific and not managed by Depends.
+
+    async def grade_question(self, user_id: str, question: str, correct_answer: str, users_answer: str):
+        """ Receives an open text question plus answer from the user and returns received points and short feedback """
+        query = self.query_service.get_grader_query(question, correct_answer, users_answer)
+        grader_response = await self.grader_agent.run(
+            user_id=user_id,
+            state={},
+            content=query
+        )
+        return grader_response['points'], grader_response['explanation']
 

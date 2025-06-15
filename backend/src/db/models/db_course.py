@@ -62,7 +62,7 @@ class Chapter(Base):
 
     # Relationships
     course = relationship("Course", back_populates="chapters")
-    mc_questions = relationship("MultipleChoiceQuestion", back_populates="chapter", cascade="all, delete-orphan")
+    questions = relationship("PracticeQuestion", back_populates="chapter", cascade="all, delete-orphan")
 
     # This makes ordering chapters by their index for a given course very fast.
     __table_args__ = (
@@ -70,20 +70,24 @@ class Chapter(Base):
     )
 
 
-class MultipleChoiceQuestion(Base):
-    """Multiple choice questions for each chapter."""
-    __tablename__ = "multiple_choice_questions"
+class PracticeQuestion(Base):
+    """Practice Questions for each chapter."""
+    __tablename__ = "practice_questions"
     
     id = Column(Integer, primary_key=True, index=True)
     chapter_id = Column(Integer, ForeignKey("chapters.id"), nullable=False)
+    type = Column(String(5), nullable=False)
     question = Column(Text, nullable=False)
-    answer_a = Column(String(500), nullable=False)
-    answer_b = Column(String(500), nullable=False)
-    answer_c = Column(String(500), nullable=False)
-    answer_d = Column(String(500), nullable=False)
-    correct_answer = Column(String(1), nullable=False)  # 'a', 'b', 'c', or 'd'
-    explanation = Column(Text, nullable=False)
+    answer_a = Column(String(500), nullable=True)
+    answer_b = Column(String(500), nullable=True)
+    answer_c = Column(String(500), nullable=True)
+    answer_d = Column(String(500), nullable=True)
+    correct_answer = Column(Text, nullable=False)
+    explanation = Column(Text, nullable=True)
+    users_answer = Column(Text, nullable=True)
+    points_received = Column(Integer, nullable=True)
+    feedback = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     # Relationships
-    chapter = relationship("Chapter", back_populates="mc_questions")
+    chapter = relationship("Chapter", back_populates="questions")
