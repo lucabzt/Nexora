@@ -45,7 +45,7 @@ function CreateCourse() {
       query: '',
       time_hours: 2,
       language: i18n.language,
-      difficulty: 'beginner',
+      difficulty: 'university',
       documents: [],
       images: [],
     },

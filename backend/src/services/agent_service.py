@@ -80,7 +80,7 @@ class AgentService:
             info_response = await self.info_agent.run(
                 user_id=user_id,
                 state={},
-                content=self.query_service.get_info_query(request, docs, images)
+                content=self.query_service.get_info_query(request, docs, images,)
             )
             print(f"[{task_id}] InfoAgent response: {info_response['title']}")
 
