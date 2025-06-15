@@ -1,4 +1,5 @@
 import { Outlet, useLocation } from 'react-router-dom';
+import { useMediaQuery } from '@mantine/hooks';
 import { 
   AppShell, 
   Header, 
@@ -32,7 +33,7 @@ import AppFooter from '../components/AppFooter';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
-import SearchBar from '../components/SearchBar';
+
 
 function MainLayout() {
   const theme = useMantineTheme();
@@ -43,6 +44,7 @@ function MainLayout() {
   // Search functionality moved to SearchBar component
   const { pathname } = useLocation();
   const dark = colorScheme === 'dark';
+  const isMobile = useMediaQuery('(max-width: 768px)'); // Add mobile detection
 
   // Logic to determine avatar source
   let avatarSrc = null;
@@ -54,15 +56,13 @@ function MainLayout() {
     }
   }
 
-
-  
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
-  
+
   return (
-    <AppShell
+      <AppShell
       styles={{
         main: {
           background: dark ? theme.colors.dark[8] : theme.colors.gray[0],
@@ -72,6 +72,8 @@ function MainLayout() {
           width: '100%',
           padding: 0,
           overflowX: 'hidden',
+          touchAction: 'manipulation',
+          textSizeAdjust: '100%',
         },
       }}
       header={
@@ -92,13 +94,15 @@ function MainLayout() {
         >
           <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
             <Group spacing="xs">
-              <IconSparkles 
-                size={28} 
-                style={{ 
-                  color: theme.colors.violet[5],
-                  filter: 'drop-shadow(0 2px 4px rgba(139, 92, 246, 0.3))',
-                }} 
-              />
+              {(!isMobile || isAuthenticated) && (
+                <IconSparkles 
+                  size={28} 
+                  style={{ 
+                    color: theme.colors.violet[5],
+                    filter: 'drop-shadow(0 2px 4px rgba(139, 92, 246, 0.3))',
+                  }} 
+                />
+              )}
               <Title
                 order={3}
                 size="1.6rem"
@@ -131,22 +135,25 @@ function MainLayout() {
             <Box sx={{ flexGrow: 1, '@media (min-width: 769px)': { display: 'none' } }} />
             
             <Group spacing="md">
-              <ActionIcon
-                variant="outline"
-                color={dark ? 'yellow' : 'blue'}
-                onClick={() => toggleColorScheme()}
-                title={t('colorSchemeToggleTitle', { ns: 'app', defaultValue: 'Toggle color scheme' })}
-                size="lg"
-                radius="md"
-                sx={{
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    transform: 'scale(1.05)',
-                  },
-                }}
-              >
-                {dark ? <IconSun size={20} /> : <IconMoonStars size={20} />}
-              </ActionIcon>
+              {(!isMobile || isAuthenticated) && (
+                <ActionIcon
+                  variant="outline"
+                  color={dark ? 'yellow' : 'blue'}
+                  onClick={() => toggleColorScheme()}
+                  title={t('colorSchemeToggleTitle', { ns: 'app', defaultValue: 'Toggle color scheme' })}
+                  size="lg"
+                  radius="md"
+                  sx={{
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      transform: 'scale(1.05)',
+                    },
+                    display: isMobile && !isAuthenticated ? 'none' : 'flex',
+                  }}
+                >
+                  {dark ? <IconSun size={20} /> : <IconMoonStars size={20} />}
+                </ActionIcon>
+              )}
               
               {isAuthenticated && user ? (
                 <Menu shadow="md" width={220} withinPortal={true} zIndex={300}>
@@ -307,7 +314,7 @@ function MainLayout() {
         <Outlet />
       </Box>
       <AppFooter />
-    </AppShell>
+      </AppShell>
   );
 }
 
