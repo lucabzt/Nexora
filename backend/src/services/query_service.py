@@ -11,20 +11,20 @@ class QueryService:
     def __init__(self, state_manager):
         self.sm = state_manager
 
-    def get_tester_query(self, user_id: str, course_id: int, chapter_idx: int, explanation: str):
+    def get_tester_query(self, user_id: str, course_id: int, chapter_idx: int, explanation: str, language: str, difficulty: str):
         chapter = self.sm.get_state(user_id, course_id)['chapters'][chapter_idx]
         pretty_chapter = \
         f"""
         Title: {chapter["caption"]}
         Time for Chapter: {chapter["time"]} minutes
         Full Chapter Content (React): \n{json.dumps(explanation, indent=2)}
+        Response Language: {language}
+        Response Difficulty: {difficulty}
         """
-        #Response Language: {chapter['language']}
-        #Response Difficulty: {chapter['difficulty']}
         return create_text_query(pretty_chapter)
 
 
-    def get_explainer_query(self, user_id, course_id, chapter_idx, language, difficulty):
+    def get_explainer_query(self, user_id, course_id, chapter_idx, language: str, difficulty: str):
         chapter = self.sm.get_state(user_id, course_id)['chapters'][chapter_idx]
         pretty_chapter = \
             f"""

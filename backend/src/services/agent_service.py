@@ -164,7 +164,7 @@ class AgentService:
                 response_tester = await self.tester_agent.run(
                     user_id=user_id,
                     state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
-                    content=self.query_service.get_tester_query(user_id, course_id, idx, response_code["explanation"]),
+                    content=self.query_service.get_tester_query(user_id, course_id, idx, response_code["explanation"], request.language, request.difficulty),
                 )
 
                 image_response = await image_task

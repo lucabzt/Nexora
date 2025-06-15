@@ -271,11 +271,15 @@ function AppLayout() {
             
             <Box sx={{ flexGrow: 1 }} />
             
-            {/* Search Bar */}
-            <Box sx={{ 
-              flex: 1, 
-              maxWidth: 500, 
-              margin: '0 20px',
+            {/* Search Bar - Centered */}
+            <Box sx={{
+              position: 'absolute',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '100%',
+              maxWidth: 500,
+              padding: '0 20px',
+              zIndex: 1,
               '@media (max-width: 900px)': {
                 display: 'none',
               },
@@ -283,7 +287,8 @@ function AppLayout() {
               <SearchBar />
             </Box>
             
-            <Box sx={{ flexGrow: 1, '@media (min-width: 901px)': { display: 'none' } }} />
+            {/* Spacer to balance the flex layout */}
+            <Box sx={{ flex: 1, '@media (min-width: 901px)': { visibility: 'hidden' } }} />
             
             <Group spacing="xs">
               {user ? (

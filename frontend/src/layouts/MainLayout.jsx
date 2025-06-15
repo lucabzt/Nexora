@@ -13,6 +13,7 @@ import {
   useMantineColorScheme,
   Badge,
   Divider,
+  UnstyledButton
 } from '@mantine/core';
 import { 
   IconSettings,
