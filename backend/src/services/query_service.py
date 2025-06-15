@@ -37,6 +37,16 @@ class QueryService:
                 Response Difficulty: {difficulty}
             """
         return create_text_query(pretty_chapter)
+    
+    def get_explainer_image_query(self, user_id, course_id, chapter_idx):
+        chapter = self.sm.get_state(user_id, course_id)['chapters'][chapter_idx]
+        pretty_chapter = \
+            f"""
+                Caption: {chapter['caption']}
+                Content Summary: \n{json.dumps(chapter['content'], indent=2)}
+                Note by Planner Agent: {json.dumps(chapter['note'], indent=2)}
+            """
+        return create_text_query(pretty_chapter)
 
     @staticmethod
     def get_info_query(request, docs, images):

@@ -2,33 +2,24 @@
 This file defines the service that coordinates the interaction between all the agents
 """
 import json
-import asyncio
 import traceback
 
+from google.adk.sessions import InMemorySessionService
 from sqlalchemy.orm import Session
 
-from .query_service import QueryService
-from .state_service import StateService, CourseState
 from ..agents.explainer_agent.agent import CodeReviewAgent
-from ..db.crud import chapters_crud, documents_crud, images_crud, questions_crud, courses_crud
-
-
-from google.adk.sessions import InMemorySessionService
-
-from ..agents.planner_agent import PlannerAgent
-from ..agents.explainer_agent import ExplainerAgent
-from ..agents.info_agent.agent import InfoAgent
-
 from ..agents.image_agent.agent import ImageAgent
-
+from ..agents.info_agent.agent import InfoAgent
+from ..agents.planner_agent import PlannerAgent
 from ..agents.tester_agent import TesterAgent
-from ..agents.utils import create_text_query, create_docs_query
-from ..db.models.db_course import CourseStatus
+from ..agents.utils import create_text_query
 from ..api.schemas.course import CourseRequest
+from ..db.crud import (chapters_crud, courses_crud, documents_crud,
+                       images_crud, questions_crud)
+from ..db.models.db_course import CourseStatus
 from ..services.notification_service import WebSocketConnectionManager
-from ..db.models.db_course import Course
-from google.genai import types
-
+from .query_service import QueryService
+from .state_service import CourseState, StateService
 
 
 class AgentService:
@@ -158,7 +149,7 @@ class AgentService:
                 image_task = self.image_agent.run(
                     user_id=user_id,
                     state={},
-                    content=self.query_service.get_explainer_query(user_id, course_id, idx, request.language, request.difficulty)
+                    content=self.query_service.get_explainer_image_query(user_id, course_id, idx)
                 )
 
 
