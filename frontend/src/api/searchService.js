@@ -110,11 +110,11 @@ export const getResultUrl = (result) => {
   
   try {
     if (result.type === 'course') {
-      return `/courses/${encodeURIComponent(result.id)}`;
+      return `/dashboard/courses/${encodeURIComponent(result.id)}`;
     } 
     
     if (result.type === 'chapter' && result.course_id) {
-      return `/courses/${encodeURIComponent(result.course_id)}/chapters/${encodeURIComponent(result.id)}`;
+      return `/dashboard/courses/${encodeURIComponent(result.course_id)}/chapters/${encodeURIComponent(result.id)}`;
     }
     
     console.warn('Unknown result type or missing required fields:', result);
