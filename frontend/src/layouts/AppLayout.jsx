@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Outlet, Link as RouterLink, useNavigate } from 'react-router-dom';
 import { 
   AppShell, 
-  Navbar, 
+  Navbar,
+  Image, 
   Header, 
   MediaQuery, 
   Burger, 
@@ -231,6 +232,7 @@ function AppLayout() {
             />
 
             <Group spacing="xs">
+              
               <IconSparkles 
                 size={28} 
                 style={{ 
@@ -388,7 +390,9 @@ function AppLayout() {
             </Group>
           </div>
         </Header>
-      }      navbar={        <Navbar 
+      }      navbar={       
+        
+        <Navbar 
           p={opened ? "md" : "xs"}
           hiddenBreakpoint="sm" 
           hidden={isMobile && !opened} // Hide completely on mobile when closed
@@ -419,15 +423,17 @@ function AppLayout() {
                 marginBottom: theme.spacing.lg,
                 backdropFilter: 'blur(8px)',
               })}
-            >              <Group spacing="sm" mb="xs" position={!opened ? "center" : "left"}>
-                <ThemeIcon 
-                  size="lg" 
-                  variant="gradient" 
-                  gradient={{ from: 'violet', to: 'blue' }}
-                  sx={{ boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)' }}
-                >
-                  <IconSparkles size={20} />
-                </ThemeIcon>
+            >     
+            
+            <Group spacing="sm" mb="xs" position={!opened ? "center" : "left"}>
+              <Group spacing="xs" position="center">
+                    <Image
+                      src="/logo.png"
+                      alt={t('app:logoAlt')}
+                      height={85}
+                      width={85}
+                    />
+                  </Group>
                 {opened && (
                   <Box>                    <Text size="sm" weight={600} mb={2}>{t('title', { ns: 'navigation', defaultValue: 'Navigation' })}</Text>
                     <Text size="xs" color="dimmed">{t('subtitle', { ns: 'navigation', defaultValue: 'Choose your destination' })}</Text>
@@ -441,36 +447,6 @@ function AppLayout() {
             <Stack spacing="xs">
               {mainLinksComponents}
             </Stack>
-          </Navbar.Section>
-          
-          <Navbar.Section>
-            <Paper
-              p="sm"
-              sx={(theme) => ({
-                background: dark 
-                  ? `linear-gradient(135deg, ${theme.colors.violet[9]}20, ${theme.colors.blue[9]}10)`
-                  : `linear-gradient(135deg, ${theme.colors.violet[1]}40, ${theme.colors.blue[1]}20)`,
-                border: `1px solid ${dark ? theme.colors.violet[8] : theme.colors.violet[2]}`,
-                borderRadius: theme.radius.md,
-                textAlign: 'center',
-              })}
-            >              {opened ? (
-                <>                  <Text size="xs" color="dimmed" mb="xs">
-                    {t('poweredBy', { ns: 'app', defaultValue: 'Powered by AI' })}
-                  </Text>
-                  <Group spacing="xs" position="center">
-                    <IconSparkles size={16} color={theme.colors.violet[5]} />
-                    <Text size="xs" weight={500} color={theme.colors.violet[6]}>
-                      {t('title', { ns: 'app' })}
-                    </Text>
-                  </Group>
-                </>
-              ) : (
-                <Group position="center">
-                  <IconSparkles size={20} color={theme.colors.violet[5]} />
-                </Group>
-              )}
-            </Paper>
           </Navbar.Section>
         </Navbar>
       }
