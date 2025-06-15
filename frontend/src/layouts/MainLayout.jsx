@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { 
   AppShell, 
   Header, 
@@ -10,11 +10,9 @@ import {
   Button,
   Avatar,
   Menu,
-  Text,
   useMantineColorScheme,
   Badge,
   Divider,
-  UnstyledButton,
 } from '@mantine/core';
 import { 
   IconSettings,
@@ -32,13 +30,15 @@ import AppFooter from '../components/AppFooter';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
+import SearchBar from '../components/SearchBar';
 
 function MainLayout() {
   const theme = useMantineTheme();
   const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuth(); // Ensure isAuthenticated is destructured
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
-  const { t } = useTranslation(['app', 'navigation']); // Initialize translation hook for app and navigation namespaces
+  const { t } = useTranslation(['app', 'navigation', 'common']); // Initialize translation hook for app, navigation, and common namespaces
+  // Search functionality moved to SearchBar component
   const { pathname } = useLocation();
   const dark = colorScheme === 'dark';
 
@@ -125,6 +125,11 @@ function MainLayout() {
             </Group>
             
             <Box sx={{ flexGrow: 1 }} />
+            
+            {/* Search Bar */}
+            <SearchBar />
+            
+            <Box sx={{ flexGrow: 1, '@media (min-width: 769px)': { display: 'none' } }} />
             
             <Group spacing="md">
               <ActionIcon
