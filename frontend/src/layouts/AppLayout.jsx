@@ -445,8 +445,8 @@ function AppLayout() {
                   <Image
                     src="/logo_only.png"
                     alt={t('app:logoAlt')}
-                    height={85}
-                    width={85}
+                    height={32}
+                    width={32}
                   />
                 )}
               </Group>

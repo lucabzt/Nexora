@@ -18,5 +18,13 @@
   },
   "image": {
     "deleteConfirm": "Sind Sie sicher, dass Sie dieses Bild löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+  },
+  "loader": {
+    "loadingContent": "Inhalt wird geladen",
+    "preparingComponents": "Interaktive Komponenten werden vorbereitet. Dies kann einen Moment dauern...",
+    "visualization": {
+      "loading": "Visualisierung wird geladen...",
+      "thisMayTakeAMoment": "Dies kann einen Moment dauern"
+    }
   }
 }
