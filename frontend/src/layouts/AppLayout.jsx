@@ -426,18 +426,28 @@ function AppLayout() {
             >     
             
             <Group spacing="sm" mb="xs" position={!opened ? "center" : "left"}>
-              <Group spacing="xs" position="center">
+                   
+                {opened ? (
+                  <Group spacing="xs" position="center">
                     <Image
                       src="/logo.png"
                       alt={t('app:logoAlt')}
                       height={85}
                       width={85}
                     />
+                    <Box>
+                      <Text size="sm" weight={600} mb={2}>{t('title', { ns: 'navigation', defaultValue: 'Navigation' })}</Text>
+                      <Text size="xs" color="dimmed">{t('subtitle', { ns: 'navigation', defaultValue: 'Choose your destination' })}</Text>
+                    </Box>
                   </Group>
-                {opened && (
-                  <Box>                    <Text size="sm" weight={600} mb={2}>{t('title', { ns: 'navigation', defaultValue: 'Navigation' })}</Text>
-                    <Text size="xs" color="dimmed">{t('subtitle', { ns: 'navigation', defaultValue: 'Choose your destination' })}</Text>
-                  </Box>
+
+                ) : (
+                  <Image
+                    src="/logo_only.png"
+                    alt={t('app:logoAlt')}
+                    height={85}
+                    width={85}
+                  />
                 )}
               </Group>
             </Paper>
