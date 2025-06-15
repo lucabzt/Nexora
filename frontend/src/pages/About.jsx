@@ -101,12 +101,12 @@ function About() {
       bio: t('team.members.lucaBozzetti.bio'),
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3'
     },
-    {
+ /*   {
       name: 'Sebastian Rogg',
       role: t('team.members.sebastianRogg.role'),
       bio: t('team.members.sebastianRogg.bio'),
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3'
-    },
+    },*/
     {
       name: 'Matthias Meierlohr',
       role: t('team.members.matthiasMeierlohr.role'),
@@ -117,12 +117,13 @@ function About() {
       role: t('team.members.jonasHoerter.role'),
       bio: t('team.members.jonasHoerter.bio'),
       avatar: 'https://m.media-amazon.com/images/S/pv-target-images/16627900db04b76fae3b64266ca161511422059cd24062fb5d900971003a0b70._SX1080_FMjpg_.jpg'
-    },{
+    },
+    /*{
       name: 'Paul Vorderbrügge',
       role: t('team.members.paulVorderbruegge.role'),
       bio: t('team.members.paulVorderbruegge.bio'),
       avatar: 'https://cdn.vectorstock.com/i/1000v/73/85/avatar-portrait-bartender-gieen-bier-vector-16227385.jpg'
-    },
+    },*/
   ];
 
   return (
