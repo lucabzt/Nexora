@@ -158,7 +158,7 @@ class AgentService:
                 image_task = self.image_agent.run(
                     user_id=user_id,
                     state={},
-                    content=self.query_service.get_explainer_query(user_id, course_id, idx)
+                    content=self.query_service.get_explainer_query(user_id, course_id, idx, request.language, request.difficulty)
                 )
 
 
@@ -166,7 +166,7 @@ class AgentService:
                 response_code = await self.coding_agent.run(
                     user_id=user_id,
                     state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
-                    content=self.query_service.get_explainer_query(user_id, course_id, idx),
+                    content=self.query_service.get_explainer_query(user_id, course_id, idx, request.language, request.difficulty),
                 )
 
                 # Get response from tester agent
