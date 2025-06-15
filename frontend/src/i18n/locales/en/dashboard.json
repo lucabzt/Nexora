@@ -9,6 +9,8 @@
     "coursesCompleted": "Courses Completed",
     "currentStreak": "Current Streak",
     "days": "days",
+    "daysUnit": "days",
+    "hoursUnit": "hours",
     "totalHoursLearned": "Total Hours Learned",
     "currentStreakDescription": "Keep it up to build your learning habit.",
     "coursesCompletedDescription": "Each course is a step forward in your journey.",

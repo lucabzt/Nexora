@@ -9,6 +9,8 @@
     "coursesCompleted": "Abgeschlossene Kurse",
     "currentStreak": "Aktuelle Serie",
     "days": "Tage",
+    "daysUnit": "Tage",
+    "hoursUnit": "Stunden",
     "totalHoursLearned": "Gesamte Lernstunden",
     "currentStreakDescription": "Bleib dran, um deine Lerngewohnheit aufzubauen.",
     "coursesCompletedDescription": "Jeder Kurs ist ein Schritt nach vorne auf deiner Reise.",
