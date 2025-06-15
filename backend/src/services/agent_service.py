@@ -191,7 +191,6 @@ class AgentService:
                 )
 
                 # Save questions in db
-                question_objects = []
                 for q_data in response_tester['questions']:
                     q_db = questions_crud.create_multiple_choice_question(
                         db=db,
@@ -204,20 +203,10 @@ class AgentService:
                         correct_answer=q_data['correct_answer'],
                         explanation=q_data['explanation']
                     )
-                    question_objects.append({
-                        "id": q_db.id,
-                        "question": q_db.question,
-                        "answer_a": q_db.answer_a,
-                        "answer_b": q_db.answer_b,
-                        "answer_c": q_db.answer_c,
-                        "answer_d": q_db.answer_d,
-                        "correct_answer": q_db.correct_answer,
-                        "explanation": q_db.explanation
-                    })
-                    print(f"[{task_id}] Saved {len(question_objects)} questions for chapter {chapter_db.id}.")
-
                     #await ws_manager.send_json_message(task_id, {"type": "chapter", "data": chapter_response_data})
                     #print(f"[{task_id}] Sent chapter update for chapter {chapter_db.id}.")
+
+                print(f"[{task_id}] Saved {len(response_tester['questions'])} questions for chapter {chapter_db.id}.")
 
             # Update course status to finished
             courses_crud.update_course_status(db, course_id, CourseStatus.FINISHED)

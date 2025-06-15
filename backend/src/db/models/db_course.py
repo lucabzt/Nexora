@@ -63,6 +63,7 @@ class Chapter(Base):
     # Relationships
     course = relationship("Course", back_populates="chapters")
     mc_questions = relationship("MultipleChoiceQuestion", back_populates="chapter", cascade="all, delete-orphan")
+    ot_questions = relationship("OpenTextQuestion", back_populates="chapter", cascade="all, delete-orphan")
 
     # This makes ordering chapters by their index for a given course very fast.
     __table_args__ = (
@@ -80,7 +81,7 @@ class OpenTextQuestion(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
-    chapter = relationship("Chapter", back_populates="mc_questions")
+    chapter = relationship("Chapter", back_populates="ot_questions")
 
 
 class MultipleChoiceQuestion(Base):
