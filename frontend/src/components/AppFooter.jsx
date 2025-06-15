@@ -1,13 +1,20 @@
 import { Text, Box } from '@mantine/core';
 import LanguageSelector from '../components/LanguageSelector'; // Import LanguageSelector
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth, logout } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 function AppFooter() {
   const currentYear = new Date().getFullYear();
   const { t } = useTranslation(['footer', 'navigation']);
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <Box 
       sx={(theme) => ({
@@ -32,7 +39,14 @@ function AppFooter() {
         <a href="/about" style={{ color: 'inherit', textDecoration: 'underline', margin: '0 8px' }}>{t('about', { ns: 'navigation' })}</a>
         {' | '}
         {isAuthenticated && (
-          <a href="/logout" style={{ color: 'inherit', textDecoration: 'underline', margin: '0 8px' }}>{t('logout', { ns: 'navigation' })}</a>
+          <a href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              handleLogout();
+            }}
+            style={{ color: 'inherit', textDecoration: 'underline', margin: '0 8px', cursor: 'pointer' }}>
+              {t('logout', { ns: 'navigation' })}
+          </a>
         )}
       </Text>
     </Box>
