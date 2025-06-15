@@ -40,6 +40,8 @@ export const searchCoursesAndChapters = async (query) => {
       },
       // Add timeout to prevent hanging requests
       timeout: 10000,
+      // send cookies
+      withCredentials: true,
       // Don't retry failed requests automatically
       'axios-retry': {
         retries: 1,

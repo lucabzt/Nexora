@@ -29,6 +29,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from '../components/LanguageSelector';
 import AppFooter from '../components/AppFooter';
+import SearchBar from '../components/SearchBar';
+
 import {
   IconHome2,
   IconPlus,

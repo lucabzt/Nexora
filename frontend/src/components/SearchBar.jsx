@@ -5,6 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import { searchCoursesAndChapters, getResultUrl } from '../api/searchService';
 import { useDebouncedValue } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
+import { useCallback } from 'react';
+import { Box } from '@mantine/core';
+
 
 const SearchBar = () => {
   const { t } = useTranslation('common');
@@ -16,6 +19,9 @@ const SearchBar = () => {
   const [error, setError] = useState(null);
   const searchRef = useRef(null);
   const [debouncedQuery] = useDebouncedValue(searchQuery, 300);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const resultsRef = useRef(null);
+
 
   // Close dropdown when clicking outside or pressing Escape
   const closeDropdown = useCallback(() => {
