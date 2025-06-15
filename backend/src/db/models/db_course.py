@@ -69,19 +69,6 @@ class Chapter(Base):
         Index('ix_chapter_course_id_index', 'course_id', 'index'),
     )
 
-class OpenTextQuestion(Base):
-    """Open text questions for each chapter."""
-    __tablename__ = "open_text_questions"
-
-    id = Column(Integer, primary_key=True, index=True)
-    chapter_id = Column(Integer, ForeignKey("chapters.id"), nullable=False)
-    question = Column(Text, nullable=False)
-    correct_answer = Column(Text, nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    # Relationships
-    chapter = relationship("Chapter", back_populates="mc_questions")
-
 
 class MultipleChoiceQuestion(Base):
     """Multiple choice questions for each chapter."""

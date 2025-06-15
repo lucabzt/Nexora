@@ -193,7 +193,7 @@ class AgentService:
                 # Save questions in db
                 question_objects = []
                 for q_data in response_tester['questions']:
-                    q_db = questions_crud.create_multiple_choice_question(
+                    q_db = questions_crud.create_question(
                         db=db,
                         chapter_id=int(chapter_db.id),
                         question=q_data['question'],
