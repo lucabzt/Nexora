@@ -12,12 +12,12 @@ from google.adk.runners import Runner
 from google.genai import types
 from litellm import max_tokens
 
-from .code_checker import ESLintValidator, clean_up_response
+from ..code_checker.code_checker import ESLintValidator, clean_up_response
 from ..agent import StandardAgent
 from ..utils import load_instructions_from_files, create_text_query
 
 
-class ExplainerAgent(StandardAgent):
+class CodeWriterAgent(StandardAgent):
     def __init__(self, app_name: str, session_service):
         files = ["explainer_agent/instructions.txt"]
         files.extend([f"explainer_agent/plugin_docs/{filename}" for filename in os.listdir(os.path.join(os.path.dirname(__file__), "plugin_docs"))])
@@ -63,14 +63,14 @@ Please only include content about the chapter that is assigned to you in the fol
         )
 
 
-class CodeReviewAgent(StandardAgent):
+class CustomExplainerAgent(StandardAgent):
     """
     Custom loop agent to provide a feedback loop between the explainer and the react parser.
     I unfortunately cannot use adks loop agent because of missing functionality,
     see https://github.com/google/adk-python/issues/1235
     """
     def __init__(self, app_name: str, session_service, iterations = 5):
-        self.explainer = ExplainerAgent(app_name=app_name, session_service=session_service)
+        self.explainer = CodeWriterAgent(app_name=app_name, session_service=session_service)
         self.eslint = ESLintValidator()
         self.iterations = iterations
 

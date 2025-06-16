@@ -47,7 +47,7 @@ import {
   IconLanguage
 } from '@tabler/icons-react';
 
-const MainLink = ({ icon, color, label, to, isActive, collapsed, onNavigate }) => {
+export const MainLink = ({ icon, color, label, to, isActive, collapsed, onNavigate }) => {
   const navigate = useNavigate();
   const theme = useMantineTheme();
   
