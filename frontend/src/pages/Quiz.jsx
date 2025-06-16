@@ -256,146 +256,117 @@ const Quiz = ({ courseId, chapterId, onQuestionCountChange }) => {
     );
   }
 
-  const otQuestions = questions.filter(q => q.type === 'OT');
-  const mcQuestions = questions.filter(q => q.type === 'MC');
-  const hasOTQuestions = otQuestions.length > 0;
-  const hasMCQuestions = mcQuestions.length > 0;
-
   return (
     <Paper shadow="xs" p="md" withBorder>
-      {/* Open Text Questions */}
-      {otQuestions.map((question, qIndex) => (
-        <Card key={`ot-${question.id}`} mb="md" withBorder>
-          <Group position="apart" align="flex-start" mb="md" noWrap>
-            <Box sx={{ flex: 1, overflow: 'hidden' }}>
-              <Text weight={500}>
-                {qIndex + 1}. {question.question}
-              </Text>
-            </Box>
-            <Badge color="blue" size="sm" ml="xs">{t('quiz.badge.openText')}</Badge>
-            <Badge 
-              color={getQuestionColor(question, question.id)}
-              variant="outline" 
-              sx={{ whiteSpace: 'nowrap' }}
-            >
-              {getQuestionPoints(question, question.id)}
-            </Badge>
-          </Group>
-
-          {/* Show input field only if no feedback exists */}
-          {!questionFeedback[question.id] && !question.feedback ? (
-            <Box>
-              <Textarea
-                placeholder={t('quiz.openText.placeholder')}
-                value={otAnswers[question.id] || ''}
-                onChange={(e) => handleOTAnswerChange(question.id, e.target.value)}
-                minRows={3}
-                mb="md"
-              />
-              <Button
-                onClick={() => handleGradeOpenTextQuestion(question.id)}
-                loading={gradingQuestion === question.id}
-                disabled={!otAnswers[question.id]?.trim()}
-                color="blue"
-                size="sm"
+      {/* Questions in original order */}
+      {questions.map((question, index) => {
+        const isOT = question.type === 'OT';
+        const badgeColor = isOT ? 'blue' : 'green';
+        const badgeText = isOT ? t('quiz.badge.openText') : t('quiz.badge.multipleChoice');
+        
+        return (
+          <Card key={`${question.type}-${question.id}`} mb="md" withBorder>
+            <Group position="apart" align="flex-start" mb="md" noWrap>
+              <Box sx={{ flex: 1, overflow: 'hidden' }}>
+                <Text weight={500}>
+                  {index + 1}. {question.question}
+                </Text>
+              </Box>
+              <Badge color={badgeColor} size="sm" ml="xs">{badgeText}</Badge>
+              <Badge 
+                color={getQuestionColor(question, question.id)}
+                variant="outline" 
+                sx={{ whiteSpace: 'nowrap' }}
               >
-                {t('quiz.openText.gradeButton')}
-              </Button>
-            </Box>
-          ) : (
-            /* Show feedback view if feedback exists (either from state or from server) */
-            <Box>
-              <Textarea
-                value={otAnswers[question.id] || question.users_answer || ''}
-                minRows={3}
-                mb="md"
-                disabled
-                styles={{
-                  input: {
-                    backgroundColor: '#f8f9fa',
-                    color: '#495057',
-                    cursor: 'not-allowed',
-                  },
-                }}
-              />
-              {(questionFeedback[question.id]?.feedback || question.feedback) && (
-                <Alert
-                  color={getQuestionColor(question, question.id)}
-                  title={getFeedbackTitle(question, question.id) + ' (AI Feedback)'}
-                  mb="sm"
+                {getQuestionPoints(question, question.id)}
+              </Badge>
+            </Group>
+
+            {isOT ? (
+              /* Open Text Question */
+              !questionFeedback[question.id] && !question.feedback ? (
+                <Box>
+                  <Textarea
+                    placeholder={t('quiz.openText.placeholder')}
+                    value={otAnswers[question.id] || ''}
+                    onChange={(e) => handleOTAnswerChange(question.id, e.target.value)}
+                    minRows={3}
+                    mb="md"
+                  />
+                  <Button
+                    onClick={() => handleGradeOpenTextQuestion(question.id)}
+                    loading={gradingQuestion === question.id}
+                    disabled={!otAnswers[question.id]?.trim()}
+                    color="blue"
+                    size="sm"
+                  >
+                    {t('quiz.openText.gradeButton')}
+                  </Button>
+                </Box>
+              ) : (
+                /* Show feedback if exists */
+                <Box>
+                  <Textarea
+                    value={otAnswers[question.id] || question.users_answer || ''}
+                    minRows={3}
+                    mb="md"
+                    disabled
+                    styles={{
+                      input: {
+                        backgroundColor: '#f8f9fa',
+                        color: '#495057',
+                        cursor: 'not-allowed',
+                      },
+                    }}
+                  />
+                  {(questionFeedback[question.id]?.feedback || question.feedback) && (
+                    <Alert
+                      color={getQuestionColor(question, question.id)}
+                      title={getFeedbackTitle(question, question.id) + ' (AI Feedback)'}
+                      mb="sm"
+                    >
+                      <Text>{questionFeedback[question.id]?.feedback || question.feedback}</Text>
+                    </Alert>
+                  )}
+                </Box>
+              )
+            ) : (
+              /* Multiple Choice Question */
+              <>
+                <Radio.Group
+                  value={mcAnswers[question.id]}
+                  onChange={(value) => handleMCAnswerChange(question.id, value)}
+                  name={`question-${question.id}`}
+                  mb="md"
                 >
-                  <Text>{questionFeedback[question.id]?.feedback || question.feedback}</Text>
-                </Alert>
-              )}
-            </Box>
-          )}
-        </Card>
-      ))}
+                  <Radio value="a" label={question.answer_a} mb="xs" />
+                  <Radio value="b" label={question.answer_b} mb="xs" />
+                  <Radio value="c" label={question.answer_c} mb="xs" />
+                  <Radio value="d" label={question.answer_d} mb="xs" />
+                </Radio.Group>
 
-      {/* Multiple Choice Questions */}
-      {mcQuestions.map((question, qIndex) => (
-        <Card key={`mc-${question.id}`} mb="md" withBorder>
-          <Group position="apart" align="flex-start" mb="md" noWrap>
-            <Box sx={{ flex: 1, overflow: 'hidden' }}>
-              <Text weight={500}>
-                {otQuestions.length + qIndex + 1}. {question.question}
-              </Text>
-            </Box>
-            <Badge color="green" size="sm" ml="xs">{t('quiz.badge.multipleChoice')}</Badge>
-            <Badge 
-              color={getQuestionColor(question, question.id)}
-              variant="outline" 
-              sx={{ whiteSpace: 'nowrap' }}
-            >
-              {getQuestionPoints(question, question.id)}
-            </Badge>
-          </Group>
-
-          <Radio.Group
-            value={mcAnswers[question.id]}
-            onChange={(value) => handleMCAnswerChange(question.id, value)}
-            name={`question-${question.id}`}
-            mb="md"
-          >
-            <Radio value="a" label={question.answer_a} mb="xs" />
-            <Radio value="b" label={question.answer_b} mb="xs" />
-            <Radio value="c" label={question.answer_c} mb="xs" />
-            <Radio value="d" label={question.answer_d} mb="xs" />
-          </Radio.Group>
-
-          {(questionFeedback[question.id] || (question.users_answer && question.feedback)) && (
-            <Alert
-              color={
-                questionFeedback[question.id]?.is_correct ??
-                (question.users_answer === question.correct_answer) ? "green" : "red"
-              }
-              title={
-                questionFeedback[question.id]?.is_correct ??
-                (question.users_answer === question.correct_answer) ?
-                  t('quiz.alert.correctTitle') : t('quiz.alert.incorrectTitle')
-              }
-            >
-              <Text mb="xs">
-                {!(questionFeedback[question.id]?.is_correct ?? (question.users_answer === question.correct_answer)) && (
-                  <>{t('quiz.alert.theCorrectAnswerIs')} <strong>
-                    {question[`answer_${question.correct_answer}`]}
-                  </strong></>
+                {(questionFeedback[question.id] || (question.users_answer && question.feedback)) && (
+                  <Alert
+                    color={getQuestionColor(question, question.id)}
+                    title={getFeedbackTitle(question, question.id)}
+                  >
+                    <Text mb="xs">
+                      {!(questionFeedback[question.id]?.is_correct ?? (question.users_answer === question.correct_answer)) && (
+                        <>{t('quiz.alert.theCorrectAnswerIs')} <strong>
+                          {question[`answer_${question.correct_answer}`]}
+                        </strong></>
+                      )}
+                    </Text>
+                    {(questionFeedback[question.id]?.feedback || question.explanation) && (
+                      <Text>{questionFeedback[question.id]?.feedback || question.explanation}</Text>
+                    )}
+                  </Alert>
                 )}
-              </Text>
-              {(questionFeedback[question.id]?.feedback || question.explanation) && (
-                <Text>{t('quiz.alert.explanationLabel')} {questionFeedback[question.id]?.feedback || question.explanation}</Text>
-              )}
-            </Alert>
-          )}
-        </Card>
-      ))}
-
-      {/* Info message if only OT questions */}
-      {hasOTQuestions && !hasMCQuestions && (
-        <Alert color="blue" mt="md">
-          <Text>{t('quiz.otOnlyMessage')}</Text>
-        </Alert>
-      )}
+              </>
+            )}
+          </Card>
+        );
+      })}
     </Paper>
   );
 };

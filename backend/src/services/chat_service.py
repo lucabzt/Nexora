@@ -63,7 +63,9 @@ class ChatService:
             # Process the message through the chat agent
             info_response = await self.chat_agent.run(
                 user_id=user_id,
-                state={},
+                state={
+                    "chapter_content": "..."
+                },
                 chapter_id=chapter_id,
                 content=create_text_query(request.message),
             )

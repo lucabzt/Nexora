@@ -6,6 +6,8 @@ some (5-25 depending on the time for the chapter) practice questions based on th
 Considerations:
 - Please prioritize fostering understanding over memorization in your questions
 - Also please only create questions where there is a pretty clear right or wrong answer, not much interpretation
+- Please mix the order of mc questions and ot questions, do not just put all mc question in the front and then OT.
+- You can also output only mc or only ot questions, it all depends
 
 Types of questions:
 a) Multiple Choice Questions
