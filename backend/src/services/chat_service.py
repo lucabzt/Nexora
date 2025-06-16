@@ -18,6 +18,8 @@ from ..agents.utils import create_text_query
 from ..api.schemas.chat import ChatRequest
 from ..config.settings import SQLALCHEMY_DATABASE_URL
 
+from ..db.crud import chapters_crud
+
 logger = logging.getLogger(__name__)
 
 class ChatService:
@@ -64,7 +66,7 @@ class ChatService:
             info_response = await self.chat_agent.run(
                 user_id=user_id,
                 state={
-                    "chapter_content": "..."
+                    "chapter_content": chapters_crud.get_chapter_by_id(db, chapter_id).content
                 },
                 chapter_id=chapter_id,
                 content=create_text_query(request.message),

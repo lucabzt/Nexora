@@ -8,7 +8,7 @@ import json
 import os
 from typing import Dict, Any, Optional
 
-from PyQt6.QtCore.QProcess import state
+
 from google.adk.agents import LlmAgent
 from google.adk.agents.callback_context import CallbackContext
 from google.adk.models import LlmResponse
