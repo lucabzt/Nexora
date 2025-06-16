@@ -177,6 +177,8 @@ const Quiz = ({ courseId, chapterId, onQuestionCountChange }) => {
   const getQuestionColor = (question, questionId) => {
     const feedback = questionFeedback[questionId];
     let points = null;
+    const isOT = question.type === 'OT';
+    const maxPoints = isOT ? 2 : 1;
 
     if (feedback?.points_received !== undefined && feedback.points_received !== null) {
       points = feedback.points_received;
@@ -186,9 +188,12 @@ const Quiz = ({ courseId, chapterId, onQuestionCountChange }) => {
       return 'gray';
     }
 
+    // For MC questions (maxPoints = 1), 1/1 is green, 0/1 is red
+    // For OT questions (maxPoints = 2), 0/2 is red, 1/2 is yellow, 2/2 is green
     if (points === 0) return 'red';
-    if (points === 1) return 'yellow';
-    if (points === 2) return 'green';
+    if (points === 1 && maxPoints === 1) return 'green'; // 1/1 for MC
+    if (points === 1 && maxPoints === 2) return 'yellow'; // 1/2 for OT
+    if (points === 2) return 'green'; // 2/2 for OT
     return 'gray';
   };
 
@@ -210,6 +215,8 @@ const Quiz = ({ courseId, chapterId, onQuestionCountChange }) => {
   const getFeedbackTitle = (question, questionId) => {
     const feedback = questionFeedback[questionId];
     let points = null;
+    const isOT = question.type === 'OT';
+    const maxPoints = isOT ? 2 : 1; // MC questions have max 1 point, OT have max 2
 
     if (feedback?.points_received !== undefined && feedback.points_received !== null) {
       points = feedback.points_received;
@@ -219,10 +226,11 @@ const Quiz = ({ courseId, chapterId, onQuestionCountChange }) => {
       return null;
     }
 
+    // For MC questions (maxPoints = 1), 1/1 is always Correct
+    // For OT questions (maxPoints = 2), 1/2 is Partially Correct, 2/2 is Correct
     if (points === 0) return 'Incorrect';
-    if (points === 1) return 'Partially Correct';
-    if (points === 2) return 'Correct';
-    return null;
+    if (points === 1 && maxPoints === 2) return 'Partially Correct';
+    return 'Correct'; // This covers 1/1 for MC and 2/2 for OT
   };
 
   if (loading) {
