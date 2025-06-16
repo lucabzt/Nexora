@@ -44,7 +44,7 @@ const QuizPanel = ({
       {otQuestions.map((question, qIndex) => (
         <Card key={`ot-${question.id}`} mb="md" withBorder>
           <Text weight={500} mb="md">
-            {qIndex + 1}. {question.question} <Badge color="blue" size="sm">Open Text</Badge>
+            {qIndex + 1}. {question.question} <Badge color="blue" size="sm">{t('quiz.badge.openText')}</Badge>
           </Text>
 
           <Textarea
@@ -92,7 +92,7 @@ const QuizPanel = ({
       {mcQuestions.map((question, qIndex) => (
         <Card key={`mc-${question.id}`} mb="md" withBorder>
           <Text weight={500} mb="md">
-            {otQuestions.length + qIndex + 1}. {question.question} <Badge color="green" size="sm">Multiple Choice</Badge>
+            {otQuestions.length + qIndex + 1}. {question.question} <Badge color="green" size="sm">{t('quiz.badge.multipleChoice')}</Badge>
           </Text>
 
           <Radio.Group
