@@ -42,6 +42,19 @@
       "incorrectTitle": "Falsch",
       "theCorrectAnswerIs": "Die richtige Antwort ist:",
       "explanationLabel": "Erklärung:"
+    },
+    "openText": {
+      "placeholder": "Gib deine Antwort hier ein...",
+      "gradeButton": "Antwort bewerten",
+      "feedbackTitle": "KI-Feedback",
+      "pointsReceived": "Punkte erhalten",
+      "feedback": "Rückmeldung",
+      "expectedAnswer": "Erwartete Antwort"
+    },
+    "otOnlyMessage": "Bewerte jede deiner Antworten, um Feedback von unserem KI-Tutor zu erhalten.",
+    "badge": {
+      "openText": "Freitext",
+      "multipleChoice": "Multiple Choice"
     }
   }
 }

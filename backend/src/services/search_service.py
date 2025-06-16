@@ -1,8 +1,12 @@
+import traceback
+from typing import List
+import datetime
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from sqlalchemy.exc import SQLAlchemyError
+
 
 from ..db.crud.courses_crud import search_courses
-from ..db.crud.chapters_crud import search_chapters
+from ..db.crud.chapters_crud import search_chapters_no_content, search_chapters_indexed
 from ..api.schemas.search import SearchResult
 
 async def search_courses_and_chapters(
@@ -29,18 +33,37 @@ async def search_courses_and_chapters(
     
     # Search for matching courses and chapters using CRUD functions
     print("Searching for courses and chapters...")
-    courses = search_courses(db, query, user_id=user_id, limit=limit)
-    print("Found courses:", len(courses))
-    chapters = search_chapters(db, query, user_id=user_id, limit=limit)
-    print("Found chapters:", len(chapters))
+
+    try:
+        #current_time = datetime.datetime.now()
+        courses = search_courses(db, query, user_id=user_id, limit=limit)
+        #time_d = datetime.datetime.now() - current_time
+        #print("Found courses:", len(courses), " in ", time_d.total_seconds() * 1000, " milliseconds")
+
+        #current_time = datetime.datetime.now()
+        chapters = search_chapters_no_content(db, query, user_id=user_id, limit=limit)
+        #time_d = datetime.datetime.now() - current_time
+        #print("Found chapters:", len(chapters), " in ", time_d.total_seconds() * 1000, " milliseconds")
+        if not chapters or len(chapters) == 0:
+            # If no chapters found, try searching indexed chapters
+            #current_time = datetime.datetime.now()
+            print("No chapters found, trying indexed search...")
+            chapters = search_chapters_indexed(db, query, user_id=user_id, limit=limit)
+            #time_d = datetime.datetime.now() - current_time
+            #print("Found chapters (2):", len(chapters_2), " in ", time_d.total_seconds() * 1000, " milliseconds")
     
+    except SQLAlchemyError as e:
+        print("Error searching indexed chapters:", e, traceback.format_exc())
+        return []
+
+        
     # Convert courses to search results
     course_results = [
         SearchResult(
             id=str(course.id),
             type="course",
-            title=course.title,
-            description=course.description,
+            title=str(course.title),
+            description=str(course.description),
             course_id=str(course.id)  # For consistency with chapters
         )
         for course in courses

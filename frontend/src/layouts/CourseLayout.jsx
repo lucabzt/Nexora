@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Outlet, Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
-import { 
-  AppShell, 
+import { Outlet, Link as RouterLink, useNavigate, useLocation, useParams } from 'react-router-dom';
+import {
+  AppShell,
   Navbar,
-  Image, 
-  Header, 
-  MediaQuery, 
-  Burger, 
+  Image,
+  Header,
+  MediaQuery,
   Title,
   UnstyledButton,
   Group,
@@ -21,8 +20,10 @@ import {
   Badge,
   Divider,
   Paper,
-  Transition,
-  Stack
+  Stack,
+  Loader,
+  Alert,
+  Progress
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { useAuth } from '../contexts/AuthContext';
@@ -30,6 +31,9 @@ import { useTranslation } from 'react-i18next';
 import LanguageSelector from '../components/LanguageSelector';
 import AppFooter from '../components/AppFooter';
 import SearchBar from '../components/SearchBar';
+import ChapterSidebar from '../components/ChapterSidebar';
+import { courseService } from '../api/courseService';
+
 
 import {
   IconHome2,
@@ -44,96 +48,34 @@ import {
   IconChevronRight,
   IconSparkles,
   IconShieldCheck,
-  IconLanguage
+  IconLanguage,
+  IconAlertCircle
 } from '@tabler/icons-react';
 
-const MainLink = ({ icon, color, label, to, isActive, collapsed, onNavigate }) => {
-  const navigate = useNavigate();
-  const theme = useMantineTheme();
-  
-  const handleClick = () => {
-    navigate(to);
-    if (onNavigate) {
-      onNavigate(); // Call the callback to close navbar on mobile
-    }
-  };
-  
-  return (
-    <UnstyledButton
-      onClick={handleClick}
-      sx={(theme) => ({
-        display: 'block',
-        width: '100%',
-        // Make menu items higher and all the same size
-        minHeight: 32,
-        height: 48,
-        padding: collapsed ? `16px 0` : `16px 16px 16px 16px`, // Adjust padding when collapsed
-        borderRadius: theme.radius.md,
-        marginBottom: theme.spacing.xs,
-        color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.black,
-        backgroundColor: isActive ? 
-          (theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[1]) :
-          'transparent',
-        border: `1px solid ${isActive ? 
-          (theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]) :
-          'transparent'}`,
-        transition: 'all 0.2s ease',
-        position: 'relative',
-        overflow: 'hidden',
-      })}
-    >
-      <Group spacing={collapsed ? 0 : 18} position={collapsed ? "center" : "left"} sx={{ position: 'relative', zIndex: 1, height: '100%', flexWrap: 'nowrap' }}>
-        <ThemeIcon 
-          color={color} 
-          variant="light" 
-          size="lg"
-          sx={{
-            background: `linear-gradient(135deg, ${theme.colors[color][6]}20, ${theme.colors[color][4]}10)`,
-            border: `1px solid ${theme.colors[color][6]}30`,
-            marginLeft: collapsed ? 0 : 4, // Adjust margins when collapsed
-            marginRight: collapsed ? 0 : 8,
-          }}
-        >
-          {icon}
-        </ThemeIcon>
-        {!collapsed && (
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Text size="md" weight={600} mb={2} sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</Text>
-            <Box 
-              sx={{ 
-                height: 3, 
-                background: `linear-gradient(90deg, ${theme.colors[color][6]}, ${theme.colors[color][4]})`,
-                borderRadius: 2,
-                width: isActive ? '100%' : '0%',
-                transition: 'width 0.3s ease',
-              }} 
-            />
-          </Box>
-        )}
-        {!collapsed && (
-          <IconChevronRight 
-            size={18} 
-            style={{ 
-              opacity: 0.6,
-              transition: 'transform 0.2s ease',
-              marginLeft: 8
-            }}
-          />
-        )}
-      </Group>
-    </UnstyledButton>
-  );
-};
-
-function AppLayout() {
+function CourseLayout() {
   const theme = useMantineTheme();
   const navigate = useNavigate();
+  const { courseId } = useParams();
+  
   const { user, logout } = useAuth();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const { t } = useTranslation(['navigation', 'app', 'settings']);
+  const { chapterId } = useParams();
   const dark = colorScheme === 'dark';
   // Check if we're on mobile
   const isMobile = useMediaQuery('(max-width: 768px)');
+
+  const [course, setCourse] = useState(null);
+  const [chapters, setChapters] = useState([]); // ADDED: Dedicated state for chapters
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const [creationProgressUI, setCreationProgressUI] = useState({
+    statusText: t('creation.statusInitializing'),
+    percentage: 0,
+    chaptersCreated: 0,
+    estimatedTotal: 0,
+  });
   
   // Set default navbar state based on device type - closed on mobile, opened on desktop
   const [opened, setOpened] = useState(!isMobile);
@@ -187,6 +129,55 @@ function AppLayout() {
     logout();
     navigate('/login');
   };
+
+  // Initial data fetch
+    useEffect(() => {
+      if (!courseId) {
+        setError(t('errors.invalidCourseId'));
+        setLoading(false);
+        return;
+      }
+  
+      const fetchInitialCourseData = async () => {
+        try {
+          setLoading(true);
+          console.log('Fetching initial course data for ID:', courseId);
+          const [courseData, currentChaptersData] = await Promise.all([ // CHANGED: Renamed variable for clarity
+            courseService.getCourseById(courseId),
+            courseService.getCourseChapters(courseId)
+          ]);
+          const currentChapters = currentChaptersData || []; // Ensure chapters is an array
+  
+          setCourse(courseData);
+          setChapters(currentChapters); // ADDED: Populate the new chapters state
+          setError(null);
+  
+          // Initialize creationProgressUI if course is in creating state
+          if (courseData.status === 'CourseStatus.CREATING') {
+            const totalChapters = courseData.chapter_count || 0;
+            const progressPercent = totalChapters > 0 ? Math.round((currentChapters.length / totalChapters) * 100) : 0;
+  
+            setCreationProgressUI({
+              statusText: t('creation.statusCreatingChapters', {
+                chaptersCreated: currentChapters.length,
+                totalChapters: totalChapters || t('creation.unknownTotal')
+              }),
+              percentage: progressPercent,
+              chaptersCreated: currentChapters.length,
+              estimatedTotal: totalChapters,
+            });
+          }
+          console.log('Initial data fetched:', courseData, 'Chapters:', currentChapters);
+        } catch (err) {
+          setError(t('errors.loadFailed'));
+          console.error('Error fetching initial course:', err);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchInitialCourseData();
+    }, [courseId, t]);
   return (    <AppShell
       styles={{
         main: {
@@ -216,23 +207,11 @@ function AppLayout() {
             position: 'relative', // Ensure stacking context
           })}
         ><div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-            <Burger
-              opened={opened}
-              onClick={() => setOpened((o) => !o)}
-              size="sm"
-              color={theme.colors.gray[6]}
-              mr="xl"
-              sx={{
-                transition: 'transform 0.2s ease',
-                '&:hover': {
-                  transform: 'scale(1.05)',
-                },
-                display: 'flex', // Ensure it's always visible
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-              aria-label={t('burgerAriaLabel', { ns: 'app', defaultValue: 'Toggle navigation' })}
-            />
+            <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
+              <Button component={RouterLink} to="/dashboard" variant="default" size="sm" mr="xl">
+                <IconHome2 size={20} />
+              </Button>
+            </MediaQuery>
 
             <Group spacing="xs">
               
@@ -271,21 +250,10 @@ function AppLayout() {
             
             <Box sx={{ flexGrow: 1 }} />
             
-            {/* Search Bar - Centered */}
-            <Box sx={{
-              position: 'absolute',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: '100%',
-              maxWidth: 500,
-              padding: '0 20px',
-              zIndex: 1,
-              '@media (max-width: 900px)': {
-                display: 'none',
-              },
-            }}>
-              <SearchBar />
-            </Box>
+            {/* Course Title */}
+            <Title>
+              {course && course.name + chapterId && "-" + chapters[chapterId].name}
+            </Title>
             
             {/* Spacer to balance the flex layout */}
             <Box sx={{ flex: 1, '@media (min-width: 901px)': { visibility: 'hidden' } }} />
@@ -324,17 +292,6 @@ function AppLayout() {
                         >
                           {!avatarSrc && user.username ? user.username.substring(0, 2).toUpperCase() : (!avatarSrc ? <IconUser size={18} /> : null)}
                         </Avatar>
-                        <Box>
-                          <Text size="sm" weight={500}>{user.username}</Text>
-                          <Badge 
-                            size="xs" 
-                            variant="light" 
-                            color="cyan"
-                            sx={{ textTransform: 'none' }}
-                          >
-                            {t('onlineStatusBadge', { ns: 'app', defaultValue: 'Online' })}
-                          </Badge>
-                        </Box>
                       </Group>
                     </UnstyledButton>
                   </Menu.Target> 
@@ -476,19 +433,41 @@ function AppLayout() {
           </Navbar.Section>
           
           <Navbar.Section grow mt="xs">
-            <Stack spacing="xs">
-              {mainLinksComponents}
-            </Stack>
+            {chapterId ? (
+              <ChapterSidebar course={course} chapters={chapters} />
+            ) : (
+              <Stack spacing="xs">
+                {mainLinksComponents}
+              </Stack>
+            )}
           </Navbar.Section>
         </Navbar>
       }
     >
-      <Box sx={{ flex: 1 }}>
-        <Outlet />
+      <Box sx={{ flex: 1, position: 'relative' }}>
+        {loading ? (
+          <Group position="center" mt="xl">
+            <Loader />
+          </Group>
+        ) : error ? (
+          <Alert icon={<IconAlertCircle size={16} />} title="Error" color="red" variant="light">
+            {error}
+          </Alert>
+        ) : (
+          <>
+            {course?.status === 'CourseStatus.CREATING' && creationProgressUI.percentage > 0 && (
+              <Paper withBorder p="md" mb="md" shadow="xs">
+                <Text size="sm" weight={500}>{creationProgressUI.statusText}</Text>
+                <Progress value={creationProgressUI.percentage} mt="sm" animate />
+              </Paper>
+            )}
+            <Outlet />
+          </>
+        )}
       </Box>
       {!useLocation().pathname.match(/^\/dashboard\/courses\/.*\/chapters\/.*$/) && <AppFooter />}
     </AppShell>
   );
 }
 
-export default AppLayout;
+export default CourseLayout;

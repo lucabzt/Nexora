@@ -92,7 +92,7 @@ function ToolbarContainer({ courseId, chapterId }) {
           }}
         >
           {toolbarOpen 
-            ? <IconChevronLeft size={22} aria-label={t('buttons.closeToolbar')} /> 
+            ? <IconChevronRight size={22} aria-label={t('buttons.closeToolbar')} /> 
             : activeTab === TOOL_TABS.PLOTTER ? <IconChartLine size={22} aria-label={t('buttons.openPlotter')} /> 
             : activeTab === TOOL_TABS.CHAT ? <IconMessage size={22} aria-label={t('buttons.openChat')} /> 
             : <IconNote size={22} aria-label={t('buttons.openNotes')} />
