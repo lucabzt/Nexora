@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { ActionIcon, Box, Tabs, useMantineTheme } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@mantine/hooks';
-import { IconChartLine, IconMessage, IconChevronLeft, IconNote } from '@tabler/icons-react';
+import { IconChartLine, IconMessage, IconChevronLeft, IconNote, IconTool } from '@tabler/icons-react';
 import { Resizable } from 're-resizable';
 import GeoGebraPlotter from './GeoGebraPlotter';
 import ChatTool from './ChatTool';
@@ -95,7 +95,7 @@ function ToolbarContainer({ courseId, chapterId }) {
             ? <IconChevronRight size={22} aria-label={t('buttons.closeToolbar')} /> 
             : activeTab === TOOL_TABS.PLOTTER ? <IconChartLine size={22} aria-label={t('buttons.openPlotter')} /> 
             : activeTab === TOOL_TABS.CHAT ? <IconMessage size={22} aria-label={t('buttons.openChat')} /> 
-            : <IconNote size={22} aria-label={t('buttons.openNotes')} />
+            : <IconTool size={22} aria-label={t('buttons.openNotes')} />
           }
         </ActionIcon>
       )}

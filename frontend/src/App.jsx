@@ -14,7 +14,6 @@ import './i18n/i18n'; // Import i18n configuration
 // Pages
 import Dashboard from './pages/Dashboard';
 import CreateCourse from './pages/CreateCourse';
-import CourseLayout from './layouts/CourseLayout';
 import CourseView from './pages/CourseView';
 import ChapterView from './pages/ChapterView';
 import Login from './pages/Login';
@@ -92,8 +91,7 @@ function App() {
                     <Route path="statistics" element={<StatisticsPage />} /> {/* /dashboard/statistics */}
                   </Route>
                 </Route>
-
-                {/* Admin-only routes - Using AppLayout for consistent interface */}
+                  {/* Admin-only routes - Using AppLayout for consistent interface */}
                 <Route element={<AdminProtectedRoute />}>
                   <Route path="/admin" element={<AppLayout />}>
                     <Route index element={<AdminView />} />
