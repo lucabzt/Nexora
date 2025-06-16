@@ -8,6 +8,7 @@ import json
 import os
 from typing import Dict, Any, Optional
 
+from PyQt6.QtCore.QProcess import state
 from google.adk.agents import LlmAgent
 from google.adk.agents.callback_context import CallbackContext
 from google.adk.models import LlmResponse
@@ -58,7 +59,7 @@ class ChatAgent:
                 session = await self.session_service.get_session(
                     app_name=self.app_name,
                     user_id=user_id,
-                    session_id=str(chapter_id)
+                    session_id=str(chapter_id),
                 )
                 if not session:
                     session = await self.session_service.create_session(
