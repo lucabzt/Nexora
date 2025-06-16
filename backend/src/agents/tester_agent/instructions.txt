@@ -61,3 +61,5 @@ return (
 
 Your react code should always be in the following format:
 () => {<code>}
+
+In the following you will see all the plugins you can use and how to use them.

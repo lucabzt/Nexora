@@ -15,6 +15,7 @@ import {
 } from '@mantine/core';
 import { toast } from 'react-toastify';
 import { courseService } from '../api/courseService';
+import AiCodeWrapper from "../components/AiCodeWrapper.jsx";
 
 const Quiz = ({ courseId, chapterId, onQuestionCountChange }) => {
   const { t } = useTranslation('chapterView');
@@ -277,7 +278,7 @@ const Quiz = ({ courseId, chapterId, onQuestionCountChange }) => {
             <Group position="apart" align="flex-start" mb="md" noWrap>
               <Box sx={{ flex: 1, overflow: 'hidden' }}>
                 <Text weight={500}>
-                  {index + 1}. {question.question}
+                  {index + 1}.
                 </Text>
               </Box>
               <Badge color={badgeColor} size="sm" ml="xs">{badgeText}</Badge>
@@ -289,6 +290,11 @@ const Quiz = ({ courseId, chapterId, onQuestionCountChange }) => {
                 {getQuestionPoints(question, question.id)}
               </Badge>
             </Group>
+            <Box mb="md">
+              <AiCodeWrapper Background={false}>
+                {question.question}
+              </AiCodeWrapper>
+            </Box>
 
             {isOT ? (
               /* Open Text Question */

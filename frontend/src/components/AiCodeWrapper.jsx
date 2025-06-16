@@ -27,7 +27,7 @@ const ModifiedRF = {
 };
 
 // Main function that shows the content
-function AiCodeWrapper({ children }) {
+function AiCodeWrapper({ children, Background = true }) {
   const plugins = "Latex, Recharts, Plot, SyntaxHighlighter, dark, RF, motion";
   const header = `(props) => 
   { const {${plugins}} = props;`;
@@ -77,24 +77,31 @@ function AiCodeWrapper({ children }) {
     </div>
   );
 
-  return (
-    <PaperBackground>
-      <Suspense fallback={<Loader />}>
-        <SafeComponent
-          code={decodedString}
-          data={{
-            Latex,
-            Recharts,
-            Plot: LazyPlot,
-            SyntaxHighlighter,
-            dark,
-            RF: ModifiedRF,
-            motion
-          }}
-        />
-      </Suspense>
-    </PaperBackground>
+  const content = (
+    <Suspense fallback={<Loader />}>
+      <SafeComponent
+        code={decodedString}
+        data={{
+          Latex,
+          Recharts,
+          Plot: LazyPlot,
+          SyntaxHighlighter,
+          dark,
+          RF: ModifiedRF,
+          motion
+        }}
+      />
+    </Suspense>
   );
+
+  if (Background) {
+    return (
+        <PaperBackground>
+          {content}
+        </PaperBackground>
+    )
+  }
+  return content;
 }
 
 

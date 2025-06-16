@@ -15,3 +15,4 @@ Usage Example:
 }
 
 Please always use style={dark}, no other styles.
+You do not need to import the dark style, you can just use it right away.

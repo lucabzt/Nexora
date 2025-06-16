@@ -12,7 +12,7 @@ from google.adk.runners import Runner
 from google.genai import types
 from litellm import max_tokens
 
-from .code_checker import ESLintValidator, clean_up_response
+from ..code_checker.code_checker import ESLintValidator, clean_up_response
 from ..agent import StandardAgent
 from ..utils import load_instructions_from_files, create_text_query
 
