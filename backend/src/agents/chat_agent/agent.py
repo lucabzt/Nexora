@@ -8,6 +8,7 @@ import json
 import os
 from typing import Dict, Any, Optional
 
+
 from google.adk.agents import LlmAgent
 from google.adk.agents.callback_context import CallbackContext
 from google.adk.models import LlmResponse
@@ -19,7 +20,8 @@ from ..agent import StructuredAgent
 from ..utils import load_instruction_from_file
 
 from google.adk.sessions import DatabaseSessionService
-
+from google.adk.runners import RunConfig
+from google.adk.agents.run_config import StreamingMode
 
 
 class ChatAgent:
@@ -31,7 +33,7 @@ class ChatAgent:
         # Call the base class constructor
         self.chat_agent = LlmAgent(
             name="chat_agent",
-            model="gemini-1.5-flash-8b",
+            model="gemini-2.5-flash-preview-05-20",
             description="Agent for creating a small chat for a course",
             instruction=load_instruction_from_file("chat_agent/instructions.txt"),
         )
@@ -45,16 +47,25 @@ class ChatAgent:
         )
 
 
-
-    async def run(self, user_id: str, chapter_id, state: dict, content: types.Content, debug: bool = False, max_retries: int = 1, retry_delay: float = 2.0) -> Dict[str, Any]:
-        last_error = None
+    async def run(self, user_id: str, chapter_id, state: dict, content: types.Content, debug: bool = False, max_retries: int = 1, retry_delay: float = 2.0):
+        """Run the chat agent with retry logic and streaming support.
         
-        for attempt in range(max_retries + 1):  # +1 for the initial attempt
+        Args:
+            user_id: The ID of the user
+            chapter_id: The ID of the chapter
+            state: The state to initialize the session with
+            content: The content to process
+            debug: Whether to enable debug logging
+            max_retries: Maximum number of retry attempts
+            retry_delay: Delay between retries in seconds
+            
+        Yields:
+            tuple: (text: str, is_final: bool) - The text content and whether it's the final response
+        """
+        last_error = None
+        for attempt in range(1, max_retries + 1):
             try:
-                if debug:
-                    print(f"[Debug] Running agent with state: {json.dumps(state, indent=2)}")
-
-                # Create session
+                # Get or create a session for this user and chapter
                 session = await self.session_service.get_session(
                     app_name=self.app_name,
                     user_id=user_id,
@@ -69,48 +80,53 @@ class ChatAgent:
                     )
                 session_id = session.id
 
-                # We iterate through events to find the final answer
-                async for event in self.runner.run_async(user_id=user_id, session_id=session_id, new_message=content):
+                # We iterate through events and yield them as they come in
+                async for event in self.runner.run_async(
+                    user_id=user_id,
+                    session_id=session_id,
+                    new_message=content,
+                    run_config=RunConfig(streaming_mode=StreamingMode.SSE)
+                ):
                     if debug:
                         print(f"  [Event] Author: {event.author}, Type: {type(event).__name__}, Final: {event.is_final_response()}, Content: {event.content}")
 
-                    # is_final_response() marks the concluding message for the turn
+                    # Check for text content in the event
+                    if event.content and event.content.parts:
+                        # Yield each text part
+                        for part in event.content.parts:
+                            if hasattr(part, 'text') and part.text:
+                                yield part.text, event.is_final_response()
+                    
+                    # Handle final response or errors
                     if event.is_final_response():
-                        if event.content and event.content.parts:
-                            # Assuming text response in the first part
-                            return {
-                                "status": "success",
-                                "explanation": event.content.parts[0].text  # TODO rename to output/content
-                            }
-                        elif event.actions and event.actions.escalate:  # Handle potential errors/escalations
+                        if event.actions and event.actions.escalate:
                             error_msg = f"Agent escalated: {event.error_message or 'No specific message.'}"
                             if attempt >= max_retries:
-                                return {"status": "error", "message": error_msg}
+                                raise Exception(error_msg)
                             last_error = error_msg
-                            break  # Break out of event loop to trigger retry
+                            break
+                        return  # Successfully completed
                 
                 # If we get here, no final response was received
                 error_msg = "Agent did not give a final response. Unknown error occurred."
                 if attempt >= max_retries:
-                    return {"status": "error", "message": error_msg}
+                    raise Exception(error_msg)
                 last_error = error_msg
                 
             except Exception as e:
                 if attempt >= max_retries:
-                    raise  # Re-raise the exception if we've exhausted our retries
+                    # Yield the error as a final message
+                    yield f"Error: {str(e)}", True
+                    return
                 last_error = str(e)
                 if debug:
-                    print(f"[RETRY] Attempt {attempt + 1} failed, retrying in {retry_delay} seconds... Error: {last_error}")
+                    print(f"[RETRY] Attempt {attempt} failed, retrying in {retry_delay} seconds... Error: {last_error}")
                 
-            # Only sleep if we're going to retry
-            if attempt < max_retries:
-                import asyncio
-                await asyncio.sleep(retry_delay)
+                # Only sleep if we're going to retry
+                if attempt < max_retries:
+                    import asyncio
+                    await asyncio.sleep(retry_delay)
         
-        # This should theoretically never be reached due to the raise/return above
-        return {
-            "status": "error",
-            "message": f"Max retries exceeded. Last error: {last_error}",
-        }
-
-
+        # If we've exhausted all retries
+        error_msg = f"Max retries exceeded. Last error: {last_error}"
+        yield error_msg, True

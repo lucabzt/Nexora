@@ -12,6 +12,7 @@ from ...db.models.db_user import User
 from ...services.chat_service import chat_service
 from ...utils.auth import get_current_active_user
 from ..schemas.chat import ChatRequest, ChatResponse
+from ...db.crud import chapters_crud
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +90,12 @@ async def chat_with_agent(
         HTTPException: If validation fails or an error occurs
     """
     try:
+        chapter = chapters_crud.get_chapter_by_id(db, chapter_id)
+        if not chapter:
+            raise HTTPException(status_code=404, detail="Chapter not found")
+        if chapter.course.user_id != current_user.id:
+            raise HTTPException(status_code=403, detail="You do not have access to this chapter")
+
         # Validate the request
         _validate_chat_request(chat_request)
         
