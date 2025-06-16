@@ -103,6 +103,9 @@ class AgentService:
             images = images_crud.get_images_by_ids(db, request.picture_ids)
             print(f"[{task_id}] Retrieved {len(docs)} documents and {len(images)} images.")
 
+            #Add Data to ChromaDB for RAG
+            
+
             # Get a short course title and description from the info_agent
             info_response = await self.info_agent.run(
                 user_id=user_id,
