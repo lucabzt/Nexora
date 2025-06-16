@@ -3,6 +3,8 @@ import PaperBackground from "./PaperBackground.jsx";
 import { ErrorBoundary } from 'react-error-boundary';
 const LazyStringToReactComponent = lazy(() => import('string-to-react-component'));
 import he from 'he';
+import { useTranslation } from 'react-i18next';
+
 
 // Plugins/Libraries available to the agent
 import 'katex/dist/katex.min.css';
@@ -34,9 +36,50 @@ function AiCodeWrapper({ children }) {
 
   const decodedString = he.decode(full_react_component);
 
+  // Get translations
+  const { t } = useTranslation('common');
+
+  // Beautiful loading component with animation
+  const Loader = () => (
+    <div className="flex flex-col items-center justify-center min-h-[300px] p-8">
+      <div className="relative w-20 h-20 mb-6">
+        {/* Spinner */}
+        <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
+        <div className="absolute inset-0 border-4 border-t-blue-500 border-r-blue-500 rounded-full animate-spin"></div>
+        
+        {/* Center dot */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+        </div>
+      </div>
+      
+      <h3 className="text-xl font-semibold text-gray-700 mb-2">
+        {t('loader.loadingContent')}
+      </h3>
+      <p className="text-gray-500 text-center max-w-md">
+        {t('loader.preparingComponents')}
+      </p>
+      
+      {/* Subtle animation */}
+      <div className="mt-6 flex space-x-2">
+        {[1, 2, 3].map((i) => (
+          <div 
+            key={i}
+            className="w-2 h-2 bg-blue-300 rounded-full animate-bounce"
+            style={{
+              animationDelay: `${i * 0.15}s`,
+              animationDuration: '1s',
+              animationIterationCount: 'infinite'
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+
   return (
     <PaperBackground>
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<Loader />}>
         <SafeComponent
           code={decodedString}
           data={{

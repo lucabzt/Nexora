@@ -391,7 +391,7 @@ function CourseView() {
                     <Button
                       variant="subtle"
                       leftIcon={<IconArrowBack size={16} />}
-                      onClick={() => navigate('/')}
+                      onClick={() => navigate('/dashboard')}
                       mb="md"
                     >
                       {t('buttons.backToDashboard')}
@@ -459,7 +459,6 @@ function CourseView() {
                         </ThemeIcon>
                         <div>
                           <Text size="md" weight={700}>{course.total_time_hours || "..."} hours</Text>
-                          <Text size="xs" color="dimmed">{t('progress.learningTimeLabel')}</Text>
                         </div>
                       </Group>
                     </Box>
@@ -477,8 +476,6 @@ function CourseView() {
                       {learningPercentage > 0 ? t('buttons.continueLearning') : t('buttons.startLearning')}
                     </Button>
                   )}
-
-                  <Text size="xs" color="dimmed" mt={30}>{t('sessionIdLabel')} {course.session_id || 'N/A'}</Text>
                 </Box>
               </Grid.Col>
 

@@ -22,7 +22,10 @@ const processQueue = (error) => {
 };
 
 apiWithCookies.interceptors.response.use(
-  response => response,
+  response => {
+    // Return the response as-is, preserving the responseType
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
 
@@ -30,20 +33,29 @@ apiWithCookies.interceptors.response.use(
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
-        }).then(() => apiWithCookies(originalRequest));
+        }).then(() => {
+          // Preserve the original responseType when retrying
+          if (originalRequest.responseType) {
+            originalRequest.responseType = originalRequest.responseType;
+          }
+          return apiWithCookies(originalRequest);
+        });
       }
 
       originalRequest._retry = true;
       isRefreshing = true;
 
       try {
-        await axios.post('/api/auth/refresh', null, { withCredentials: true }); // Refresh-Call
+        await axios.post('/api/auth/refresh', null, { withCredentials: true });
         processQueue(null);
-        return apiWithCookies(originalRequest); // Ursprünglichen Request wiederholen
+        // Preserve the original responseType when retrying
+        if (originalRequest.responseType) {
+          originalRequest.responseType = originalRequest.responseType;
+        }
+        return apiWithCookies(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError);
-        // Log the refresh error
-        if ( typeof window !== 'undefined' && 
+        if (typeof window !== 'undefined' && 
             window.location.pathname !== '/login') {
           window.location.href = '/login';
         }

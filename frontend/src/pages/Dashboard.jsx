@@ -463,7 +463,7 @@ function Dashboard() {
               rightIcon={<IconArrowUpRight size={16} />}
               onClick={() => setViewAllCourses(!viewAllCourses)}
             >
-              {viewAllCourses ? t('viewLess') : t('viewAll')}
+              {viewAllCourses ? t('viewLessButton') : t('viewAllButton')}
             </Button>
           </Group>
 

@@ -74,5 +74,30 @@ def get_all_courses(db: Session) -> List[Course]:
 
 def get_all_course_ids(db: Session) -> List[int]:
     """Get all course IDs"""
-    results = db.query(Course.id).all()
-    return [result[0] for result in results]
+    return [course[0] for course in db.query(Course.id).all()]
+
+
+def search_courses(db: Session, query: str, user_id: str, limit: int = 10) -> List[Course]:
+    """
+    Search for courses where title or description contains the query string (case-insensitive).
+    
+    Args:
+        db: Database session
+        query: Search string
+        limit: Maximum number of results to return
+        
+    Returns:
+        List of matching Course objects
+    """
+    search = f"%{query}%"
+    return (
+        db.query(Course)
+        .filter(
+            (Course.user_id == user_id)
+        )
+        .filter(
+            (Course.title.ilike(search)) | (Course.description.ilike(search))
+        )
+        .limit(limit)
+        .all()
+    )

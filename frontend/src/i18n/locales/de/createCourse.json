@@ -2,7 +2,27 @@
   "title": "Neuen Lernkurs erstellen",
   "mainTitle": "Neuen Lernkurs erstellen",
   "form": {
+    "language": {
+      "label": "Kurssprache",
+      "placeholder": "Kurssprache auswählen",
+      "options": {
+        "english": "Englisch",
+        "german": "Deutsch"
+      }
+    },
+    "difficulty": {
+      "label": "Schwierigkeitsgrad",
+      "placeholder": "Schwierigkeitsgrad auswählen",
+      "options": {
+        "beginner": "Anfänger",
+        "intermediate": "Mittelstufe",
+        "advanced": "Fortgeschritten",
+        "university": "Universitätsniveau"
+      }
+    },
     "duration": {
+      "label": "Kursdauer",
+      "description": "Geschätzte Dauer des Kurses in Stunden",
       "value": "{{count}} Stunde",
       "value_plural": "{{count}} Stunden"
     },
@@ -18,7 +38,8 @@
     },
     "validation": {
       "topicRequired": "Thema ist erforderlich",
-      "timePositive": "Zeit muss größer als 0 sein"
+      "timePositive": "Zeit muss größer als 0 sein",
+      "difficultyRequired": "Bitte wählen Sie einen Schwierigkeitsgrad aus"
     },
     "topic": {
       "label": "Über welches Thema möchten Sie lernen?",

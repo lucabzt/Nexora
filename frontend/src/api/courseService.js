@@ -17,15 +17,24 @@ export const courseService = {
   getChapter: async (courseId, chapterId) =>
     (await apiWithCookies.get(`/courses/${courseId}/chapters/${chapterId}`)).data,
 
-  // Get questions for a specific chapter
+  // Get questions for a specific chapter with full QuestionResponse data
   getChapterQuestions: async (courseId, chapterId) =>
     (await apiWithCookies.get(`/chapters/${courseId}/chapters/${chapterId}`)).data,
 
+  // save mc answer
+  saveMCAnswer: async (courseId, chapterId, questionId, usersAnswer) => {
+    const params = new URLSearchParams();
+    params.append('users_answer', usersAnswer);
+    return (await apiWithCookies.get(
+      `/chapters/${courseId}/chapters/${chapterId}/${questionId}/save?${params.toString()}`
+    )).data;
+  },
+
   // Get feedback for an open text question
   getQuestionFeedback: async (courseId, chapterId, questionId, userAnswer) => {
-    const params = new URLSearchParams();
-    params.append('users_answer', userAnswer);
-    return (await apiWithCookies.get(`/chapters/${courseId}/chapters/${chapterId}/${questionId}/feedback?${params.toString()}`)).data;
+    return (await apiWithCookies.get(
+      `/chapters/${courseId}/chapters/${chapterId}/${questionId}/feedback?users_answer=${encodeURIComponent(userAnswer)}`
+    )).data;
   },
 
   // Mark a chapter as complete
@@ -35,6 +44,20 @@ export const courseService = {
 
   getFiles: async (courseId) =>
   (await apiWithCookies.get(`/files/documents?course_id=${courseId}`)).data,
+
+  downloadFile: async (fileId) => {
+    const response = await apiWithCookies.get(`/files/documents/${fileId}`, {
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  downloadImage: async (imageId) => {
+    const response = await apiWithCookies.get(`/files/images/${imageId}`, {
+      responseType: 'blob',
+    });
+    return response.data;
+  },
 
   getImages: async (courseId) =>
     (await apiWithCookies.get(`/files/images?course_id=${courseId}`)).data,
@@ -68,40 +91,49 @@ export const courseService = {
   },
 
   createCourse: async (data) => { // Removed onProgress, onError, onComplete
-    // let ws; // WebSocket instance - REMOVED
     console.log('[POST] Initiating createCourse POST request');
     // Step 1: Make the initial POST request to get the course data (including ID)
     const response = await apiWithCookies.post('/courses/create', data);
     console.log('[POST] Course creation request successful, response:', response.data);
-    return response.data;
+    return response.data; 
   },
 
   // Upload a document and get document ID
   uploadDocument: async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-
+    
     const response = await apiWithCookies.post('/files/documents', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     });
-
+    
     return response.data; // Contains document ID and other info
   },
 
   // Upload an image and get image ID
-uploadImage: async (file) => {
+  uploadImage: async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-
+    
     const response = await apiWithCookies.post('/files/images', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     });
-
+    
     return response.data; // Contains image ID and other info
+  },
+
+  // Delete a document by ID
+  deleteDocument: async (fileId) => {
+    await apiWithCookies.delete(`/files/documents/${fileId}`);
+  },
+
+  // Delete an image by ID
+  deleteImage: async (imageId) => {
+    await apiWithCookies.delete(`/files/images/${imageId}`);
   },
 
 };

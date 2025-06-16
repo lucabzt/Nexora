@@ -6,5 +6,33 @@
   "delete": "Löschen",
   "edit": "Bearbeiten",
   "create": "Erstellen",
-  "submit": "Absenden"
+  "submit": "Absenden",
+  "confirmDelete": {
+    "title": "Löschen bestätigen",
+    "message": "Sind Sie sicher, dass Sie dieses Element löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "confirm": "Löschen",
+    "cancel": "Abbrechen"
+  },
+  "file": {
+    "deleteConfirm": "Sind Sie sicher, dass Sie die Datei '{{filename}}' löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+  },
+  "image": {
+    "deleteConfirm": "Sind Sie sicher, dass Sie dieses Bild löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+  },
+  "search": {
+    "placeholder": "Nach Kursen und Kapiteln suchen",
+    "course": "Kurs",
+    "chapter": "Kapitel",
+    "noResults": "Keine Ergebnisse gefunden",
+    "startTyping": "Tippen Sie, um zu suchen...",
+    "error": "Fehler beim Laden der Suchergebnisse"
+  },
+  "loader": {
+    "loadingContent": "Inhalt wird geladen",
+    "preparingComponents": "Interaktive Komponenten werden vorbereitet. Dies kann einen Moment dauern...",
+    "visualization": {
+      "loading": "Visualisierung wird geladen...",
+      "thisMayTakeAMoment": "Dies kann einen Moment dauern"
+    }
+  }
 }

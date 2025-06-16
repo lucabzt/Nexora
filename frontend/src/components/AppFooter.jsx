@@ -1,11 +1,20 @@
 import { Text, Box } from '@mantine/core';
 import LanguageSelector from '../components/LanguageSelector'; // Import LanguageSelector
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 function AppFooter() {
   const currentYear = new Date().getFullYear();
   const { t } = useTranslation(['footer', 'navigation']);
-  
+  const navigate = useNavigate();
+  const { isAuthenticated, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <Box 
       sx={(theme) => ({
@@ -19,13 +28,26 @@ function AppFooter() {
         }`,
       })}
     >
-      <LanguageSelector />
+      {!isAuthenticated && (
+        <LanguageSelector />
+      )}
       
       <Text size="sm" color="dimmed">
         {t('copyright', { year: currentYear, ns: 'footer' })} {' | '}
         <a href="/impressum" style={{ color: 'inherit', textDecoration: 'underline', margin: '0 8px' }}>{t('impressum', { ns: 'navigation' })}</a>
         {' | '}
         <a href="/about" style={{ color: 'inherit', textDecoration: 'underline', margin: '0 8px' }}>{t('about', { ns: 'navigation' })}</a>
+        {' | '}
+        {isAuthenticated && (
+          <a href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              handleLogout();
+            }}
+            style={{ color: 'inherit', textDecoration: 'underline', margin: '0 8px', cursor: 'pointer' }}>
+              {t('logout', { ns: 'navigation' })}
+          </a>
+        )}
       </Text>
     </Box>
   );

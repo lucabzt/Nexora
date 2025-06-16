@@ -45,6 +45,17 @@ import { useAuth } from '../contexts/AuthContext';
 import userService from '../api/userService';
 import { useDisclosure } from '@mantine/hooks';
 
+
+// Helper function to determine MIME type from base64 string
+function getMimeTypeFromBase64(base64String) {
+  if (!base64String) return 'image/png'; // Default or handle error
+  if (base64String.startsWith('/9j/')) return 'image/jpeg';
+  if (base64String.startsWith('iVBOR')) return 'image/png';
+  if (base64String.startsWith('R0lGOD')) return 'image/gif';
+  if (base64String.startsWith('UklGR')) return 'image/webp';
+  return 'image/png'; // Fallback
+}
+
 function AdminView() {
   const { t } = useTranslation('adminView');
   const theme = useMantineTheme();
@@ -73,6 +84,9 @@ function AdminView() {
     inactive: 0,
     admins: 0
   });
+
+  
+
 
   // Fetch users on initial render and update filtered users when search term or active tab changes
   useEffect(() => {
@@ -255,7 +269,7 @@ function AdminView() {
       toast.warning(t('toast.cannotRevokeAdminSelf'));
       navigate('/');
     }
-  }, [currentUser, navigate]);
+  }, [currentUser, navigate, t]);
 
   if (!currentUser || !currentUser.is_admin) {
     return (
@@ -405,14 +419,14 @@ function AdminView() {
             <Table striped highlightOnHover withBorder withColumnBorders verticalSpacing="sm" sx={{ minWidth: 900 }}>
               <thead>
                 <tr>
-                  <th>{t('table.header.profilePicture')}</th>
-                  <th>{t('table.header.username')}</th>
-                  <th>{t('table.header.email')}</th>
-                  <th>{t('table.header.status')}</th>
-                  <th>{t('table.header.role')}</th>
-                  <th>{t('table.header.createdAt')}</th>
-                  <th>{t('table.header.lastLogin')}</th>
-                  <th>{t('table.header.actions')}</th>
+                  <th>{t('table.headers.profilePicture')}</th>
+                  <th>{t('table.headers.username')}</th>
+                  <th>{t('table.headers.email')}</th>
+                  <th>{t('table.headers.status')}</th>
+                  <th>{t('table.headers.role')}</th>
+                  <th>{t('table.headers.createdAt')}</th>
+                  <th>{t('table.headers.lastLogin')}</th>
+                  <th>{t('table.headers.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -421,10 +435,10 @@ function AdminView() {
                     <tr key={user.id}>
                       <td>
                         {user.profile_image_base64 ? (
-                          <img 
-                            src={`data:image/png;base64,${user.profile_image_base64}`} 
-                            alt={t('table.profilePictureAlt', { username: user.username })} 
-                            style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} 
+                          <img
+                            src={`data:${getMimeTypeFromBase64(user.profile_image_base64)};base64,${user.profile_image_base64}`}
+                            alt={t('table.profilePictureAlt', { username: user.username })}
+                            style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
                           />
                         ) : (
                           <Text size="sm" color="dimmed">{t('table.noProfilePicture')}</Text>

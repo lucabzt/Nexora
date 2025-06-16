@@ -2,7 +2,27 @@
   "title": "Create a New Learning Course",
   "mainTitle": "Create a New Learning Course",
   "form": {
+    "language": {
+      "label": "Course Language",
+      "placeholder": "Select course language",
+      "options": {
+        "english": "English",
+        "german": "German"
+      }
+    },
+    "difficulty": {
+      "label": "Difficulty Level",
+      "placeholder": "Select difficulty level",
+      "options": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced",
+        "university": "University Level"
+      }
+    },
     "duration": {
+      "label": "Course Duration",
+      "description": "Estimated duration of the course in hours",
       "value": "{{count}} hour",
       "value_plural": "{{count}} hours"
     },
@@ -18,7 +38,8 @@
     },
     "validation": {
       "topicRequired": "Topic is required",
-      "timePositive": "Time must be greater than 0"
+      "timePositive": "Time must be greater than 0",
+      "difficultyRequired": "Please select a difficulty level"
     },
     "topic": {
       "label": "What topic do you want to learn about?",

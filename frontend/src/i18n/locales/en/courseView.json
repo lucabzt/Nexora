@@ -34,7 +34,8 @@
     "backToDashboard": "Back to Dashboard",
     "startLearning": "Start Learning",
     "continueLearning": "Continue Learning",
-    "reviewChapter": "Review Chapter"
+    "reviewChapter": "Review Chapter",
+    "startChapter": "Start Chapter"
   },
   "progress": {
     "percentageComplete": "{{percentage}}% Complete",

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Outlet, Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Outlet, Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { 
   AppShell, 
-  Navbar, 
+  Navbar,
+  Image, 
   Header, 
   MediaQuery, 
   Burger, 
@@ -27,6 +28,9 @@ import { useMediaQuery } from '@mantine/hooks';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from '../components/LanguageSelector';
+import AppFooter from '../components/AppFooter';
+import SearchBar from '../components/SearchBar';
+
 import {
   IconHome2,
   IconPlus,
@@ -43,7 +47,7 @@ import {
   IconLanguage
 } from '@tabler/icons-react';
 
-const MainLink = ({ icon, color, label, to, isActive, collapsed, onNavigate }) => {
+export const MainLink = ({ icon, color, label, to, isActive, collapsed, onNavigate }) => {
   const navigate = useNavigate();
   const theme = useMantineTheme();
   
@@ -231,6 +235,7 @@ function AppLayout() {
             />
 
             <Group spacing="xs">
+              
               <IconSparkles 
                 size={28} 
                 style={{ 
@@ -264,7 +269,26 @@ function AppLayout() {
               </Title>
             </Group>
             
-            <Box sx={{ flexGrow: 1 }} /> {/* Spacer */}
+            <Box sx={{ flexGrow: 1 }} />
+            
+            {/* Search Bar - Centered */}
+            <Box sx={{
+              position: 'absolute',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '100%',
+              maxWidth: 500,
+              padding: '0 20px',
+              zIndex: 1,
+              '@media (max-width: 900px)': {
+                display: 'none',
+              },
+            }}>
+              <SearchBar />
+            </Box>
+            
+            {/* Spacer to balance the flex layout */}
+            <Box sx={{ flex: 1, '@media (min-width: 901px)': { visibility: 'hidden' } }} />
             
             <Group spacing="xs">
               {user ? (
@@ -388,7 +412,9 @@ function AppLayout() {
             </Group>
           </div>
         </Header>
-      }      navbar={        <Navbar 
+      }      navbar={       
+        
+        <Navbar 
           p={opened ? "md" : "xs"}
           hiddenBreakpoint="sm" 
           hidden={isMobile && !opened} // Hide completely on mobile when closed
@@ -419,19 +445,31 @@ function AppLayout() {
                 marginBottom: theme.spacing.lg,
                 backdropFilter: 'blur(8px)',
               })}
-            >              <Group spacing="sm" mb="xs" position={!opened ? "center" : "left"}>
-                <ThemeIcon 
-                  size="lg" 
-                  variant="gradient" 
-                  gradient={{ from: 'violet', to: 'blue' }}
-                  sx={{ boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)' }}
-                >
-                  <IconSparkles size={20} />
-                </ThemeIcon>
-                {opened && (
-                  <Box>                    <Text size="sm" weight={600} mb={2}>{t('title', { ns: 'navigation', defaultValue: 'Navigation' })}</Text>
-                    <Text size="xs" color="dimmed">{t('subtitle', { ns: 'navigation', defaultValue: 'Choose your destination' })}</Text>
-                  </Box>
+            >     
+            
+            <Group spacing="sm" mb="xs" position={!opened ? "center" : "left"}>
+                   
+                {opened ? (
+                  <Group spacing="xs" position="center">
+                    <Image
+                      src="/logo.png"
+                      alt={t('app:logoAlt')}
+                      height={85}
+                      width={85}
+                    />
+                    <Box>
+                      <Text size="sm" weight={600} mb={2}>{t('title', { ns: 'navigation', defaultValue: 'Navigation' })}</Text>
+                      <Text size="xs" color="dimmed">{t('subtitle', { ns: 'navigation', defaultValue: 'Choose your destination' })}</Text>
+                    </Box>
+                  </Group>
+
+                ) : (
+                  <Image
+                    src="/logo_only.png"
+                    alt={t('app:logoAlt')}
+                    height={32}
+                    width={32}
+                  />
                 )}
               </Group>
             </Paper>
@@ -442,40 +480,13 @@ function AppLayout() {
               {mainLinksComponents}
             </Stack>
           </Navbar.Section>
-          
-          <Navbar.Section>
-            <Paper
-              p="sm"
-              sx={(theme) => ({
-                background: dark 
-                  ? `linear-gradient(135deg, ${theme.colors.violet[9]}20, ${theme.colors.blue[9]}10)`
-                  : `linear-gradient(135deg, ${theme.colors.violet[1]}40, ${theme.colors.blue[1]}20)`,
-                border: `1px solid ${dark ? theme.colors.violet[8] : theme.colors.violet[2]}`,
-                borderRadius: theme.radius.md,
-                textAlign: 'center',
-              })}
-            >              {opened ? (
-                <>                  <Text size="xs" color="dimmed" mb="xs">
-                    {t('poweredBy', { ns: 'app', defaultValue: 'Powered by AI' })}
-                  </Text>
-                  <Group spacing="xs" position="center">
-                    <IconSparkles size={16} color={theme.colors.violet[5]} />
-                    <Text size="xs" weight={500} color={theme.colors.violet[6]}>
-                      {t('title', { ns: 'app' })}
-                    </Text>
-                  </Group>
-                </>
-              ) : (
-                <Group position="center">
-                  <IconSparkles size={20} color={theme.colors.violet[5]} />
-                </Group>
-              )}
-            </Paper>
-          </Navbar.Section>
         </Navbar>
       }
     >
-      <Outlet />
+      <Box sx={{ flex: 1 }}>
+        <Outlet />
+      </Box>
+      {!useLocation().pathname.match(/^\/dashboard\/courses\/.*\/chapters\/.*$/) && <AppFooter />}
     </AppShell>
   );
 }

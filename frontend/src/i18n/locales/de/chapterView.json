@@ -23,8 +23,16 @@
   },
   "errors": {
     "loadFailed": "Kapitel konnte nicht geladen werden. Bitte versuche es später erneut.",
-    "genericTitle": "Fehler!"
+    "genericTitle": "Fehler!",
+    "deleteFailed": "Löschen fehlgeschlagen. Bitte versuche es später erneut.",
+    "mediaLoadFailed": "Medien konnten nicht geladen werden. Bitte versuche es später erneut."
   },
+  "confirmDeleteImage": "Bist du sicher, dass du dieses Bild löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
+  "confirmDeleteFile": "Bist du sicher, dass du diese Datei löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
+  "imageDeleted": "Bild erfolgreich gelöscht.",
+  "fileDeleted": "Datei erfolgreich gelöscht.",
+  "noImages": "Keine Bilder verfügbar",
+  "noFiles": "Keine Dateien verfügbar",
   "quiz": {
     "alert": {
       "greatJobTitle": "Sehr gut!",
@@ -34,6 +42,19 @@
       "incorrectTitle": "Falsch",
       "theCorrectAnswerIs": "Die richtige Antwort ist:",
       "explanationLabel": "Erklärung:"
+    },
+    "openText": {
+      "placeholder": "Gib deine Antwort hier ein...",
+      "gradeButton": "Antwort bewerten",
+      "feedbackTitle": "KI-Feedback",
+      "pointsReceived": "Punkte erhalten",
+      "feedback": "Rückmeldung",
+      "expectedAnswer": "Erwartete Antwort"
+    },
+    "otOnlyMessage": "Bewerte jede deiner Antworten, um Feedback von unserem KI-Tutor zu erhalten.",
+    "badge": {
+      "openText": "Freitext",
+      "multipleChoice": "Multiple Choice"
     }
   }
 }

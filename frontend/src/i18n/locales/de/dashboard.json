@@ -9,6 +9,8 @@
     "coursesCompleted": "Abgeschlossene Kurse",
     "currentStreak": "Aktuelle Serie",
     "days": "Tage",
+    "daysUnit": "Tage",
+    "hoursUnit": "Stunden",
     "totalHoursLearned": "Gesamte Lernstunden",
     "currentStreakDescription": "Bleib dran, um deine Lerngewohnheit aufzubauen.",
     "coursesCompletedDescription": "Jeder Kurs ist ein Schritt nach vorne auf deiner Reise.",
@@ -19,6 +21,12 @@
 
   "viewAllButton": "Alle anzeigen",
   "viewLessButton": "Weniger anzeigen",
+  
+  "emptyState": {
+    "title": "Noch keine Kurse",
+    "message": "Erstelle deinen ersten Kurs, um mit deiner Lernreise zu beginnen.",
+    "button": "Ersten Kurs erstellen"
+  },
   
   "deleteModal": {
     "title": "Kurs löschen",
@@ -42,6 +50,12 @@
     "creating": "Wird erstellt...",
     "completed": "Abgeschlossen"
   },
+  
+  "errors": {
+    "deleteCourse": "Beim Löschen des Kurses ist ein Fehler aufgetreten. Bitte versuche es später erneut."
+  },
+  
+  "errorAlertTitle": "Fehler",
   
   "myCourses": "Meine Kurse",
   "noCoursesMessage": "Du hast noch keine Kurse erstellt. Leg jetzt los!",

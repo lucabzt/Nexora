@@ -5,6 +5,7 @@ import json
 import asyncio
 import traceback
 
+from google.adk.sessions import InMemorySessionService
 from sqlalchemy.orm import Session
 
 from .query_service import QueryService
@@ -25,7 +26,7 @@ from ..agents.tester_agent import TesterAgent
 from ..agents.utils import create_text_query
 from ..db.models.db_course import CourseStatus
 from ..api.schemas.course import CourseRequest
-from ..services.notification_service import WebSocketConnectionManager
+#from ..services.notification_service import WebSocketConnectionManager
 from ..db.models.db_course import Course
 from google.genai import types
 
@@ -74,7 +75,7 @@ class AgentService:
                 )
 
 
-    async def create_course(self, user_id: str, course_id: int, request: CourseRequest, db: Session, task_id: str, ws_manager: WebSocketConnectionManager):
+    async def create_course(self, user_id: str, course_id: int, request: CourseRequest, db: Session, task_id: str):#, ws_manager: WebSocketConnectionManager):
         """
         Main function for handling the course creation logic. Uses WebSocket for progress.
 
@@ -83,7 +84,7 @@ class AgentService:
         request (CourseRequest): A CourseRequest object containing all necessary details for creating a new course.
         db (Session): The SQLAlchemy database session.
         task_id (str): The unique ID for this course creation task, used for WebSocket communication.
-        ws_manager (WebSocketConnectionManager): Manager to send messages over WebSockets.
+        #ws_manager (WebSocketConnectionManager): Manager to send messages over WebSockets.
         """
         course_db = None
         try:
@@ -106,7 +107,7 @@ class AgentService:
             info_response = await self.info_agent.run(
                 user_id=user_id,
                 state={},
-                content=self.query_service.get_info_query(request, docs, images)
+                content=self.query_service.get_info_query(request, docs, images,)
             )
             print(f"[{task_id}] InfoAgent response: {info_response['title']}")
 
@@ -184,13 +185,13 @@ class AgentService:
                 coding_task = self.coding_agent.run(
                     user_id=user_id,
                     state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
-                    content=self.query_service.get_explainer_query(user_id, course_id, idx),
+                    content=self.query_service.get_explainer_query(user_id, course_id, idx, request.language, request.difficulty),
                 )
 
                 image_task = self.image_agent.run(
                     user_id=user_id,
                     state={},
-                    content=self.query_service.get_explainer_query(user_id, course_id, idx)
+                    content=self.query_service.get_explainer_image_query(user_id, course_id, idx)
                 )
 
                 # Await both tasks to complete in parallel
@@ -215,7 +216,7 @@ class AgentService:
                 response_tester = await self.tester_agent.run(
                     user_id=user_id,
                     state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
-                    content=self.query_service.get_tester_query(user_id, course_id, idx, response_code["explanation"]),
+                    content=self.query_service.get_tester_query(user_id, course_id, idx, response_code["explanation"], request.language, request.difficulty)
                 )
 
                 # Save questions in db

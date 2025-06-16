@@ -44,7 +44,7 @@ export default defineConfig({
             console.log(`[Proxy] Redirecting: ${req.method} ${req.url}`);
           });
 
-          proxy.on('proxyRes', (proxyRes, req) => {
+          /*proxy.on('proxyRes', (proxyRes, req) => {
             const chunks = [];
 
             proxyRes.on('data', (chunk) => {
@@ -65,6 +65,7 @@ export default defineConfig({
               }
             });
           });
+          */
 
           proxy.on('error', (err, req, res) => {
             console.error(`[Proxy] Error on ${req.method} ${req.url}: ${err.message}`);

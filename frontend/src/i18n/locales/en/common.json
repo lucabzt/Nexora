@@ -6,5 +6,33 @@
   "delete": "Delete",
   "edit": "Edit",
   "create": "Create",
-  "submit": "Submit"
+  "submit": "Submit",
+  "confirmDelete": {
+    "title": "Confirm Deletion",
+    "message": "Are you sure you want to delete this item? This action cannot be undone.",
+    "confirm": "Delete",
+    "cancel": "Cancel"
+  },
+  "file": {
+    "deleteConfirm": "Are you sure you want to delete the file '{{filename}}'? This action cannot be undone."
+  },
+  "image": {
+    "deleteConfirm": "Are you sure you want to delete this image? This action cannot be undone."
+  },
+  "search": {
+    "placeholder": "Search for courses and chapters",
+    "course": "Course",
+    "chapter": "Chapter",
+    "noResults": "No results found",
+    "startTyping": "Start typing to search...",
+    "error": "Error loading search results"
+  },
+  "loader": {
+    "loadingContent": "Inhalt wird geladen",
+    "preparingComponents": "Interaktive Komponenten werden vorbereitet. Dies kann einen Moment dauern...",
+    "visualization": {
+      "loading": "Visualisierung wird geladen...",
+      "thisMayTakeAMoment": "Dies kann einen Moment dauern"
+    }
+  }
 }

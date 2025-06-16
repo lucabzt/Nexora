@@ -91,24 +91,12 @@ function ChatTool({ isOpen, courseId, chapterId }) {
     setIsLoading(true);
 
     try {
+      console.log('Sending message with courseId:', courseId, 'chapterId:', chapterId);
+      
       // Send the message to the API with streaming response
       await chatService.sendMessage(courseId, chapterId, userMessage.content, (data) => {
-        if (data.type === 'chunk') {
-          // Update the AI message with the incoming chunks
-          setMessages(prevMessages => {
-            const updatedMessages = [...prevMessages];
-            const aiMessageIndex = updatedMessages.findIndex(msg => msg.id === aiMessageId);
-            
-            if (aiMessageIndex !== -1) {
-              updatedMessages[aiMessageIndex] = {
-                ...updatedMessages[aiMessageIndex],
-                content: (updatedMessages[aiMessageIndex].content || '') + data.data.text,
-              };
-            }
-            
-            return updatedMessages;
-          });
-        } else if (data.type === 'end') {
+        // Handle the SSE data
+        if (data.done) {
           // Mark streaming as complete
           setMessages(prevMessages => {
             const updatedMessages = [...prevMessages];
@@ -125,8 +113,11 @@ function ChatTool({ isOpen, courseId, chapterId }) {
           });
           
           setIsLoading(false);
-        } else if (data.type === 'error') {
-          // Handle errors
+          return;
+        }
+
+        // Handle error message
+        if (data.error) {
           setMessages(prevMessages => {
             const updatedMessages = [...prevMessages];
             const aiMessageIndex = updatedMessages.findIndex(msg => msg.id === aiMessageId);
@@ -134,7 +125,7 @@ function ChatTool({ isOpen, courseId, chapterId }) {
             if (aiMessageIndex !== -1) {
               updatedMessages[aiMessageIndex] = {
                 ...updatedMessages[aiMessageIndex],
-                content: `Error: ${data.data.message || t('genericErrorMessage')}`,
+                content: `Error: ${data.error}`,
                 isStreaming: false,
                 isError: true,
               };
@@ -144,10 +135,51 @@ function ChatTool({ isOpen, courseId, chapterId }) {
           });
           
           setIsLoading(false);
+          return;
+        }
+
+        // Handle content update
+        if (data.content) {
+          setMessages(prevMessages => {
+            const updatedMessages = [...prevMessages];
+            const aiMessageIndex = updatedMessages.findIndex(msg => msg.id === aiMessageId);
+            
+            if (aiMessageIndex !== -1) {
+              updatedMessages[aiMessageIndex] = {
+                ...updatedMessages[aiMessageIndex],
+                content: data.content,
+              };
+            }
+            
+            return updatedMessages;
+          });
         }
       });
     } catch (error) {
-      console.error('Failed to send message:', error);
+      console.error('Failed to send message:', {
+        error,
+        status: error.status,
+        data: error.data,
+        rawResponse: error.rawResponse
+      });
+      
+      // Create a user-friendly error message
+      let errorMessage = t('genericErrorMessage');
+      
+      if (error.status === 422) {
+        // Handle validation errors
+        if (error.data?.detail) {
+          if (Array.isArray(error.data.detail)) {
+            errorMessage = error.data.detail.map(err => `${err.loc?.join('.')}: ${err.msg}`).join('\n');
+          } else if (typeof error.data.detail === 'string') {
+            errorMessage = error.data.detail;
+          }
+        } else if (error.rawResponse) {
+          errorMessage = `Validation error: ${error.rawResponse}`;
+        }
+      } else if (error.status === 401) {
+        errorMessage = t('unauthorizedError', 'You need to be logged in to send messages');
+      }
       
       // Update the AI message with the error
       setMessages(prevMessages => {
@@ -157,7 +189,7 @@ function ChatTool({ isOpen, courseId, chapterId }) {
         if (aiMessageIndex !== -1) {
           updatedMessages[aiMessageIndex] = {
             ...updatedMessages[aiMessageIndex],
-            content: t('errorMessage'),
+            content: errorMessage,
             isStreaming: false,
             isError: true,
           };
