@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from .query_service import QueryService
 from .state_service import StateService, CourseState
-from ..agents.explainer_agent.agent import CodeReviewAgent
+from ..agents.explainer_agent.agent import ExplainerAgent
 from ..agents.grader_agent.agent import GraderAgent
 from ..db.crud import chapters_crud, documents_crud, images_crud, questions_crud, courses_crud
 
@@ -43,7 +43,7 @@ class AgentService:
         # define agents
         self.info_agent = InfoAgent(self.app_name, self.session_service)
         self.planner_agent = PlannerAgent(self.app_name, self.session_service)
-        self.coding_agent = CodeReviewAgent(self.app_name, self.session_service)
+        self.coding_agent = ExplainerAgent(self.app_name, self.session_service)
         self.tester_agent = TesterAgent(self.app_name, self.session_service)
         self.image_agent = ImageAgent(self.app_name, self.session_service)
         self.grader_agent = GraderAgent(self.app_name, self.session_service)

@@ -1,0 +1,17 @@
+## Code and Syntax Highlighting
+
+This plugin can be used to display syntax highlighted code to the user
+You can access it via the SyntaxHighlighter component.
+
+Usage Example:
+
+() => {
+  const codeString = '(num) => num + 1';
+  return (
+    <SyntaxHighlighter language="javascript" style={dark}>
+      {codeString}
+    </SyntaxHighlighter>
+  );
+}
+
+Please always use style={dark}, no other styles.
