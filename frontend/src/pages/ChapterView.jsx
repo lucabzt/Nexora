@@ -18,6 +18,7 @@ import {
   Badge,
   SimpleGrid,
   Image,
+  Textarea,
 } from '@mantine/core';
 import { IconDownload } from '@tabler/icons-react';
 
@@ -40,6 +41,7 @@ function ChapterView() {
   const { toolbarOpen, toolbarWidth } = useToolbar(); // Get toolbar state from context
   const isMobile = useMediaQuery('(max-width: 768px)'); // Add mobile detection
   const [chapter, setChapter] = useState(null);
+  const [questions, setQuestions] = useState([]); // This will store all quiz questions
   const [images, setImages] = useState([]); // This will store image info + object URLs
   const [files, setFiles] = useState([]); // This will store file info + object URLs
   const [loading, setLoading] = useState(true);
@@ -64,19 +66,21 @@ function ChapterView() {
     // We could add additional logic here if needed
   }, [toolbarOpen, toolbarWidth]);
 
-  // Fetch chapter data and media info
+  // Fetch chapter data, questions, and media info
   useEffect(() => {
     const fetchChapterAndMediaInfo = async () => {
       try {
         setLoading(true);
-        // Fetch chapter data and media info
-        const [chapterData, imagesData, filesData] = await Promise.all([
+        // Fetch chapter data, questions, and media info
+        const [chapterData, questionsData, imagesData, filesData] = await Promise.all([
           courseService.getChapter(courseId, chapterId),
+          courseService.getChapterQuestions(courseId, chapterId),
           courseService.getImages(courseId),
           courseService.getFiles(courseId)
         ]);
 
         setChapter(chapterData);
+        setQuestions(questionsData || []);
         
         // Set initial media state with empty URLs (will be populated in next effect)
         setImages(imagesData.map(img => ({
@@ -94,11 +98,11 @@ function ChapterView() {
         })));
 
         // Initialize quiz answers for both MC and OT questions
-        if (chapterData.questions) {
+        if (questionsData && questionsData.length > 0) {
           const initialMCAnswers = {};
           const initialOTAnswers = {};
 
-          chapterData.questions.forEach((question) => {
+          questionsData.forEach((question) => {
             if (question.type === 'MC') {
               initialMCAnswers[question.id] = '';
             } else if (question.type === 'OT') {
@@ -321,12 +325,12 @@ function ChapterView() {
   };
 
   const handleSubmitQuiz = () => {
-    if (!chapter?.questions) return;
+    if (!questions.length) return;
 
     let correct = 0;
     let totalMCQuestions = 0;
 
-    chapter.questions.forEach((question) => {
+    questions.forEach((question) => {
       if (question.type === 'MC') {
         totalMCQuestions++;
         if (quizAnswers[question.id] === question.correct_answer) {
@@ -400,9 +404,9 @@ function ChapterView() {
     ? (toolbarOpen ? window.innerWidth : 0)
     : (toolbarOpen ? toolbarWidth : 40);
 
-  const mcQuestions = chapter?.questions?.filter(q => q.type === 'MC') || [];
-  const otQuestions = chapter?.questions?.filter(q => q.type === 'OT') || [];
-  const hasQuestions = chapter?.questions?.length > 0;
+  const mcQuestions = questions.filter(q => q.type === 'MC');
+  const otQuestions = questions.filter(q => q.type === 'OT');
+  const hasQuestions = questions.length > 0;
 
   return (
     <div style={{
@@ -483,7 +487,7 @@ function ChapterView() {
                 )}
                 {hasQuestions && (
                   <Tabs.Tab value="quiz" icon={<IconQuestionMark size={14} />}>
-                    {t('tabs.quiz', { count: chapter.questions?.length || 0 })}
+                    {t('tabs.quiz', { count: questions.length })}
                   </Tabs.Tab>
                 )}
               </Tabs.List>
