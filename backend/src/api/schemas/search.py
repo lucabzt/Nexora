@@ -11,4 +11,4 @@ class SearchResult(BaseModel):
     course_title: Optional[str] = None  # For chapters, to show parent course title
     
     class Config:
-        orm_mode = True
+        from_attributes = True
