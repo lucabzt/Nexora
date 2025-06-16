@@ -4,20 +4,22 @@ import uuid
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
+from ...db.models.db_course import Chapter, Course, CourseStatus
 from ...db.models.db_user import User
 from ...services.agent_service import AgentService
 from ...utils.auth import get_current_active_user
 from ...db.database import get_db
-from ...db.crud import courses_crud, chapters_crud, users_crud, questions_crud
+from ...db.crud import courses_crud, chapters_crud, users_crud
 
 from ...services.notification_service import manager as ws_manager
 from ..schemas.course import (
     CourseInfo,
     CourseRequest,
     Chapter as ChapterSchema,
-    MultipleChoiceQuestion as MCQuestionSchema
 )
-from ...db.models.db_course import Course, Chapter, CourseStatus
+
+
+
 
 router = APIRouter(
     prefix="/courses",
@@ -42,7 +44,6 @@ async def _verify_course_ownership(course_id: int, user_id: str, db: Session) ->
         )
     
     return course
-
 
 
 @router.post("/create")
@@ -147,6 +148,7 @@ async def get_course_by_id(
         image_url= str(course.image_url) if course.image_url else None
     )
 
+
 # -------- CHAPTERS ----------
 @router.get("/{course_id}/chapters", response_model=List[ChapterSchema])
 async def get_course_chapters(
@@ -162,28 +164,17 @@ async def get_course_chapters(
    
     chapters = course.chapters
 
-    # Build chapter response with questions
+    # Build chapter response
     chapters = [
         ChapterSchema(
-            id=chapter.id,  # Add this
+            id=chapter.id,  
             index=chapter.index,
             caption=chapter.caption,
             summary=chapter.summary or "",
             content=chapter.content,
             image_url=chapter.image_url,
-            mc_questions=[
-                MCQuestionSchema(
-                    question=q.question,
-                    answer_a=q.answer_a,
-                    answer_b=q.answer_b,
-                    answer_c=q.answer_c,
-                    answer_d=q.answer_d,
-                    correct_answer=q.correct_answer,
-                    explanation=q.explanation
-                ) for q in chapter.mc_questions
-            ],
             time_minutes=chapter.time_minutes,
-            is_completed=chapter.is_completed  # Add this
+            is_completed=chapter.is_completed  
         ) for chapter in chapters
     ]
 
@@ -215,29 +206,16 @@ async def get_chapter_by_id(
             detail="Chapter not found in this course"
         )
     
-    # Build chapter response with questions
-    mc_questions = [
-        MCQuestionSchema(
-            question=q.question,
-            answer_a=q.answer_a,
-            answer_b=q.answer_b,
-            answer_c=q.answer_c,
-            answer_d=q.answer_d,
-            correct_answer=q.correct_answer,
-            explanation=q.explanation
-        ) for q in chapter.mc_questions
-    ]
-    
+    # Build chapter response
     return ChapterSchema(
-        id=chapter.id,  # Add this
+        id=chapter.id,  
         index=chapter.index,
         caption=chapter.caption,
         summary=chapter.summary or "",
         content=chapter.content,
-        mc_questions=mc_questions,
-        time_minutes=chapter.time_minutes,
         image_url=chapter.image_url,
-        is_completed=chapter.is_completed  # Add this
+        time_minutes=chapter.time_minutes,
+        is_completed=chapter.is_completed  
     )
 
 
@@ -319,13 +297,13 @@ async def delete_course(
         db: Session = Depends(get_db)
 ):
     """
-    Delete a course and all its chapters and questions.
+    Delete a course and all its chapters.
     Only accessible if the course belongs to the current user.
     """
     # Verify course ownership
     course = await _verify_course_ownership(course_id, current_user.id, db)
 
-    # Delete the course (cascades to chapters and questions)
+    # Delete the course (cascades to chapters)
     success = courses_crud.delete_course(db, course_id)
 
     if not success:
@@ -392,7 +370,7 @@ async def update_chapter(
         )
 
     # Update the chapter
-    updated_chapter = chapter_crud.update_chapter(db, chapter_id, **update_data)
+    updated_chapter = chapters_crud.update_chapter(db, chapter_id, **update_data)
 
     if not updated_chapter:
         raise HTTPException(
@@ -400,29 +378,16 @@ async def update_chapter(
             detail="Failed to update chapter"
         )
 
-    # Build chapter response with questions
-    mc_questions = [
-        MCQuestionSchema(
-            question=q.question,
-            answer_a=q.answer_a,
-            answer_b=q.answer_b,
-            answer_c=q.answer_c,
-            answer_d=q.answer_d,
-            correct_answer=q.correct_answer,
-            explanation=q.explanation
-        ) for q in updated_chapter.mc_questions
-    ]
-
+    # Build chapter response
     return ChapterSchema(
         id=updated_chapter.id,
         index=updated_chapter.index,
         caption=updated_chapter.caption,
         summary=updated_chapter.summary or "",
         content=updated_chapter.content,
-        mc_questions=mc_questions,
+        image_url=updated_chapter.image_url,
         time_minutes=updated_chapter.time_minutes,
-        is_completed=updated_chapter.is_completed,
-        image_url=updated_chapter.image_url
+        is_completed=updated_chapter.is_completed
     )
 
 
@@ -434,7 +399,7 @@ async def delete_chapter(
         db: Session = Depends(get_db)
 ):
     """
-    Delete a chapter and all its questions.
+    Delete a chapter.
     Only accessible if the course belongs to the current user.
     """
     # First verify course ownership
@@ -453,7 +418,7 @@ async def delete_chapter(
 
     chapter_caption = chapter.caption
 
-    # Delete the chapter (cascades to questions)
+    # Delete the chapter
     success = chapters_crud.delete_chapter(db, chapter_id)
 
     if not success:

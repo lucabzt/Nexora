@@ -17,6 +17,17 @@ export const courseService = {
   getChapter: async (courseId, chapterId) =>
     (await apiWithCookies.get(`/courses/${courseId}/chapters/${chapterId}`)).data,
 
+  // Get questions for a specific chapter
+  getChapterQuestions: async (courseId, chapterId) =>
+    (await apiWithCookies.get(`/chapters/${courseId}/chapters/${chapterId}`)).data,
+
+  // Get feedback for an open text question
+  getQuestionFeedback: async (courseId, chapterId, questionId, userAnswer) => {
+    const params = new URLSearchParams();
+    params.append('users_answer', userAnswer);
+    return (await apiWithCookies.get(`/chapters/${courseId}/chapters/${chapterId}/${questionId}/feedback?${params.toString()}`)).data;
+  },
+
   // Mark a chapter as complete
   markChapterComplete: async (courseId, chapterId) =>
       // Use the actual chapter ID, not index

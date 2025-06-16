@@ -19,7 +19,8 @@ import {
   Card,
   List,
   Badge,
-  SimpleGrid
+  SimpleGrid,
+  Select
 } from '@mantine/core';
 import { IconUpload, IconAlertCircle, IconCheck, IconPhoto, IconFileText } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
@@ -28,7 +29,7 @@ import { courseService } from '../api/courseService';
 
 function CreateCourse() {
   const navigate = useNavigate();
-  const { t } = useTranslation('createCourse');
+  const { t, i18n } = useTranslation('createCourse');
   const [active, setActive] = useState(0);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,12 +44,15 @@ function CreateCourse() {
     initialValues: {
       query: '',
       time_hours: 2,
+      language: i18n.language,
+      difficulty: 'university',
       documents: [],
       images: [],
     },
     validate: {
       query: (value) => (!value ? t('form.validation.topicRequired') : null),
       time_hours: (value) => (value <= 0 ? t('form.validation.timePositive') : null),
+      difficulty: (value) => (!value ? t('form.validation.difficultyRequired') : null),
     },
   });
 
@@ -102,6 +106,8 @@ function CreateCourse() {
         { 
           query: form.values.query,
           time_hours: form.values.time_hours,
+          language: form.values.language,
+          difficulty: form.values.difficulty,
           document_ids: documentIds,
           picture_ids: imageIds,
         }
@@ -168,6 +174,32 @@ function CreateCourse() {
                 max={100}
                 mb="md"
                 {...form.getInputProps('time_hours')}
+              />
+              
+              <Select
+                label={t('form.language.label')}
+                placeholder={t('form.language.placeholder')}
+                data={[
+                  { value: 'en', label: t('form.language.options.english') },
+                  { value: 'de', label: t('form.language.options.german') },
+                ]}
+                mb="md"
+                clearable={false}
+                {...form.getInputProps('language')}
+              />
+              
+              <Select
+                label={t('form.difficulty.label')}
+                placeholder={t('form.difficulty.placeholder')}
+                data={[
+                  { value: 'beginner', label: t('form.difficulty.options.beginner') },
+                  { value: 'intermediate', label: t('form.difficulty.options.intermediate') },
+                  { value: 'advanced', label: t('form.difficulty.options.advanced') },
+                  { value: 'university', label: t('form.difficulty.options.university') },
+                ]}
+                required
+                mb="md"
+                {...form.getInputProps('difficulty')}
               />
             </Stepper.Step>
 

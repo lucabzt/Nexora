@@ -9,6 +9,8 @@
     "coursesCompleted": "Courses Completed",
     "currentStreak": "Current Streak",
     "days": "days",
+    "daysUnit": "days",
+    "hoursUnit": "hours",
     "totalHoursLearned": "Total Hours Learned",
     "currentStreakDescription": "Keep it up to build your learning habit.",
     "coursesCompletedDescription": "Each course is a step forward in your journey.",
@@ -48,6 +50,12 @@
     "creating": "Creating...",
     "completed": "Completed"
   },
+  
+  "errors": {
+    "deleteCourse": "An error occurred while deleting the course. Please try again."
+  },
+  
+  "errorAlertTitle": "Error",
   
   "myCourses": "My Courses",
   "noCoursesMessage": "You haven't created any courses yet. Get started now!",

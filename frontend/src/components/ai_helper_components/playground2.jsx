@@ -1,14 +1,41 @@
 // This file serves as a playground for testing ai generated components
 // Plugins/Libraries available to the agent
-import React from 'react'
+import React, { Suspense } from 'react';
+import { useTranslation } from 'react-i18next';
 import 'katex/dist/katex.min.css';
 import Latex from 'react-latex-next';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { dark } from 'react-syntax-highlighter/dist/esm/styles/hljs'
-import Plot from 'react-plotly.js'
 import * as Recharts from 'recharts';
 import * as RF from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+
+// Lazy load Plotly for better performance
+const LazyPlot = React.lazy(() => import('react-plotly.js'));
+
+// Visually appealing loader component
+const PlotLoader = () => {
+  const { t } = useTranslation('common');
+  
+  return (
+    <div className="flex flex-col items-center justify-center p-8 bg-gray-50 rounded-lg border border-gray-200 h-96 animate-pulse">
+      <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+      <p className="text-gray-600 text-lg font-medium">
+        {t('loader.visualization.loading')}
+      </p>
+      <p className="text-sm text-gray-500 mt-2">
+        {t('loader.visualization.thisMayTakeAMoment')}
+      </p>
+    </div>
+  );
+};
+
+// Wrapper component to handle suspense for Plot
+const PlotWithSuspense = (props) => (
+  <Suspense fallback={<PlotLoader />}>
+    <LazyPlot {...props} />
+  </Suspense>
+);
 
 function TestComponent() {
   const [selectedComplexity, setSelectedComplexity] = React.useState('all');
@@ -288,7 +315,7 @@ function TestComponent() {
         </p>
 
         <div className="flex justify-center">
-          <Plot
+          <PlotWithSuspense
             data={[
               {
                 x: Array.from({length: 20}, (_, i) => i + 1),

@@ -18,6 +18,7 @@ import {
   Badge,
   SimpleGrid,
   Image,
+  Textarea,
 } from '@mantine/core';
 import { IconDownload } from '@tabler/icons-react';
 
@@ -32,6 +33,7 @@ import { useToolbar } from '../contexts/ToolbarContext';
 import AiCodeWrapper from "../components/AiCodeWrapper.jsx";
 import { downloadChapterContentAsPDF, prepareElementForPDF } from '../utils/pdfDownload';
 import FullscreenContentWrapper from '../components/FullscreenContentWrapper';
+import QuizPanel from '../components/media/QuizPanel';
 
 function ChapterView() {
   const { t } = useTranslation('chapterView');
@@ -40,6 +42,7 @@ function ChapterView() {
   const { toolbarOpen, toolbarWidth } = useToolbar(); // Get toolbar state from context
   const isMobile = useMediaQuery('(max-width: 768px)'); // Add mobile detection
   const [chapter, setChapter] = useState(null);
+  const [questions, setQuestions] = useState([]); // This will store all quiz questions
   const [images, setImages] = useState([]); // This will store image info + object URLs
   const [files, setFiles] = useState([]); // This will store file info + object URLs
   const [loading, setLoading] = useState(true);
@@ -47,8 +50,11 @@ function ChapterView() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('content');
   const [quizAnswers, setQuizAnswers] = useState({});
+  const [openTextAnswers, setOpenTextAnswers] = useState({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState(0);
+  const [gradingQuestion, setGradingQuestion] = useState(null);
+  const [questionFeedback, setQuestionFeedback] = useState({});
   const [markingComplete, setMarkingComplete] = useState(false);
   const [downloadingPDF, setDownloadingPDF] = useState(false);
   const [deletingItem, setDeletingItem] = useState(null); // Track which item is being deleted
@@ -61,19 +67,21 @@ function ChapterView() {
     // We could add additional logic here if needed
   }, [toolbarOpen, toolbarWidth]);
 
-  // Fetch chapter data and media info
+  // Fetch chapter data, questions, and media info
   useEffect(() => {
     const fetchChapterAndMediaInfo = async () => {
       try {
         setLoading(true);
-        // Fetch chapter data and media info
-        const [chapterData, imagesData, filesData] = await Promise.all([
+        // Fetch chapter data, questions, and media info
+        const [chapterData, questionsData, imagesData, filesData] = await Promise.all([
           courseService.getChapter(courseId, chapterId),
+          courseService.getChapterQuestions(courseId, chapterId),
           courseService.getImages(courseId),
           courseService.getFiles(courseId)
         ]);
 
         setChapter(chapterData);
+        setQuestions(questionsData || []);
         
         // Set initial media state with empty URLs (will be populated in next effect)
         setImages(imagesData.map(img => ({
@@ -90,13 +98,21 @@ function ChapterView() {
           error: null
         })));
 
-        // Initialize quiz answers
-        if (chapterData.mc_questions) {
-          const initialAnswers = {};
-          chapterData.mc_questions.forEach((q, index) => {
-            initialAnswers[index] = '';
+        // Initialize quiz answers for both MC and OT questions
+        if (questionsData && questionsData.length > 0) {
+          const initialMCAnswers = {};
+          const initialOTAnswers = {};
+
+          questionsData.forEach((question) => {
+            if (question.type === 'MC') {
+              initialMCAnswers[question.id] = '';
+            } else if (question.type === 'OT') {
+              initialOTAnswers[question.id] = question.users_answer || '';
+            }
           });
-          setQuizAnswers(initialAnswers);
+
+          setQuizAnswers(initialMCAnswers);
+          setOpenTextAnswers(initialOTAnswers);
         }
 
         setError(null);
@@ -203,7 +219,7 @@ function ChapterView() {
     };
 
     fetchMedia();
-  }, [loading, t]); // Removed images and files from dependencies
+  }, [loading, t, images, files]); // Include images and files in dependencies
 
   // Separate effect for cleanup on unmount
   useEffect(() => {
@@ -265,31 +281,78 @@ function ChapterView() {
     }
   };
 
-  const handleAnswerChange = (questionIndex, value) => {
+  const handleMCAnswerChange = (questionId, value) => {
     setQuizAnswers((prev) => ({
       ...prev,
-      [questionIndex]: value,
+      [questionId]: value,
     }));
   };
 
+  const handleOTAnswerChange = (questionId, value) => {
+    setOpenTextAnswers((prev) => ({
+      ...prev,
+      [questionId]: value,
+    }));
+  };
+
+  const handleGradeOpenTextQuestion = async (questionId) => {
+    const userAnswer = openTextAnswers[questionId];
+    if (!userAnswer || !userAnswer.trim()) {
+      toast.error('Please provide an answer before grading.');
+      return;
+    }
+
+    try {
+      setGradingQuestion(questionId);
+      const feedback = await courseService.getQuestionFeedback(
+        courseId,
+        chapterId,
+        questionId,
+        userAnswer
+      );
+
+      setQuestionFeedback(prev => ({
+        ...prev,
+        [questionId]: feedback
+      }));
+
+      toast.success('Your answer has been graded!');
+    } catch (error) {
+      console.error('Error grading question:', error);
+      toast.error('Failed to grade your answer. Please try again.');
+    } finally {
+      setGradingQuestion(null);
+    }
+  };
+
   const handleSubmitQuiz = () => {
-    if (!chapter?.mc_questions) return;
+    if (!questions.length) return;
 
     let correct = 0;
-    chapter.mc_questions.forEach((question, index) => {
-      if (quizAnswers[index] === question.correct_answer) {
-        correct++;
+    let totalMCQuestions = 0;
+
+    questions.forEach((question) => {
+      if (question.type === 'MC') {
+        totalMCQuestions++;
+        if (quizAnswers[question.id] === question.correct_answer) {
+          correct++;
+        }
       }
     });
 
-    const scorePercentage = Math.round((correct / chapter.mc_questions.length) * 100);
-    setQuizScore(scorePercentage);
-    setQuizSubmitted(true);
+    if (totalMCQuestions > 0) {
+      const scorePercentage = Math.round((correct / totalMCQuestions) * 100);
+      setQuizScore(scorePercentage);
+      setQuizSubmitted(true);
 
-    if (scorePercentage >= 70) {
-      toast.success(t('toast.quizGreatJob', { scorePercentage }));
+      if (scorePercentage >= 70) {
+        toast.success(t('toast.quizGreatJob', { scorePercentage }));
+      } else {
+        toast.info(t('toast.quizReviewContent', { scorePercentage }));
+      }
     } else {
-      toast.info(t('toast.quizReviewContent', { scorePercentage }));
+      setQuizSubmitted(true);
+      toast.info('Quiz completed! Check your open text question feedback above.');
     }
   };
 
@@ -339,8 +402,12 @@ function ChapterView() {
   };
 
   const sidebarWidth = isMobile
-    ? (toolbarOpen ? window.innerWidth : 0) // Full screen on mobile when open, hidden when closed
-    : (toolbarOpen ? toolbarWidth : 40); // Desktop shows normal width when open, 40px when closed
+    ? (toolbarOpen ? window.innerWidth : 0)
+    : (toolbarOpen ? toolbarWidth : 40);
+
+  const mcQuestions = questions.filter(q => q.type === 'MC');
+  const otQuestions = questions.filter(q => q.type === 'OT');
+  const hasQuestions = questions.length > 0;
 
   return (
     <div style={{
@@ -419,9 +486,9 @@ function ChapterView() {
                 {files.length > 0 && (
                     <Tabs.Tab value="files" icon={<IconFileText size={14} />}>{t('tabs.files')}</Tabs.Tab>
                 )}
-                {chapter?.mc_questions?.length > 0 && (
+                {hasQuestions && (
                   <Tabs.Tab value="quiz" icon={<IconQuestionMark size={14} />}>
-                    {t('tabs.quiz', { count: chapter.mc_questions.length })}
+                    {t('tabs.quiz', { count: questions.length })}
                   </Tabs.Tab>
                 )}
               </Tabs.List>
@@ -436,130 +503,46 @@ function ChapterView() {
                 </FullscreenContentWrapper>
               </Tabs.Panel>
 
-                <Tabs.Panel value="images" pt="xs">
-                  <Paper shadow="xs" p="md" withBorder>
-                    <MediaGallery 
-                      images={images} 
-                      onDelete={handleDeleteImage} 
-                      deletingItem={deletingItem} 
-                      isMobile={isMobile} 
-                    />
-                  </Paper>
-                </Tabs.Panel>
-
-                <Tabs.Panel value="files" pt="xs">
-                  <Paper shadow="xs" p="md" withBorder>
-                    <FileList 
-                      files={files} 
-                      onDelete={handleDeleteFile} 
-                      deletingItem={deletingItem} 
-                      mediaLoading={mediaLoading} 
-                    />
-                  </Paper>
-                </Tabs.Panel>
-
-              <Tabs.Panel value="quiz" pt="xs">
+              <Tabs.Panel value="images" pt="xs">
                 <Paper shadow="xs" p="md" withBorder>
-                  {quizSubmitted && (
-                    <Alert
-                      color={quizScore >= 70 ? "green" : "yellow"}
-                      title={quizScore >= 70 ? t('quiz.alert.greatJobTitle') : t('quiz.alert.keepPracticingTitle')}
-                      mb="lg"
-                    >
-                      <Group>
-                        <Text>{t('quiz.alert.scoreText', { quizScore })}</Text>
-                        <Badge color={quizScore >= 70 ? "green" : "yellow"}>
-                          {quizScore}%
-                        </Badge>
-                      </Group>
-                    </Alert>
-                  )}
-
-                  {chapter.mc_questions?.map((question, qIndex) => (
-                    <Card key={qIndex} mb="md" withBorder>
-                      <Text weight={500} mb="md">{qIndex + 1}. {question.question}</Text>
-
-                      <Radio.Group
-                        value={quizAnswers[qIndex]}
-                        onChange={(value) => handleAnswerChange(qIndex, value)}
-                        name={`question-${qIndex}`}
-                        mb="md"
-                        disabled={quizSubmitted}
-                      >
-                        <Radio value="a" label={question.answer_a} mb="xs" />
-                        <Radio value="b" label={question.answer_b} mb="xs" />
-                        <Radio value="c" label={question.answer_c} mb="xs" />
-                        <Radio value="d" label={question.answer_d} mb="xs" />
-                      </Radio.Group>
-
-                      {quizSubmitted && (
-                        <Alert
-                          color={quizAnswers[qIndex] === question.correct_answer ? "green" : "red"}
-                          title={quizAnswers[qIndex] === question.correct_answer ? t('quiz.alert.correctTitle') : t('quiz.alert.incorrectTitle')}
-                        >
-                          <Text mb="xs">
-                            {quizAnswers[qIndex] !== question.correct_answer && (
-                              <>{t('quiz.alert.theCorrectAnswerIs')} <strong>
-                                {question[`answer_${question.correct_answer}`]}
-                              </strong></>
-                            )}
-                          </Text>
-                          <Text>{t('quiz.alert.explanationLabel')} {question.explanation}</Text>
-                        </Alert>
-                      )}
-                    </Card>
-                  ))}
-
-                  {!quizSubmitted && (
-                    <Button
-                      onClick={handleSubmitQuiz}
-                      fullWidth
-                      mt="md"
-                      disabled={
-                        !chapter.mc_questions ||
-                        Object.values(quizAnswers).some(a => a === '')
-                      }
-                    >
-                      {t('buttons.submitQuiz')}
-                    </Button>
-                  )}
+                  <MediaGallery 
+                    images={images} 
+                    onDelete={handleDeleteImage} 
+                    deletingItem={deletingItem} 
+                    isMobile={isMobile} 
+                  />
                 </Paper>
               </Tabs.Panel>
-            </Tabs>
 
-            <Group position="apart">
-              <Button
-                variant="outline"
-                onClick={() => navigate(`/dashboard/courses/${courseId}`)}
-              >
-                {t('buttons.backToCourse')}
-              </Button>
-              <Group spacing="sm">
-                <Button
-                  variant="outline"
-                  color="blue"
-                  leftIcon={<IconDownload size={16} />}
-                  onClick={handleDownloadPDF}
-                  loading={downloadingPDF}
-                  disabled={downloadingPDF || activeTab !== 'content'}
-                >
-                  Download PDF
-                </Button>
-                <Button
-                  color="green"
-                  onClick={markChapterComplete}
-                  loading={markingComplete}
-                  disabled={markingComplete}
-                >
-                  {t('buttons.markComplete')}
-                </Button>
-                {chapter.is_completed && (
-                  <Badge color="green" size="lg">{t('badge.completed')}</Badge>
-                )}
-              </Group>
-            </Group>
+              <Tabs.Panel value="files" pt="xs">
+                <Paper shadow="xs" p="md" withBorder>
+                  <FileList 
+                    files={files} 
+                    onDelete={handleDeleteFile} 
+                    deletingItem={deletingItem} 
+                    mediaLoading={mediaLoading} 
+                  />
+                </Paper>
+              </Tabs.Panel>
+
+              <Tabs.Panel value="quiz" pt="xs">
+                <QuizPanel
+                  questions={questions}
+                  quizAnswers={quizAnswers}
+                  openTextAnswers={openTextAnswers}
+                  quizSubmitted={quizSubmitted}
+                  quizScore={quizScore}
+                  gradingQuestion={gradingQuestion}
+                  questionFeedback={questionFeedback}
+                  onMCAnswerChange={handleMCAnswerChange}
+                  onOTAnswerChange={handleOTAnswerChange}
+                  onGradeQuestion={handleGradeOpenTextQuestion}
+                  onSubmitQuiz={handleSubmitQuiz}
+                />
+              </Tabs.Panel>
+            </Tabs>
           </>
-        )}      
+        )}
       </Container>
       
       {/* Toolbar Container with all interactive tools */}
