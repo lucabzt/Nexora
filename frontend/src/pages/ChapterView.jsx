@@ -541,6 +541,25 @@ function ChapterView() {
                 />
               </Tabs.Panel>
             </Tabs>
+
+            <Group position="apart" mt="md">
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/dashboard/courses/${courseId}`)}
+              >
+                {t('buttons.backToCourse')}
+              </Button>
+              <Group spacing="sm">
+                <Button
+                  color="green"
+                  onClick={markChapterComplete}
+                  loading={markingComplete}
+                  disabled={markingComplete || chapter?.is_completed}
+                >
+                  {chapter?.is_completed ? t('badge.completed') : t('buttons.markComplete')}
+                </Button>
+              </Group>
+            </Group>
           </>
         )}
       </Container>
