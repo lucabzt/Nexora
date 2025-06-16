@@ -68,7 +68,8 @@ class ChatService:
             )
             
             # Get the response content, defaulting to an empty string if not found
-            response_content = info_response.get('content', '')
+            print("info_response", info_response)
+            response_content = info_response.get('explanation', '')
             
             # Yield the response as a properly formatted SSE message
             if response_content:

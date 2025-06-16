@@ -22,12 +22,18 @@ export const chatService = {
         withCredentials: true
       });
 
+      console.log(response);
+      // Log the response status
+      console.log('Response status:', response.status);
+      console.log('Response status text:', response.statusText);
+      
+
       if (!response.ok) {
         let errorData;
         let errorText;
         try {
           // First try to get the response as text
-          errorText = await response.text();
+          errorText = await response.data.text();
           console.log('Raw error response:', errorText);
           
           // Try to parse as JSON
