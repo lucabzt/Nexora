@@ -4,19 +4,64 @@ export const chatService = {
   // Send a message to the AI assistant and get streaming response
   sendMessage: async (courseId, chapterId, message, onProgress) => {
     try {
-      const response = await fetch(`${apiWithCookies.defaults.baseURL}/chat/${chapterId}`, {
-        method: 'POST',
+      // Note: The backend expects the chapterId in the URL path
+      const url = `/chat/${chapterId}`;
+      
+      // Create the request body
+      const requestBody = { message };
+      
+      // Log the request details
+      console.log('Sending request to:', `${apiWithCookies.defaults.baseURL}${url}`);
+      console.log('Request body:', requestBody);
+      
+      // Make the request using the axios instance with credentials
+      const response = await apiWithCookies.post(url, requestBody, {
         headers: {
-          'Content-Type': 'application/json',
-          ...apiWithCookies.defaults.headers.common,
+          'Content-Type': 'application/json'
         },
-        credentials: 'include',
-        body: JSON.stringify({ message }),
+        withCredentials: true
       });
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw new Error(error.detail || 'Failed to send message');
+        let errorData;
+        let errorText;
+        try {
+          // First try to get the response as text
+          errorText = await response.text();
+          console.log('Raw error response:', errorText);
+          
+          // Try to parse as JSON
+          try {
+            errorData = JSON.parse(errorText);
+            console.error('Chat API error response (parsed):', {
+              status: response.status,
+              statusText: response.statusText,
+              error: errorData
+            });
+          } catch (parseError) {
+            console.error('Chat API error (non-JSON response):', {
+              status: response.status,
+              statusText: response.statusText,
+              responseText: errorText
+            });
+            errorData = { detail: errorText };
+          }
+        } catch (e) {
+          console.error('Error processing error response:', e);
+          errorData = { detail: 'Failed to process error response' };
+        }
+        
+        // Create a more detailed error message
+        const errorMessage = errorData.detail || 
+                             (errorData.error && errorData.error.message) || 
+                             `HTTP error! status: ${response.status}`;
+        
+        const error = new Error(errorMessage);
+        error.status = response.status;
+        error.data = errorData;
+        error.rawResponse = errorText;
+        console.error('Throwing error:', error);
+        throw error;
       }
 
       if (!response.body) {

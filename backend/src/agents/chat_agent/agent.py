@@ -55,12 +55,18 @@ class ChatAgent:
                     print(f"[Debug] Running agent with state: {json.dumps(state, indent=2)}")
 
                 # Create session
-                session = await self.session_service.create_session(
+                session = await self.session_service.get_session(
                     app_name=self.app_name,
                     user_id=user_id,
-                    session_id=str(chapter_id),
-                    state=state
+                    session_id=str(chapter_id)
                 )
+                if not session:
+                    session = await self.session_service.create_session(
+                        app_name=self.app_name,
+                        user_id=user_id,
+                        session_id=str(chapter_id),
+                        state=state
+                    )
                 session_id = session.id
 
                 # We iterate through events to find the final answer

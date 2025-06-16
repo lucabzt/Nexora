@@ -91,6 +91,8 @@ function ChatTool({ isOpen, courseId, chapterId }) {
     setIsLoading(true);
 
     try {
+      console.log('Sending message with courseId:', courseId, 'chapterId:', chapterId);
+      
       // Send the message to the API with streaming response
       await chatService.sendMessage(courseId, chapterId, userMessage.content, (data) => {
         // Handle the SSE data
@@ -154,7 +156,30 @@ function ChatTool({ isOpen, courseId, chapterId }) {
         }
       });
     } catch (error) {
-      console.error('Failed to send message:', error);
+      console.error('Failed to send message:', {
+        error,
+        status: error.status,
+        data: error.data,
+        rawResponse: error.rawResponse
+      });
+      
+      // Create a user-friendly error message
+      let errorMessage = t('genericErrorMessage');
+      
+      if (error.status === 422) {
+        // Handle validation errors
+        if (error.data?.detail) {
+          if (Array.isArray(error.data.detail)) {
+            errorMessage = error.data.detail.map(err => `${err.loc?.join('.')}: ${err.msg}`).join('\n');
+          } else if (typeof error.data.detail === 'string') {
+            errorMessage = error.data.detail;
+          }
+        } else if (error.rawResponse) {
+          errorMessage = `Validation error: ${error.rawResponse}`;
+        }
+      } else if (error.status === 401) {
+        errorMessage = t('unauthorizedError', 'You need to be logged in to send messages');
+      }
       
       // Update the AI message with the error
       setMessages(prevMessages => {
@@ -164,7 +189,7 @@ function ChatTool({ isOpen, courseId, chapterId }) {
         if (aiMessageIndex !== -1) {
           updatedMessages[aiMessageIndex] = {
             ...updatedMessages[aiMessageIndex],
-            content: t('genericErrorMessage'),
+            content: errorMessage,
             isStreaming: false,
             isError: true,
           };
