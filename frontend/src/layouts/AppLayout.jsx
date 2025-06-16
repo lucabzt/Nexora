@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Outlet, Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Outlet, Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { 
   AppShell, 
   Navbar,
@@ -486,7 +486,7 @@ function AppLayout() {
       <Box sx={{ flex: 1 }}>
         <Outlet />
       </Box>
-      <AppFooter />
+      {!useLocation().pathname.match(/^\/dashboard\/courses\/.*\/chapters\/.*$/) && <AppFooter />}
     </AppShell>
   );
 }
