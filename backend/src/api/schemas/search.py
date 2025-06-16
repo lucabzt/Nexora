@@ -9,6 +9,3 @@ class SearchResult(BaseModel):
     description: Optional[str] = None
     course_id: Optional[str] = None  # For chapters, to link back to parent course
     course_title: Optional[str] = None  # For chapters, to show parent course title
-    
-    class Config:
-        orm_mode = True
