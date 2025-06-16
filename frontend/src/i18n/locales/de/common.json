@@ -24,6 +24,7 @@
     "course": "Kurs",
     "chapter": "Kapitel",
     "noResults": "Keine Ergebnisse gefunden",
+    "startTyping": "Tippen Sie, um zu suchen...",
     "error": "Fehler beim Laden der Suchergebnisse"
   },
   "loader": {
