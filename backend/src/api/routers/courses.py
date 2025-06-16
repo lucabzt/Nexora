@@ -11,7 +11,7 @@ from ...utils.auth import get_current_active_user
 from ...db.database import get_db
 from ...db.crud import courses_crud, chapters_crud, users_crud
 
-from ...services.notification_service import manager as ws_manager
+#from ...services.notification_service import manager as ws_manager
 from ..schemas.course import (
     CourseInfo,
     CourseRequest,
@@ -81,8 +81,8 @@ async def create_course_request(
         course_id=course.id,
         request=course_request,
         db=db,
-        task_id=str(uuid.uuid4()),  # Generate a unique task ID
-        ws_manager=ws_manager
+        task_id=str(uuid.uuid4())#,  # Generate a unique task ID
+        #ws_manager=ws_manager
     )
     
     return CourseInfo(

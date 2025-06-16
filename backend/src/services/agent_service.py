@@ -26,7 +26,7 @@ from ..agents.tester_agent import TesterAgent
 from ..agents.utils import create_text_query
 from ..db.models.db_course import CourseStatus
 from ..api.schemas.course import CourseRequest
-from ..services.notification_service import WebSocketConnectionManager
+#from ..services.notification_service import WebSocketConnectionManager
 from ..db.models.db_course import Course
 from google.genai import types
 
@@ -75,7 +75,7 @@ class AgentService:
                 )
 
 
-    async def create_course(self, user_id: str, course_id: int, request: CourseRequest, db: Session, task_id: str, ws_manager: WebSocketConnectionManager):
+    async def create_course(self, user_id: str, course_id: int, request: CourseRequest, db: Session, task_id: str):#, ws_manager: WebSocketConnectionManager):
         """
         Main function for handling the course creation logic. Uses WebSocket for progress.
 
@@ -84,7 +84,7 @@ class AgentService:
         request (CourseRequest): A CourseRequest object containing all necessary details for creating a new course.
         db (Session): The SQLAlchemy database session.
         task_id (str): The unique ID for this course creation task, used for WebSocket communication.
-        ws_manager (WebSocketConnectionManager): Manager to send messages over WebSockets.
+        #ws_manager (WebSocketConnectionManager): Manager to send messages over WebSockets.
         """
         course_db = None
         try:

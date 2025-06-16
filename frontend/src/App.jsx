@@ -6,7 +6,7 @@ import { MantineProvider, ColorSchemeProvider } from '@mantine/core';
 import { AuthProvider } from './contexts/AuthContext';
 import { ToolbarProvider } from './contexts/ToolbarContext';
 import { LanguageProvider } from './contexts/LanguageContext';
-import { NotificationProvider } from './contexts/NotificationContext';
+//import { NotificationProvider } from './contexts/NotificationContext';
 import './i18n/i18n'; // Import i18n configuration
 
 

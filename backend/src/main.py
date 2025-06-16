@@ -11,7 +11,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from .api.routers import auth as auth_router
 from .api.routers import courses, files, users, statistics, questions  # Your existing users router
 from .api.routers import notes
-from .api.routers import notifications
+#from .api.routers import notifications
 from .api.routers import search as search_router
 from .api.schemas import user as user_schema
 from .db.database import engine
@@ -61,7 +61,7 @@ app.include_router(search_router.router)  # Add search router
 app.include_router(statistics.router)
 app.include_router(auth_router.api_router)
 app.include_router(notes.router)
-app.include_router(notifications.router)
+#app.include_router(notifications.router)
 app.include_router(questions.router)
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
