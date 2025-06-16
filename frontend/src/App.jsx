@@ -14,6 +14,7 @@ import './i18n/i18n'; // Import i18n configuration
 // Pages
 import Dashboard from './pages/Dashboard';
 import CreateCourse from './pages/CreateCourse';
+import CourseLayout from './layouts/CourseLayout';
 import CourseView from './pages/CourseView';
 import ChapterView from './pages/ChapterView';
 import Login from './pages/Login';
@@ -82,16 +83,19 @@ function App() {
                 </Route>
                   {/* Protected routes now based at /dashboard */}
                 <Route element={<ProtectedRoute />}>
-                  <Route path="/dashboard" element={<AppLayout />}> {/* Base path for dashboard and other protected routes */}
-                    <Route index element={<Dashboard />} /> {/* This will be /dashboard */}
-                    <Route path="create-course" element={<CreateCourse />} /> {/* /dashboard/create-course */}
-                    <Route path="courses/:courseId" element={<CourseView />} /> {/* /dashboard/courses/:courseId */}
-                    <Route path="courses/:courseId/chapters/:chapterId" element={<ChapterView />} /> {/* /dashboard/courses/:courseId/chapters/:chapterId */}
-                    <Route path="settings" element={<SettingsPage />} /> {/* /dashboard/settings */}
-                    <Route path="statistics" element={<StatisticsPage />} /> {/* /dashboard/statistics */}
+                  <Route path="/dashboard" element={<AppLayout />}>
+                    <Route index element={<Dashboard />} />
+                    <Route path="create-course" element={<CreateCourse />} />
+                    <Route path="settings" element={<SettingsPage />} />
+                    <Route path="statistics" element={<StatisticsPage />} />
+                  </Route>
+                  <Route path="/dashboard/courses/:courseId" element={<CourseLayout />}>
+                    <Route index element={<CourseView />} />
+                    <Route path="chapters/:chapterId" element={<ChapterView />} />
                   </Route>
                 </Route>
-                  {/* Admin-only routes - Using AppLayout for consistent interface */}
+
+                {/* Admin-only routes - Using AppLayout for consistent interface */}
                 <Route element={<AdminProtectedRoute />}>
                   <Route path="/admin" element={<AppLayout />}>
                     <Route index element={<AdminView />} />
