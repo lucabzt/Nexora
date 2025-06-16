@@ -3,100 +3,63 @@ import { apiWithCookies } from './baseApi';
 export const chatService = {
   // Send a message to the AI assistant and get streaming response
   sendMessage: async (courseId, chapterId, message, onProgress) => {
-
-    const result = await apiWithCookies.post(`/chat/${courseId}`, {
-      message: message,
-    });
-
-
-    return result.data;
-
     try {
-      let lastProcessedLength = 0;
-      console.log('[ChatStreaming] Initializing chat message');
-      
-      // Payload for the chat request
-      const data = {
-        course_id: courseId,
-        chapter_id: chapterId,
-        message: message
-      };
-      
-      await apiWithCookies.post('/chat/message', data, {
-        responseType: 'text',
-        timeout: 60000, // 1 minute timeout
-        onDownloadProgress: (progressEvent) => {
-          console.log('[ChatStreaming] onDownloadProgress triggered');
-          
-          let responseText = null;
-          
-          // Try to access the response text from different possible locations
-          if (progressEvent.event && progressEvent.event.target && typeof progressEvent.event.target.responseText === 'string') {
-            responseText = progressEvent.event.target.responseText;
-          } else if (progressEvent.target && typeof progressEvent.target.responseText === 'string') {
-            responseText = progressEvent.target.responseText;
-          } else if (typeof progressEvent.responseText === 'string') { 
-            responseText = progressEvent.responseText;
-          }
-          
-          if (responseText && typeof onProgress === 'function') {
-            const newData = responseText.substring(lastProcessedLength);
+      const response = await fetch(`${apiWithCookies.defaults.baseURL}/chat/${chapterId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...apiWithCookies.defaults.headers.common,
+        },
+        credentials: 'include',
+        body: JSON.stringify({ message }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.detail || 'Failed to send message');
+      }
+
+      if (!response.body) {
+        throw new Error('Response body is not readable');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        // Decode the chunk of data
+        const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
+
+        // Process complete SSE messages
+        let newlineIndex;
+        while ((newlineIndex = buffer.indexOf('\n\n')) !== -1) {
+          const message = buffer.slice(0, newlineIndex);
+          buffer = buffer.slice(newlineIndex + 2);
+
+          if (message.startsWith('data: ')) {
+            const data = message.slice(6); // Remove 'data: ' prefix
             
-            if (newData.length > 0) {
-              const lines = newData.split('\\n').filter(line => line.trim() !== '');
-              
-              lines.forEach(line => {
-                const trimmedLine = line.trim();
-                try {
-                  const parsedData = JSON.parse(trimmedLine);
-                  if (typeof onProgress === 'function') {
-                    onProgress(parsedData);
-                  }
-                } catch (e) {
-                  console.error('[ChatStreaming] Error parsing JSON from line:', e);
-                  if (typeof onProgress === 'function') {
-                    onProgress({
-                      type: 'error',
-                      data: {
-                        message: `Error parsing streaming data` 
-                      }
-                    });
-                  }
-                }
-              });
-              
-              lastProcessedLength = responseText.length;
+            if (data === '[DONE]') {
+              if (onProgress) onProgress({ done: true });
+              return;
+            }
+
+            try {
+              const parsedData = JSON.parse(data);
+              if (onProgress) onProgress(parsedData);
+            } catch (e) {
+              console.error('Error parsing SSE message:', e, data);
             }
           }
         }
-      });
-      
-      return true;
+      }
     } catch (error) {
-      console.error('[ChatStreaming] Chat error:', error);
-      
-      let errorMessage = 'Chat request failed';
-      
-      if (error.code === 'ECONNABORTED') {
-        errorMessage = 'Request timed out. Please try again.';
-      } else if (error.response?.status === 401) {
-        errorMessage = 'Authentication failed. Please log in again.';
-      } else if (error.response?.status >= 500) {
-        errorMessage = 'Server error. Please try again later.';
-      } else if (error.response?.data?.detail) {
-        errorMessage = error.response.data.detail;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      if (typeof onProgress === 'function') {
-        onProgress({
-          type: 'error',
-          data: {
-            message: errorMessage
-          }
-        });
-      }
+      console.error('Error in sendMessage:', error);
       throw error;
     }
   },
@@ -107,6 +70,7 @@ export const chatService = {
       const response = await apiWithCookies.get(`/chat/history/${courseId}/${chapterId}`);
       return response.data;
     } catch (error) {
+      console.error('Error fetching chat history:', error);
       throw error;
     }
   }

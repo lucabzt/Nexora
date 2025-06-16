@@ -93,22 +93,8 @@ function ChatTool({ isOpen, courseId, chapterId }) {
     try {
       // Send the message to the API with streaming response
       await chatService.sendMessage(courseId, chapterId, userMessage.content, (data) => {
-        if (data.type === 'chunk') {
-          // Update the AI message with the incoming chunks
-          setMessages(prevMessages => {
-            const updatedMessages = [...prevMessages];
-            const aiMessageIndex = updatedMessages.findIndex(msg => msg.id === aiMessageId);
-            
-            if (aiMessageIndex !== -1) {
-              updatedMessages[aiMessageIndex] = {
-                ...updatedMessages[aiMessageIndex],
-                content: (updatedMessages[aiMessageIndex].content || '') + data.data.text,
-              };
-            }
-            
-            return updatedMessages;
-          });
-        } else if (data.type === 'end') {
+        // Handle the SSE data
+        if (data.done) {
           // Mark streaming as complete
           setMessages(prevMessages => {
             const updatedMessages = [...prevMessages];
@@ -125,8 +111,11 @@ function ChatTool({ isOpen, courseId, chapterId }) {
           });
           
           setIsLoading(false);
-        } else if (data.type === 'error') {
-          // Handle errors
+          return;
+        }
+
+        // Handle error message
+        if (data.error) {
           setMessages(prevMessages => {
             const updatedMessages = [...prevMessages];
             const aiMessageIndex = updatedMessages.findIndex(msg => msg.id === aiMessageId);
@@ -134,7 +123,7 @@ function ChatTool({ isOpen, courseId, chapterId }) {
             if (aiMessageIndex !== -1) {
               updatedMessages[aiMessageIndex] = {
                 ...updatedMessages[aiMessageIndex],
-                content: `Error: ${data.data.message || t('genericErrorMessage')}`,
+                content: `Error: ${data.error}`,
                 isStreaming: false,
                 isError: true,
               };
@@ -144,6 +133,24 @@ function ChatTool({ isOpen, courseId, chapterId }) {
           });
           
           setIsLoading(false);
+          return;
+        }
+
+        // Handle content update
+        if (data.content) {
+          setMessages(prevMessages => {
+            const updatedMessages = [...prevMessages];
+            const aiMessageIndex = updatedMessages.findIndex(msg => msg.id === aiMessageId);
+            
+            if (aiMessageIndex !== -1) {
+              updatedMessages[aiMessageIndex] = {
+                ...updatedMessages[aiMessageIndex],
+                content: data.content,
+              };
+            }
+            
+            return updatedMessages;
+          });
         }
       });
     } catch (error) {
@@ -157,7 +164,7 @@ function ChatTool({ isOpen, courseId, chapterId }) {
         if (aiMessageIndex !== -1) {
           updatedMessages[aiMessageIndex] = {
             ...updatedMessages[aiMessageIndex],
-            content: t('errorMessage'),
+            content: t('genericErrorMessage'),
             isStreaming: false,
             isError: true,
           };
