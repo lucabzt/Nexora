@@ -7,33 +7,46 @@ export const chatService = {
       // Note: The backend expects the chapterId in the URL path
       const url = `/chat/${chapterId}`;
       
-      // Create the request body
-      const requestBody = { message };
+      // Create the request body matching the backend's ChatRequest model
+      const requestBody = JSON.stringify({
+        message: message  // The backend expects a 'message' field
+      });
       
       // Log the request details
       console.log('Sending request to:', `${apiWithCookies.defaults.baseURL}${url}`);
       console.log('Request body:', requestBody);
       
-      // Make the request using the axios instance with credentials
-      const response = await apiWithCookies.post(url, requestBody, {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        withCredentials: true
+      // Set up headers
+      const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+      };
+      
+      // Add authorization header if it exists
+      if (apiWithCookies.defaults.headers.common?.Authorization) {
+        headers['Authorization'] = apiWithCookies.defaults.headers.common.Authorization;
+      }
+      
+      // Make the request using fetch
+      const response = await fetch(`${apiWithCookies.defaults.baseURL}${url}`, {
+        method: 'POST',
+        headers: headers,
+        credentials: 'include',
+        body: requestBody
       });
 
-      console.log(response);
-      // Log the response status
       console.log('Response status:', response.status);
       console.log('Response status text:', response.statusText);
       
-
       if (!response.ok) {
         let errorData;
         let errorText;
+        
         try {
-          // First try to get the response as text
-          errorText = await response.data.text();
+          // Try to get the error response as text
+          errorText = await response.text();
           console.log('Raw error response:', errorText);
           
           // Try to parse as JSON
@@ -59,8 +72,8 @@ export const chatService = {
         
         // Create a more detailed error message
         const errorMessage = errorData.detail || 
-                             (errorData.error && errorData.error.message) || 
-                             `HTTP error! status: ${response.status}`;
+                           (errorData.error && errorData.error.message) || 
+                           `HTTP error! status: ${response.status}`;
         
         const error = new Error(errorMessage);
         error.status = response.status;
@@ -78,36 +91,47 @@ export const chatService = {
       const decoder = new TextDecoder();
       let buffer = '';
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-        // Decode the chunk of data
-        const chunk = decoder.decode(value, { stream: true });
-        buffer += chunk;
+          // Decode the chunk of data
+          const chunk = decoder.decode(value, { stream: true });
+          buffer += chunk;
 
-        // Process complete SSE messages
-        let newlineIndex;
-        while ((newlineIndex = buffer.indexOf('\n\n')) !== -1) {
-          const message = buffer.slice(0, newlineIndex);
-          buffer = buffer.slice(newlineIndex + 2);
-
-          if (message.startsWith('data: ')) {
-            const data = message.slice(6); // Remove 'data: ' prefix
-            
-            if (data === '[DONE]') {
-              if (onProgress) onProgress({ done: true });
-              return;
-            }
-
-            try {
-              const parsedData = JSON.parse(data);
-              if (onProgress) onProgress(parsedData);
-            } catch (e) {
-              console.error('Error parsing SSE message:', e, data);
+          // Process complete SSE messages
+          const lines = buffer.split('\n');
+          buffer = '';
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6).trim(); // Remove 'data: ' prefix and trim
+              
+              if (data === '[DONE]') {
+                if (onProgress) onProgress({ done: true });
+                return;
+              }
+              
+              if (data) {
+                try {
+                  const parsedData = JSON.parse(data);
+                  if (onProgress) onProgress(parsedData);
+                } catch (e) {
+                  console.error('Error parsing SSE message:', e, data);
+                  // If parsing fails, send the raw data as content
+                  if (onProgress) onProgress({ content: data });
+                }
+              }
+            } else if (line.trim() !== '') {
+              // If it's not an empty line, keep it in the buffer for the next chunk
+              buffer += line + '\n';
             }
           }
         }
+      } catch (error) {
+        console.error('Error reading stream:', error);
+        throw error;
       }
     } catch (error) {
       console.error('Error in sendMessage:', error);
