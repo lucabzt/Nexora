@@ -83,15 +83,13 @@ function App() {
                 </Route>
                   {/* Protected routes now based at /dashboard */}
                 <Route element={<ProtectedRoute />}>
-                  <Route path="/dashboard" element={<AppLayout />}>
-                    <Route index element={<Dashboard />} />
-                    <Route path="create-course" element={<CreateCourse />} />
-                    <Route path="settings" element={<SettingsPage />} />
-                    <Route path="statistics" element={<StatisticsPage />} />
-                  </Route>
-                  <Route path="/dashboard/courses/:courseId" element={<CourseLayout />}>
-                    <Route index element={<CourseView />} />
-                    <Route path="chapters/:chapterId" element={<ChapterView />} />
+                  <Route path="/dashboard" element={<AppLayout />}> {/* Base path for dashboard and other protected routes */}
+                    <Route index element={<Dashboard />} /> {/* This will be /dashboard */}
+                    <Route path="create-course" element={<CreateCourse />} /> {/* /dashboard/create-course */}
+                    <Route path="courses/:courseId" element={<CourseView />} /> {/* /dashboard/courses/:courseId */}
+                    <Route path="courses/:courseId/chapters/:chapterId" element={<ChapterView />} /> {/* /dashboard/courses/:courseId/chapters/:chapterId */}
+                    <Route path="settings" element={<SettingsPage />} /> {/* /dashboard/settings */}
+                    <Route path="statistics" element={<StatisticsPage />} /> {/* /dashboard/statistics */}
                   </Route>
                 </Route>
 
