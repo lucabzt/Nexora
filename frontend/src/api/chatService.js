@@ -30,6 +30,9 @@ export const chatService = {
       }
       
       // Make the request using fetch
+
+      //fetch current user
+      const user = await apiWithCookies.get('/users/me');
       const response = await fetch(`${apiWithCookies.defaults.baseURL}${url}`, {
         method: 'POST',
         headers: headers,
@@ -91,42 +94,81 @@ export const chatService = {
       const decoder = new TextDecoder();
       let buffer = '';
 
+      let messageBuffer = '';
+      let accumulatedContent = '';
+      
+      const processMessage = (data) => {
+        if (data === '[DONE]') {
+          if (onProgress) onProgress({ done: true });
+          return true; // Signal to stop processing
+        }
+        
+        try {
+          const parsedData = JSON.parse(data);
+          if (parsedData.content) {
+            accumulatedContent += parsedData.content;
+            if (onProgress) onProgress({ 
+              content: accumulatedContent,
+              isStreaming: true 
+            });
+          }
+        } catch (e) {
+          console.error('Error parsing SSE message:', e, data);
+          // If parsing fails, still try to accumulate the raw content
+          accumulatedContent += data;
+          if (onProgress) onProgress({ 
+            content: accumulatedContent,
+            isStreaming: true 
+          });
+        }
+        return false;
+      };
+      
       try {
+        // Main processing loop
         while (true) {
           const { done, value } = await reader.read();
-          if (done) break;
-
-          // Decode the chunk of data
-          const chunk = decoder.decode(value, { stream: true });
-          buffer += chunk;
-
-          // Process complete SSE messages
-          const lines = buffer.split('\n');
-          buffer = '';
           
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.slice(6).trim(); // Remove 'data: ' prefix and trim
-              
-              if (data === '[DONE]') {
-                if (onProgress) onProgress({ done: true });
-                return;
+          // Handle stream completion
+          if (done) {
+            // Process any remaining data in the buffer
+            if (messageBuffer.trim()) {
+              if (messageBuffer.startsWith('data: ')) {
+                const data = messageBuffer.slice(6).trim();
+                if (processMessage(data)) break;
               }
-              
-              if (data) {
-                try {
-                  const parsedData = JSON.parse(data);
-                  if (onProgress) onProgress(parsedData);
-                } catch (e) {
-                  console.error('Error parsing SSE message:', e, data);
-                  // If parsing fails, send the raw data as content
-                  if (onProgress) onProgress({ content: data });
-                }
-              }
-            } else if (line.trim() !== '') {
-              // If it's not an empty line, keep it in the buffer for the next chunk
-              buffer += line + '\n';
             }
+            if (onProgress) onProgress({ done: true });
+            break;
+          }
+
+          try {
+            // Decode the chunk of data
+            const chunk = decoder.decode(value, { stream: true });
+            console.log('Chunk:', chunk);
+            
+            // Add chunk to our buffer
+            messageBuffer += chunk;
+            
+            // Process all complete messages in the buffer
+            let newlineIndex;
+            while ((newlineIndex = messageBuffer.indexOf('\n\n')) !== -1) {
+              // Extract one complete message (up to the double newline)
+              const message = messageBuffer.slice(0, newlineIndex);
+              messageBuffer = messageBuffer.slice(newlineIndex + 2);
+              
+              // Skip empty messages
+              if (!message.trim()) continue;
+              
+              // Handle the message
+              if (message.startsWith('data: ')) {
+                const data = message.slice(6).trim();
+                if (processMessage(data)) return; // Stop if we got a [DONE] message
+              }
+            }
+          } catch (error) {
+            console.error('Error processing chunk:', error);
+            throw error;
           }
         }
       } catch (error) {

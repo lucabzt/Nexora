@@ -62,27 +62,37 @@ class ChatService:
                 }
             )
             
-            # Process the message through the chat agent
-            info_response = await self.chat_agent.run(
-                user_id=user_id,
-                state={
-                    "chapter_content": chapters_crud.get_chapter_by_id(db, chapter_id).content
-                },
-                chapter_id=chapter_id,
-                content=create_text_query(request.message),
-            )
-            
-            # Get the response content, defaulting to an empty string if not found
-            print("info_response", info_response)
-            response_content = info_response.get('explanation', '')
-            
-            # Yield the response as a properly formatted SSE message
-            if response_content:
-                # Format as SSE data (double newline indicates end of message)
-                yield f"data: {json.dumps({'content': response_content})}\n\n"
-            
-            # Send a [DONE] event to signal the end of the stream
-            yield "data: [DONE]\n\n"
+            # Process the message through the chat agent and stream responses
+            try:
+                # Get chapter content for the agent state
+                chapter_content = chapters_crud.get_chapter_by_id(db, chapter_id).content
+                
+                # Process the message and stream responses
+                async for text_chunk, is_final in self.chat_agent.run(
+                    user_id=user_id,
+                    state={"chapter_content": chapter_content},
+                    chapter_id=chapter_id,
+                    content=create_text_query(request.message),
+                    debug=logger.isEnabledFor(logging.DEBUG)
+                ):
+                    # Skip empty chunks
+                    if not text_chunk:
+                        continue
+
+                    logger.info(f"Text chunk: {text_chunk}")
+
+                    # If this is the final chunk, send a [DONE] event
+                    if is_final:
+                        yield "data: [DONE]\n\n"
+                        return
+                    else:
+                        # Format as SSE data (double newline indicates end of message)
+                        yield f"data: {json.dumps({'content': text_chunk})}\n\n"
+                        
+            except Exception as e:
+                logger.error(f"Error in chat stream: {str(e)}", exc_info=True)
+                error_msg = json.dumps({"error": "An error occurred while processing your message"})
+                yield f"event: error\ndata: {error_msg}\n\n"
             
         except Exception as e:
             logger.error(
