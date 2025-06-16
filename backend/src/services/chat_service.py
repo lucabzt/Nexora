@@ -14,6 +14,7 @@ from google.genai import types
 from sqlalchemy.orm import Session
 
 from ..agents.chat_agent.agent import ChatAgent
+from ..agents.utils import create_text_query
 from ..api.schemas.chat import ChatRequest
 from ..config.settings import SQLALCHEMY_DATABASE_URL
 
@@ -64,7 +65,7 @@ class ChatService:
                 user_id=user_id,
                 state={},
                 chapter_id=chapter_id,
-                content=types.Content(parts=[types.Part(text=request.message)]),
+                content=create_text_query(request.message),
             )
             
             # Get the response content, defaulting to an empty string if not found
