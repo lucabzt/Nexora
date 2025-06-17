@@ -63,6 +63,8 @@ async def create_course_request(
         user_id=str(current_user.id),
         total_time_hours=course_request.time_hours,
         query_=course_request.query,
+        language=course_request.language,
+        difficulty=course_request.difficulty,
         status=CourseStatus.CREATING  # Set initial status to CREATING
     )
     if not course:
