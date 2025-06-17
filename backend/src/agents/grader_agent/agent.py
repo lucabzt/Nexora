@@ -17,11 +17,11 @@ class GraderAgent(StructuredAgent):
     def __init__(self, app_name: str, session_service):
         # Create the planner agent
         grader_agent = LlmAgent(
-            name="tester_agent",
+            name="grader_agent",
             model="gemini-2.0-flash",
             description="Agent for testing the user on studied material",
             output_schema=Grading,
-            instruction=load_instruction_from_file("tester_agent/instructions.txt"),
+            instruction=lambda _: load_instruction_from_file("grader_agent/instructions.txt"),
             disallow_transfer_to_parent=True,
             disallow_transfer_to_peers=True
         )
