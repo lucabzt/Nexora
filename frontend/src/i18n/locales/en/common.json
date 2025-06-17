@@ -24,6 +24,7 @@
     "course": "Course",
     "chapter": "Chapter",
     "noResults": "No results found",
+    "startTyping": "Start typing to search...",
     "error": "Error loading search results"
   },
   "loader": {

@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from .query_service import QueryService
 from .state_service import StateService, CourseState
-from ..agents.explainer_agent.agent import CodeReviewAgent
+from ..agents.explainer_agent.agent import ExplainerAgent
 from ..agents.grader_agent.agent import GraderAgent
 from ..db.crud import chapters_crud, documents_crud, images_crud, questions_crud, courses_crud
 
@@ -26,7 +26,7 @@ from ..agents.tester_agent import TesterAgent
 from ..agents.utils import create_text_query
 from ..db.models.db_course import CourseStatus
 from ..api.schemas.course import CourseRequest
-from ..services.notification_service import WebSocketConnectionManager
+#from ..services.notification_service import WebSocketConnectionManager
 from ..db.models.db_course import Course
 from google.genai import types
 
@@ -44,7 +44,7 @@ class AgentService:
         # define agents
         self.info_agent = InfoAgent(self.app_name, self.session_service)
         self.planner_agent = PlannerAgent(self.app_name, self.session_service)
-        self.coding_agent = CodeReviewAgent(self.app_name, self.session_service)
+        self.coding_agent = ExplainerAgent(self.app_name, self.session_service)
         self.tester_agent = TesterAgent(self.app_name, self.session_service)
         self.image_agent = ImageAgent(self.app_name, self.session_service)
         self.grader_agent = GraderAgent(self.app_name, self.session_service)
@@ -75,7 +75,7 @@ class AgentService:
                 )
 
 
-    async def create_course(self, user_id: str, course_id: int, request: CourseRequest, db: Session, task_id: str, ws_manager: WebSocketConnectionManager):
+    async def create_course(self, user_id: str, course_id: int, request: CourseRequest, db: Session, task_id: str):#, ws_manager: WebSocketConnectionManager):
         """
         Main function for handling the course creation logic. Uses WebSocket for progress.
 
@@ -84,7 +84,7 @@ class AgentService:
         request (CourseRequest): A CourseRequest object containing all necessary details for creating a new course.
         db (Session): The SQLAlchemy database session.
         task_id (str): The unique ID for this course creation task, used for WebSocket communication.
-        ws_manager (WebSocketConnectionManager): Manager to send messages over WebSockets.
+        #ws_manager (WebSocketConnectionManager): Manager to send messages over WebSockets.
         """
         course_db = None
         try:
@@ -102,6 +102,9 @@ class AgentService:
             docs = documents_crud.get_documents_by_ids(db, request.document_ids)
             images = images_crud.get_images_by_ids(db, request.picture_ids)
             print(f"[{task_id}] Retrieved {len(docs)} documents and {len(images)} images.")
+
+            #Add Data to ChromaDB for RAG
+            
 
             # Get a short course title and description from the info_agent
             info_response = await self.info_agent.run(

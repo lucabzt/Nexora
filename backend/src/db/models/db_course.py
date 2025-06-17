@@ -69,6 +69,7 @@ class Chapter(Base):
     # This makes ordering chapters by their index for a given course very fast.
     __table_args__ = (
         Index('ix_chapter_course_id_index', 'course_id', 'index'),
+        Index('ix_chapter_fulltext', 'caption', 'summary', 'content', mysql_prefix='FULLTEXT'),
     )
 
 

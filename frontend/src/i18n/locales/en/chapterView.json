@@ -42,6 +42,19 @@
       "incorrectTitle": "Incorrect",
       "theCorrectAnswerIs": "The correct answer is:",
       "explanationLabel": "Explanation:"
+    },
+    "openText": {
+      "placeholder": "Type your answer here...",
+      "gradeButton": "Grade Answer",
+      "feedbackTitle": "AI Feedback",
+      "pointsReceived": "Points received",
+      "feedback": "Feedback",
+      "expectedAnswer": "Expected answer"
+    },
+    "otOnlyMessage": "Grade each of your answers above to receive feedback from our AI tutor.",
+    "badge": {
+      "openText": "Open Text",
+      "multipleChoice": "Multiple Choice"
     }
   }
 }

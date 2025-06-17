@@ -193,7 +193,7 @@ const SearchBar = () => {
         />
       </form>
       
-      {isDropdownOpen && (searchResults.length > 0 || isSearching || error) && (
+      {isDropdownOpen && (searchQuery.length > 0 || isSearching) && (
         <Paper
           shadow="md"
           style={{
@@ -275,10 +275,16 @@ const SearchBar = () => {
                   </Group>
                 </UnstyledButton>
               ))
-            ) : (
+            ) : searchQuery.length > 1 ? (
               <Box p="md" style={{ textAlign: 'center' }}>
                 <Text size="sm" color="dimmed">
                   {t('search.noResults')}
+                </Text>
+              </Box>
+            ) : (
+              <Box p="md" style={{ textAlign: 'center' }}>
+                <Text size="sm" color="dimmed">
+                  {t('search.startTyping')}
                 </Text>
               </Box>
             )}

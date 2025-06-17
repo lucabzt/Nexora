@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Outlet, Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Outlet, Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { 
   AppShell, 
   Navbar,
@@ -47,7 +47,7 @@ import {
   IconLanguage
 } from '@tabler/icons-react';
 
-const MainLink = ({ icon, color, label, to, isActive, collapsed, onNavigate }) => {
+export const MainLink = ({ icon, color, label, to, isActive, collapsed, onNavigate }) => {
   const navigate = useNavigate();
   const theme = useMantineTheme();
   
@@ -433,47 +433,7 @@ function AppLayout() {
             zIndex: 150, // Higher than toolbar (100)
           })}
         >
-          <Navbar.Section>
-            <Paper
-              p="md"
-              sx={(theme) => ({
-                background: dark 
-                  ? `linear-gradient(135deg, ${theme.colors.dark[6]}80, ${theme.colors.dark[5]}40)`
-                  : `linear-gradient(135deg, ${theme.colors.gray[1]}80, ${theme.white}40)`,
-                border: `1px solid ${dark ? theme.colors.dark[4] : theme.colors.gray[3]}`,
-                borderRadius: theme.radius.lg,
-                marginBottom: theme.spacing.lg,
-                backdropFilter: 'blur(8px)',
-              })}
-            >     
-            
-            <Group spacing="sm" mb="xs" position={!opened ? "center" : "left"}>
-                   
-                {opened ? (
-                  <Group spacing="xs" position="center">
-                    <Image
-                      src="/logo.png"
-                      alt={t('app:logoAlt')}
-                      height={85}
-                      width={85}
-                    />
-                    <Box>
-                      <Text size="sm" weight={600} mb={2}>{t('title', { ns: 'navigation', defaultValue: 'Navigation' })}</Text>
-                      <Text size="xs" color="dimmed">{t('subtitle', { ns: 'navigation', defaultValue: 'Choose your destination' })}</Text>
-                    </Box>
-                  </Group>
-
-                ) : (
-                  <Image
-                    src="/logo_only.png"
-                    alt={t('app:logoAlt')}
-                    height={32}
-                    width={32}
-                  />
-                )}
-              </Group>
-            </Paper>
-          </Navbar.Section>
+          
           
           <Navbar.Section grow mt="xs">
             <Stack spacing="xs">
@@ -486,7 +446,7 @@ function AppLayout() {
       <Box sx={{ flex: 1 }}>
         <Outlet />
       </Box>
-      <AppFooter />
+      {!useLocation().pathname.match(/^\/dashboard\/courses\/.*\/chapters\/.*$/) && <AppFooter />}
     </AppShell>
   );
 }

@@ -1,99 +1,117 @@
 """
- Frontend
-  ↓
-API (FastAPI)
-  ↓
-→ MySQL: Verlauf lesen
-→ Chroma: RAG-Wissen holen
-  ↓
-→ Prompt + Kontext an Agent SDK
-  ↓
-→ Agent entscheidet:
-   ↳ Tool verwenden? → ja → Tool-Call + Ergebnis
-   ↳ nein → Antwort direkt
-  ↓
-Antwort speichern + zurück an User
+Chat service for handling chat interactions with AI agents.
+
+This service coordinates the interaction between the API and the chat agent,
+handling message processing, streaming responses, and error handling.
 """
+import json
+import logging
+from typing import AsyncGenerator
+
+from fastapi import HTTPException
+from google.adk.sessions import DatabaseSessionService
+from google.genai import types
+from sqlalchemy.orm import Session
+
+from ..agents.chat_agent.agent import ChatAgent
+from ..agents.utils import create_text_query
+from ..api.schemas.chat import ChatRequest
+from ..config.settings import SQLALCHEMY_DATABASE_URL
+
+from ..db.crud import chapters_crud
+
+logger = logging.getLogger(__name__)
+
+class ChatService:
+    """Service for handling chat interactions with AI agents."""
+    
+    def __init__(self):
+        """Initialize the chat service with required components."""
+        self.session_service = DatabaseSessionService(db_url=SQLALCHEMY_DATABASE_URL)
+        self.chat_agent = ChatAgent("Nexora", self.session_service)
+   
+    async def process_chat_message(
+        self, 
+        user_id: str, 
+        chapter_id: str, 
+        request: ChatRequest, 
+        db: Session
+    ) -> AsyncGenerator[str, None]:
+        """Process a chat message and stream the response.
+        
+        Args:
+            user_id: The ID of the user sending the message
+            chapter_id: The ID of the chapter the chat is related to
+            request: The chat request containing the message
+            db: Database session
+            
+        Yields:
+            str: Server-Sent Events formatted response chunks
+            
+        Raises:
+            HTTPException: If there's an error processing the message
+        """
+        try:
+            # Log the incoming request
+            logger.info(
+                "Processing chat message",
+                extra={
+                    "user_id": user_id,
+                    "chapter_id": chapter_id,
+                    "message_length": len(request.message)
+                }
+            )
+            
+            # Process the message through the chat agent and stream responses
+            try:
+                # Get chapter content for the agent state
+                chapter_content = chapters_crud.get_chapter_by_id(db, chapter_id).content
+                
+                # Process the message and stream responses
+                async for text_chunk, is_final in self.chat_agent.run(
+                    user_id=user_id,
+                    state={"chapter_content": chapter_content},
+                    chapter_id=chapter_id,
+                    content=create_text_query(request.message),
+                    debug=logger.isEnabledFor(logging.DEBUG)
+                ):
+                    # Skip empty chunks
+                    if not text_chunk:
+                        continue
+
+                    logger.info(f"Text chunk: {text_chunk}")
+
+                    # If this is the final chunk, send a [DONE] event
+                    if is_final:
+                        yield "data: [DONE]\n\n"
+                        return
+                    else:
+                        # Format as SSE data (double newline indicates end of message)
+                        yield f"data: {json.dumps({'content': text_chunk})}\n\n"
+                        
+            except Exception as e:
+                logger.error(f"Error in chat stream: {str(e)}", exc_info=True)
+                error_msg = json.dumps({"error": "An error occurred while processing your message"})
+                yield f"event: error\ndata: {error_msg}\n\n"
+            
+        except Exception as e:
+            logger.error(
+                "Error processing chat message",
+                exc_info=True,
+                extra={
+                    "user_id": user_id,
+                    "chapter_id": chapter_id,
+                    "error": str(e)
+                }
+            )
+            # Send an error message as an SSE event
+            error_msg = json.dumps({"error": "An error occurred while processing your message"})
+            yield f"event: error\ndata: {error_msg}\n\n"
+            # Re-raise the exception to be handled by the endpoint
+            raise HTTPException(
+                status_code=500,
+                detail="An error occurred while processing your message"
+            ) from e
 
 
-
-import asyncio
-from google.adk.agents import LlmAgent
-from google.adk.sessions import InMemorySessionService, Session
-from google.adk.memory import InMemoryMemoryService # Import MemoryService
-from google.adk.runners import Runner
-from google.adk.tools import load_memory # Tool to query memory
-from google.genai.types import Content, Part
-
-from sqlalchemy.orm import Session as SqlAlchemySession
-
-from ..api.schemas.chat import ChatRequest, ChatResponse
-
-from ..db.crud.chats import get_last_n_messages_by_course_id, save_chat_message
-from ..db.models.db_chat import Chat
-
-# --- Constants ---
-APP_NAME = "memory_example_app"
-USER_ID = "mem_user"
-MODEL = "gemini-2.0-flash" # Use a valid model
-
-
-# --- Agent Definitions ---
-# Agent 1: Simple agent to capture information
-info_capture_agent = LlmAgent(
-    model=MODEL,
-    name="InfoCaptureAgent",
-    instruction="Acknowledge the user's statement.",
-    # output_key="captured_info" # Could optionally save to state too
-)
-
-# Agent 2: Agent that can use memory
-memory_recall_agent = LlmAgent(
-    model=MODEL,
-    name="MemoryRecallAgent",
-    instruction="Answer the user's question. Use the 'load_memory' tool "
-                "if the answer might be in past conversations.",
-    tools=[load_memory] # Give the agent the tool
-)
-
-# --- Services and Runner ---
-session_service = InMemorySessionService()
-memory_service = InMemoryMemoryService() # Use in-memory for demo
-
-runner = Runner(
-    # Start with the info capture agent
-    agent=info_capture_agent,
-    app_name=APP_NAME,
-    session_service=session_service,
-    memory_service=memory_service # Provide the memory service to the Runner
-)
-
-
-
-def generate_chat_response(
-    db: SqlAlchemySession,
-    course_id: int,
-    current_user_id: str,
-    chat_request: ChatRequest
-):
-    """
-    Generate a response for the chat request using the agent.
-    """
-    #session1 = await runner.session_service.create_session(app_name=APP_NAME, user_id=USER_ID, session_id=current_user_id)
-
-    save_chat_message(
-        db=db,
-        chat=Chat(
-            course_id = course_id,
-            user_id = current_user_id,
-            role="user",
-            content=chat_request.message,
-            images=chat_request.images or [],
-        )
-    )
-
-    return ChatResponse(
-        role="assistant",
-        content="This is a placeholder response. The agent will generate the actual response.",
-        timestamp=None  # You can set this to the current time if needed
-    )
+chat_service = ChatService()
