@@ -223,7 +223,10 @@ function CreateCourse() {
                       <List size="sm" spacing="xs" mb="md">
                         {uploadedDocuments.map((doc) => (
                           <List.Item key={doc.id} icon={<IconFileText size={14} />}>
-                            {t('form.documents.fileEntry', { fileName: doc.filename, sizeKB: Math.round(doc.size / 1024) })}
+                            {t('form.documents.fileEntry', { 
+                              fileName: doc.filename, 
+                              sizeKB: doc.size ? Math.round(doc.size / 1024) : 0 
+                            })}
                           </List.Item>
                         ))}
                       </List>
@@ -248,7 +251,10 @@ function CreateCourse() {
                       <List size="sm" spacing="xs" mb="md">
                         {uploadedImages.map((img) => (
                           <List.Item key={img.id} icon={<IconPhoto size={14} />}>
-                            {t('form.images.fileEntry', { fileName: img.filename, sizeKB: Math.round(img.size / 1024) })}
+                            {t('form.images.fileEntry', { 
+                              fileName: img.filename || img.name || 'Image', 
+                              sizeKB: img.size ? Math.round(img.size / 1024) : 0 
+                            })}
                           </List.Item>
                         ))}
                       </List>
