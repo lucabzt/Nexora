@@ -19,7 +19,7 @@ class StandardAgent(ABC):
         self.app_name = app_name
         self.session_service = session_service
 
-    async def run(self, user_id: str, state: dict, content: types.Content, debug: bool = False, max_retries: int = 1, retry_delay: float = 2.0) -> Dict[str, Any]:
+    async def run(self, user_id: str, state: dict, content: types.Content, debug: bool = False) -> Dict[str, Any]:
         """
         Wraps the event handling and runner from adk into a simple run() method that includes error handling
         and automatic retries for transient failures.
@@ -28,10 +28,10 @@ class StandardAgent(ABC):
         :param state: the state created from the StateService
         :param content: the user query as a type.Content object
         :param debug: if true the method will print auxiliary outputs (all events)
-        :param max_retries: maximum number of retry attempts (default: 1)
-        :param retry_delay: delay between retries in seconds (default: 2.0)
         :return: the parsed dictionary response from the agent
         """
+        max_retries: int = 1
+        retry_delay: float = 2.0
         last_error = None
         
         for attempt in range(max_retries + 1):  # +1 for the initial attempt
@@ -108,10 +108,10 @@ class StructuredAgent(ABC):
         :param state: the state created from the StateService
         :param content: the user query as a type.Content object
         :param debug: if true the method will print auxiliary outputs (all events)
-        :param max_retries: maximum number of retry attempts (default: 1)
-        :param retry_delay: delay between retries in seconds (default: 2.0)
         :return: the parsed dictionary response from the agent
         """
+        max_retries: int = 1
+        retry_delay: float = 2.0
         last_error = None
         
         for attempt in range(max_retries + 1):  # +1 for the initial attempt

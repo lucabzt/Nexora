@@ -138,7 +138,9 @@ class AgentService:
 
             init_state = CourseState(
                 query=request.query,
-                time_hours=request.time_hours
+                time_hours=request.time_hours,
+                language=request.language,
+                difficulty=request.difficulty,
             )
             # Create initial state for the course
             self.state_manager.create_state(user_id, course_id, init_state)
@@ -262,12 +264,12 @@ class AgentService:
             # and not managed by FastAPI's Depends. For now, assuming Depends handles it.
             # db.close() # If db session is task-specific and not managed by Depends.
 
-    async def grade_question(self, user_id: str, question: str, correct_answer: str, users_answer: str):
+    async def grade_question(self, user_id: str, course_id: int, question: str, correct_answer: str, users_answer: str):
         """ Receives an open text question plus answer from the user and returns received points and short feedback """
         query = self.query_service.get_grader_query(question, correct_answer, users_answer)
         grader_response = await self.grader_agent.run(
             user_id=user_id,
-            state={},
+            state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
             content=query
         )
         return grader_response['points'], grader_response['explanation']
