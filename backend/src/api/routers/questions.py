@@ -131,6 +131,7 @@ async def get_feedback(
     # Get feedback from grader
     points, feedback = await agent_service.grade_question(
         user_id=current_user.id,
+        course_id=course_id,
         question=question.question,
         correct_answer=question.correct_answer,
         users_answer=users_answer,

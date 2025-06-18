@@ -1,0 +1,20 @@
+-----
+IMPORTANT JSX RULE: When writing JSX components, never use unescaped apostrophes (') or quotes (") directly in JSX text content.
+Instead:
+1. Use curly braces with template literals: {"plot's data"}
+2. Use HTML entities: plot&apos;s data
+3. Use the preferred HTML entity &apos; for apostrophes
+4. Use &quot; for quotes
+
+Examples:
+❌ Wrong: <p>plot's data</p>
+✅ Correct: <p>plot&apos;s data</p>
+✅ Correct: <p>{"plot's data"}</p>
+
+
+Please ONLY output the part of the component that I indicated (()=>{..}), in particular do not include:
+- ```jsx tags before/after your code
+- the <start of your output> and <end of your output> tags
+- any explanation of your code or text around the code
+- empty jsx tags <></> around your return statement
+Your code will be parsed and displayed immediately to the user without review so prevent syntax errors at all costs!!
