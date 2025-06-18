@@ -11,6 +11,8 @@ import { useToolbar } from '../../contexts/ToolbarContext';
 import { TOOL_TABS } from './ToolUtils';
 import './Toolbar.css';
 
+import { IconChevronRight  } from '@tabler/icons-react';
+
 /**
  * ToolbarContainer component
  * Container for interactive learning tools with a resizable sidebar
@@ -99,70 +101,71 @@ function ToolbarContainer({ courseId, chapterId }) {
           }
         </ActionIcon>
       )}
-        <Resizable      style={{
-        position: 'fixed',
-        top: 70, /* Match the header height (70px for md size) */
-        right: 0,
-        bottom: 0, /* Pin to bottom to prevent header issues */
-        borderLeft: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : '#e9ecef'}`,
-        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : '#f8f9fa',
-        overflow: 'hidden',
-        height: 'calc(100vh - 70px)', /* Adjust height to account for header */
-        zIndex: 100,
-        // Completely hide on mobile when closed, only show toggle button
-        display: (isMobile && !toolbarOpen) ? 'none' : 'flex',
-        flexDirection: 'column',
-        boxShadow: toolbarOpen ? (theme.colorScheme === 'dark' 
-          ? '-2px 0 10px rgba(0, 0, 0, 0.3)' 
-          : '-2px 0 10px rgba(0, 0, 0, 0.1)')
-          : 'none',
-        transition: 'width 0.3s ease, box-shadow 0.3s ease',
-      }}size={{ 
-        width: toolbarOpen ? (isMobile ? '100vw' : toolbarWidth) : (isMobile ? 0 : 40), 
-        height: 'calc(100vh - 70px)' 
-      }}
-      minWidth={isMobile ? (toolbarOpen ? '100vw' : 0) : 40}
-      maxWidth={isMobile ? '100vw' : 800}
-      enable={{
-        top: false,
-        right: false,
-        bottom: false,
-        left: toolbarOpen && !isMobile,
-        topRight: false,
-        bottomRight: false,
-        bottomLeft: false,
-        topLeft: false,      }}onResizeStart={() => {
-        // Set a resize class on body to disable transitions during resize
-        document.body.classList.add('resizing-toolbar');
-      }}
-      onResize={() => {
-        // Do nothing during resize to prevent erratic behavior
-        // We'll only update at the end of resize
-      }}      onResizeStop={(e, direction, ref) => {
-        // Update width once at the end of resizing to prevent erratic behavior
-        const newWidth = isMobile 
-          ? Math.max(200, Math.min(280, parseInt(ref.style.width, 10)))
-          : Math.max(40, Math.min(800, parseInt(ref.style.width, 10)));
-        setToolbarWidth(newWidth);
-        document.body.classList.remove('resizing-toolbar');
-        console.log('Toolbar width updated to:', newWidth);
-      }}
-      handleStyles={{
-        left: {
-          width: '6px',
-          left: '0',
-          height: '100%',
-          cursor: 'col-resize',
-          backgroundColor: theme.colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
-          '&:hover': {
-            backgroundColor: theme.colorScheme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
-          },
-        }
-      }}
-      handleClasses={{
-        left: 'splitter-handle-left'
-      }}
-    >
+        <Resizable      
+          style={{
+            position: 'fixed',
+            top: 70, /* Match the header height (70px for md size) */
+            right: 0,
+            bottom: 0, /* Pin to bottom to prevent header issues */
+            borderLeft: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : '#e9ecef'}`,
+            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : '#f8f9fa',
+            overflow: 'hidden',
+            zIndex: 100,
+            // Completely hide on mobile when closed, only show toggle button
+            display: (isMobile && !toolbarOpen) ? 'none' : 'flex',
+            flexDirection: 'column',
+            boxShadow: toolbarOpen ? (theme.colorScheme === 'dark' 
+              ? '-2px 0 10px rgba(0, 0, 0, 0.3)' 
+              : '-2px 0 10px rgba(0, 0, 0, 0.1)')
+              : 'none',
+            transition: 'width 0.3s ease, box-shadow 0.3s ease',
+          }}
+          size={{ 
+            width: toolbarOpen ? (isMobile ? '100vw' : toolbarWidth) : (isMobile ? 0 : 40)
+          }}
+          minWidth={isMobile ? (toolbarOpen ? '100vw' : 0) : 40}
+          maxWidth={isMobile ? '100vw' : 800}
+          enable={{
+            top: false,
+            right: false,
+            bottom: false,
+            left: toolbarOpen && !isMobile,
+            topRight: false,
+            bottomRight: false,
+            bottomLeft: false,
+            topLeft: false,      }}onResizeStart={() => {
+            // Set a resize class on body to disable transitions during resize
+            document.body.classList.add('resizing-toolbar');
+          }}
+          onResize={() => {
+            // Do nothing during resize to prevent erratic behavior
+            // We'll only update at the end of resize
+          }}      
+          onResizeStop={(e, direction, ref) => {
+            // Update width once at the end of resizing to prevent erratic behavior
+            const newWidth = isMobile 
+              ? Math.max(200, Math.min(280, parseInt(ref.style.width, 10)))
+              : Math.max(40, Math.min(800, parseInt(ref.style.width, 10)));
+            setToolbarWidth(newWidth);
+            document.body.classList.remove('resizing-toolbar');
+            console.log('Toolbar width updated to:', newWidth);
+
+          }}
+          handleStyles={{
+            left: {
+              width: '6px',
+              left: '0',
+              cursor: 'col-resize',
+              backgroundColor: theme.colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+              '&:hover': {
+                backgroundColor: theme.colorScheme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
+              },
+            }
+          }}
+          handleClasses={{
+            left: 'splitter-handle-left'
+          }}
+        >
       {/* Toggle button and tab selection */}
       <Box sx={{ 
         position: 'absolute', 
@@ -241,7 +244,6 @@ function ToolbarContainer({ courseId, chapterId }) {
         )}</Box>
         {/* Tool Content Area */}        <div style={{
         width: '100%',
-        height: '100%',
         overflow: 'auto', // Allow content to scroll independently
         position: 'relative',
         paddingTop: '40px', // Add space for the toggle button
