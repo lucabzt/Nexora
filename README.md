@@ -1,13 +1,10 @@
 # Nexora AI Project
 
-<!-- Optional: Add a project logo or banner here -->
-<!-- <p align="center">
-  <img src="link_to_your_logo.png" alt="Nexora AI Logo" width="200"/>
-</p> -->
+<img src="https://github.com/M4RKUS28/Nexora/blob/main/doc/logo.png?raw=true" alt="Logo" width="200"/>
 
-Welcome to Nexora AI! This project is a full-stack application designed to [**Describe your project's main purpose and goals here. e.g., ...deliver cutting-edge AI solutions for X, Y, Z.**]. It leverages a Python (FastAPI) backend and a modern React frontend (Vite).
+Welcome to Nexora AI! This project is a full-stack application designed to deliver cutting-edge AI solutions for personalized learning assistance. It leverages a Python backend and a modern React frontend.
 
-**Live Site:** [nexora-ai.de](https://nexora-ai.de)
+**Try it out yourself:** [nexora-ai.de](https://nexora-ai.de)
 
 ---
 
@@ -30,9 +27,9 @@ Welcome to Nexora AI! This project is a full-stack application designed to [**De
 ## 🛠️ Tech Stack
 
 ### Backend
-*   **Language:** Python (3.10+)
+*   **Language:** Python (3.12)
 *   **Framework:** FastAPI
-*   **Database:** [Specify if known, e.g., PostgreSQL, MongoDB]
+*   **Database:** [MySQL + ChromaDB]
 *   **Environment Management:** Python `venv`
 *   **Containerization:** Docker (Dockerfile, docker-compose.yml)
 
@@ -40,12 +37,10 @@ Welcome to Nexora AI! This project is a full-stack application designed to [**De
 *   **Library:** React
 *   **Build Tool:** Vite
 *   **Package Manager:** npm
-*   **Language:** JavaScript/TypeScript
-*   **Styling:** [Specify if known, e.g., Tailwind CSS, Material UI, CSS Modules]
+*   **Language:** JavaScript
+*   **Styling:** [Tailwind CSS, Mantine]
 
-### General
-*   **Version Control:** Git
-*   **Linting:** ESLint (Frontend)
+## Current Software Architecture
 
 ![Software Architecture](https://github.com/M4RKUS28/Nexora/blob/main/doc/Editor%20_%20Mermaid%20Chart-2025-06-18-210221.png?raw=true)
 
@@ -65,57 +60,9 @@ Follow these instructions to set up the Nexora AI project for local development.
 *   **Git:** For cloning the repository.
 *   **(Optional) Docker:** If you plan to use Docker for running the backend.
 
-### Installation & Setup
+### Development Installation & Setup
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <your-repository-url>
-    cd nexora-project # Or your project's root directory name
-    ```
-
-2.  **Backend Setup:**
-    Navigate to the backend directory:
-    ```bash
-    cd backend
-    ```
-    Create and activate a Python virtual environment:
-    ```bash
-    python -m venv venv
-    ```
-    *   On Windows:
-        ```bash
-        .\venv\Scripts\activate
-        ```
-    *   On macOS/Linux:
-        ```bash
-        source venv/bin/activate
-        ```
-    Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-    (Optional) Set up your `.env` file. If an `.env.example` is present, copy it to `.env` and fill in the necessary values.
-    Run the backend server:
-    ```bash
-    ./run.sh
-    ```
-    The backend should now be running (typically on a port like 8000 or 5000).
-
-3.  **Frontend Setup:**
-    Navigate to the frontend directory:
-    ```bash
-    cd ../frontend/ # Assuming you are in the backend directory
-    # Or from root: cd frontend/
-    ```
-    Install dependencies:
-    ```bash
-    npm install
-    ```
-    Run the frontend development server:
-    ```bash
-    npm run dev
-    ```
-    The frontend development server will start, typically on a port like `5173` (Vite default). Open your browser to the specified address.
+Have a look at our [wiki](https://github.com/M4RKUS28/Nexora/wiki/How-to-run-locally)
 
 ---
 
@@ -150,18 +97,6 @@ nexora-project/
 
 ---
 
-## 🐳 Docker (Optional Backend)
-
-The backend can also be run using Docker. Ensure Docker and Docker Compose are installed.
-
-From the `backend/` directory:
-```bash
-docker-compose up --build
-```
-This will build the Docker image (if not already built) and start the backend service as defined in `docker-compose.yml`.
-
----
-
 ## 🤝 Contributing
 
 Contributions are welcome! If you'd like to contribute, please follow these steps:
@@ -175,18 +110,11 @@ Contributions are welcome! If you'd like to contribute, please follow these step
 
 Please make sure to update tests as appropriate.
 
----
-
-## 📜 License
-
-This project is licensed under the [**Specify License, e.g., MIT License**]. See the `LICENSE` file for more details (you might need to create one).
 
 ---
 
 ## 📞 Contact
 
-If you have any questions, feedback, or issues, please [**Specify contact method: e.g., open an issue on GitHub, or provide an email address**].
+If you have any questions, feedback, or issues, please open an issue on GitHub.
 
 ---
-
-*This README was generated with the assistance of Cascade, your AI coding partner.*
