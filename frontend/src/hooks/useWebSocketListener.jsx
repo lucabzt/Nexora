@@ -31,3 +31,4 @@ export const useWebSocketListener = (callback) => {
   // For example: return { isConnected };
   // However, typically components just care about messages, not the connection state itself here.
 };
+
