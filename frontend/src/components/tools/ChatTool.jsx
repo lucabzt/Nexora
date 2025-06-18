@@ -293,7 +293,10 @@ function ChatTool({ isOpen, courseId, chapterId }) {
                         />
                       ),
                       ul: ({node, ordered, ...props}) => (
-                        <List type={ordered ? 'ordered' : 'unordered'} size="sm" {...props} />
+                        <List withPadding size="sm" type={ordered ? 'ordered' : 'unordered'} {...props} />
+                      ),
+                      li: ({node, ordered, ...props}) => (
+                        <List.Item {...props} />
                       ),
                       a: ({node, ...props}) => <Anchor target="_blank" rel="noopener noreferrer" {...props} />,
                     }}
