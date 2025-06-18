@@ -124,7 +124,7 @@ function ToolbarContainer({ courseId, chapterId }) {
             width: toolbarOpen ? (isMobile ? '100vw' : toolbarWidth) : (isMobile ? 0 : 40)
           }}
           minWidth={isMobile ? (toolbarOpen ? '100vw' : 0) : 40}
-          maxWidth={isMobile ? '100vw' : 800}
+          maxWidth={isMobile ? '100vw' : '50vw'}
           enable={{
             top: false,
             right: false,
