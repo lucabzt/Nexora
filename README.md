@@ -47,6 +47,10 @@ Welcome to Nexora AI! This project is a full-stack application designed to [**De
 *   **Version Control:** Git
 *   **Linting:** ESLint (Frontend)
 
+![Software Architecture](https://github.com/M4RKUS28/Nexora/blob/main/doc/Editor%20_%20Mermaid%20Chart-2025-06-18-210221.png?raw=true)
+
+
+
 ---
 
 ## 🚀 Getting Started
