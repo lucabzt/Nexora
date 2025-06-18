@@ -359,7 +359,7 @@ function ChatTool({ isOpen, courseId, chapterId }) {
             disabled={!inputValue.trim() || isLoading}
             loading={isLoading}
           >
-            {t('sendButton')}
+            {t('sendMessage')}
           </Button>
         </Group>
       </form>
