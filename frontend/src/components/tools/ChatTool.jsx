@@ -292,11 +292,37 @@ function ChatTool({ isOpen, courseId, chapterId }) {
                           {...props}
                         />
                       ),
-                      ul: ({node, ordered, ...props}) => (
-                        <List withPadding size="sm" type={ordered ? 'ordered' : 'unordered'} {...props} />
+                      ul: ({node, ordered, ...props}) => {
+                        const Component = ordered ? 'ol' : 'ul';
+                        return (
+                          <Component 
+                            style={{
+                              paddingLeft: '1.5em',
+                              margin: '0.5em 0',
+                              listStyleType: ordered ? 'decimal' : 'disc'
+                            }}
+                            {...props}
+                          />
+                        );
+                      },
+                      ol: ({node, ...props}) => (
+                        <ol 
+                          style={{
+                            paddingLeft: '1.5em',
+                            margin: '0.5em 0',
+                            listStyleType: 'decimal'
+                          }}
+                          {...props} 
+                        />
                       ),
                       li: ({node, ordered, ...props}) => (
-                        <List.Item {...props} />
+                        <li 
+                          style={{
+                            marginBottom: '0.25em',
+                            lineHeight: '1.5'
+                          }}
+                          {...props} 
+                        />
                       ),
                       a: ({node, ...props}) => <Anchor target="_blank" rel="noopener noreferrer" {...props} />,
                     }}
