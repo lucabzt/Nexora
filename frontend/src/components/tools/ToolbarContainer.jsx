@@ -21,6 +21,7 @@ function ToolbarContainer({ courseId, chapterId }) {
   const { t } = useTranslation('toolbarContainer');  
   const theme = useMantineTheme();  
   const isMobile = useMediaQuery('(max-width: 768px)');
+  const isDesktop = !isMobile;
   const { toolbarOpen, setToolbarOpen, toolbarWidth, setToolbarWidth } = useToolbar();
   const [activeTab, setActiveTab] = useState(TOOL_TABS.CHAT); // Use constant for tab value
 
@@ -71,6 +72,37 @@ function ToolbarContainer({ courseId, chapterId }) {
   };
   return (
     <>
+      {/* Desktop floating toggle button - only visible when toolbar is closed */}
+      {!isMobile && !toolbarOpen && (
+        <ActionIcon
+          size="lg"
+          variant="filled"
+          color="blue"
+          onClick={handleToggleToolbar}
+          sx={{
+            position: 'fixed',
+            bottom: '32px',
+            right: '32px',
+            zIndex: 150,
+            borderRadius: '50%',
+            width: '56px',
+            height: '56px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            boxShadow: theme.colorScheme === 'dark' 
+              ? '0 4px 12px rgba(0, 0, 0, 0.4)' 
+              : '0 4px 12px rgba(0, 0, 0, 0.15)',
+            transition: 'transform 0.2s ease',
+            '&:hover': {
+              transform: 'scale(1.1)'
+            }
+          }}
+        >
+          <IconChevronLeft size={24} aria-label={t('buttons.openToolbar')} />
+        </ActionIcon>
+      )}
+
       {/* Mobile floating toggle button - always visible on mobile */}
       {isMobile && (
         <ActionIcon
