@@ -96,7 +96,7 @@ function MainLayout() {
             <Group spacing="xs">
               {(!isMobile || isAuthenticated) && (
                 <img 
-                  src="/simple_logo.jpg" 
+                  src={theme.colorScheme === 'dark' ? "/logo_white.png" : "/logo_black.png"}
                   alt="Logo"
                   style={{ 
                     height: 28,

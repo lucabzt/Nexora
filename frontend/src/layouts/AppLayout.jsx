@@ -3,53 +3,42 @@ import { Outlet, Link as RouterLink, useNavigate, useLocation } from 'react-rout
 import { 
   AppShell, 
   Navbar,
-  Image, 
-  Header, 
-  MediaQuery, 
-  Burger, 
+  Group, 
   Title,
+  useMantineTheme,
+  ActionIcon,
+  Box,
+  Avatar,
+  Menu,
+  useMantineColorScheme,
+  Badge,
   UnstyledButton,
-  Group,
   Text,
   ThemeIcon,
-  Box,
-  Menu,
-  Avatar,
-  useMantineColorScheme,
-  Button,
-  useMantineTheme,
-  Badge,
-  Divider,
-  Paper,
-  Transition,
   Stack,
-  ActionIcon
+  Divider,
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
-import { useAuth } from '../contexts/AuthContext';
-import { useTranslation } from 'react-i18next';
-import LanguageSelector from '../components/LanguageSelector';
-import AppFooter from '../components/AppFooter';
-import SearchBar from '../components/SearchBar';
-
-import {
+import { 
+  IconSettings,
+  IconSun, 
+  IconMoonStars, 
+  IconUser, 
+  IconLogout,
   IconHome2,
   IconPlus,
-  IconSettings,
-  IconSun,
-  IconMoonStars,
-  IconLogout,
   IconChartLine,
-  IconUser,
+  IconShieldCheck,
   IconInfoCircle,
   IconChevronRight,
-  IconSparkles,
-  IconShieldCheck,
-  IconLanguage,
-  IconMenu2,
-  IconX
+  IconX,
+  IconMenu2
 } from '@tabler/icons-react';
+import AppFooter from '../components/AppFooter';
+import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
+// MainLink component for sidebar navigation
 export const MainLink = ({ icon, color, label, to, isActive, collapsed, onNavigate }) => {
   const navigate = useNavigate();
   const theme = useMantineTheme();
@@ -208,207 +197,6 @@ function AppLayout() {
       }}
       navbarOffsetBreakpoint="sm"
       asideOffsetBreakpoint="sm"
-      header={
-        <Header 
-          height={{ base: 60, md: 70 }} 
-          p="md"
-          sx={(theme) => ({
-            background: dark 
-              ? `linear-gradient(135deg, ${theme.colors.dark[7]} 0%, ${theme.colors.dark[8]} 100%)`
-              : `linear-gradient(135deg, ${theme.white} 0%, ${theme.colors.gray[0]} 100%)`,
-            borderBottom: `1px solid ${dark ? theme.colors.dark[6] : theme.colors.gray[2]}`,
-            boxShadow: dark 
-              ? `0 4px 12px ${theme.colors.dark[9]}50`
-              : `0 4px 12px ${theme.colors.gray[3]}30`,
-            zIndex: 200, // Higher than navbar (150) and toolbar (100)
-            position: 'relative', // Ensure stacking context
-          })}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-            <Group spacing="xs">
-              <img 
-                src="/simple_logo.jpg" 
-                alt="Logo"
-                style={{ 
-                  height: 28,
-                  width: 'auto',
-                  filter: 'drop-shadow(0 2px 4px rgba(139, 92, 246, 0.3))',
-                }} 
-              />
-              <Title
-                order={3}
-                size="1.6rem"
-                component={RouterLink}
-                to={user ? "/dashboard" : "/"}
-                sx={(theme) => ({
-                  textDecoration: 'none',
-                  background: `linear-gradient(135deg, ${theme.colors.violet[6]}, ${theme.colors.violet[4]})`,
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  fontWeight: 800,
-                  letterSpacing: '-1px',
-                  transition: 'all 0.3s ease',
-                  filter: 'drop-shadow(0 2px 4px rgba(139, 92, 246, 0.2))',
-                  '&:hover': {
-                    transform: 'scale(1.02)',
-                    textDecoration: 'none',
-                    cursor: 'pointer',
-                    filter: 'drop-shadow(0 4px 8px rgba(139, 92, 246, 0.4))',
-                  },
-                })}
-              >
-                {t('title', { ns: 'app' })}
-              </Title>
-            </Group>
-            
-            <Box sx={{ flexGrow: 1 }} />
-            
-            {/* Search Bar - Centered */}
-            <Box sx={{
-              position: 'absolute',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: '100%',
-              maxWidth: 500,
-              padding: '0 20px',
-              zIndex: 1,
-              '@media (max-width: 900px)': {
-                display: 'none',
-              },
-            }}>
-              <SearchBar />
-            </Box>
-            
-            {/* Spacer to balance the flex layout */}
-            <Box sx={{ flex: 1, '@media (min-width: 901px)': { visibility: 'hidden' } }} />
-            
-            <Group spacing="xs">
-              {user ? (
-                <Menu shadow="md" width={220} withinPortal={true} zIndex={300}>
-                  <Menu.Target>
-                    <UnstyledButton
-                      sx={{
-                        padding: theme.spacing.xs,
-                        borderRadius: theme.radius.md,
-                        transition: 'all 0.2s ease',
-                        '&:hover': {
-                          backgroundColor: dark ? theme.colors.dark[6] : theme.colors.gray[1],
-                          transform: 'scale(1.02)',
-                        },
-                      }}
-                    > 
-                      <Group spacing="xs"> 
-                        <Avatar
-                          key={avatarSrc || (user ? user.id : 'app-layout-avatar')}
-                          src={avatarSrc}
-                          radius="xl"
-                          alt={user.username || t('userAvatarAlt', { ns: 'app', defaultValue: 'User avatar' })}
-                          color="cyan"
-                          sx={{
-                            cursor: 'pointer',
-                            border: `2px solid ${theme.colors.cyan[5]}40`,
-                            transition: 'all 0.2s ease',
-                            '&:hover': {
-                              transform: 'scale(1.05)',
-                              border: `2px solid ${theme.colors.cyan[5]}`,
-                            },
-                          }}
-                        >
-                          {!avatarSrc && user.username ? user.username.substring(0, 2).toUpperCase() : (!avatarSrc ? <IconUser size={18} /> : null)}
-                        </Avatar>
-                        <Box>
-                          <Text size="sm" weight={500}>{user.username}</Text>
-                          <Badge 
-                            size="xs" 
-                            variant="light" 
-                            color="cyan"
-                            sx={{ textTransform: 'none' }}
-                          >
-                            {t('onlineStatusBadge', { ns: 'app', defaultValue: 'Online' })}
-                          </Badge>
-                        </Box>
-                      </Group>
-                    </UnstyledButton>
-                  </Menu.Target> 
-                  <Menu.Dropdown
-                    sx={{
-                      border: `1px solid ${dark ? theme.colors.dark[4] : theme.colors.gray[3]}`,
-                      boxShadow: dark 
-                        ? `0 8px 24px ${theme.colors.dark[9]}70`
-                        : `0 8px 24px ${theme.colors.gray[4]}40`,
-                      zIndex: 300, // Much higher than navbar (150) and toolbar (100)
-                    }}
-                  >
-                    <Menu.Item 
-                      icon={<IconSettings size={14} />} 
-                      onClick={() => navigate('/dashboard/settings')}
-                      sx={{
-                        '&:hover': {
-                          backgroundColor: dark ? theme.colors.dark[6] : theme.colors.gray[1],
-                        },
-                      }}
-                    >
-                      {t('settings', { ns: 'navigation' })}
-                    </Menu.Item>
-                    <Menu.Item 
-                      icon={dark ? <IconSun size={14} /> : <IconMoonStars size={14} />} 
-                      onClick={() => toggleColorScheme()}
-                      sx={{
-                        '&:hover': {
-                          backgroundColor: dark ? theme.colors.dark[6] : theme.colors.gray[1],
-                        },
-                      }}
-                    >
-                      {t('theme', { ns: 'settings' })}
-                    </Menu.Item>
-
-                    <Menu.Item 
-                      icon={ <IconInfoCircle size={14} />} 
-                      onClick={() => {navigate('/about');}}
-                      sx={{
-                        '&:hover': {
-                          backgroundColor: dark ? theme.colors.dark[6] : theme.colors.gray[1],
-                        },
-                      }}
-                    >
-                      {t('about', { ns: 'navigation' })}
-                    </Menu.Item>
-
-                    <Divider />
-                    <Menu.Item 
-                      icon={<IconLogout size={14} />} 
-                      onClick={handleLogout}
-                      color="red"
-                      sx={{
-                        '&:hover': {
-                          backgroundColor: `${theme.colors.red[6]}15`,
-                        },
-                      }}
-                    >
-                      {t('logout', { ns: 'navigation' })}
-                    </Menu.Item>
-                  </Menu.Dropdown>
-                </Menu>
-              ) : (
-                <Button 
-                  onClick={() => navigate('/login')}
-                  variant="gradient"
-                  gradient={{ from: 'violet', to: 'blue' }}
-                  sx={{
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                      transform: 'scale(1.05)',
-                    },
-                  }}
-                >
-                  {t('login', { ns: 'navigation' })}
-                </Button>
-              )}
-            </Group>
-          </div>
-        </Header>
-      }
       navbar={       
         <Navbar 
           p={opened ? "md" : "xs"}
@@ -429,16 +217,57 @@ function AppLayout() {
             zIndex: 150, // Higher than toolbar (100)
           })}
         >
-          {/* Toggle button in navbar */}
+          {/* Header section with logo, app name, and toggle */}
           <Box 
             sx={{
               display: 'flex',
-              justifyContent: opened ? 'flex-end' : 'center',
               alignItems: 'center',
-              marginBottom: 'md',
-              minHeight: 40,
+              justifyContent: opened ? 'space-between' : 'center',
+              marginBottom: theme.spacing.md,
+              paddingBottom: theme.spacing.md,
+              borderBottom: `1px solid ${dark ? theme.colors.dark[5] : theme.colors.gray[2]}`,
+              minHeight: 60,
             }}
           >
+            {opened && (
+              <Group spacing="xs">
+                <img 
+                  src={theme.colorScheme === 'dark' ? "/logo_white.png" : "/logo_black.png"}
+                  alt="Logo"
+                  style={{ 
+                    height: 28,
+                    width: 'auto',
+                    filter: 'drop-shadow(0 2px 4px rgba(139, 92, 246, 0.3))',
+                  }} 
+                />
+                <Title
+                  order={3}
+                  size="1.6rem"
+                  component={RouterLink}
+                  to="/dashboard"
+                  sx={(theme) => ({
+                    textDecoration: 'none',
+                    background: `linear-gradient(135deg, ${theme.colors.violet[6]}, ${theme.colors.violet[4]})`,
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    fontWeight: 800,
+                    letterSpacing: '-1px',
+                    transition: 'all 0.3s ease',
+                    filter: 'drop-shadow(0 2px 4px rgba(139, 92, 246, 0.2))',
+                    '&:hover': {
+                      transform: 'scale(1.02)',
+                      textDecoration: 'none',
+                      cursor: 'pointer',
+                      filter: 'drop-shadow(0 4px 8px rgba(139, 92, 246, 0.4))',
+                    },
+                  })}
+                >
+                  {t('title', { ns: 'app' })}
+                </Title>
+              </Group>
+            )}
+            
             <ActionIcon
               variant="outline"
               onClick={() => setOpened((o) => !o)}
@@ -456,11 +285,192 @@ function AppLayout() {
             </ActionIcon>
           </Box>
           
+          {/* Navigation Links */}
           <Navbar.Section grow mt="xs">
             <Stack spacing="xs">
               {mainLinksComponents}
             </Stack>
           </Navbar.Section>
+
+          {/* Profile section at bottom */}
+          <Box 
+            sx={{
+              paddingTop: theme.spacing.md,
+              borderTop: `1px solid ${dark ? theme.colors.dark[5] : theme.colors.gray[2]}`,
+            }}
+          >
+            {opened ? (
+              // Full profile menu when expanded
+              <Menu shadow="md" width={220} withinPortal={true} zIndex={300}>
+                <Menu.Target>
+                  <UnstyledButton
+                    sx={{
+                      padding: theme.spacing.xs,
+                      borderRadius: theme.radius.md,
+                      transition: 'all 0.2s ease',
+                      width: '100%',
+                      '&:hover': {
+                        backgroundColor: dark ? theme.colors.dark[6] : theme.colors.gray[1],
+                        transform: 'scale(1.02)',
+                      },
+                    }}
+                  > 
+                    <Group spacing="xs"> 
+                      <Avatar
+                        key={avatarSrc || (user ? user.id : 'app-layout-avatar')}
+                        src={avatarSrc}
+                        radius="xl"
+                        alt={user.username || t('userAvatarAlt', { ns: 'app', defaultValue: 'User avatar' })}
+                        color="cyan"
+                        sx={{
+                          cursor: 'pointer',
+                          border: `2px solid ${theme.colors.cyan[5]}40`,
+                          transition: 'all 0.2s ease',
+                          '&:hover': {
+                            transform: 'scale(1.05)',
+                            border: `2px solid ${theme.colors.cyan[5]}`,
+                          },
+                        }}
+                      >
+                        {!avatarSrc && user.username ? user.username.substring(0, 2).toUpperCase() : (!avatarSrc ? <IconUser size={18} /> : null)}
+                      </Avatar>
+                      <Box>
+                        <Text size="sm" weight={500}>{user.username}</Text>
+                        <Badge 
+                          size="xs" 
+                          variant="light" 
+                          color="cyan"
+                          sx={{ textTransform: 'none' }}
+                        >
+                          {t('onlineStatusBadge', { ns: 'app', defaultValue: 'Online' })}
+                        </Badge>
+                      </Box>
+                    </Group>
+                  </UnstyledButton>
+                </Menu.Target> 
+                <Menu.Dropdown
+                  sx={{
+                    border: `1px solid ${dark ? theme.colors.dark[4] : theme.colors.gray[3]}`,
+                    boxShadow: dark 
+                      ? `0 8px 24px ${theme.colors.dark[9]}70`
+                      : `0 8px 24px ${theme.colors.gray[4]}40`,
+                    zIndex: 300,
+                  }}
+                >
+                  <Menu.Item 
+                    icon={<IconSettings size={14} />} 
+                    onClick={() => navigate('/dashboard/settings')}
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: dark ? theme.colors.dark[6] : theme.colors.gray[1],
+                      },
+                    }}
+                  >
+                    {t('settings', { ns: 'navigation' })}
+                  </Menu.Item>
+                  <Menu.Item 
+                    icon={dark ? <IconSun size={14} /> : <IconMoonStars size={14} />} 
+                    onClick={() => toggleColorScheme()}
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: dark ? theme.colors.dark[6] : theme.colors.gray[1],
+                      },
+                    }}
+                  >
+                    {t('theme', { ns: 'settings' })}
+                  </Menu.Item>
+
+                  <Menu.Item 
+                    icon={ <IconInfoCircle size={14} />} 
+                    onClick={() => {navigate('/about');}}
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: dark ? theme.colors.dark[6] : theme.colors.gray[1],
+                      },
+                    }}
+                  >
+                    {t('about', { ns: 'navigation' })}
+                  </Menu.Item>
+
+                  <Divider />
+                  <Menu.Item 
+                    icon={<IconLogout size={14} />} 
+                    onClick={handleLogout}
+                    color="red"
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: `${theme.colors.red[6]}15`,
+                      },
+                    }}
+                  >
+                    {t('logout', { ns: 'navigation' })}
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
+            ) : (
+              // Collapsed profile - just avatar
+              <Group position="center">
+                <Menu shadow="md" width={220} withinPortal={true} zIndex={300}>
+                  <Menu.Target>
+                    <Avatar
+                      key={avatarSrc || (user ? user.id : 'app-layout-avatar-collapsed')}
+                      src={avatarSrc}
+                      radius="xl"
+                      alt={user.username || t('userAvatarAlt', { ns: 'app', defaultValue: 'User avatar' })}
+                      color="cyan"
+                      sx={{
+                        cursor: 'pointer',
+                        border: `2px solid ${theme.colors.cyan[5]}40`,
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          transform: 'scale(1.05)',
+                          border: `2px solid ${theme.colors.cyan[5]}`,
+                        },
+                      }}
+                    >
+                      {!avatarSrc && user.username ? user.username.substring(0, 2).toUpperCase() : (!avatarSrc ? <IconUser size={18} /> : null)}
+                    </Avatar>
+                  </Menu.Target>
+                  <Menu.Dropdown
+                    sx={{
+                      border: `1px solid ${dark ? theme.colors.dark[4] : theme.colors.gray[3]}`,
+                      boxShadow: dark 
+                        ? `0 8px 24px ${theme.colors.dark[9]}70`
+                        : `0 8px 24px ${theme.colors.gray[4]}40`,
+                      zIndex: 300,
+                    }}
+                  >
+                    <Menu.Item 
+                      icon={<IconSettings size={14} />} 
+                      onClick={() => navigate('/dashboard/settings')}
+                    >
+                      {t('settings', { ns: 'navigation' })}
+                    </Menu.Item>
+                    <Menu.Item 
+                      icon={dark ? <IconSun size={14} /> : <IconMoonStars size={14} />} 
+                      onClick={() => toggleColorScheme()}
+                    >
+                      {t('theme', { ns: 'settings' })}
+                    </Menu.Item>
+                    <Menu.Item 
+                      icon={ <IconInfoCircle size={14} />} 
+                      onClick={() => {navigate('/about');}}
+                    >
+                      {t('about', { ns: 'navigation' })}
+                    </Menu.Item>
+                    <Divider />
+                    <Menu.Item 
+                      icon={<IconLogout size={14} />} 
+                      onClick={handleLogout}
+                      color="red"
+                    >
+                      {t('logout', { ns: 'navigation' })}
+                    </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
+              </Group>
+            )}
+          </Box>
         </Navbar>
       }
     >
