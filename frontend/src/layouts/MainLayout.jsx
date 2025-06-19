@@ -95,10 +95,12 @@ function MainLayout() {
           <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
             <Group spacing="xs">
               {(!isMobile || isAuthenticated) && (
-                <IconSparkles 
-                  size={28} 
+                <img 
+                  src="/simple_logo.jpg" 
+                  alt="Logo"
                   style={{ 
-                    color: theme.colors.violet[5],
+                    height: 28,
+                    width: 'auto',
                     filter: 'drop-shadow(0 2px 4px rgba(139, 92, 246, 0.3))',
                   }} 
                 />

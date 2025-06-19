@@ -22,7 +22,8 @@ import {
   Divider,
   Paper,
   Transition,
-  Stack
+  Stack,
+  ActionIcon
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { useAuth } from '../contexts/AuthContext';
@@ -44,7 +45,9 @@ import {
   IconChevronRight,
   IconSparkles,
   IconShieldCheck,
-  IconLanguage
+  IconLanguage,
+  IconMenu2,
+  IconX
 } from '@tabler/icons-react';
 
 export const MainLink = ({ icon, color, label, to, isActive, collapsed, onNavigate }) => {
@@ -156,7 +159,9 @@ function AppLayout() {
     } else {
       avatarSrc = `data:image/jpeg;base64,${user.profile_image_base64}`;
     }
-  }  const mainLinksData = [
+  }
+
+  const mainLinksData = [
     { icon: <IconHome2 size={20} />, color: 'blue', label: t('home', { ns: 'navigation' }), to: '/dashboard' },
     { icon: <IconPlus size={20} />, color: 'teal', label: t('newCourse', { ns: 'navigation' }), to: '/dashboard/create-course' },
     { icon: <IconChartLine size={20} />, color: 'grape', label: t('statistics', { ns: 'navigation' }), to: '/dashboard/statistics' },
@@ -187,7 +192,9 @@ function AppLayout() {
     logout();
     navigate('/login');
   };
-  return (    <AppShell
+
+  return (
+    <AppShell
       styles={{
         main: {
           background: dark ? theme.colors.dark[8] : theme.colors.gray[0],
@@ -200,7 +207,8 @@ function AppLayout() {
         },
       }}
       navbarOffsetBreakpoint="sm"
-      asideOffsetBreakpoint="sm"      header={
+      asideOffsetBreakpoint="sm"
+      header={
         <Header 
           height={{ base: 60, md: 70 }} 
           p="md"
@@ -215,34 +223,19 @@ function AppLayout() {
             zIndex: 200, // Higher than navbar (150) and toolbar (100)
             position: 'relative', // Ensure stacking context
           })}
-        ><div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-            <Burger
-              opened={opened}
-              onClick={() => setOpened((o) => !o)}
-              size="sm"
-              color={theme.colors.gray[6]}
-              mr="xl"
-              sx={{
-                transition: 'transform 0.2s ease',
-                '&:hover': {
-                  transform: 'scale(1.05)',
-                },
-                display: 'flex', // Ensure it's always visible
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-              aria-label={t('burgerAriaLabel', { ns: 'app', defaultValue: 'Toggle navigation' })}
-            />
-
+        >
+          <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
             <Group spacing="xs">
-              
-              <IconSparkles 
-                size={28} 
+              <img 
+                src="/simple_logo.jpg" 
+                alt="Logo"
                 style={{ 
-                  color: theme.colors.violet[5],
+                  height: 28,
+                  width: 'auto',
                   filter: 'drop-shadow(0 2px 4px rgba(139, 92, 246, 0.3))',
                 }} 
-              />              <Title
+              />
+              <Title
                 order={3}
                 size="1.6rem"
                 component={RouterLink}
@@ -338,7 +331,7 @@ function AppLayout() {
                       </Group>
                     </UnstyledButton>
                   </Menu.Target> 
-                    <Menu.Dropdown
+                  <Menu.Dropdown
                     sx={{
                       border: `1px solid ${dark ? theme.colors.dark[4] : theme.colors.gray[3]}`,
                       boxShadow: dark 
@@ -347,7 +340,7 @@ function AppLayout() {
                       zIndex: 300, // Much higher than navbar (150) and toolbar (100)
                     }}
                   >
-                      <Menu.Item 
+                    <Menu.Item 
                       icon={<IconSettings size={14} />} 
                       onClick={() => navigate('/dashboard/settings')}
                       sx={{
@@ -357,7 +350,8 @@ function AppLayout() {
                       }}
                     >
                       {t('settings', { ns: 'navigation' })}
-                    </Menu.Item>                    <Menu.Item 
+                    </Menu.Item>
+                    <Menu.Item 
                       icon={dark ? <IconSun size={14} /> : <IconMoonStars size={14} />} 
                       onClick={() => toggleColorScheme()}
                       sx={{
@@ -381,7 +375,8 @@ function AppLayout() {
                       {t('about', { ns: 'navigation' })}
                     </Menu.Item>
 
-                    <Divider />                    <Menu.Item 
+                    <Divider />
+                    <Menu.Item 
                       icon={<IconLogout size={14} />} 
                       onClick={handleLogout}
                       color="red"
@@ -405,15 +400,16 @@ function AppLayout() {
                     '&:hover': {
                       transform: 'scale(1.05)',
                     },
-                  }}                >
+                  }}
+                >
                   {t('login', { ns: 'navigation' })}
                 </Button>
               )}
             </Group>
           </div>
         </Header>
-      }      navbar={       
-        
+      }
+      navbar={       
         <Navbar 
           p={opened ? "md" : "xs"}
           hiddenBreakpoint="sm" 
@@ -433,7 +429,32 @@ function AppLayout() {
             zIndex: 150, // Higher than toolbar (100)
           })}
         >
-          
+          {/* Toggle button in navbar */}
+          <Box 
+            sx={{
+              display: 'flex',
+              justifyContent: opened ? 'flex-end' : 'center',
+              alignItems: 'center',
+              marginBottom: 'md',
+              minHeight: 40,
+            }}
+          >
+            <ActionIcon
+              variant="outline"
+              onClick={() => setOpened((o) => !o)}
+              size="lg"
+              radius="md"
+              sx={{
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                },
+              }}
+              aria-label={t('burgerAriaLabel', { ns: 'app', defaultValue: 'Toggle navigation' })}
+            >
+              {opened ? <IconX size={18} /> : <IconMenu2 size={18} />}
+            </ActionIcon>
+          </Box>
           
           <Navbar.Section grow mt="xs">
             <Stack spacing="xs">
