@@ -104,9 +104,10 @@ function ToolbarContainer({ courseId, chapterId }) {
         <Resizable      
           style={{
             position: 'fixed',
-            top: 70, /* Match the header height (70px for md size) */
+            top: 0,
             right: 0,
-            bottom: 0, /* Pin to bottom to prevent header issues */
+            bottom: 0,
+            paddingTop: '16px',
             borderLeft: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : '#e9ecef'}`,
             backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : '#f8f9fa',
             overflow: 'hidden',
