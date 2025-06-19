@@ -51,14 +51,12 @@ function ChapterView() {
   const [questionsCreated, setQuestionsCreated] = useState(false); // Start as false
   const [questionCount, setQuestionCount] = useState(0);
   const [isBlinking, setIsBlinking] = useState(false); // New state for blinking
-  const [notificationShown, setNotificationShown] = useState(false); // Prevent multiple notifications
   const [quizKey, setQuizKey] = useState(0); // Force Quiz component re-mount
 
   // Refs for cleanup
   const contentRef = useRef(null);
   const pollIntervalRef = useRef(null);
   const blinkTimeoutRef = useRef(null);
-  const notificationShownRef = useRef(false); // Immediate tracking to prevent multiple notifications
 
   useEffect(() => {
     console.log("Toolbar state changed:", { open: toolbarOpen, width: toolbarWidth });
@@ -84,14 +82,10 @@ function ChapterView() {
           setHasQuestions(true);
           setQuestionCount(questionsData.length);
           setQuestionsCreated(true); // Questions already exist
-          setNotificationShown(true); // No notification needed for existing questions
-          notificationShownRef.current = true; // Immediate ref update
         } else {
           setHasQuestions(false);
           setQuestionCount(0);
           setQuestionsCreated(false); // No questions yet, start polling
-          setNotificationShown(false); // Reset notification flag
-          notificationShownRef.current = false; // Reset ref
         }
 
         // Set initial media state with empty URLs (will be populated in next effect)
@@ -118,8 +112,6 @@ function ChapterView() {
       }
     };
 
-    // Reset notification ref when courseId/chapterId changes
-    notificationShownRef.current = false;
     fetchChapterAndMediaInfo();
   }, [courseId, chapterId, t]);
 
@@ -202,7 +194,7 @@ function ChapterView() {
   // Polling logic for quiz questions - FIXED
   useEffect(() => {
     // Only start polling if questions haven't been created yet
-    if (questionsCreated || loading || notificationShown) {
+    if (questionsCreated || loading) {
       return;
     }
 
@@ -210,22 +202,10 @@ function ChapterView() {
     
     const pollForQuestions = async () => {
       try {
-        // Double-check: if notification was already shown, don't proceed
-        if (notificationShownRef.current) {
-          if (pollIntervalRef.current) {
-            clearInterval(pollIntervalRef.current);
-            pollIntervalRef.current = null;
-          }
-          return;
-        }
-
         const questionsData = await courseService.getChapterQuestions(courseId, chapterId);
         
         if (questionsData && questionsData.length > 0) {
-          console.log('Questions found! Stopping polling and showing notification.');
-          
-          // Set ref IMMEDIATELY to prevent other calls from showing notification
-          notificationShownRef.current = true;
+          console.log('Questions found! Stopping polling.');
           
           // Clear the polling interval
           if (pollIntervalRef.current) {
@@ -237,13 +217,11 @@ function ChapterView() {
           setHasQuestions(true);
           setQuestionCount(questionsData.length);
           setQuestionsCreated(true);
-          setNotificationShown(true);
+          toast.success(t("quizReady"))
+
           
           // Force Quiz component to re-mount and fetch new data
           setQuizKey(prev => prev + 1);
-          
-          // Show notification (only once due to immediate ref check)
-          toast.success('Quiz questions are now available!');
           
           // Start blinking animation
           setIsBlinking(true);
@@ -269,7 +247,7 @@ function ChapterView() {
         pollIntervalRef.current = null;
       }
     };
-  }, [courseId, chapterId, questionsCreated, loading, notificationShown]);
+  }, [courseId, chapterId, questionsCreated, loading]);
 
   // Cleanup on unmount
   useEffect(() => {
