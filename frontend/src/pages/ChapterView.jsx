@@ -1,3 +1,5 @@
+//ChapterView.jsx - Fixed polling logic
+
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -34,6 +36,7 @@ function ChapterView() {
   const navigate = useNavigate();
   const { toolbarOpen, toolbarWidth } = useToolbar();
   const isMobile = useMediaQuery('(max-width: 768px)');
+  
   const [chapter, setChapter] = useState(null);
   const [images, setImages] = useState([]);
   const [files, setFiles] = useState([]);
@@ -45,10 +48,17 @@ function ChapterView() {
   const [downloadingPDF, setDownloadingPDF] = useState(false);
   const [deletingItem, setDeletingItem] = useState(null);
   const [hasQuestions, setHasQuestions] = useState(false);
+  const [questionsCreated, setQuestionsCreated] = useState(false); // Start as false
   const [questionCount, setQuestionCount] = useState(0);
+  const [isBlinking, setIsBlinking] = useState(false); // New state for blinking
+  const [notificationShown, setNotificationShown] = useState(false); // Prevent multiple notifications
+  const [quizKey, setQuizKey] = useState(0); // Force Quiz component re-mount
 
-  // Ref for the content area that we want to download as PDF
+  // Refs for cleanup
   const contentRef = useRef(null);
+  const pollIntervalRef = useRef(null);
+  const blinkTimeoutRef = useRef(null);
+  const notificationShownRef = useRef(false); // Immediate tracking to prevent multiple notifications
 
   useEffect(() => {
     console.log("Toolbar state changed:", { open: toolbarOpen, width: toolbarWidth });
@@ -59,18 +69,30 @@ function ChapterView() {
     const fetchChapterAndMediaInfo = async () => {
       try {
         setLoading(true);
-        // Fetch chapter data and media info (removed questions from here)
-        const [chapterData, imagesData, filesData] = await Promise.all([
+        // Fetch chapter data and media info (including questions check)
+        const [chapterData, imagesData, filesData, questionsData] = await Promise.all([
           courseService.getChapter(courseId, chapterId),
           courseService.getImages(courseId),
-          courseService.getFiles(courseId)
+          courseService.getFiles(courseId),
+          courseService.getChapterQuestions(courseId, chapterId),
         ]);
 
         setChapter(chapterData);
 
-        // Check if chapter has questions by checking if quiz tab should be shown
-        // This could be based on chapter data or we'll let Quiz component handle it
-        setHasQuestions(true); // We'll let Quiz component determine if there are actual questions
+        // Check if chapter has questions
+        if (questionsData && questionsData.length > 0) {
+          setHasQuestions(true);
+          setQuestionCount(questionsData.length);
+          setQuestionsCreated(true); // Questions already exist
+          setNotificationShown(true); // No notification needed for existing questions
+          notificationShownRef.current = true; // Immediate ref update
+        } else {
+          setHasQuestions(false);
+          setQuestionCount(0);
+          setQuestionsCreated(false); // No questions yet, start polling
+          setNotificationShown(false); // Reset notification flag
+          notificationShownRef.current = false; // Reset ref
+        }
 
         // Set initial media state with empty URLs (will be populated in next effect)
         setImages(imagesData.map(img => ({
@@ -96,6 +118,8 @@ function ChapterView() {
       }
     };
 
+    // Reset notification ref when courseId/chapterId changes
+    notificationShownRef.current = false;
     fetchChapterAndMediaInfo();
   }, [courseId, chapterId, t]);
 
@@ -175,9 +199,82 @@ function ChapterView() {
     fetchMedia();
   }, [images, files, loading, t]);
 
-  // Cleanup object URLs on unmount
+  // Polling logic for quiz questions - FIXED
+  useEffect(() => {
+    // Only start polling if questions haven't been created yet
+    if (questionsCreated || loading || notificationShown) {
+      return;
+    }
+
+    console.log('Starting polling for quiz questions...');
+    
+    const pollForQuestions = async () => {
+      try {
+        // Double-check: if notification was already shown, don't proceed
+        if (notificationShownRef.current) {
+          if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
+          }
+          return;
+        }
+
+        const questionsData = await courseService.getChapterQuestions(courseId, chapterId);
+        
+        if (questionsData && questionsData.length > 0) {
+          console.log('Questions found! Stopping polling and showing notification.');
+          
+          // Set ref IMMEDIATELY to prevent other calls from showing notification
+          notificationShownRef.current = true;
+          
+          // Clear the polling interval
+          if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
+          }
+          
+          // Update state
+          setHasQuestions(true);
+          setQuestionCount(questionsData.length);
+          setQuestionsCreated(true);
+          setNotificationShown(true);
+          
+          // Force Quiz component to re-mount and fetch new data
+          setQuizKey(prev => prev + 1);
+          
+          // Show notification (only once due to immediate ref check)
+          toast.success('Quiz questions are now available!');
+          
+          // Start blinking animation
+          setIsBlinking(true);
+          
+          // Stop blinking after 4 seconds
+          blinkTimeoutRef.current = setTimeout(() => {
+            setIsBlinking(false);
+          }, 4000);
+        }
+      } catch (error) {
+        console.error('Error polling for questions:', error);
+        // Don't show error toast for polling failures, as this is expected during creation
+      }
+    };
+
+    // Start polling every 500ms
+    pollIntervalRef.current = setInterval(pollForQuestions, 500);
+
+    // Cleanup function
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    };
+  }, [courseId, chapterId, questionsCreated, loading, notificationShown]);
+
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
+      // Cleanup object URLs
       images.forEach(image => {
         if (image.objectUrl) {
           URL.revokeObjectURL(image.objectUrl);
@@ -188,6 +285,14 @@ function ChapterView() {
           URL.revokeObjectURL(file.objectUrl);
         }
       });
+      
+      // Cleanup intervals and timeouts
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+      }
+      if (blinkTimeoutRef.current) {
+        clearTimeout(blinkTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -310,6 +415,29 @@ function ChapterView() {
         minHeight: '100vh',
       }}
     >
+      {/* Add CSS for blinking animation */}
+      <style>
+        {`
+          @keyframes tabBlink {
+            0%, 50% { 
+              background-color: #339af0; 
+              color: white;
+              transform: scale(1.05);
+            }
+            25%, 75% { 
+              background-color: #74c0fc; 
+              color: white;
+              transform: scale(1.02);
+            }
+          }
+          
+          .quiz-tab-blinking {
+            animation: tabBlink 1s ease-in-out 4;
+            border-radius: 4px;
+          }
+        `}
+      </style>
+
       <Container size="xl" py="xl">
         {chapter && (
           <>
@@ -358,13 +486,17 @@ function ChapterView() {
               <Tabs.List>
                 <Tabs.Tab value="content" icon={<IconBookmark size={14} />}>{t('tabs.content')}</Tabs.Tab>
                 {images.length > 0 && (
-                    <Tabs.Tab value="images" icon={<IconPhoto size={14} />}>{t('tabs.images')}</Tabs.Tab>
+                  <Tabs.Tab value="images" icon={<IconPhoto size={14} />}>{t('tabs.images')}</Tabs.Tab>
                 )}
                 {files.length > 0 && (
-                    <Tabs.Tab value="files" icon={<IconFileText size={14} />}>{t('tabs.files')}</Tabs.Tab>
+                  <Tabs.Tab value="files" icon={<IconFileText size={14} />}>{t('tabs.files')}</Tabs.Tab>
                 )}
                 {hasQuestions && (
-                  <Tabs.Tab value="quiz" icon={<IconQuestionMark size={14} />}>
+                  <Tabs.Tab 
+                    value="quiz" 
+                    icon={<IconQuestionMark size={14} />}
+                    className={isBlinking ? 'quiz-tab-blinking' : ''}
+                  >
                     {questionCount > 0 ? t('tabs.quiz', { count: questionCount }) : 'Quiz'}
                   </Tabs.Tab>
                 )}
@@ -404,6 +536,7 @@ function ChapterView() {
 
               <Tabs.Panel value="quiz" pt="xs">
                 <Quiz
+                  key={quizKey} // Force re-mount when questions become available
                   courseId={courseId}
                   chapterId={chapterId}
                   onQuestionCountChange={(count) => {

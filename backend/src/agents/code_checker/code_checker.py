@@ -183,13 +183,14 @@ class ESLintValidator:
         Validates JSX using NamedTemporaryFile in a specific directory.
         """
         cleaned_code = find_react_code_in_response(jsx_code)
-        code_with_imports = plugin_imports + "\n" + cleaned_code
 
         if not cleaned_code:
             return {
                 'valid': False,
                 'errors': [{'message': 'Your response does not match the required format. Start your response with () and end with }'}]
             }
+        
+        code_with_imports = plugin_imports + "\n" + cleaned_code
 
         # Create temporary file in our designated directory
         with tempfile.NamedTemporaryFile(
