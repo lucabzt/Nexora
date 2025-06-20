@@ -506,6 +506,7 @@ function AppLayout() {
       </Box>
       {!useLocation().pathname.match(/^\/dashboard\/courses\/.*\/chapters\/.*$/) && <AppFooter />}
     </AppShell>
+    </>
   );
 }
 
