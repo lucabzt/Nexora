@@ -212,7 +212,7 @@ class AgentService:
                     index=idx + 1,
                     caption=topic['caption'],
                     summary=json.dumps(topic['content'], indent=2),
-                    content=response_code['explanation'],
+                    content=response_code['explanation'] if 'explanation' in response_code else "() => {<p>Something went wrong</p>}",
                     time_minutes=topic['time'],
                     image_url=image_response['explanation'],
                 )

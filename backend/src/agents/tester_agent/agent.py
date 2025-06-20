@@ -124,7 +124,10 @@ class TesterAgent(StandardAgent):
             )
             # Await the correction from the code review agent
             response = await self.code_review.run(user_id=user_id, state=state, content=content)
-            code = response['explanation']
+            if 'explanation' not in response:
+                break
+            else:
+                code = response['explanation']
 
         # If the loop completes without returning, it means the code could not be fixed.
         print(f"!!ERROR: Could not fix code for a question after {self.iterations} iterations. Discarding question.")
