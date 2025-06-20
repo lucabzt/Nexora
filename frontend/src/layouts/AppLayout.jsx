@@ -130,6 +130,9 @@ function AppLayout() {
   // Set default navbar state based on device type - closed on mobile, opened on desktop
   const [opened, setOpened] = useState(!isMobile);
   
+  // Toggle navbar visibility
+  const toggleNavbar = () => setOpened((o) => !o);
+  
   // Update opened state when screen size changes
   useEffect(() => {
     // Only update if the user hasn't manually toggled the navbar
@@ -183,40 +186,64 @@ function AppLayout() {
   };
 
   return (
-    <AppShell
-      styles={{
-        main: {
-          background: dark ? theme.colors.dark[8] : theme.colors.gray[0],
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
-          width: '100%',
-          paddingRight: 0, // Remove default padding to account for the right toolbar
-          overflowX: 'hidden',
-        },
-      }}
-      navbarOffsetBreakpoint="sm"
-      asideOffsetBreakpoint="sm"
-      navbar={       
-        <Navbar 
-          p={opened ? "md" : "xs"}
-          hiddenBreakpoint="sm" 
-          hidden={isMobile && !opened} // Hide completely on mobile when closed
-          width={{ sm: opened ? 250 : (isMobile ? 0 : 80), lg: opened ? 300 : (isMobile ? 0 : 80) }}
-          sx={(theme) => ({
-            background: dark 
-              ? `linear-gradient(180deg, ${theme.colors.dark[7]} 0%, ${theme.colors.dark[8]} 100%)`
-              : `linear-gradient(180deg, ${theme.white} 0%, ${theme.colors.gray[0]} 100%)`,
-            borderRight: `1px solid ${dark ? theme.colors.dark[5] : theme.colors.gray[2]}`,
-            boxShadow: dark 
-              ? `4px 0 12px ${theme.colors.dark[9]}30`
-              : `4px 0 12px ${theme.colors.gray[3]}20`,
-            transition: 'width 0.3s ease, padding 0.3s ease',
-            display: (isMobile && !opened) ? 'none' : 'flex', // Completely hide on mobile when closed
-            flexDirection: 'column',
-            zIndex: 150, // Higher than toolbar (100)
-          })}
+    <>
+      {/* Floating menu button for mobile */}
+      {isMobile && !opened && (
+        <ActionIcon
+          onClick={toggleNavbar}
+          size="xl"
+          radius="xl"
+          variant="filled"
+          color={dark ? 'blue' : 'blue.6'}
+          sx={{
+            position: 'fixed',
+            bottom: 20,
+            left: 20,
+            zIndex: 1000,
+            boxShadow: theme.shadows.lg,
+            transition: 'transform 0.2s',
+            '&:hover': {
+              transform: 'scale(1.1)',
+            },
+          }}
         >
+          <IconMenu2 size={24} />
+        </ActionIcon>
+      )}
+      <AppShell
+        styles={{
+          main: {
+            background: dark ? theme.colors.dark[8] : theme.colors.gray[0],
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: '100vh',
+            width: '100%',
+            paddingRight: 0,
+            overflowX: 'hidden',
+          },
+        }}
+        navbarOffsetBreakpoint="sm"
+        asideOffsetBreakpoint="sm"
+        navbar={
+          <Navbar 
+            p={opened ? "md" : "xs"}
+            hiddenBreakpoint="sm" 
+            hidden={isMobile && !opened}
+            width={{ sm: opened ? 250 : (isMobile ? 0 : 80), lg: opened ? 300 : (isMobile ? 0 : 80) }}
+            sx={(theme) => ({
+              background: dark 
+                ? `linear-gradient(180deg, ${theme.colors.dark[7]} 0%, ${theme.colors.dark[8]} 100%)`
+                : `linear-gradient(180deg, ${theme.white} 0%, ${theme.colors.gray[0]} 100%)`,
+              borderRight: `1px solid ${dark ? theme.colors.dark[5] : theme.colors.gray[2]}`,
+              boxShadow: dark 
+                ? `4px 0 12px ${theme.colors.dark[9]}30`
+                : `4px 0 12px ${theme.colors.gray[3]}20`,
+              transition: 'width 0.3s ease, padding 0.3s ease',
+              display: (isMobile && !opened) ? 'none' : 'flex',
+              flexDirection: 'column',
+              zIndex: 150,
+            })}
+          >
           {/* Header section with logo, app name, and toggle */}
           <Box 
             sx={{
