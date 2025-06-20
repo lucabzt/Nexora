@@ -4,6 +4,8 @@
   "loadCoursesError": "Deine Kurse konnten nicht geladen werden. Bitte versuche es später erneut.",
   "deleteCourseError": "Der Kurs konnte nicht gelöscht werden. {{message}}",
   "renameCourseError": "Der Kurs konnte nicht umbenannt werden. {{message}}",
+  "recommendedForYou": "Für dich empfohlen",
+  "yourProgress": "Fortschritt",
 
   "stats": {
     "coursesCompleted": "Abgeschlossene Kurse",

@@ -4,6 +4,8 @@
   "loadCoursesError": "Failed to load your courses. Please try again later.",
   "deleteCourseError": "Failed to delete the course. {{message}}",
   "renameCourseError": "Failed to rename the course. {{message}}",
+  "recommendedForYou": "Recommended for you",
+  "yourProgress": "Progress",
 
   "stats": {
     "coursesCompleted": "Courses Completed",
