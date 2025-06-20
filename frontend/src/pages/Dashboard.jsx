@@ -506,11 +506,7 @@ function Dashboard() {
                       },
                     }}
                     onClick={() => {
-                      if (course.status === 'CourseStatus.CREATING') {
-                        navigate(`/dashboard/create-course?courseId=${course.course_id}`);
-                      } else {
                         navigate(`/dashboard/courses/${course.course_id}`);
-                      }
                     }}
                   >
                     <Card.Section>
