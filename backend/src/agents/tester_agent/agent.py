@@ -29,7 +29,7 @@ class InitialTesterAgent(StructuredAgent):
         # Create the planner agent
         tester_agent = LlmAgent(
             name="tester_agent",
-            model="gemini-2.5-flash-preview-05-20",
+            model="gemini-2.5-flash",
             description="Agent for testing the user on studied material",
             output_schema=Test,
             global_instruction=lambda _: load_instruction_from_file("tester_agent/instructions.txt") + "\n" + get_full_instructions(),
@@ -55,7 +55,7 @@ class CodeReviewAgent(StandardAgent):
         # Create the planner agent
         agent = LlmAgent(
             name="code_review_agent",
-            model="gemini-2.5-flash-preview-05-20",
+            model="gemini-2.5-flash",
             description="Agent for testing the user on studied material",
             instruction=lambda _: """
 Please debug the given react code, using the error message provided. Do not add any code, just debug the existing one.
