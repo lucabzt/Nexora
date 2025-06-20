@@ -21,6 +21,7 @@ function ToolbarContainer({ courseId, chapterId }) {
   const { t } = useTranslation('toolbarContainer');  
   const theme = useMantineTheme();  
   const isMobile = useMediaQuery('(max-width: 768px)');
+  const isDesktop = !isMobile;
   const { toolbarOpen, setToolbarOpen, toolbarWidth, setToolbarWidth } = useToolbar();
   const [activeTab, setActiveTab] = useState(TOOL_TABS.CHAT); // Use constant for tab value
 
@@ -71,6 +72,37 @@ function ToolbarContainer({ courseId, chapterId }) {
   };
   return (
     <>
+      {/* Desktop floating toggle button - only visible when toolbar is closed */}
+      {!isMobile && !toolbarOpen && (
+        <ActionIcon
+          size="lg"
+          variant="filled"
+          color="blue"
+          onClick={handleToggleToolbar}
+          sx={{
+            position: 'fixed',
+            bottom: '32px',
+            right: '32px',
+            zIndex: 150,
+            borderRadius: '50%',
+            width: '56px',
+            height: '56px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            boxShadow: theme.colorScheme === 'dark' 
+              ? '0 4px 12px rgba(0, 0, 0, 0.4)' 
+              : '0 4px 12px rgba(0, 0, 0, 0.15)',
+            transition: 'transform 0.2s ease',
+            '&:hover': {
+              transform: 'scale(1.1)'
+            }
+          }}
+        >
+          <IconChevronLeft size={24} aria-label={t('buttons.openToolbar')} />
+        </ActionIcon>
+      )}
+
       {/* Mobile floating toggle button - always visible on mobile */}
       {isMobile && (
         <ActionIcon
@@ -104,9 +136,10 @@ function ToolbarContainer({ courseId, chapterId }) {
         <Resizable      
           style={{
             position: 'fixed',
-            top: 70, /* Match the header height (70px for md size) */
+            top: 0,
             right: 0,
-            bottom: 0, /* Pin to bottom to prevent header issues */
+            bottom: 0,
+            paddingTop: '16px',
             borderLeft: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : '#e9ecef'}`,
             backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : '#f8f9fa',
             overflow: 'hidden',
@@ -124,7 +157,7 @@ function ToolbarContainer({ courseId, chapterId }) {
             width: toolbarOpen ? (isMobile ? '100vw' : toolbarWidth) : (isMobile ? 0 : 40)
           }}
           minWidth={isMobile ? (toolbarOpen ? '100vw' : 0) : 40}
-          maxWidth={isMobile ? '100vw' : '70vw'}
+          maxWidth={isMobile ? '100vw' : '80vw'}
           enable={{
             top: false,
             right: false,

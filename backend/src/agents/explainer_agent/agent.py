@@ -47,7 +47,7 @@ Please only include content about the chapter that is assigned to you in the fol
             )"""
         explainer_agent = LlmAgent(
             name="explainer_agent",
-            model="gemini-2.5-flash-preview-05-20",
+            model="gemini-2.5-pro-preview-05-06",
             description="Agent for creating engaging visual explanations using react",
             global_instruction=lambda _: full_instructions,
             instruction=dynamic_instructions,
