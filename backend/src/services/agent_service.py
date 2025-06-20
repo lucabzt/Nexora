@@ -205,13 +205,15 @@ class AgentService:
                     image_task
                 )
 
+                summary = "\n".join(topic['content'][:3])
+
                 # Save the chapter in db first
                 chapter_db = chapters_crud.create_chapter(
                     db=db,
                     course_id=course_id,
                     index=idx + 1,
                     caption=topic['caption'],
-                    summary=json.dumps(topic['content'], indent=2),
+                    summary=summary,
                     content=response_code['explanation'] if 'explanation' in response_code else "() => {<p>Something went wrong</p>}",
                     time_minutes=topic['time'],
                     image_url=image_response['explanation'],
