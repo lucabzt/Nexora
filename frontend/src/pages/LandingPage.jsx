@@ -94,12 +94,13 @@ function LandingPage() {
       <Box className={classes.hero}>
         <Card
           shadow="sm"
-          p="2rem" // increased for breathing room
+          p="2rem"
           radius="md"
           withBorder
           className={classes.heroCard}
         >
-          <Stack align="center" spacing="1.5rem">
+          <Group position="center" spacing="xl" noWrap align="flex-start">
+            <Stack align="center" spacing="1.5rem" style={{ flex: 1, maxWidth: '600px' }}>
             <Stack spacing="1rem" align="center" maw="40rem">
               <Title
                 order={1}
@@ -172,7 +173,35 @@ function LandingPage() {
                 </Button>
               )}
             </Group>
-          </Stack>
+            </Stack>
+            
+            {/* Hero Image */}
+            <Box 
+              style={{
+                width: '400px',
+                height: '300px',
+                borderRadius: theme.radius.md,
+                overflow: 'hidden',
+                boxShadow: theme.shadows.md,
+                flexShrink: 0,
+                position: 'relative'
+              }}
+            >
+              <Image 
+                src="https://onlineschool.co.za/wp-content/uploads/2020/04/online-learing-image.jpg" 
+                alt={t('hero.imageAlt')}
+                width="100%"
+                height="100%"
+                fit="cover"
+                withPlaceholder
+                styles={{
+                  image: {
+                    objectPosition: 'center'
+                  }
+                }}
+              />
+            </Box>
+          </Group>
         </Card>
       </Box>
       {/* Features Section */}
