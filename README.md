@@ -92,7 +92,7 @@ nexora-project/
 │   ├── vite.config.js
 │   └── ...
 ├── README.md                 # This file
-└── (server/                  # Optional: if you have this directory)
+...
 ```
 
 ---
