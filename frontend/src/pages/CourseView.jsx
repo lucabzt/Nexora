@@ -656,7 +656,6 @@ function CourseView() {
                       )}
                     </Box>
                   </Card.Section>
-
                   <Box mt="md" mb="xs" sx={{ flex: 1 }}>
                     <Text
                       weight={700}
@@ -670,9 +669,26 @@ function CourseView() {
                     <Text
                       color="dimmed"
                       size="sm"
-                      mt="md"
-                      lineClamp={3}
-                      sx={{ flex: 1, minHeight: '4.5rem' }}
+                      mt="xs"  // Changed from "md" to "xs" for less spacing
+                      sx={{ 
+                        flex: 1, 
+                        height: '5.5rem',  // Fixed height instead of minHeight
+                        overflow: 'auto',  // Make it scrollable
+                        paddingRight: '4px',  // Small padding for scrollbar space
+                        '&::-webkit-scrollbar': {
+                          width: '4px',
+                        },
+                        '&::-webkit-scrollbar-track': {
+                          background: 'transparent',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                          background: '#ccc',
+                          borderRadius: '2px',
+                        },
+                        '&::-webkit-scrollbar-thumb:hover': {
+                          background: '#999',
+                        },
+                      }}
                     >
                       {chapter.summary || t('chapters.defaultSummaryText')}
                     </Text>

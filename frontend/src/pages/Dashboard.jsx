@@ -409,7 +409,24 @@ function Dashboard() {
                     {t('recommendedForYou')}
                   </Badge>
                   <Title order={2} mb="xs">{courses[0]?.title || t('featuredCourse.defaultTitle')}</Title>
-                  <Text lineClamp={2} mb="lg" color="dimmed">
+                  <Text lineClamp={2} mb="lg" color="dimmed" sx={{ 
+                        flex: 1, 
+                        overflow: 'auto',  // Make it scrollable
+                        paddingRight: '4px',  // Small padding for scrollbar space
+                        '&::-webkit-scrollbar': {
+                          width: '4px',
+                        },
+                        '&::-webkit-scrollbar-track': {
+                          background: 'transparent',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                          background: '#ccc',
+                          borderRadius: '2px',
+                        },
+                        '&::-webkit-scrollbar-thumb:hover': {
+                          background: '#999',
+                        },
+                      }}>
                     {courses[0]?.description || t('featuredCourse.defaultDescription')}
                   </Text>
                   
@@ -581,7 +598,25 @@ function Dashboard() {
                       {course.title}
                     </Title>
 
-                    <Text size="sm" color="dimmed" lineClamp={2} mb="md" sx={{ flex: 1 }}>
+                    <Text size="sm" color="dimmed" lineClamp={2} mb="md" sx={{ 
+                        flex: 1, 
+                        height: '5.5rem',  // Fixed height instead of minHeight
+                        overflow: 'auto',  // Make it scrollable
+                        paddingRight: '4px',  // Small padding for scrollbar space
+                        '&::-webkit-scrollbar': {
+                          width: '4px',
+                        },
+                        '&::-webkit-scrollbar-track': {
+                          background: 'transparent',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                          background: '#ccc',
+                          borderRadius: '2px',
+                        },
+                        '&::-webkit-scrollbar-thumb:hover': {
+                          background: '#999',
+                        },
+                      }}>
                       {course.description}
                     </Text>
 

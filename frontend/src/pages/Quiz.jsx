@@ -35,6 +35,8 @@ import {
 import { toast } from 'react-toastify';
 import { courseService } from '../api/courseService';
 import AiCodeWrapper from "../components/AiCodeWrapper.jsx";
+import 'katex/dist/katex.min.css';
+import Latex from 'react-latex-next';
 
 const useStyles = createStyles((theme) => ({
   quizContainer: {
@@ -745,7 +747,10 @@ const Quiz = ({ courseId, chapterId, onQuestionCountChange }) => {
                           >
                             <Radio 
                               value={option} 
-                              label={question[`answer_${option}`]}
+                              label={
+                              <Latex>
+                                {question[`answer_${option}`]}
+                              </Latex>}
                               styles={{
                                 radio: {
                                   '&:checked': {
@@ -783,7 +788,7 @@ const Quiz = ({ courseId, chapterId, onQuestionCountChange }) => {
                             </Text>
                           )}
                           {(questionFeedback[question.id]?.feedback || question.explanation) && (
-                            <Text>{questionFeedback[question.id]?.feedback || question.explanation}</Text>
+                            <Latex>{questionFeedback[question.id]?.feedback || question.explanation}</Latex>
                           )}
                         </Stack>
                       </Alert>
