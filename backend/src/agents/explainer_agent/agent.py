@@ -38,8 +38,9 @@ Please only include content about the chapter that is assigned to you in the fol
         """
 
         # LiteLlm("openai/gpt-4.1-2025-04-14")
-        # gemini-2.5-pro-preview-05-06
-        # gemini-2.5-flash-preview-05-20
+        # gemini-2.5-pro
+        # gemini-2.5-flash
+        # gemini-2.5-flash-lite-preview-06-17
         """LiteLlm(
                 model="anthropic/claude-sonnet-4-20250514",
                 reasoning_effort="low",
@@ -47,7 +48,7 @@ Please only include content about the chapter that is assigned to you in the fol
             )"""
         explainer_agent = LlmAgent(
             name="explainer_agent",
-            model="gemini-2.5-flash-preview-05-20",
+            model="gemini-2.5-flash",
             description="Agent for creating engaging visual explanations using react",
             global_instruction=lambda _: full_instructions,
             instruction=dynamic_instructions,

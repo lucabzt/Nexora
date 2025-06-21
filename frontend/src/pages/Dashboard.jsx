@@ -1,92 +1,88 @@
-import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Container, 
-  Title, 
-  Grid, 
-  Card, 
-  Text, 
-  Button, 
+import { useMediaQuery } from '@mantine/hooks';
+import {
+  Container,
+  Title,
+  Text,
+  Grid,
+  Card,
+  Image,
+  Button,
   Group,
+  Stack,
+  ThemeIcon,
+  Progress,
+  Paper,
+  SimpleGrid,
   Badge,
+  ActionIcon,
   Loader,
   Alert,
-  Box,
-  Progress,
-  ActionIcon,
-  Image,
-  Paper,
-  RingProgress,
-  ThemeIcon,
-  SimpleGrid,
-  Stack,
-  Divider,
-  useMantineTheme,
-  Overlay,
-  rem,
-  Tooltip,
-  Center,
   Modal,
   TextInput,
-  Textarea 
+  Textarea,
+  Box,
+  rem,
+  useMantineTheme,
+  Tooltip,
 } from '@mantine/core';
-import { useMediaQuery } from '@mantine/hooks';
-import { 
-  IconAlertCircle, 
-  IconClock, 
-  IconCheck, 
-  IconBook, 
-  IconTrash,
-  IconTrophy,
-  IconFlame,
-  IconStars,
-  IconArrowUpRight,
-  IconCertificate,
-  IconHeartHandshake,
+import {
   IconBrain,
+  IconStar,
+  IconClock,
   IconChevronRight,
-  IconPlaceholder,
+  IconBook,
+  IconStars,
+  IconHeartHandshake,
+  IconCalendarStats,
+  IconCertificate,
+  IconFlame,
+  IconCheck,
+  IconLoader,
+  IconAlertCircle,
+  IconTrash,
   IconPencil,
-  IconLoader
+  IconArrowUpRight,
 } from '@tabler/icons-react';
-import { courseService } from '../api/courseService';
-
-
+import courseService from '../api/courseService';
+import { useTranslation } from 'react-i18next';
 import PlaceGolderImage from '../assets/place_holder_image.png'
+import SearchBar from '../components/SearchBar';
 
 function Dashboard() {
-  const { t } = useTranslation('dashboard');
-  const navigate = useNavigate();
-  const theme = useMantineTheme();
-  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [viewAllCourses, setViewAllCourses] = useState(false);
-  const [userStats, setUserStats] = useState({
-    coursesCompleted: 2,
-    currentStreak: 5,
-    totalHoursLearned: 24
-  });
-
-  // State for delete confirmation modal
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [courseToDeleteId, setCourseToDeleteId] = useState(null);
-
-  // State for rename modal
   const [renameModalOpen, setRenameModalOpen] = useState(false);
   const [courseToRename, setCourseToRename] = useState(null);
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
+  
+  const navigate = useNavigate();
+  const theme = useMantineTheme();
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const { t } = useTranslation('dashboard');
 
-  // Opens the delete confirmation modal
+  // Mock user stats - in real app, this would come from API
+  const userStats = {
+    coursesCompleted: courses.filter(course => course.status === 'CourseStatus.COMPLETED').length,
+    currentStreak: 7,
+    totalHoursLearned: 24,
+  };
+
+  // Show limited courses unless "View All" is clicked
+  const displayedCourses = viewAllCourses ? courses : courses.slice(0, 6);
+
+  // Handlers for course actions
   const handleDelete = (courseId) => {
     setCourseToDeleteId(courseId);
     setDeleteModalOpen(true);
   };
 
-  // Opens the rename modal
   const handleRename = (course) => {
     setCourseToRename(course);
     setNewTitle(course.title || '');
@@ -149,8 +145,6 @@ function Dashboard() {
 
   // Helper function to get status badge color and icon
   const getStatusInfo = (status) => {
-
-
     const label = t(`status.${status}`, { defaultValue: status });
 
     switch (status) {
@@ -254,7 +248,7 @@ function Dashboard() {
             onClick={() => navigate('/dashboard/create-course')}
             leftIcon={<IconBrain size={20} />}
             sx={(theme) => ({
-              background: theme.colorScheme === 'dark' ? 
+              background: theme.colorScheme === 'dark' ?
                 `linear-gradient(45deg, ${theme.colors.teal[9]}, ${theme.colors.cyan[7]})` : 
                 `linear-gradient(45deg, ${theme.colors.teal[6]}, ${theme.colors.cyan[4]})`,
               transition: 'transform 0.2s ease',
@@ -268,26 +262,30 @@ function Dashboard() {
         </Group>
       </Box>
 
-      {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
-          <Loader size="lg" />
-        </Box>
-      )}
-
-      {error && !loading && (
-        <Alert 
+      {/* Error Alert */}
+      {error && (
+        <Alert
           icon={<IconAlertCircle size={16} />}
-          title={t('errorAlertTitle')} 
-          color="red" 
-          mb="lg"
+          title={t('errorAlertTitle')}
+          color="red"
+          mb="xl"
+          variant="outline"
         >
           {error}
         </Alert>
       )}
 
-      {/* Learning Stats & Motivation Section */}
+      {/* Loading State */}
+      {loading && (
+        <Group position="center" py="xl">
+          <Loader size="lg" variant="dots" />
+          <Text size="lg" color="dimmed">{t('loadingCourses')}</Text>
+        </Group>
+      )}
+
+      {/* User Statistics */}
       {!loading && !error && courses.length > 0 && (
-        <SimpleGrid cols={3} spacing="lg" breakpoints={[{ maxWidth: 'sm', cols: 1 }]} mb="xl">
+        <SimpleGrid cols={3} spacing="lg" mb="xl" breakpoints={[{ maxWidth: 'sm', cols: 1 }]}>
           <Paper withBorder p="md" radius="md" shadow="sm">
             <Group position="apart">
               <div>
@@ -313,8 +311,8 @@ function Dashboard() {
                 </Text>
                 <Text weight={700} size="xl">{userStats.coursesCompleted}</Text>
               </div>
-              <ThemeIcon color="green" size={50} radius="md" variant="light">
-                <IconTrophy size={30} />
+              <ThemeIcon color="teal" size={50} radius="md" variant="light">
+                <IconCalendarStats size={30} />
               </ThemeIcon>
             </Group>
             <Text size="xs" color="dimmed" mt="md">
@@ -411,7 +409,24 @@ function Dashboard() {
                     {t('recommendedForYou')}
                   </Badge>
                   <Title order={2} mb="xs">{courses[0]?.title || t('featuredCourse.defaultTitle')}</Title>
-                  <Text lineClamp={2} mb="lg" color="dimmed">
+                  <Text lineClamp={2} mb="lg" color="dimmed" sx={{ 
+                        flex: 1, 
+                        overflow: 'auto',  // Make it scrollable
+                        paddingRight: '4px',  // Small padding for scrollbar space
+                        '&::-webkit-scrollbar': {
+                          width: '4px',
+                        },
+                        '&::-webkit-scrollbar-track': {
+                          background: 'transparent',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                          background: '#ccc',
+                          borderRadius: '2px',
+                        },
+                        '&::-webkit-scrollbar-thumb:hover': {
+                          background: '#999',
+                        },
+                      }}>
                     {courses[0]?.description || t('featuredCourse.defaultDescription')}
                   </Text>
                   
@@ -452,11 +467,27 @@ function Dashboard() {
             </Grid>
           </Paper>
         </>
-      )}      {/* Course Grid */}
+      )}
+
+      {/* Course Grid */}
       {!loading && !error && courses.length > 0 && (
         <>
-          <Group position="apart" mb="md">
-            <Title order={2} mb="lg">{t('myCourses')}</Title>
+          <Group position="apart" mb="md" align="center">
+            <Title order={2}>{t('myCourses')}</Title>
+            
+            {/* Search Bar - positioned next to My Courses title */}
+            <Box sx={{ 
+              flexGrow: 1, 
+              maxWidth: 400, 
+              marginLeft: theme.spacing.xl,
+              marginRight: theme.spacing.md,
+              '@media (max-width: 768px)': {
+                display: 'none',
+              },
+            }}>
+              <SearchBar />
+            </Box>
+            
             <Button 
               variant="subtle" 
               color="blue" 
@@ -468,58 +499,59 @@ function Dashboard() {
           </Group>
 
           <Grid>
-            {(viewAllCourses ? courses : courses.slice(0, 6)).map((course, index) => {
+            {displayedCourses.map((course) => {
               const statusInfo = getStatusInfo(course.status);
               const StatusIcon = statusInfo.Icon;
               const progress = calculateProgress(course);
-              
+
               return (
-                <Grid.Col key={course.course_id} xs={12} sm={6} md={4}>
+                <Grid.Col key={course.course_id} xs={12} sm={6} lg={4}>
                   <Card 
                     shadow="sm" 
                     padding="lg" 
                     radius="md" 
                     withBorder
-                    sx={(theme) => ({
-                      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                      '&:hover': {
-                        transform: 'translateY(-5px)',
-                        boxShadow: theme.shadows.md
-                      },
+                    sx={{ 
+                      height: '100%',
                       display: 'flex',
                       flexDirection: 'column',
-                      height: '100%'
-                    })}
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        transform: 'translateY(-5px)',
+                        boxShadow: theme.shadows.lg,
+                      },
+                    }}
+                    onClick={() => {
+                        navigate(`/dashboard/courses/${course.course_id}`);
+                    }}
                   >
-                    <Card.Section pos="relative">
+                    <Card.Section>
                       <Image
-                        src={ course?.image_url ? course?.image_url : PlaceGolderImage}
+                        src={course.image_url || PlaceGolderImage}
                         height={160}
                         alt={course.title}
+                        sx={{ objectFit: 'cover' }}
                       />
-
-                      {progress > 0 && progress < 100 && (                        <Box 
-                          sx={{
-                            position: 'absolute',
-                            bottom: -15,
-                            right: 15,
-                            zIndex: 2
-                          }}
-                        >
+                      {course.status !== 'CourseStatus.CREATING' && (
+                        <Box sx={{ position: 'absolute', top: 8, right: 8 }}>
                           <Tooltip label={t('courseProgressTooltip', { progress })}>
-                            <Box>
-                              <RingProgress
-                                size={60}
-                                thickness={5}
-                                roundCaps
-                                sections={[{ value: progress, color: 'teal' }]}
-                                label={
-                                  <div style={{ textAlign: 'center' }}>
-                                    <Text size="xs" align="center" weight={700}>{progress}%</Text>
-                                  </div>
-                                }
-                                bg={theme.colorScheme === 'dark' ? theme.colors.dark[7] : 'white'}
-                              />
+                            <Box
+                              sx={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: '50%',
+                                background: `conic-gradient(${theme.colors.teal[6]} ${progress * 3.6}deg, ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]} 0deg)`,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: theme.fontSizes.xs,
+                                fontWeight: 600,
+                                color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.colors.gray[7],
+                                backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : 'white',
+                              }}
+                            >
+                              {progress}%
                             </Box>
                           </Tooltip>
                         </Box>
@@ -566,7 +598,25 @@ function Dashboard() {
                       {course.title}
                     </Title>
 
-                    <Text size="sm" color="dimmed" lineClamp={2} mb="md" sx={{ flex: 1 }}>
+                    <Text size="sm" color="dimmed" lineClamp={2} mb="md" sx={{ 
+                        flex: 1, 
+                        height: '5.5rem',  // Fixed height instead of minHeight
+                        overflow: 'auto',  // Make it scrollable
+                        paddingRight: '4px',  // Small padding for scrollbar space
+                        '&::-webkit-scrollbar': {
+                          width: '4px',
+                        },
+                        '&::-webkit-scrollbar-track': {
+                          background: 'transparent',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                          background: '#ccc',
+                          borderRadius: '2px',
+                        },
+                        '&::-webkit-scrollbar-thumb:hover': {
+                          background: '#999',
+                        },
+                      }}>
                       {course.description}
                     </Text>
 
@@ -582,13 +632,15 @@ function Dashboard() {
 
                     <Button
                       variant={course.status === 'CourseStatus.CREATING' ? 'light' : 'filled'}
-                      color={course.status === 'CourseStatus.CREATING' ? 'blue' : 'teal'}
+                      color={course.status === 'CourseStatus.CREATING' ? 'yellow' : 'teal'}
                       fullWidth
                       mt="auto"
-                      rightIcon={<IconChevronRight size={16} />}
-                      onClick={() => navigate(`/dashboard/courses/${course.course_id}`)}
+                      leftIcon={course.status === 'CourseStatus.CREATING' ? <IconLoader size={16} /> : <IconBook size={16} />}
                     >
-                      {course.status === 'CourseStatus.CREATING' ? t('viewCreationProgressButton') : t('continueLearningButton')}
+                      {course.status === 'CourseStatus.CREATING' 
+                        ? t('viewCreationProgressButton')
+                        : t('continueLearningButton')
+                      }
                     </Button>
                   </Card>
                 </Grid.Col>

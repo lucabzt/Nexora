@@ -33,6 +33,7 @@
   "fileDeleted": "Datei erfolgreich gelöscht.",
   "noImages": "Keine Bilder verfügbar",
   "noFiles": "Keine Dateien verfügbar",
+  "quizReady": "Quiz ist verfügbar!",
   "quiz": {
     "alert": {
       "greatJobTitle": "Sehr gut!",

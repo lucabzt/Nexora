@@ -10,12 +10,19 @@ import {
   Box, 
   Stack,
   Loader, 
-  useMantineTheme
+  useMantineTheme,
+  Code,
+  Blockquote,
+  List,
+  Anchor
 } from '@mantine/core';
-import { IconSend, IconRobot, IconUser } from '@tabler/icons-react';
+import { IconSend, IconRobot, IconUser, IconQuote } from '@tabler/icons-react';
 import { chatService } from '../../api/chatService';
 import { getToolContainerStyle } from './ToolUtils';
 import { useTranslation } from 'react-i18next';
+import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 /**
  * ChatTool component
@@ -253,12 +260,84 @@ function ChatTool({ isOpen, courseId, chapterId }) {
                 </Text>
               </Group>
               
-              <Text size="sm" sx={{ whiteSpace: 'pre-wrap' }}>
-                {message.content}
+              <div style={{ fontSize: '0.875rem' }}>
+                {message.sender === 'ai' ? (
+                  <ReactMarkdown
+                    components={{
+                      code({node, inline, className, children, ...props}) {
+                        const match = /language-(\w+)/.exec(className || '');
+                        return !inline && match ? (
+                          <SyntaxHighlighter
+                            style={oneDark}
+                            language={match[1]}
+                            PreTag="div"
+                            {...props}
+                          >
+                            {String(children).replace(/\n$/, '')}
+                          </SyntaxHighlighter>
+                        ) : (
+                          <Code {...props}>
+                            {children}
+                          </Code>
+                        );
+                      },
+                      p: ({node, ...props}) => <p style={{ marginTop: 0, marginBottom: '0.5rem' }} {...props} />,
+                      blockquote: ({node, ...props}) => (
+                        <Blockquote
+                          icon={<IconQuote size={18} />}
+                          styles={(theme) => ({
+                            root: { margin: '0.5rem 0', padding: '0.25rem 0 0.25rem 1rem' },
+                            cite: { fontSize: '0.85em' }
+                          })}
+                          {...props}
+                        />
+                      ),
+                      ul: ({node, ordered, ...props}) => {
+                        const Component = ordered ? 'ol' : 'ul';
+                        return (
+                          <Component 
+                            style={{
+                              paddingLeft: '1.5em',
+                              margin: '0.5em 0',
+                              listStyleType: ordered ? 'decimal' : 'disc'
+                            }}
+                            {...props}
+                          />
+                        );
+                      },
+                      ol: ({node, ...props}) => (
+                        <ol 
+                          style={{
+                            paddingLeft: '1.5em',
+                            margin: '0.5em 0',
+                            listStyleType: 'decimal'
+                          }}
+                          {...props} 
+                        />
+                      ),
+                      li: ({node, ordered, ...props}) => (
+                        <li 
+                          style={{
+                            marginBottom: '0.25em',
+                            lineHeight: '1.5'
+                          }}
+                          {...props} 
+                        />
+                      ),
+                      a: ({node, ...props}) => <Anchor target="_blank" rel="noopener noreferrer" {...props} />,
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+                ) : (
+                  <Text size="sm" sx={{ whiteSpace: 'pre-wrap' }}>
+                    {message.content}
+                  </Text>
+                )}
                 {message.isStreaming && (
                   <Loader size="xs" variant="dots" ml="xs" display="inline" />
                 )}
-              </Text>
+              </div>
             </Paper>
           ))}
           <div ref={messageEndRef} />
@@ -280,7 +359,7 @@ function ChatTool({ isOpen, courseId, chapterId }) {
             disabled={!inputValue.trim() || isLoading}
             loading={isLoading}
           >
-            {t('sendButton')}
+            {t('sendMessage')}
           </Button>
         </Group>
       </form>

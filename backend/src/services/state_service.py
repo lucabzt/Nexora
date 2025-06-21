@@ -23,6 +23,8 @@ class CourseState(BaseModel):
     chapters_str: str = ""     # only important for explainer as unnecessary info (e.g. idx, time_hours) is cut off
     code: str = ""
     errors: str = ""
+    language: str ="English"
+    difficulty: str ="Intermediate"
 
 
 class StateService:
@@ -46,7 +48,10 @@ class StateService:
 
     def get_state(self, user_id: str, course_id: int) -> dict[str, Any]:
         print(f"Getting state for user {user_id} and course {course_id}")
-        return self.state[user_id][course_id].model_dump()
+        try:
+            return self.state[user_id][course_id].model_dump()
+        except KeyError:
+            return CourseState().model_dump()
 
     def create_state(self, user_id: str, course_id: int, state: CourseState):
         self.state[user_id][course_id] = state

@@ -33,6 +33,7 @@
   "fileDeleted": "File deleted successfully.",
   "noImages": "No images available",
   "noFiles": "No files available",
+  "quizReady": "Quiz is ready!",
   "quiz": {
     "alert": {
       "greatJobTitle": "Great job!",
