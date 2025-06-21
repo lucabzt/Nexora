@@ -114,8 +114,8 @@ def delete_user(db: Session, db_user: User):
             course_ids_placeholder = f"({course_ids_placeholder})"
             params = {f"course_id_{i}": course_id for i, course_id in enumerate(course_ids)}
 
-        # 3. Delete all questions from the user's courses
-        db.execute(text(f"DELETE FROM multiple_choice_questions WHERE chapter_id IN "
+        # 3. Delete all practice questions from the user's courses
+        db.execute(text(f"DELETE FROM practice_questions WHERE chapter_id IN "
                         f"(SELECT id FROM chapters WHERE course_id IN {course_ids_placeholder})"), params)
         
         # 4. Delete documents associated with the user's courses
