@@ -34,10 +34,9 @@ const fadeIn = keyframes({
   to: { opacity: 1, transform: "translateY(0)" },
 });
 
-const floatAnimation = keyframes({
-  '0%': { transform: 'translateY(0px)' },
-  '50%': { transform: 'translateY(-10px)' },
-  '100%': { transform: 'translateY(0px)' }
+const slideInFromRight = keyframes({
+  '0%': { transform: 'translateX(100px)', opacity: 0 },
+  '100%': { transform: 'translateX(0)', opacity: 1 }
 });
 
 const useStyles = createStyles((theme) => ({
@@ -55,7 +54,9 @@ const useStyles = createStyles((theme) => ({
   },
   
   heroImage: {
-    animation: `${floatAnimation} 4s ease-in-out infinite`,
+    animation: `${slideInFromRight} 1s ease-out forwards`,
+    opacity: 0,
+    transform: 'translateX(100px)',
   },
   
   heroCard: {
@@ -161,18 +162,14 @@ function LandingPage() {
         </Grid.Col>
         
         <Grid.Col md={6}>
-          <Transition mounted={visible} transition="fade" duration={1000} timingFunction="ease">
-            {(styles) => (
-              <Box className={classes.heroImage} style={styles}>
-                <Image
-                  radius="md"
-                  src="https://onlineschool.co.za/wp-content/uploads/2020/04/online-learing-image.jpg"
-                  alt={t('hero.imageAlt')}
-                  caption={t('hero.imageCaption')}
-                />
-              </Box>
-            )}
-          </Transition>
+          <Box className={classes.heroImage}>
+            <Image
+              radius="md"
+              src="https://onlineschool.co.za/wp-content/uploads/2020/04/online-learing-image.jpg"
+              alt={t('hero.imageAlt')}
+              caption={t('hero.imageCaption')}
+            />
+          </Box>
         </Grid.Col>
       </Grid>
       {/* Features Section */}
