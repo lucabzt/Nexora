@@ -108,24 +108,26 @@ def delete_user(db: Session, db_user: User):
         # Ensure course_ids_tuple is correctly formatted for the IN clause
         if len(course_ids) == 1:
             course_ids_placeholder = f"(:course_id_0)"
-            params = {f"course_id_0": course_ids[0]}
+            params = {"course_id_0": course_ids[0]}
         else:
             course_ids_placeholder = ", ".join([f":course_id_{i}" for i in range(len(course_ids))])
             course_ids_placeholder = f"({course_ids_placeholder})"
             params = {f"course_id_{i}": course_id for i, course_id in enumerate(course_ids)}
 
-        # 3. Delete all practice questions from the user's courses
-        db.execute(text(f"DELETE FROM practice_questions WHERE chapter_id IN "
-                        f"(SELECT id FROM chapters WHERE course_id IN {course_ids_placeholder})"), params)
+        # 3. Delete images associated with the user's courses first
+        db.execute(text(f"DELETE FROM images WHERE course_id IN {course_ids_placeholder}"), params)
         
-        # 4. Delete documents associated with the user's courses
-        # This must happen before deleting the courses themselves due to foreign key constraints.
+        # 4. Delete all practice questions from the user's courses
+        db.execute(text(f"DELETE FROM practice_questions WHERE chapter_id IN "
+                      f"(SELECT id FROM chapters WHERE course_id IN {course_ids_placeholder})"), params)
+        
+        # 5. Delete documents associated with the user's courses
         db.execute(text(f"DELETE FROM documents WHERE course_id IN {course_ids_placeholder}"), params)
         
-        # 5. Delete chapters related to courses
+        # 6. Delete chapters related to courses
         db.execute(text(f"DELETE FROM chapters WHERE course_id IN {course_ids_placeholder}"), params)
         
-        # 6. Delete courses
+        # 7. Finally, delete the courses themselves
         db.execute(text(f"DELETE FROM courses WHERE id IN {course_ids_placeholder}"), params)
     
     # 7. Delete documents directly associated with the user (i.e., not linked to any course)
