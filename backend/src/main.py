@@ -1,33 +1,43 @@
-import secrets
-from typing import Optional  # Added for generating random passwords/suffixes
-from logging import getLogger
+import asyncio
+import atexit
 import logging
+import secrets
+from typing import Optional
 
-from fastapi import FastAPI  # Ensure Request is imported
-from fastapi import Depends
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from sqlalchemy.orm import Session
 
 from .api.routers import auth as auth_router
-from .api.routers import courses, files, users, statistics, questions  # Your existing users router
+from .api.routers import courses, files, users, statistics, questions
 from .api.routers import notes
 #from .api.routers import notifications
-from .api.routers import chat  # Import search router
+from .api.routers import chat
 from .api.routers import search as search_router
 from .api.schemas import user as user_schema
-from .db.database import engine
+from .db.database import engine, SessionLocal
 from .db.models import db_user as user_model
 from .utils import auth
+from .services.chat_service_instance import get_chat_service
 
 from .core.routines import update_stuck_courses
-from .config.settings import SESSION_SECRET_KEY  # Ensure this is imported from your settings
+from .config.settings import SESSION_SECRET_KEY
+from .core.lifespan import lifespan
+
 
 
 # Create database tables
 user_model.Base.metadata.create_all(bind=engine)
 
 # Create the main app instance
-app = FastAPI(title="User Management API", root_path="/api")
+app = FastAPI(
+    title="User Management API",
+    root_path="/api",
+    lifespan=lifespan  # Use the lifespan context manager
+)
+
+# Chat service is now managed in services.chat_service_instance
 
 app.add_middleware(
     SessionMiddleware,
@@ -67,26 +77,7 @@ app.include_router(questions.router)
 app.include_router(chat.router)
 
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from contextlib import asynccontextmanager
-scheduler = AsyncIOScheduler()
 
-import logging
-
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Startup
-    scheduler.add_job(update_stuck_courses, 'interval', hours=1)
-    scheduler.start()
-    logging.info("Scheduler started.")
-    yield
-    # Shutdown
-    scheduler.shutdown()
-    logging.info("Scheduler stopped.")
-
-app.router.lifespan_context = lifespan
 
 # The root path "/" is now outside the /api prefix
 @app.get("/")
