@@ -9,40 +9,32 @@ import {
   Button,
   Text,
   Anchor,
-  Group,
-  Divider, // Import Divider
-  Box, // Import Box for spacing if needed
+  Stack,
+  Divider,
+  Box,
+  Space,
+  Image,
+  useMantineColorScheme,
+  useMantineTheme
 } from "@mantine/core";
+import { IconSun, IconMoonStars } from "@tabler/icons-react";
 import { useForm } from "@mantine/form";
 import { useAuth } from "../contexts/AuthContext";
-import authService from "../api/authService"; // Import authService
-import {
-  IconBrandGoogleFilled,
-  IconBrandGithubFilled,
-} from "@tabler/icons-react";
-import { useTranslation } from "react-i18next"; // Import useTranslation hook
-import discordGif from "../assets/wired-flat-2566-logo-discord-hover-wink.gif"; // Import local Discord GIF
+import authService from "../api/authService";
+import { IconBrandGoogleFilled } from "@tabler/icons-react";
+import { useTranslation } from "react-i18next";
 
-// Use Discord GIF icon from local asset
-const DiscordIcon = (props) => {
-  const { t } = useTranslation("auth");
-  return (
-    <img
-      src={discordGif}
-      alt={t("discordAltText")}
-      width={32}
-      height={32}
-      style={{ display: "block" }}
-      {...props}
-    />
-  );
-};
 
 function Login() {
   const { t } = useTranslation("auth");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { colorScheme } = useMantineColorScheme();
+  const theme = useMantineTheme();
+  
+  // Use white logo for dark theme, black for light theme
+  const logoPath = colorScheme === 'dark' ? '/logo_white.png' : '/logo_black.png';
 
   const form = useForm({
     initialValues: {
@@ -88,93 +80,79 @@ function Login() {
     authService.redirectToGoogleOAuth();
   };
 
-  const handleGithubLogin = () => {
-    authService.redirectToGithubOAuth();
-  };
-
-  const handleDiscordLogin = () => {
-    authService.redirectToDiscordOAuth();
-  };
+  // GitHub and Discord login handlers removed from UI but kept in code for future use
 
   return (
-    <Container
-      size="xs"
-      py="xl"
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-      }}
-    >
-      {" "}
-      <Title align="center" mb="lg">
-        {t("loginTitle")}
-      </Title>
-      <Paper withBorder shadow="md" p={30} radius="md" mt="xl">
+    <Container size={460} my={120}>
+      <Stack align="center" spacing="xs" mb={40} >
+        <Image src={logoPath} width={80} mb="md" alt="TeachAI Logo" />
+        <Title order={1} size={32} weight={700} align="center">
+          {t("welcomeBack")}
+        </Title>
+        <Text color="dimmed" size="lg" align="center" mb="xl">
+          {t("signInToContinue")}
+        </Text>
+      </Stack>
+
+      <Paper withBorder p={30} radius="md">
+        <Button
+          leftIcon={<IconBrandGoogleFilled size={20} />}
+          variant="default"
+          fullWidth
+          size="md"
+          onClick={handleGoogleLogin}
+          mb="xl"
+          style={{ height: 46 }}
+        >
+          {t("continueWithGoogle")}
+        </Button>
+
+        <Divider
+          label={
+            <Text size="sm" color="dimmed">
+              {t("orContinueWithEmail")}
+            </Text>
+          }
+          labelPosition="center"
+          my="lg"
+        />
+
         <form onSubmit={form.onSubmit(handleSubmit)}>
-          <TextInput
-            label={t("username")}
-            placeholder={t("usernamePlaceholder")}
-            required
-            {...form.getInputProps("username")}
-            mb="md"
-          />
+          <Stack spacing="md">
+            <TextInput
+              label={t("username")}
+              placeholder={t("usernamePlaceholder")}
+              required
+              size="md"
+              {...form.getInputProps("username")}
+            />
 
-          <PasswordInput
-            label={t("password")}
-            placeholder={t("passwordPlaceholder")}
-            required
-            {...form.getInputProps("password")}
-            mb="xl"
-          />
+            <PasswordInput
+              label={t("password")}
+              placeholder={t("passwordPlaceholder")}
+              required
+              size="md"
+              {...form.getInputProps("password")}
+            />
 
-          <Button
-            fullWidth
-            variant="gradient"
-            gradient={{ from: "cyan", to: "teal", deg: 45 }}
-            type="submit"
-            loading={isLoading}
-          >
-            {t("signIn")}
-          </Button>
-
-          <Divider label={t("continueWith")} labelPosition="center" my="lg" />
-
-          <Group position="center" spacing="md" mb="xl">
             <Button
-              variant="outline"
-              onClick={handleGoogleLogin}
-              px="md"
-              style={{ width: 48, height: 48, padding: 0 }}
+              fullWidth
+              type="submit"
+              size="md"
+              loading={isLoading}
+              style={{ height: 46 }}
             >
-              <IconBrandGoogleFilled size={24} />
+              {t("signIn")}
             </Button>
-            <Button
-              variant="outline"
-              onClick={handleGithubLogin}
-              px="md"
-              style={{ width: 48, height: 48, padding: 0 }}
-            >
-              <IconBrandGithubFilled size={24} />
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleDiscordLogin}
-              px="md"
-              style={{ width: 48, height: 48, padding: 0 }}
-            >
-              <DiscordIcon />
-            </Button>
-          </Group>
-
-          <Text align="center" mt="md">
-            {t("noAccount")}{" "}
-            <Anchor component={Link} to="/register">
-              {t("signUp")}
-            </Anchor>
-          </Text>
+          </Stack>
         </form>
+
+        <Text align="center" mt="lg">
+          {t("noAccount")}{" "}
+          <Anchor component={Link} to="/register" weight={600}>
+            {t("signUp")}
+          </Anchor>
+        </Text>
       </Paper>
     </Container>
   );
