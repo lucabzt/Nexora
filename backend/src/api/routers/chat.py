@@ -2,17 +2,18 @@
 import logging
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.responses import StreamingResponse
 from pydantic import constr
 from sqlalchemy.orm import Session
 
 from ...db.database import get_db
 from ...db.models.db_user import User
-from ...services.chat_service import chat_service
+from ...services.chat_service import ChatService
 from ...utils.auth import get_current_active_user
 from ..schemas.chat import ChatRequest, ChatResponse
 from ...db.crud import chapters_crud
+from ...main import get_chat_service
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +70,7 @@ def _validate_chat_request(chat_request: ChatRequest) -> None:
 async def chat_with_agent(
     chapter_id: str,
     chat_request: ChatRequest,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ) -> StreamingResponse:
@@ -117,16 +119,23 @@ async def chat_with_agent(
             "X-Content-Type-Options": "nosniff"
         }
         
-        # Return the streaming response
+        # Get the chat service instance from the application state
+        chat_service = get_chat_service()
+        
+        # Process the chat message and return a streaming response
         return StreamingResponse(
             chat_service.process_chat_message(
-                str(current_user.id),
-                chapter_id,
-                chat_request,
-                db
+                user_id=str(current_user.id),
+                chapter_id=chapter_id,
+                request=chat_request,
+                db=db
             ),
             media_type="text/event-stream",
-            headers=headers
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no"
+            }
         )
         
     except HTTPException:
