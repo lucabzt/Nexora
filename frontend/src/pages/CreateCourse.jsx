@@ -2,27 +2,50 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Container, 
-  Title, 
-  TextInput, 
-  NumberInput, 
-  Button, 
-  Text, 
   Paper, 
-  Stepper,
-  Group,
-  Textarea,
-  FileInput,
-  Alert,
-  Loader,
-  Progress,
-  Card,
-  List,
-  Badge,
+  Container,
+  Title, 
+  Text, 
+  Button, 
+  Group, 
+  Textarea, 
+  Slider, 
+  Select, 
+  FileButton,
   SimpleGrid,
-  Select
+  Stack,
+  Box,
+  ThemeIcon,
+  Progress,
+  Badge,
+  Card,
+  Image,
+  ActionIcon,
+  useMantineTheme,
+  Center,
+  RingProgress,
+  Divider,
+  Alert,
+  List
 } from '@mantine/core';
-import { IconUpload, IconAlertCircle, IconCheck, IconPhoto, IconFileText } from '@tabler/icons-react';
+import { 
+  IconBook, 
+  IconClock, 
+  IconGlobe, 
+  IconBrain, 
+  IconUpload, 
+  IconFile, 
+  IconPhoto, 
+  IconCheck, 
+  IconArrowRight, 
+  IconArrowLeft,
+  IconSparkles,
+  IconTarget,
+  IconX,
+  IconEdit,
+  IconAlertCircle,
+  IconFileText
+} from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import { toast } from 'react-toastify';
 import { courseService } from '../api/courseService';
@@ -30,22 +53,21 @@ import { courseService } from '../api/courseService';
 function CreateCourse() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation('createCourse');
-  const [active, setActive] = useState(0);
-
+  const theme = useMantineTheme();
+  
+  const [activeStep, setActiveStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
-
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
   const [uploadedImages, setUploadedImages] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
 
-  
   const form = useForm({
     initialValues: {
       query: '',
       time_hours: 2,
       language: i18n.language,
-      difficulty: 'university',
+      difficulty: '',
       documents: [],
       images: [],
     },
@@ -55,6 +77,45 @@ function CreateCourse() {
       difficulty: (value) => (!value ? t('form.validation.difficultyRequired') : null),
     },
   });
+
+  const steps = [
+    { 
+      label: t('stepper.details.label') || 'Learning Goal', 
+      description: t('stepper.details.description') || 'What do you want to learn?',
+      icon: <IconBrain size={20} />,
+      color: 'teal'
+    },
+    { 
+      label: t('stepper.uploads.label') || 'Time Investment', 
+      description: 'How much time to invest?',
+      icon: <IconClock size={20} />,
+      color: 'blue'
+    },
+    { 
+      label: t('stepper.review.label') || 'Course Settings', 
+      description: 'Difficulty and language',
+      icon: <IconTarget size={20} />,
+      color: 'cyan'
+    },
+    { 
+      label: 'Review & Create', 
+      description: 'Confirm your choices',
+      icon: <IconCheck size={20} />,
+      color: 'green'
+    }
+  ];
+
+  const difficultyOptions = [
+    { value: 'beginner', label: t('form.difficulty.options.beginner') || 'Beginner', description: 'New to this topic' },
+    { value: 'intermediate', label: t('form.difficulty.options.intermediate') || 'Intermediate', description: 'Some knowledge' },
+    { value: 'advanced', label: t('form.difficulty.options.advanced') || 'Advanced', description: 'Experienced learner' },
+    { value: 'university', label: t('form.difficulty.options.university') || 'University', description: 'University level' }
+  ];
+
+  const languageOptions = [
+    { value: 'en', label: t('form.language.options.english') || 'English' },
+    { value: 'de', label: t('form.language.options.german') || 'Deutsch' }
+  ];
 
   const handleDocumentUpload = async (file) => {
     if (!file) return;
@@ -88,7 +149,42 @@ function CreateCourse() {
     } finally {
       setIsUploading(false);
     }
-  };  
+  };
+
+  const nextStep = () => {
+    console.log('Next step clicked, current step:', activeStep, 'isValid:', isStepValid(activeStep), 'query length:', form.values.query.trim().length);
+    if (activeStep < steps.length - 1) {
+      setActiveStep(prev => prev + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (activeStep > 0) {
+      setActiveStep(prev => prev - 1);
+    }
+  };
+
+  const handleFileUpload = async (files, type) => {
+    if (files && files.length > 0) {
+      for (const file of files) {
+        if (type === 'document') {
+          await handleDocumentUpload(file);
+        } else {
+          await handleImageUpload(file);
+        }
+      }
+      form.setFieldValue(type === 'document' ? 'documents' : 'images', 
+        [...form.values[type === 'document' ? 'documents' : 'images'], ...files]);
+    }
+  };
+
+  const removeFile = (index, type) => {
+    if (type === 'document') {
+      setUploadedDocuments(prev => prev.filter((_, i) => i !== index));
+    } else {
+      setUploadedImages(prev => prev.filter((_, i) => i !== index));
+    }
+  };
 
   const handleSubmit = async () => {
     if (form.validate().hasErrors) {
@@ -102,16 +198,14 @@ function CreateCourse() {
       const documentIds = uploadedDocuments.map(doc => doc.id);
       const imageIds = uploadedImages.map(img => img.id);
 
-      const data = await courseService.createCourse(
-        { 
-          query: form.values.query,
-          time_hours: form.values.time_hours,
-          language: form.values.language,
-          difficulty: form.values.difficulty,
-          document_ids: documentIds,
-          picture_ids: imageIds,
-        }
-      );
+      const data = await courseService.createCourse({
+        query: form.values.query,
+        time_hours: form.values.time_hours,
+        language: form.values.language,
+        difficulty: form.values.difficulty,
+        document_ids: documentIds,
+        picture_ids: imageIds,
+      });
 
       console.log('Course creation initiated:', data);
       navigate(`/dashboard/courses/${data.course_id}`);
@@ -125,207 +219,599 @@ function CreateCourse() {
     }
   };
 
-  const nextStep = () => setActive((current) => (current < 2 ? current + 1 : current));
-  const prevStep = () => setActive((current) => (current > 0 ? current - 1 : current));
-
-  const handleMultipleDocuments = async (files) => {
-    if (!files || files.length === 0) return;
-    for (const file of files) {
-      await handleDocumentUpload(file);
+  const isStepValid = (step) => {
+    switch (step) {
+      case 0: return form.values.query.trim().length > 0;
+      case 1: return form.values.time_hours > 0;
+      case 2: return form.values.difficulty && form.values.language;
+      case 3: return true;
+      default: return false;
     }
-    form.setFieldValue('documents', [...form.values.documents, ...files]);
   };
 
-  const handleMultipleImages = async (files) => {
-    if (!files || files.length === 0) return;
-    for (const file of files) {
-      await handleImageUpload(file);
+  // Step Content Components
+  const renderStepContent = () => {
+    switch (activeStep) {
+      case 0:
+        return (
+          <Stack spacing="lg">
+            <Box ta="center" mb="sm">
+              <ThemeIcon 
+                size={60} 
+                radius="xl" 
+                variant="gradient"
+                gradient={{ from: 'teal', to: 'cyan' }}
+                mb="sm"
+              >
+                <img 
+                  src="/logo_white_mittig.png"
+                  alt="Logo"
+                  style={{ 
+                    height: 28,
+                    width: 'auto',
+                    filter: 'drop-shadow(0 2px 4px rgba(139, 92, 246, 0.3))',
+                  }}></img>
+              </ThemeIcon>
+              <Title order={3} mb="xs">{t('form.topic.label') || 'What would you like to learn?'}</Title>
+              <Text color="dimmed" size="md">
+                {t('form.topic.placeholder') || 'Describe your learning goal and upload any relevant materials'}
+              </Text>
+            </Box>
+
+            <Textarea
+              placeholder={t('form.topic.placeholder') || "I want to learn about React hooks and how to build modern web applications with functional components..."}
+              required
+              autosize
+              minRows={3}
+              maxRows={4}
+              {...form.getInputProps('query')}
+              styles={{
+                input: {
+                  fontSize: 14,
+                  lineHeight: 1.5,
+                  padding: '12px 16px',
+                  borderRadius: 8,
+                  border: `2px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]}`,
+                  '&:focus': {
+                    borderColor: theme.colors.teal[6],
+                    boxShadow: `0 0 0 3px ${theme.colors.teal[6]}20`
+                  }
+                }
+              }}
+            />
+
+            <Divider label={t('form.uploads.description') || "Optional: Add Learning Materials"} labelPosition="center" />
+
+            <SimpleGrid cols={2} spacing="md">
+              <FileButton
+                onChange={(files) => handleFileUpload(files, 'document')}
+                accept=".pdf,.doc,.docx,.txt"
+                multiple
+                disabled={isUploading || isSubmitting}
+              >
+                {(props) => (
+                  <Card 
+                    {...props}
+                    p="md"
+                    withBorder
+                    sx={{
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      opacity: isUploading ? 0.6 : 1,
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: theme.shadows.md
+                      }
+                    }}
+                  >
+                    <Stack align="center" spacing="xs">
+                      <ThemeIcon size={40} color="blue" variant="light" radius="xl">
+                        <IconFile size={20} />
+                      </ThemeIcon>
+                      <Text weight={600} size="xs">{t('form.documents.label') || 'Upload Documents'}</Text>
+                      <Text size="xs" color="dimmed" ta="center">
+                        PDF, DOC, TXT files
+                      </Text>
+                    </Stack>
+                  </Card>
+                )}
+              </FileButton>
+
+              <FileButton
+                onChange={(files) => handleFileUpload(files, 'image')}
+                accept="image/*"
+                multiple
+                disabled={isUploading || isSubmitting}
+              >
+                {(props) => (
+                  <Card 
+                    {...props}
+                    p="md"
+                    withBorder
+                    sx={{
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      opacity: isUploading ? 0.6 : 1,
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: theme.shadows.md
+                      }
+                    }}
+                  >
+                    <Stack align="center" spacing="xs">
+                      <ThemeIcon size={40} color="teal" variant="light" radius="xl">
+                        <IconPhoto size={20} />
+                      </ThemeIcon>
+                      <Text weight={600} size="xs">{t('form.images.label') || 'Upload Images'}</Text>
+                      <Text size="xs" color="dimmed" ta="center">
+                        PNG, JPG, GIF files
+                      </Text>
+                    </Stack>
+                  </Card>
+                )}
+              </FileButton>
+            </SimpleGrid>
+
+            {(uploadedDocuments.length > 0 || uploadedImages.length > 0) && (
+              <Box>
+                <Text weight={600} mb="sm">
+                  {t('form.documents.uploadedTitle') || 'Uploaded Files'} ({uploadedDocuments.length + uploadedImages.length})
+                </Text>
+                <Group grow align="start">
+                  {uploadedDocuments.length > 0 && (
+                    <div>
+                      <Text size="sm" weight={500} mb="xs">{t('form.documents.uploadedTitle') || 'Documents'}</Text>
+                      <List size="sm" spacing="xs">
+                        {uploadedDocuments.map((doc, index) => (
+                          <List.Item key={doc.id} icon={<IconFileText size={14} />}>
+                            <Group position="apart">
+                              <Text size="xs" truncate>{doc.filename}</Text>
+                              <ActionIcon
+                                size="xs"
+                                color="red"
+                                variant="subtle"
+                                onClick={() => removeFile(index, 'document')}
+                              >
+                                <IconX size={10} />
+                              </ActionIcon>
+                            </Group>
+                          </List.Item>
+                        ))}
+                      </List>
+                    </div>
+                  )}
+                  {uploadedImages.length > 0 && (
+                    <div>
+                      <Text size="sm" weight={500} mb="xs">{t('form.images.uploadedTitle') || 'Images'}</Text>
+                      <List size="sm" spacing="xs">
+                        {uploadedImages.map((img, index) => (
+                          <List.Item key={img.id} icon={<IconPhoto size={14} />}>
+                            <Group position="apart">
+                              <Text size="xs" truncate>{img.filename || img.name || 'Image'}</Text>
+                              <ActionIcon
+                                size="xs"
+                                color="red"
+                                variant="subtle"
+                                onClick={() => removeFile(index, 'image')}
+                              >
+                                <IconX size={10} />
+                              </ActionIcon>
+                            </Group>
+                          </List.Item>
+                        ))}
+                      </List>
+                    </div>
+                  )}
+                </Group>
+              </Box>
+            )}
+
+            {isUploading && (
+              <Alert 
+                icon={<IconUpload size={16} />}
+                title={t('alert.uploading.title') || 'Uploading files...'} 
+                color="blue"
+              >
+                {t('alert.uploading.message') || 'Please wait while your files are being uploaded.'}
+              </Alert>
+            )}
+          </Stack>
+        );
+
+      case 1:
+        return (
+          <Stack spacing="lg">
+            <Box ta="center" mb="sm">
+              <ThemeIcon 
+                size={60} 
+                radius="xl" 
+                variant="gradient"
+                gradient={{ from: 'blue', to: 'teal' }}
+                mb="sm"
+              >
+                <IconClock size={30} />
+              </ThemeIcon>
+              <Title order={3} mb="xs">{t('form.duration.label') || 'Time Investment'}</Title>
+              <Text color="dimmed" size="md">
+                {t('form.duration.description') || 'How many hours do you want to dedicate to this course?'}
+              </Text>
+            </Box>
+
+            <Card p="lg" withBorder radius="lg" bg={theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0]}>
+              <Center mb="lg">
+                <RingProgress
+                  size={160}
+                  thickness={10}
+                  roundCaps
+                  sections={[{ 
+                    value: (form.values.time_hours / 30) * 100, 
+                    color: theme.colors.blue[6] 
+                  }]}
+                  label={
+                    <Stack align="center" spacing={2}>
+                      <Text size="lg" weight={700} color={theme.colors.blue[6]}>
+                        {form.values.time_hours}
+                      </Text>
+                      <Text size="xs" color="dimmed">hours</Text>
+                    </Stack>
+                  }
+                />
+              </Center>
+
+              <Slider
+                value={form.values.time_hours}
+                onChange={(value) => form.setFieldValue('time_hours', value)}
+                min={1}
+                max={30}
+                step={1}
+                size="lg"
+                radius="xl"
+                color="blue"
+                marks={[
+                  { value: 5, label: '5h' },
+                  { value: 10, label: '10h' },
+                  { value: 15, label: '15h' },
+                  { value: 20, label: '20h' },
+                  { value: 25, label: '25h' },
+                  { value: 30, label: '30h'},
+                ]}
+                styles={{
+                  track: { height: 8 },
+                  thumb: { 
+                    width: 24, 
+                    height: 24,
+                    border: `3px solid ${theme.colors.blue[6]}`,
+                    backgroundColor: theme.white
+                  }
+                }}
+              />
+
+              <SimpleGrid cols={3} spacing="md" mt="lg">
+                <Card p="sm" withBorder radius="md" ta="center">
+                  <Text size="xs" color="dimmed" weight={600} transform="uppercase">Quick</Text>
+                  <Text size="md" weight={700}>1-5 hours</Text>
+                  <Text size="xs" color="dimmed">Quick Refresher</Text>
+                </Card>
+                <Card p="sm" withBorder radius="md" ta="center">
+                  <Text size="xs" color="dimmed" weight={600} transform="uppercase">Deep Dive</Text>
+                  <Text size="md" weight={700}>5-20 hours</Text>
+                  <Text size="xs" color="dimmed">Deep Dive into a Complex Topic</Text>
+                </Card>
+                <Card p="sm" withBorder radius="md" ta="center">
+                  <Text size="xs" color="dimmed" weight={600} transform="uppercase">Mastery</Text>
+                  <Text size="md" weight={700}>20+ hours</Text>
+                  <Text size="xs" color="dimmed">University Level Mastering of the Topic</Text>
+                </Card>
+              </SimpleGrid>
+            </Card>
+          </Stack>
+        );
+
+      case 2:
+        return (
+          <Stack spacing="lg">
+            <Box ta="center" mb="sm">
+              <Title order={3} mb="xs">{t('form.difficulty.label') || 'Course Settings'}</Title>
+              <Text color="dimmed" size="md">
+                Choose your difficulty level and preferred language
+              </Text>
+            </Box>
+
+            <Box>
+              <Text weight={600} mb="md">{t('form.difficulty.label') || 'Difficulty Level'}</Text>
+              <SimpleGrid cols={1} spacing="sm">
+                {difficultyOptions.map((option) => (
+                  <Card
+                    key={option.value}
+                    p="md"
+                    withBorder
+                    radius="md"
+                    sx={{
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      backgroundColor: form.values.difficulty === option.value 
+                        ? (theme.colorScheme === 'dark' ? theme.colors.teal[9] : theme.colors.teal[0])
+                        : 'transparent',
+                      borderColor: form.values.difficulty === option.value 
+                        ? theme.colors.teal[6] 
+                        : (theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]),
+                      '&:hover': {
+                        borderColor: theme.colors.teal[6],
+                        transform: 'translateY(-1px)'
+                      }
+                    }}
+                    onClick={() => form.setFieldValue('difficulty', option.value)}
+                  >
+                    <Group position="apart">
+                      <Box>
+                        <Text weight={600} size="sm">{option.label}</Text>
+                        <Text size="xs" color="dimmed">{option.description}</Text>
+                      </Box>
+                      {form.values.difficulty === option.value && (
+                        <ThemeIcon color="teal" variant="filled" radius="xl" size="sm">
+                          <IconCheck size={14} />
+                        </ThemeIcon>
+                      )}
+                    </Group>
+                  </Card>
+                ))}
+              </SimpleGrid>
+            </Box>
+
+            <Box>
+              <Text weight={600} mb="md">{t('form.language.label') || 'Course Language'}</Text>
+              <Select
+                value={form.values.language}
+                onChange={(value) => form.setFieldValue('language', value)}
+                data={languageOptions}
+                size="md"
+                radius="md"
+                icon={<IconGlobe size={18} />}
+                clearable={false}
+                styles={{
+                  input: {
+                    fontSize: 14,
+                    padding: '10px 14px',
+                    height: 'auto'
+                  }
+                }}
+              />
+            </Box>
+          </Stack>
+        );
+
+      case 3:
+        return (
+          <Stack spacing="lg">
+            <Box ta="center" mb="sm">
+              <ThemeIcon 
+                size={60} 
+                radius="xl" 
+                variant="gradient"
+                gradient={{ from: 'green', to: 'teal' }}
+                mb="sm"
+              >
+                <IconCheck size={30} />
+              </ThemeIcon>
+              <Title order={3} mb="xs">{t('form.review.title') || 'Review & Create'}</Title>
+              <Text color="dimmed" size="md">
+                {t('form.review.confirmation') || 'Confirm your choices and create your personalized course'}
+              </Text>
+            </Box>
+
+            <Card p="lg" withBorder radius="lg" bg={theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0]}>
+              <Stack spacing="md">
+                <Group position="apart">
+                  <Text weight={600} color="dimmed">{t('form.topic.label') || 'Learning Goal'}</Text>
+                  <ActionIcon 
+                    variant="subtle" 
+                    onClick={() => setActiveStep(0)}
+                    title="Edit"
+                  >
+                    <IconEdit size={16} />
+                  </ActionIcon>
+                </Group>
+                <Text sx={{ 
+                  backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.white,
+                  padding: 12,
+                  borderRadius: 6,
+                  border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]}`,
+                  fontSize: 14,
+                  lineHeight: 1.4
+                }}>
+                  {form.values.query || t('form.review.notSet') || "No learning goal specified"}
+                </Text>
+
+                <Group grow>
+                  <Box>
+                    <Group position="apart" mb="xs">
+                      <Text weight={600} color="dimmed">{t('form.duration.label') || 'Time Investment'}</Text>
+                      <ActionIcon variant="subtle" onClick={() => setActiveStep(1)}>
+                        <IconEdit size={16} />
+                      </ActionIcon>
+                    </Group>
+                    <Group spacing="xs">
+                      <ThemeIcon color="blue" variant="light" size="sm">
+                        <IconClock size={14} />
+                      </ThemeIcon>
+                      <Text weight={600}>{form.values.time_hours} hours</Text>
+                    </Group>
+                  </Box>
+
+                  <Box>
+                    <Group position="apart" mb="xs">
+                      <Text weight={600} color="dimmed">{t('form.difficulty.label') || 'Difficulty'}</Text>
+                      <ActionIcon variant="subtle" onClick={() => setActiveStep(2)}>
+                        <IconEdit size={16} />
+                      </ActionIcon>
+                    </Group>
+                    <Group spacing="xs">
+                      <ThemeIcon color="cyan" variant="light" size="sm">
+                        <IconTarget size={14} />
+                      </ThemeIcon>
+                      <Text weight={600} transform="capitalize">
+                        {difficultyOptions.find(d => d.value === form.values.difficulty)?.label || t('form.review.notSet') || "Not selected"}
+                      </Text>
+                    </Group>
+                  </Box>
+                </Group>
+
+                <Group grow>
+                  <Box>
+                    <Text weight={600} color="dimmed" mb="xs">{t('form.language.label') || 'Language'}</Text>
+                    <Group spacing="xs">
+                      <ThemeIcon color="teal" variant="light" size="sm">
+                        <IconGlobe size={14} />
+                      </ThemeIcon>
+                      <Text weight={600}>
+                        {languageOptions.find(l => l.value === form.values.language)?.label || "English"}
+                      </Text>
+                    </Group>
+                  </Box>
+
+                  <Box>
+                    <Text weight={600} color="dimmed" mb="xs">Materials</Text>
+                    <Group spacing="xs">
+                      <ThemeIcon color="orange" variant="light" size="sm">
+                        <IconUpload size={14} />
+                      </ThemeIcon>
+                      <Text weight={600}>{uploadedDocuments.length + uploadedImages.length} files</Text>
+                    </Group>
+                  </Box>
+                </Group>
+              </Stack>
+            </Card>
+
+            {isSubmitting && (
+              <Card p="lg" withBorder radius="md" ta="center">
+                <Progress value={100} animate color="teal" mb="md" />
+                <Text weight={600} mb="xs">{t('streaming.title') || 'Creating your course...'}</Text>
+                <Text size="sm" color="dimmed">
+                  {t('streaming.description') || 'Our AI is analyzing your requirements and building a personalized learning path'}
+                </Text>
+              </Card>
+            )}
+          </Stack>
+        );
+
+      default:
+        return null;
     }
-    form.setFieldValue('images', [...form.values.images, ...files]);
   };
+
+  if (isSubmitting) {
+    return (
+      <Container size="lg" py="md">
+        <Paper shadow="md" p="xl" withBorder>
+          <Title order={3} align="center" mb="md">{t('streaming.title') || 'Creating Your Course'}</Title>
+          <Text align="center" mb="md">{t('streaming.description') || 'Please wait while we generate your personalized course...'}</Text>
+          <Progress value={100} animate color="teal" />
+        </Paper>
+      </Container>
+    );
+  }
 
   return (
-    <Container size="md" py="xl">
-      <Title order={1} align="center" mb="xl">{t('title')}</Title>
+    <Container size="lg" py="md">
+      
+      <Paper 
+        radius="lg" 
+        withBorder 
+        sx={{
+          overflow: 'hidden',
+          background: theme.colorScheme === 'dark' 
+            ? `linear-gradient(135deg, ${theme.colors.dark[7]}, ${theme.colors.dark[6]})`
+            : `linear-gradient(135deg, ${theme.white}, ${theme.colors.gray[0]})`,
+        }}
+      >
+        {/* Header */}
+        <Box 
+          p="lg" 
+          sx={{
+            background: theme.colorScheme === 'dark' 
+              ? `linear-gradient(45deg, ${theme.colors.teal[9]}, ${theme.colors.cyan[8]})`
+              : `linear-gradient(45deg, ${theme.colors.teal[6]}, ${theme.colors.cyan[5]})`,
+            color: 'white',
+            position: 'relative'
+          }}
+        >
 
-      {isSubmitting ? (
-        <Paper shadow="md" p="xl" withBorder>
-          <Title order={3} align="center" mb="md">{t('streaming.title')}</Title>
-          <Text align="center" mb="md">{t('streaming.description')}</Text>
-        </Paper>
-      ) : (
-        <Paper shadow="md" p="xl" withBorder>
-          <Stepper active={active} onStepClick={setActive} breakpoint="sm" mb="xl">
-            <Stepper.Step label={t('stepper.details.label')} description={t('stepper.details.description')}>
-              <Textarea
-                label={t('form.topic.label')}
-                placeholder={t('form.topic.placeholder')}
-                required
-                autosize
-                minRows={3}
-                mb="md"
-                {...form.getInputProps('query')}
-              />
-              <NumberInput
-                label={t('form.duration.label')}
-                description={t('form.duration.description')}
-                required
-                min={1}
-                max={100}
-                mb="md"
-                {...form.getInputProps('time_hours')}
-              />
-              
-              <Select
-                label={t('form.language.label')}
-                placeholder={t('form.language.placeholder')}
-                data={[
-                  { value: 'en', label: t('form.language.options.english') },
-                  { value: 'de', label: t('form.language.options.german') },
-                ]}
-                mb="md"
-                clearable={false}
-                {...form.getInputProps('language')}
-              />
-              
-              <Select
-                label={t('form.difficulty.label')}
-                placeholder={t('form.difficulty.placeholder')}
-                data={[
-                  { value: 'beginner', label: t('form.difficulty.options.beginner') },
-                  { value: 'intermediate', label: t('form.difficulty.options.intermediate') },
-                  { value: 'advanced', label: t('form.difficulty.options.advanced') },
-                  { value: 'university', label: t('form.difficulty.options.university') },
-                ]}
-                required
-                mb="md"
-                {...form.getInputProps('difficulty')}
-              />
-            </Stepper.Step>
+          {/* Progress indicator */}
+          <Progress 
+            value={(activeStep + 1) / steps.length * 100} 
+            color="white" 
+            mt="md"
+            size="sm"
+            radius="xl"
+          />
+        </Box>
 
-            <Stepper.Step label={t('stepper.uploads.label')} description={t('stepper.uploads.description')}>
-              <Text size="sm" mb="xs">{t('form.uploads.description')}</Text>
-              <Group grow align="start">
-                <div>
-                  <FileInput
-                    label={t('form.documents.label')}
-                    placeholder={t('form.documents.placeholder')}
-                    accept=".pdf,.doc,.docx,.txt"
-                    icon={<IconFileText size={14} />}
-                    onChange={handleMultipleDocuments}
-                    multiple
-                    mb="sm"
-                    disabled={isUploading || isSubmitting}
-                  />
-                  {uploadedDocuments.length > 0 && (
-                    <>
-                      <Text size="sm" weight={500} mb="xs">{t('form.documents.uploadedTitle')}</Text>
-                      <List size="sm" spacing="xs" mb="md">
-                        {uploadedDocuments.map((doc) => (
-                          <List.Item key={doc.id} icon={<IconFileText size={14} />}>
-                            {t('form.documents.fileEntry', { 
-                              fileName: doc.filename, 
-                              sizeKB: doc.size ? Math.round(doc.size / 1024) : 0 
-                            })}
-                          </List.Item>
-                        ))}
-                      </List>
-                    </>
-                  )}
-                </div>
-                
-                <div>
-                  <FileInput
-                    label={t('form.images.label')}
-                    placeholder={t('form.images.placeholder')}
-                    accept="image/*"
-                    icon={<IconPhoto size={14} />}
-                    onChange={handleMultipleImages}
-                    multiple
-                    mb="sm"
-                    disabled={isUploading || isSubmitting}
-                  />
-                  {uploadedImages.length > 0 && (
-                    <>
-                      <Text size="sm" weight={500} mb="xs">{t('form.images.uploadedTitle')}</Text>
-                      <List size="sm" spacing="xs" mb="md">
-                        {uploadedImages.map((img) => (
-                          <List.Item key={img.id} icon={<IconPhoto size={14} />}>
-                            {t('form.images.fileEntry', { 
-                              fileName: img.filename || img.name || 'Image', 
-                              sizeKB: img.size ? Math.round(img.size / 1024) : 0 
-                            })}
-                          </List.Item>
-                        ))}
-                      </List>
-                    </>
-                  )}
-                </div>
-              </Group>
-              
-              {(uploadedDocuments.length > 0 || uploadedImages.length > 0) && (
-                <Text size="sm" color="dimmed" mb="md">
-                  {t('form.uploads.personalizedExperience')}
-                </Text>
-              )}
-            </Stepper.Step>
+        {/* Content */}
+        <Box p="lg" style={{ minHeight: 350 }}>
+          {renderStepContent()}
+        </Box>
 
-            <Stepper.Step label={t('stepper.review.label')} description={t('stepper.review.description')}>
-              <Text mb="md">{t('form.review.title')}</Text>
-              <Card withBorder p="md" mb="md">
-                <Text><strong>{t('form.topic.label')}:</strong> {form.values.query || t('form.review.notSet')}</Text>
-                <Text><strong>{t('form.duration.label')}:</strong> {form.values.time_hours ? t('form.duration.value', { count: form.values.time_hours }) : t('form.review.notSet')}</Text>
-                <Text><strong>{t('form.documents.uploadedTitle')}:</strong> {uploadedDocuments.length > 0 ? uploadedDocuments.map(d => d.filename).join(', ') : t('form.review.none')}</Text>
-                <Text><strong>{t('form.images.uploadedTitle')}:</strong> {uploadedImages.length > 0 ? uploadedImages.map(i => i.filename).join(', ') : t('form.review.none')}</Text>
-              </Card>
-              <Text size="sm" color="dimmed">{t('form.review.confirmation')}</Text>
-            </Stepper.Step>
-          </Stepper>
-
-          {error && !isSubmitting && (
+        {/* Error Alert */}
+        {error && (
+          <Box px="lg">
             <Alert 
               icon={<IconAlertCircle size={16} />}
-              title={t('form.error.alertTitle')} 
+              title={t('form.error.alertTitle') || 'Error'} 
               color="red" 
-              mb="lg"
+              mb="md"
+              onClose={() => setError(null)}
+              withCloseButton
             >
               {error}
             </Alert>
-          )}
+          </Box>
+        )}
 
-          {isUploading && (
-            <Alert 
-              icon={<Loader size={16} />}
-              title={t('alert.uploading.title')} 
-              color="blue" 
-              mb="lg"
+        {/* Footer */}
+        <Box 
+          p="lg" 
+          pt="sm"
+          sx={{
+            borderTop: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]}`,
+            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0]
+          }}
+        >
+          <Group position="apart">
+            <Button
+              variant="subtle"
+              leftIcon={<IconArrowLeft size={16} />}
+              onClick={prevStep}
+              disabled={activeStep === 0 || isSubmitting || isUploading}
             >
-              {t('alert.uploading.message')}
-            </Alert>
-          )}
+              {t('buttons.back') || 'Previous'}
+            </Button>
 
-          <Group position="right" mt="xl">
-            {active > 0 && (
-              <Button variant="default" onClick={prevStep} disabled={isSubmitting || isUploading}>
-                {t('buttons.back')}
-              </Button>
-            )}
-            {active < 2 ? (
-              <Button onClick={nextStep} disabled={isSubmitting || isUploading}>
-                {t('buttons.nextStep')}
+            {activeStep < steps.length - 1 ? (
+              <Button
+                rightIcon={<IconArrowRight size={16} />}
+                onClick={nextStep}
+                disabled={!isStepValid(activeStep) || isUploading}
+                variant="gradient"
+                gradient={{ from: 'teal', to: 'cyan' }}
+              >
+                {t('buttons.nextStep') || 'Next Step'}
               </Button>
             ) : (
-              <Button 
-                onClick={handleSubmit} 
-                loading={isSubmitting} 
-                disabled={isSubmitting || isUploading || (form.values.query === '')} 
+              <Button
+                leftIcon={<IconSparkles size={16} />}
+                onClick={handleSubmit}
+                disabled={!isStepValid(activeStep) || isSubmitting || isUploading}
+                loading={isSubmitting}
+                variant="gradient"
+                gradient={{ from: 'green', to: 'teal' }}
+                size="md"
               >
-                {isSubmitting ? t('buttons.creating') : t('buttons.createCourse')}
+                {isSubmitting ? (t('buttons.creating') || 'Creating Course...') : (t('buttons.createCourse') || 'Create Course')}
               </Button>
             )}
           </Group>
-        </Paper>
-      )}
+        </Box>
+      </Paper>
     </Container>
   );
 }

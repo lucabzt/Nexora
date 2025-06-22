@@ -1,5 +1,7 @@
 {
   "loadingCourseDetails": "Loading course details...",
+  "courseLoadingTitle": "Loading...",
+  "courseLoadingDescription": "",
   "errors": {
     "loadFailed": "Failed to load course details. Please try again later.",
     "genericTitle": "Error!",
