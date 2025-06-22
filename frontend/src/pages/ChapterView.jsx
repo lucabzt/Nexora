@@ -1,6 +1,6 @@
 //ChapterView.jsx - Fixed polling logic
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -15,6 +15,7 @@ import {
   Loader,
   Paper,
   Badge,
+  ActionIcon,
 } from '@mantine/core';
 import { IconDownload } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
@@ -53,6 +54,22 @@ function ChapterView() {
   const [questionCount, setQuestionCount] = useState(0);
   const [isBlinking, setIsBlinking] = useState(false); // New state for blinking
   const [quizKey, setQuizKey] = useState(0); // Force Quiz component re-mount
+  const [courseChapters, setCourseChapters] = useState([]);
+
+  const { isLastChapter, nextChapterId } = useMemo(() => {
+    
+    if (!courseChapters || courseChapters.length === 0) {
+      return { isLastChapter: false, nextChapterId: null };
+    }
+    // Ensure IDs are compared as strings, as chapterId from URL is a string
+    const currentIndex = courseChapters.findIndex(c => String(c.id) === chapterId);
+    if (currentIndex === -1) {
+      return { isLastChapter: false, nextChapterId: null };
+    }
+    const isLast = currentIndex === courseChapters.length - 1;
+    const nextId = isLast ? null : courseChapters[currentIndex + 1].id;
+    return { isLastChapter: isLast, nextChapterId: nextId };
+  }, [courseChapters, chapterId]);
 
   // Refs for cleanup
   const contentRef = useRef(null);
@@ -76,14 +93,16 @@ function ChapterView() {
       try {
         setLoading(true);
         // Fetch chapter data and media info (including questions check)
-        const [chapterData, imagesData, filesData, questionsData] = await Promise.all([
+        const [chapterData, imagesData, filesData, questionsData, chaptersData] = await Promise.all([
           courseService.getChapter(courseId, chapterId),
           courseService.getImages(courseId),
           courseService.getFiles(courseId),
           courseService.getChapterQuestions(courseId, chapterId),
+          courseService.getCourseChapters(courseId),
         ]);
 
         setChapter(chapterData);
+        setCourseChapters(chaptersData || []);
 
         // Check if chapter has questions
         if (questionsData && questionsData.length > 0) {
@@ -255,7 +274,7 @@ function ChapterView() {
         pollIntervalRef.current = null;
       }
     };
-  }, [courseId, chapterId, questionsCreated, loading]);
+  }, [courseId, chapterId, questionsCreated, loading, t]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -280,7 +299,7 @@ function ChapterView() {
         clearTimeout(blinkTimeoutRef.current);
       }
     };
-  }, []);
+  }, [images, files]);
 
   const handleDeleteImage = async (imageId) => {
     try {
@@ -331,7 +350,7 @@ function ChapterView() {
       setMarkingComplete(true);
       await courseService.markChapterComplete(courseId, chapterId);
       toast.success(t('toast.markedCompleteSuccess'));
-      navigate(`/dashboard/courses/${courseId}`);
+      //navigate(`/dashboard/courses/${courseId}`);
     } catch (error) {
       toast.error(t('toast.markedCompleteError'));
       console.error('Error marking chapter complete:', error);
@@ -360,6 +379,14 @@ function ChapterView() {
       toast.error('Failed to download PDF. Please try again.');
     } finally {
       setDownloadingPDF(false);
+    }
+  };
+
+  const handleNextChapter = () => {
+    console.log("nextChapterId", nextChapterId);
+    if (nextChapterId) {
+      navigate(`/dashboard/courses/${courseId}/chapters/${nextChapterId}`);
+      window.scrollTo(0, 0);
     }
   };
 
@@ -445,27 +472,16 @@ function ChapterView() {
                   )}
                 </Group>
               </Box>
-
-              <Group spacing="sm">
-                <Button
-                  variant="outline"
-                  color="blue"
-                  leftIcon={<IconDownload size={16} />}
-                  onClick={handleDownloadPDF}
-                  loading={downloadingPDF}
-                  disabled={downloadingPDF || activeTab !== 'content'}
-                >
-                  Download PDF
-                </Button>
-                <Button
-                  color="green"
-                  onClick={markChapterComplete}
-                  loading={markingComplete}
-                  disabled={markingComplete}
-                >
-                  {t('buttons.markComplete')}
-                </Button>
-              </Group>
+              <ActionIcon
+                size="lg"
+                variant="default"
+                onClick={handleDownloadPDF}
+                loading={downloadingPDF}
+                disabled={downloadingPDF || activeTab !== 'content'}
+                title={t('buttons.downloadPDF', 'Download PDF')}
+              >
+                <IconDownload size={20} />
+              </ActionIcon>
             </Group>
 
             <Tabs value={activeTab} onTabChange={setActiveTab} mb="xl">
@@ -538,17 +554,40 @@ function ChapterView() {
                 variant="outline"
                 onClick={() => navigate(`/dashboard/courses/${courseId}`)}
               >
-                {t('buttons.backToCourse')}
+                {t('buttons.backToCourse', 'Back to Course')}
               </Button>
               <Group spacing="sm">
-                <Button
-                  color="green"
-                  onClick={markChapterComplete}
-                  loading={markingComplete}
-                  disabled={markingComplete || chapter?.is_completed}
-                >
-                  {chapter?.is_completed ? t('badge.completed') : t('buttons.markComplete')}
-                </Button>
+                {!chapter?.is_completed ? (
+                  <Button
+                    color="green"
+                    onClick={markChapterComplete}
+                    loading={markingComplete}
+                  >
+                    {t('buttons.markComplete', 'Mark as Complete')}
+                  </Button>
+                ) : hasQuestions ? (
+                  activeTab === 'quiz' ? (
+                    !isLastChapter ? (
+                      <Button onClick={handleNextChapter}>
+                        {t('buttons.nextChapter', 'Continue with Next Chapter')}
+                      </Button>
+                    ) : (
+                      <Text weight={500} color="teal">{t('messages.courseComplete', 'Well done, you mastered this course!')}</Text>
+                    )
+                  ) : (
+                    <Button onClick={() => { setActiveTab('quiz'); navigate(`#quiz`); }}>
+                      {t('buttons.testYourself', 'Test Yourself')}
+                    </Button>
+                  )
+                ) : (
+                  !isLastChapter ? (
+                    <Button onClick={handleNextChapter}>
+                      {t('buttons.nextChapter', 'Next Chapter')}
+                    </Button>
+                  ) : (
+                    <Text weight={500} color="teal">{t('messages.courseComplete', 'Well done, you mastered this course!')}</Text>
+                  )
+                )}
               </Group>
             </Group>
           </>
