@@ -1,7 +1,7 @@
 //ChapterView.jsx - Fixed polling logic
 
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Container,
@@ -43,7 +43,8 @@ function ChapterView() {
   const [loading, setLoading] = useState(true);
   const [mediaLoading, setMediaLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('content');
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.hash.replace('#', '') || 'content');
   const [markingComplete, setMarkingComplete] = useState(false);
   const [downloadingPDF, setDownloadingPDF] = useState(false);
   const [deletingItem, setDeletingItem] = useState(null);
@@ -57,6 +58,13 @@ function ChapterView() {
   const contentRef = useRef(null);
   const pollIntervalRef = useRef(null);
   const blinkTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    const hash = location.hash.replace('#', '');
+    if (hash) {
+      setActiveTab(hash);
+    }
+  }, [location.hash]);
 
   useEffect(() => {
     console.log("Toolbar state changed:", { open: toolbarOpen, width: toolbarWidth });
