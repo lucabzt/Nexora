@@ -34,19 +34,34 @@ const fadeIn = keyframes({
   to: { opacity: 1, transform: "translateY(0)" },
 });
 
+const slideInFromRight = keyframes({
+  '0%': { transform: 'translateX(100px)', opacity: 0 },
+  '100%': { transform: 'translateX(0)', opacity: 1 }
+});
+
 const useStyles = createStyles((theme) => ({
   hero: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    //padding: `${theme.spacing.xl * 4}px 0`,
+    position: 'relative',
+    paddingTop: theme.spacing.xl * 5,
+    paddingBottom: theme.spacing.xl * 3,
     minHeight: "calc(80vh - 100px)",
+    display: 'flex',
+    alignItems: 'center',
   },
-
+  
+  heroContent: {
+    animation: `${fadeIn} 1s ease-out`,
+  },
+  
+  heroImage: {
+    animation: `${slideInFromRight} 1s ease-out forwards`,
+    opacity: 0,
+    transform: 'translateX(100px)',
+  },
+  
   heroCard: {
     textAlign: "center",
     animation: `${fadeIn} 1s ease-out`,
-    //padding: "2rem",
     maxWidth: 700,
   },
 
@@ -91,90 +106,72 @@ function LandingPage() {
   return (
     <Container size="xl" px="xs" mt={40} mb={40}> {/* Add marginTop to match header height */}
       {/* Hero Section */}
-      <Box className={classes.hero}>
-        <Card
-          shadow="sm"
-          p="2rem" // increased for breathing room
-          radius="md"
-          withBorder
-          className={classes.heroCard}
-        >
-          <Stack align="center" spacing="1.5rem">
-            <Stack spacing="1rem" align="center" maw="40rem">
-              <Title
-                order={1}
-                size="3rem" // 48px
-                lh="3.5rem" // 56px (for better balance)
-                fw={900}
-                ta="center"
-                sx={(theme) => ({
-                  color:
-                    theme.colorScheme === "dark" ? theme.white : theme.black,
-                })}
+      <Grid gutter={50} className={classes.hero}>
+        <Grid.Col md={6}>
+          <div className={classes.heroContent}>
+            <Title
+              order={1}
+              size="3.3rem"
+              weight={900}
+              sx={(theme) => ({ 
+                color: theme.colorScheme === 'dark' ? theme.white : theme.black,
+                lineHeight: 1.2,
+              })}
+              mb="md"
+            >
+              {t('hero.titlePart1')}{' '}
+              <Text 
+                component="span" 
+                variant="gradient" 
+                gradient={{ from: 'cyan', to: 'teal', deg: 45 }}
               >
-                {t("hero.titlePart1")}{" "}
-                <Text
-                  component="span"
-                  variant="gradient"
-                  gradient={{ from: "cyan", to: "teal", deg: 45 }}
-                >
-                  {t("hero.titlePart2")}
-                </Text>
-              </Title>
-
-              <Text
-                size="1.125rem" // 18px
-                lh="1.875rem" // 30px
-                c="gray.5"
-                ta="center"
-                maw="37.5rem" // 600px
-              >
-                {t("hero.subtitle")}
+                {t('hero.titlePart2')}
               </Text>
-            </Stack>
-
-            <Group mt="1.5rem">
+            </Title>
+            
+            <Text size="xl" color="dimmed" mb={30}>
+              {t('hero.subtitle')}
+            </Text>
+            
+            <Group>
               {!isAuthenticated ? (
-                <Button
-                  component={Link}
-                  to="/register"
-                  size="lg"
+                <Button 
+                  component={Link} 
+                  to="/register" 
+                  size="lg" 
                   radius="md"
                   variant="gradient"
-                  gradient={{ from: "cyan", to: "teal", deg: 45 }}
-                  px="2rem"
-                  py="0.75rem"
-                  fw={600}
-                  fz="1rem"
-                  sx={{
-                    color: 'white',
-                    '&:hover': {
-                      color: 'white',
-                    },
-                  }}
+                  gradient={{ from: 'cyan', to: 'teal' }}
                 >
-                  {t("hero.getStarted")}
+                  {t('hero.getStarted')}
                 </Button>
               ) : (
-                <Button
-                  onClick={() => navigate("/dashboard")}
-                  size="lg"
+                <Button 
+                  onClick={() => navigate('/dashboard')} 
+                  size="lg" 
                   radius="md"
                   variant="gradient"
-                  gradient={{ from: "cyan", to: "teal", deg: 45 }}
-                  px="2rem"
-                  py="0.75rem"
-                  fw={600}
-                  fz="1rem"
+                  gradient={{ from: 'cyan', to: 'teal' }}
                   rightIcon={<IconArrowRight size={18} />}
                 >
-                  {t("hero.backToDashboard")}
+                  {t('hero.backToDashboard')}
                 </Button>
               )}
             </Group>
-          </Stack>
-        </Card>
-      </Box>
+          </div>
+        </Grid.Col>
+        
+        <Grid.Col md={6}>
+          <Box className={classes.heroImage}>
+            <Image
+              radius="md"
+              src="https://onlineschool.co.za/wp-content/uploads/2020/04/online-learing-image.jpg"
+              alt={t('hero.imageAlt')}
+              caption={t('hero.imageCaption')}
+            />
+          </Box>
+        </Grid.Col>
+      </Grid>
       {/* Features Section */}
       <Box className={`${classes.section} ${classes.gradient}`} mb={50}>
         <Title order={2} align="center" mb="xl" fz="2.25rem">
