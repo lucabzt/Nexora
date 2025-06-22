@@ -16,13 +16,16 @@ export const useToolbar = () => {
 export function ToolbarProvider({ children }) {
   const [toolbarWidth, setToolbarWidth] = useState(500); // Default expanded width for desktop
   const [toolbarOpen, setToolbarOpen] = useState(false); // Default closed for better mobile UX
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Provide both the toolbar state and update functions
   const value = {
     toolbarWidth,
     setToolbarWidth,
     toolbarOpen,
-    setToolbarOpen
+    setToolbarOpen,
+    isFullscreen,
+    setIsFullscreen,
   };
 
   

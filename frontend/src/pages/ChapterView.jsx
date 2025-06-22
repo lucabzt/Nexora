@@ -16,6 +16,7 @@ import {
   Paper,
   Badge,
   ActionIcon,
+  
 } from '@mantine/core';
 import { IconDownload } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
@@ -390,9 +391,7 @@ function ChapterView() {
     }
   };
 
-  const sidebarWidth = isMobile
-    ? (toolbarOpen ? window.innerWidth : 0)
-    : (toolbarOpen ? toolbarWidth : 0);
+
 
   if (loading) {
     return (
@@ -421,181 +420,153 @@ function ChapterView() {
   }
 
   return (
-    <div
-      style={{
-        marginRight: sidebarWidth,
-        transition: 'margin-right 0.3s ease',
-        minHeight: '100vh',
-      }}
-    >
-      {/* Add CSS for blinking animation */}
-      <style>
-        {`
-          @keyframes tabBlink {
-            0%, 50% { 
-              background-color: #339af0; 
-              color: white;
-              transform: scale(1.05);
-            }
-            25%, 75% { 
-              background-color: #74c0fc; 
-              color: white;
-              transform: scale(1.02);
-            }
-          }
-          
-          .quiz-tab-blinking {
-            animation: tabBlink 1s ease-in-out 4;
-            border-radius: 4px;
-          }
-        `}
-      </style>
-
-      <Container size="xl" py="xl">
-        {chapter && (
-          <>
-            <Group position="apart" mb="xl">
-              <Box>
-                <Title order={1} mb="xs">
-                  {chapter.caption || 'Chapter'}
-                </Title>
+    <>
+      <div style={{
+        paddingRight: isMobile ? 0 : (toolbarOpen ? `${toolbarWidth}px` : '0'),
+        transition: 'padding-right 0.3s ease-in-out',
+        height: '100%',
+        overflowY: 'auto'
+      }}>
+        <Container my="md" fluid>
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+              <Loader size="lg" />
+            </div>
+          ) : error ? (
+            <Alert title="Error" color="red" icon={<IconAlertCircle />}>
+              {error}
+            </Alert>
+          ) : (
+            <>
+              <Group position="apart" align="flex-start">
+                <div>
+                  <Title order={2}>{chapter.caption}</Title>
+                  <Text color="dimmed">{chapter.description}</Text>
+                </div>
                 <Group>
-                  {chapter.estimated_minutes && (
-                    <Text color="dimmed" size="sm">
-                      {t('estimatedTime', { minutes: chapter.estimated_minutes })}
-                    </Text>
-                  )}
-                  {chapter.is_completed && (
-                    <Badge color="green" variant="filled">
-                      {t('badge.completed')}
-                    </Badge>
-                  )}
-                </Group>
-              </Box>
-              <ActionIcon
-                size="lg"
-                variant="default"
-                onClick={handleDownloadPDF}
-                loading={downloadingPDF}
-                disabled={downloadingPDF || activeTab !== 'content'}
-                title={t('buttons.downloadPDF', 'Download PDF')}
-              >
-                <IconDownload size={20} />
-              </ActionIcon>
-            </Group>
-
-            <Tabs value={activeTab} onTabChange={setActiveTab} mb="xl">
-              <Tabs.List>
-                <Tabs.Tab value="content" icon={<IconBookmark size={14} />}>{t('tabs.content')}</Tabs.Tab>
-                {images.length > 0 && (
-                  <Tabs.Tab value="images" icon={<IconPhoto size={14} />}>{t('tabs.images')}</Tabs.Tab>
-                )}
-                {files.length > 0 && (
-                  <Tabs.Tab value="files" icon={<IconFileText size={14} />}>{t('tabs.files')}</Tabs.Tab>
-                )}
-                {hasQuestions && (
-                  <Tabs.Tab 
-                    value="quiz" 
-                    icon={<IconQuestionMark size={14} />}
-                    className={isBlinking ? 'quiz-tab-blinking' : ''}
-                  >
-                    {questionCount > 0 ? t('tabs.quiz', { count: questionCount }) : 'Quiz'}
-                  </Tabs.Tab>
-                )}
-              </Tabs.List>
-
-              <Tabs.Panel value="content" pt="xs">
-                <FullscreenContentWrapper>
-                  <Paper shadow="xs" p="md" withBorder ref={contentRef}>
-                    <div className="markdown-content">
-                      <AiCodeWrapper>{chapter.content}</AiCodeWrapper>
-                    </div>
-                  </Paper>
-                </FullscreenContentWrapper>
-              </Tabs.Panel>
-
-              <Tabs.Panel value="images" pt="xs">
-                <Paper shadow="xs" p="md" withBorder>
-                  <MediaGallery
-                    images={images}
-                    onDelete={handleDeleteImage}
-                    deletingItem={deletingItem}
-                    isMobile={isMobile}
-                  />
-                </Paper>
-              </Tabs.Panel>
-
-              <Tabs.Panel value="files" pt="xs">
-                <Paper shadow="xs" p="md" withBorder>
-                  <FileList
-                    files={files}
-                    onDelete={handleDeleteFile}
-                    deletingItem={deletingItem}
-                    mediaLoading={mediaLoading}
-                  />
-                </Paper>
-              </Tabs.Panel>
-
-              <Tabs.Panel value="quiz" pt="xs">
-                <Quiz
-                  key={quizKey} // Force re-mount when questions become available
-                  courseId={courseId}
-                  chapterId={chapterId}
-                  onQuestionCountChange={(count) => {
-                    setQuestionCount(count);
-                    setHasQuestions(count > 0);
-                  }}
-                />
-              </Tabs.Panel>
-            </Tabs>
-
-            <Group position="apart" mt="md">
-              <Button
-                variant="outline"
-                onClick={() => navigate(`/dashboard/courses/${courseId}`)}
-              >
-                {t('buttons.backToCourse', 'Back to Course')}
-              </Button>
-              <Group spacing="sm">
-                {!chapter?.is_completed ? (
                   <Button
-                    color="green"
-                    onClick={markChapterComplete}
-                    loading={markingComplete}
+                    leftIcon={<IconDownload size={16} />}
+                    onClick={handleDownloadPDF}
+                    loading={downloadingPDF}
+                    variant="outline"
                   >
-                    {t('buttons.markComplete', 'Mark as Complete')}
+                    {t('buttons.downloadPDF', 'Download as PDF')}
                   </Button>
-                ) : hasQuestions ? (
-                  activeTab === 'quiz' ? (
+                </Group>
+              </Group>
+
+              <Tabs value={activeTab} onTabChange={(value) => { setActiveTab(value); navigate(`#${value}`); }} mt="md">
+                <Tabs.List>
+                  <Tabs.Tab value="content" icon={<IconBookmark size={14} />}>{t('tabs.content', 'Content')}</Tabs.Tab>
+                  {images.length > 0 && (
+                    <Tabs.Tab value="images" icon={<IconPhoto size={14} />}>{t('tabs.images', 'Images')}</Tabs.Tab>
+                  )}
+                  {files.length > 0 && (
+                    <Tabs.Tab value="files" icon={<IconFileText size={14} />}>{t('tabs.files', 'Files')}</Tabs.Tab>
+                  )}
+                  {hasQuestions && (
+                    <Tabs.Tab 
+                      value="quiz" 
+                      icon={<IconQuestionMark size={14} />}
+                      className={isBlinking ? 'quiz-tab-blinking' : ''}
+                    >
+                      {questionCount > 0 ? t('tabs.quiz', { count: questionCount }) : 'Quiz'}
+                    </Tabs.Tab>
+                  )}
+                </Tabs.List>
+
+                <Tabs.Panel value="content" pt="xs">
+                  <FullscreenContentWrapper>
+                    <Paper shadow="xs" p="md" withBorder ref={contentRef}>
+                      <div className="markdown-content">
+                        <AiCodeWrapper>{chapter.content}</AiCodeWrapper>
+                      </div>
+                    </Paper>
+                  </FullscreenContentWrapper>
+                </Tabs.Panel>
+
+                <Tabs.Panel value="images" pt="xs">
+                  <Paper shadow="xs" p="md" withBorder>
+                    <MediaGallery
+                      images={images}
+                      onDelete={handleDeleteImage}
+                      deletingItem={deletingItem}
+                      isMobile={isMobile}
+                    />
+                  </Paper>
+                </Tabs.Panel>
+
+                <Tabs.Panel value="files" pt="xs">
+                  <Paper shadow="xs" p="md" withBorder>
+                    <FileList
+                      files={files}
+                      onDelete={handleDeleteFile}
+                      deletingItem={deletingItem}
+                      mediaLoading={mediaLoading}
+                    />
+                  </Paper>
+                </Tabs.Panel>
+
+                <Tabs.Panel value="quiz" pt="xs">
+                  <Quiz
+                    key={quizKey} // Force re-mount when questions become available
+                    courseId={courseId}
+                    chapterId={chapterId}
+                    onQuestionCountChange={(count) => {
+                      setQuestionCount(count);
+                      setHasQuestions(count > 0);
+                    }}
+                  />
+                </Tabs.Panel>
+              </Tabs>
+
+              <Group position="apart" mt="md">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate(`/dashboard/courses/${courseId}`)}
+                >
+                  {t('buttons.backToCourse', 'Back to Course')}
+                </Button>
+                <Group spacing="sm">
+                  {!chapter?.is_completed ? (
+                    <Button
+                      color="green"
+                      onClick={markChapterComplete}
+                      loading={markingComplete}
+                    >
+                      {t('buttons.markComplete', 'Mark as Complete')}
+                    </Button>
+                  ) : hasQuestions ? (
+                    activeTab === 'quiz' ? (
+                      !isLastChapter ? (
+                        <Button onClick={handleNextChapter}>
+                          {t('buttons.nextChapter', 'Continue with Next Chapter')}
+                        </Button>
+                      ) : (
+                        <Text weight={500} color="teal">{t('messages.courseComplete', 'Well done, you mastered this course!')}</Text>
+                      )
+                    ) : (
+                      <Button onClick={() => { setActiveTab('quiz'); navigate(`#quiz`); }}>
+                        {t('buttons.testYourself', 'Test Yourself')}
+                      </Button>
+                    )
+                  ) : (
                     !isLastChapter ? (
                       <Button onClick={handleNextChapter}>
-                        {t('buttons.nextChapter', 'Continue with Next Chapter')}
+                        {t('buttons.nextChapter', 'Next Chapter')}
                       </Button>
                     ) : (
                       <Text weight={500} color="teal">{t('messages.courseComplete', 'Well done, you mastered this course!')}</Text>
                     )
-                  ) : (
-                    <Button onClick={() => { setActiveTab('quiz'); navigate(`#quiz`); }}>
-                      {t('buttons.testYourself', 'Test Yourself')}
-                    </Button>
-                  )
-                ) : (
-                  !isLastChapter ? (
-                    <Button onClick={handleNextChapter}>
-                      {t('buttons.nextChapter', 'Next Chapter')}
-                    </Button>
-                  ) : (
-                    <Text weight={500} color="teal">{t('messages.courseComplete', 'Well done, you mastered this course!')}</Text>
-                  )
-                )}
+                  )}
+                </Group>
               </Group>
-            </Group>
-          </>
-        )}
-      </Container>
-
+            </>
+          )}
+        </Container>
+      </div>
       <ToolbarContainer courseId={courseId} chapterId={chapterId} />
-    </div>
+    </>
   );
 }
 
