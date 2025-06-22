@@ -9,11 +9,10 @@ from sqlalchemy.orm import Session
 
 from ...db.database import get_db
 from ...db.models.db_user import User
-from ...services.chat_service import ChatService
+from ...services.chat_service_instance import get_chat_service
 from ...utils.auth import get_current_active_user
 from ..schemas.chat import ChatRequest, ChatResponse
 from ...db.crud import chapters_crud
-from ...main import get_chat_service
 
 logger = logging.getLogger(__name__)
 

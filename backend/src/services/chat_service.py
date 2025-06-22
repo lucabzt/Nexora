@@ -42,10 +42,10 @@ class ChatService:
             pool_timeout=30
         )
         
-        # Initialize the session service with the configured engine
+        # Initialize the session service with just the database URL
+        # The ADK will create its own engine internally
         self.session_service = DatabaseSessionService(
-            db_url=SQLALCHEMY_DATABASE_URL,
-            engine=self._engine
+            db_url=SQLALCHEMY_DATABASE_URL
         )
         
         self.chat_agent = ChatAgent("Nexora", self.session_service)

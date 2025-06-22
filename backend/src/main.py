@@ -19,10 +19,12 @@ from .api.schemas import user as user_schema
 from .db.database import engine, SessionLocal
 from .db.models import db_user as user_model
 from .utils import auth
-from .services.chat_service import ChatService
+from .services.chat_service_instance import get_chat_service
 
 from .core.routines import update_stuck_courses
 from .config.settings import SESSION_SECRET_KEY
+from .core.lifespan import lifespan
+
 
 
 # Create database tables
@@ -35,15 +37,7 @@ app = FastAPI(
     lifespan=lifespan  # Use the lifespan context manager
 )
 
-# Global chat service instance
-chat_service = None
-
-def get_chat_service() -> ChatService:
-    """Dependency to get the chat service instance."""
-    global chat_service
-    if chat_service is None:
-        chat_service = ChatService()
-    return chat_service
+# Chat service is now managed in services.chat_service_instance
 
 app.add_middleware(
     SessionMiddleware,
@@ -83,68 +77,7 @@ app.include_router(questions.router)
 app.include_router(chat.router)
 
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from contextlib import asynccontextmanager
-scheduler = AsyncIOScheduler()
 
-import logging
-
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Manage application lifecycle including startup and shutdown events."""
-    global chat_service
-    
-    # Startup
-    logging.info("Starting application...")
-    
-    # Initialize scheduler
-    scheduler.add_job(update_stuck_courses, 'interval', hours=1)
-    scheduler.start()
-    logging.info("Scheduler started.")
-    
-    # Initialize chat service
-    try:
-        chat_service = ChatService()
-        await chat_service.initialize()
-        logging.info("Chat service initialized.")
-        
-        # Register cleanup on exit
-        def cleanup():
-            """Synchronous cleanup function."""
-            global chat_service
-            if chat_service:
-                loop = asyncio.get_event_loop()
-                if loop.is_running():
-                    loop.create_task(chat_service.close())
-                else:
-                    loop.run_until_complete(chat_service.close())
-                logging.info("Chat service cleaned up.")
-        
-        atexit.register(cleanup)
-        
-        # Yield control to the application
-        yield
-        
-    except Exception as e:
-        logging.error(f"Error during startup: {str(e)}", exc_info=True)
-        raise
-    finally:
-        # Shutdown
-        logging.info("Shutting down application...")
-        
-        # Shutdown scheduler
-        if scheduler.running:
-            scheduler.shutdown()
-            logging.info("Scheduler stopped.")
-        
-        # Clean up chat service
-        if chat_service:
-            await chat_service.close()
-            logging.info("Chat service stopped.")
-        
-        logging.info("Application shutdown complete.")
 
 # The root path "/" is now outside the /api prefix
 @app.get("/")
