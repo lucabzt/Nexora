@@ -1,45 +1,13 @@
 {
   "mainTitle": "Impressum",
-  "companyInfo": {
-    "title": "Firmeninformationen",
-    "name": "Nexora GmbH",
-    "tagline": "Innovative KI-gestützte Lernlösungen",
-    "registration": "Registrierung: HRB 123456 B (Amtsgericht Berlin)",
-    "vatId": "USt-IdNr.: DE123456789"
+  "projectPhase": {
+    "title": "Projektstatus",
+    "info": "Dieses Projekt befindet sich derzeit in der Entwicklungsphase. Alle Angaben sind vorläufig und können sich ändern.",
+    "contact": "Für Anfragen: nexora-ai+markus@obermui.de"
   },
-  "legalRepresentative": {
-    "title": "Gesetzlicher Vertreter",
-    "name": "Markus Beispiel",
-    "role": "Geschäftsführer"
-  },
-  "address": {
-    "title": "Adresse",
-    "street": "Beispielstraße 1",
-    "city": "12345 Beispielstadt",
-    "country": "Deutschland"
-  },
-  "contact": {
-    "title": "Kontakt",
-    "email": "E-Mail: info@nexora.ai",
-    "phone": "Telefon: +49 (0) 30 123 45678"
-  },
-  "onlinePresence": {
-    "title": "Online-Präsenz",
-    "website": "Webseite: www.nexora.ai",
-    "socialMedia": "Soziale Medien: @nexoralearning"
-  },
-  "legalDisclaimer": {
-    "title": "Haftungsausschluss",
-    "externalLinks": "Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich.",
-    "copyright": "Alle Inhalte dieser Webseite sind urheberrechtlich geschützt. Eine Vervielfältigung oder Verwendung ohne ausdrückliche Genehmigung ist nicht gestattet."
-  },
-  "contentResponsibility": {
-    "title": "Inhaltsverantwortung",
-    "details": "Verantwortlich für den Inhalt gemäß § 55 Abs. 2 RStV: Markus Beispiel, Beispielstraße 1, 12345 Beispielstadt"
-  },
-  "dataProtection": {
-    "title": "Datenschutz",
-    "info": "Details zur Verarbeitung Ihrer Daten finden Sie in unserer Datenschutzerklärung."
+  "creativeInfo": {
+    "title": "Ein kreativer Hinweis vom Team",
+    "text": "Nexora entsteht mit Leidenschaft, Kaffee und einer Vision für intelligenteres, spannenderes Lernen. Bleib gespannt auf kommende Updates!"
   },
   "lastUpdated": "Diese Impressumsseite wurde zuletzt aktualisiert: Juni 2025"
 }

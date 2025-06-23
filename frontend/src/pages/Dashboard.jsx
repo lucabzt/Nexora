@@ -133,7 +133,7 @@ function Dashboard() {
         setCourses(coursesData);
         setError(null);
       } catch (error) {
-        setError(t('errors.loadCourses'));
+        setError(t('loadCoursesError'));
         console.error('Error fetching courses:', error);
       } finally {
         setLoading(false);
@@ -169,8 +169,9 @@ function Dashboard() {
     if (course.status === 'CourseStatus.CREATING') return 0;
     
     // For in-progress courses, generate a random progress between 10-90%
-    return Math.floor((String(course.course_id)?.charCodeAt(0) || 0) % 80) + 10;
-  };
+    return (course && course.chapter_count && course.chapter_count > 0) ? (100 * course.completed_chapter_count / course.chapter_count) : 0;
+};
+
 
   return (
     <Container size="lg" py="xl">
