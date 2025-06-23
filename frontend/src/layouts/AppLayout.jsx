@@ -445,22 +445,52 @@ function AppLayout() {
               </ActionIcon>
             </Box>
 
-            {/* Navigation Links */}
-            <Navbar.Section grow mt="xs">
-              {isCoursePage ? (
-                <CourseSidebar opened={opened} setopen={setOpened} />
-              ) : (
-                <Stack spacing="xs">{mainLinksComponents}</Stack>
-              )}
+            {/* Navigation Links - Scrollable Section */}
+            <Navbar.Section 
+              grow 
+              mt="xs"
+              sx={{
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                flex: '1 1 auto',
+                '&::-webkit-scrollbar': {
+                  width: '6px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: 'transparent',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  backgroundColor: dark ? theme.colors.dark[6] : theme.colors.gray[4],
+                  borderRadius: '3px',
+                  '&:hover': {
+                    backgroundColor: dark ? theme.colors.dark[5] : theme.colors.gray[5],
+                  },
+                },
+                paddingRight: '4px',
+                marginRight: '-4px',
+              }}
+            >
+              <Box pb="md">
+                {isCoursePage ? (
+                  <CourseSidebar opened={opened} setopen={setOpened} />
+                ) : (
+                  <Stack spacing="xs">{mainLinksComponents}</Stack>
+                )}
+              </Box>
             </Navbar.Section>
 
-            {/* Profile section at bottom */}
+            {/* Profile section at bottom - Fixed */}
             <Box
               sx={{
                 paddingTop: theme.spacing.md,
                 borderTop: `1px solid ${
                   dark ? theme.colors.dark[5] : theme.colors.gray[2]
                 }`,
+                position: 'sticky',
+                bottom: 0,
+                zIndex: 100,
+                paddingBottom: theme.spacing.sm,
+                marginTop: 'auto',
               }}
             >
               {opened ? (
