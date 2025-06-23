@@ -3,7 +3,6 @@ import vertexai
 from vertexai.preview.vision_models import ImageGenerationModel
 from PIL import Image
 from io import BytesIO
-import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -64,28 +63,3 @@ class VertexImagenAgent:
         except Exception as e:
             print(f"Error generating image: {e}")
             raise
-
-
-if __name__ == '__main__': # Replace with your actual project ID
-    
-    try:
-        agent = VertexImagenAgent()
-        image_blob = agent.run("generate a vector image of a mountain")
-        
-        # Convert the image blob to a PIL Image
-        image = Image.open(BytesIO(image_blob))
-        
-        # Display the image using matplotlib
-        plt.figure(figsize=(10, 10))
-        plt.imshow(np.array(image))
-        plt.axis('off')  # Hide axes
-        plt.show()
-        
-        print(f"Generated image blob of size: {len(image_blob)} bytes")
-        
-    except Exception as e:
-        print(f"Failed to generate image: {e}")
-        print("Make sure you have:")
-        print("1. Set up Google Cloud authentication")
-        print("2. Enabled Vertex AI API")
-        print("3. Set the correct project ID")
