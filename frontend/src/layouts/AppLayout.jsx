@@ -488,7 +488,6 @@ function AppLayout() {
                 }`,
                 position: 'sticky',
                 bottom: 0,
-                backgroundColor: dark ? theme.colors.dark[7] : theme.white,
                 zIndex: 100,
                 paddingBottom: theme.spacing.sm,
                 marginTop: 'auto',
