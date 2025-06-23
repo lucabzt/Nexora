@@ -67,7 +67,9 @@ const ChapterLink = ({ chapter, activeChapter, index, handleChapterClick, handle
           width: '100%',
           marginBottom: theme.spacing.xs,
           minHeight: 48,
-          backgroundColor: chapterId === chapter.id.toString() ? theme.colors.blue[8] : undefined,
+          border: chapterId === chapter.id.toString()
+            ? `2px solid ${theme.colors.green[9]}`
+            : undefined,
         }}
         title={`${index + 1}. ${chapter.caption}`}
       >

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -44,11 +44,29 @@ import {
   IconX,
   IconEdit,
   IconAlertCircle,
-  IconFileText
+  IconFileText,
+  IconSchool
 } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import { toast } from 'react-toastify';
 import { courseService } from '../api/courseService';
+import ReactCountryFlag from 'react-country-flag';
+
+const LanguageSelectItem = forwardRef(({ label, countryCode, ...others }, ref) => (
+  <div ref={ref} {...others}>
+    <Group noWrap>
+      <ReactCountryFlag
+        countryCode={countryCode}
+        svg
+        style={{ width: '1.5em', height: '1.5em' }}
+        title={countryCode}
+      />
+      <Text size="sm">{label}</Text>
+    </Group>
+  </div>
+));
+
+
 
 function CreateCourse() {
   const navigate = useNavigate();
@@ -106,15 +124,15 @@ function CreateCourse() {
   ];
 
   const difficultyOptions = [
-    { value: 'beginner', label: t('form.difficulty.options.beginner') || 'Beginner', description: 'New to this topic' },
-    { value: 'intermediate', label: t('form.difficulty.options.intermediate') || 'Intermediate', description: 'Some knowledge' },
-    { value: 'advanced', label: t('form.difficulty.options.advanced') || 'Advanced', description: 'Experienced learner' },
-    { value: 'university', label: t('form.difficulty.options.university') || 'University', description: 'University level' }
+    { value: 'beginner', label: t('form.difficulty.options.beginner') || 'Beginner', description: 'New to this topic', icon: IconBook },
+    { value: 'intermediate', label: t('form.difficulty.options.intermediate') || 'Intermediate', description: 'Some knowledge', icon: IconBrain },
+    { value: 'advanced', label: t('form.difficulty.options.advanced') || 'Advanced', description: 'Experienced learner', icon: IconSparkles },
+    { value: 'university', label: t('form.difficulty.options.university') || 'University', description: 'University level', icon: IconSchool }
   ];
 
   const languageOptions = [
-    { value: 'en', label: t('form.language.options.english') || 'English' },
-    { value: 'de', label: t('form.language.options.german') || 'Deutsch' }
+    { value: 'en', label: t('form.language.options.english') || 'English', countryCode: 'US' },
+    { value: 'de', label: t('form.language.options.german') || 'Deutsch', countryCode: 'DE' }
   ];
 
   const handleDocumentUpload = async (file) => {
@@ -520,67 +538,77 @@ function CreateCourse() {
             <Box>
               <Text weight={600} mb="md">{t('form.difficulty.label') || 'Difficulty Level'}</Text>
               <SimpleGrid cols={1} spacing="sm">
-                {difficultyOptions.map((option) => (
-                  <Card
-                    key={option.value}
-                    p="md"
-                    withBorder
-                    radius="md"
-                    sx={{
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      backgroundColor: form.values.difficulty === option.value 
-                        ? (theme.colorScheme === 'dark' ? theme.colors.teal[9] : theme.colors.teal[0])
-                        : 'transparent',
-                      borderColor: form.values.difficulty === option.value 
-                        ? theme.colors.teal[6] 
-                        : (theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]),
-                      '&:hover': {
-                        borderColor: theme.colors.teal[6],
-                        transform: 'translateY(-1px)'
-                      }
-                    }}
-                    onClick={() => form.setFieldValue('difficulty', option.value)}
-                  >
-                    <Group position="apart">
-                      <Box>
-                        <Text weight={600} size="sm">{option.label}</Text>
-                        <Text size="xs" color="dimmed">{option.description}</Text>
-                      </Box>
-                      {form.values.difficulty === option.value && (
-                        <ThemeIcon color="teal" variant="filled" radius="xl" size="sm">
-                          <IconCheck size={14} />
-                        </ThemeIcon>
-                      )}
-                    </Group>
-                  </Card>
-                ))}
+                {difficultyOptions.map((option) => {
+                  const Icon = option.icon;
+                  return (
+                    <Card
+                      key={option.value}
+                      p="md"
+                      withBorder
+                      radius="md"
+                      sx={{
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        backgroundColor: form.values.difficulty === option.value 
+                          ? (theme.colorScheme === 'dark' ? theme.colors.teal[9] : theme.colors.teal[0])
+                          : 'transparent',
+                        borderColor: form.values.difficulty === option.value 
+                          ? theme.colors.teal[6] 
+                          : (theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]),
+                        '&:hover': {
+                          borderColor: theme.colors.teal[6],
+                          transform: 'translateY(-1px)'
+                        }
+                      }}
+                      onClick={() => form.setFieldValue('difficulty', option.value)}
+                    >
+                      <Group position="apart">
+                        <Group noWrap>
+                          <ThemeIcon variant="light" size="lg" color={form.values.difficulty === option.value ? 'teal' : 'gray'}>
+                            <Icon size={20} />
+                          </ThemeIcon>
+                          <div>
+                            <Text weight={600} size="sm">{option.label}</Text>
+                            <Text size="xs" color="dimmed">{option.description}</Text>
+                          </div>
+                        </Group>
+                        {form.values.difficulty === option.value && (
+                          <ThemeIcon color="teal" variant="filled" radius="xl" size="sm">
+                            <IconCheck size={14} />
+                          </ThemeIcon>
+                        )}
+                      </Group>
+                    </Card>
+                  );
+                })}
               </SimpleGrid>
             </Box>
 
             <Box>
               <Text weight={600} mb="md">{t('form.language.label') || 'Course Language'}</Text>
-              <Select
-                value={form.values.language}
-                onChange={(value) => form.setFieldValue('language', value)}
-                data={languageOptions}
-                size="md"
-                radius="md"
-                icon={<IconGlobe size={18} />}
-                clearable={false}
-                styles={{
-                  input: {
-                    fontSize: 14,
-                    padding: '10px 14px',
-                    height: 'auto'
-                  }
-                }}
-              />
+              {(() => {
+                const selectedLanguage = languageOptions.find(lang => lang.value === form.values.language);
+
+                return (
+                  <Select
+                    placeholder={t('form.language.placeholder')}
+                    icon={selectedLanguage ? <ReactCountryFlag countryCode={selectedLanguage.countryCode} svg style={{ width: '1.2em', height: '1.2em' }} /> : <IconGlobe size={16} />}
+                    itemComponent={LanguageSelectItem}
+                    data={languageOptions}
+                    {...form.getInputProps('language')}
+                    size="md"
+                  />
+                );
+              })()}
             </Box>
           </Stack>
         );
 
-      case 3:
+      case 3: {
+        const selectedLanguage = languageOptions.find(o => o.value === form.values.language);
+        const selectedDifficulty = difficultyOptions.find(o => o.value === form.values.difficulty);
+        const DifficultyIcon = selectedDifficulty?.icon;
+
         return (
           <Stack spacing="lg">
             <Box ta="center" mb="sm">
@@ -611,7 +639,7 @@ function CreateCourse() {
                     <IconEdit size={16} />
                   </ActionIcon>
                 </Group>
-                <Text sx={{ 
+                <Text sx={{
                   backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.white,
                   padding: 12,
                   borderRadius: 6,
@@ -646,11 +674,13 @@ function CreateCourse() {
                       </ActionIcon>
                     </Group>
                     <Group spacing="xs">
-                      <ThemeIcon color="cyan" variant="light" size="sm">
-                        <IconTarget size={14} />
-                      </ThemeIcon>
+                      {DifficultyIcon ? (
+                        <ThemeIcon color="cyan" variant="light" size="sm">
+                          <DifficultyIcon size={14} />
+                        </ThemeIcon>
+                      ) : <IconTarget size={14} />}
                       <Text weight={600} transform="capitalize">
-                        {difficultyOptions.find(d => d.value === form.values.difficulty)?.label || t('form.review.notSet') || "Not selected"}
+                        {selectedDifficulty?.label || t('form.review.notSet') || "Not selected"}
                       </Text>
                     </Group>
                   </Box>
@@ -658,13 +688,27 @@ function CreateCourse() {
 
                 <Group grow>
                   <Box>
-                    <Text weight={600} color="dimmed" mb="xs">{t('form.language.label') || 'Language'}</Text>
+                    <Group position="apart" mb="xs">
+                      <Text weight={600} color="dimmed">{t('form.language.label') || 'Language'}</Text>
+                      <ActionIcon variant="subtle" onClick={() => setActiveStep(2)}>
+                        <IconEdit size={16} />
+                      </ActionIcon>
+                    </Group>
                     <Group spacing="xs">
-                      <ThemeIcon color="teal" variant="light" size="sm">
-                        <IconGlobe size={14} />
-                      </ThemeIcon>
+                      {selectedLanguage ? (
+                        <ReactCountryFlag
+                          countryCode={selectedLanguage.countryCode}
+                          svg
+                          style={{ width: '1.2em', height: '1.2em', borderRadius: '2px' }}
+                          title={selectedLanguage.countryCode}
+                        />
+                      ) : (
+                        <ThemeIcon color="teal" variant="light" size="sm">
+                          <IconGlobe size={14} />
+                        </ThemeIcon>
+                      )}
                       <Text weight={600}>
-                        {languageOptions.find(l => l.value === form.values.language)?.label || "English"}
+                        {selectedLanguage?.label || "English"}
                       </Text>
                     </Group>
                   </Box>
@@ -693,6 +737,7 @@ function CreateCourse() {
             )}
           </Stack>
         );
+      }
 
       default:
         return null;
