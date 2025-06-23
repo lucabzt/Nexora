@@ -8,8 +8,8 @@ import traceback
 from google.adk.sessions import InMemorySessionService
 from sqlalchemy.orm import Session
 
-from src.services import vector_service
-from src.services.course_content_service import CourseContentService
+from ..services import vector_service
+from ..services.course_content_service import CourseContentService
 
 from .query_service import QueryService
 from .state_service import StateService, CourseState
