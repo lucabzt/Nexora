@@ -28,7 +28,7 @@ def get_chapter_by_course_and_index(db: Session, course_id: int, index: int) -> 
 
 
 def create_chapter(db: Session, course_id: int, index: int, caption: str,
-                   summary: str, content: str, time_minutes: int, image_url: Optional[str] = None) -> Chapter:
+                   summary: str, content: str, time_minutes: int, image_data: Optional[bytes] = None) -> Chapter:
     """Create a new chapter"""
     db_chapter = Chapter(
         course_id=course_id,
@@ -38,7 +38,7 @@ def create_chapter(db: Session, course_id: int, index: int, caption: str,
         content=content,
         time_minutes=time_minutes,
         is_completed=False,
-        image_url=image_url
+        image_data=image_data
     )
     db.add(db_chapter)
     db.commit()

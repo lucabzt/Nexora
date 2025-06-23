@@ -24,6 +24,7 @@ from ..agents.planner_agent import PlannerAgent
 from ..agents.info_agent.agent import InfoAgent
 
 from ..agents.image_agent.agent import ImageAgent
+from ..agents.image_creation_agent.agent import VertexImagenAgent
 
 from ..agents.tester_agent import TesterAgent
 from ..agents.utils import create_text_query
@@ -53,6 +54,7 @@ class AgentService:
         self.tester_agent = TesterAgent(self.app_name, self.session_service)
         self.image_agent = ImageAgent(self.app_name, self.session_service)
         self.grader_agent = GraderAgent(self.app_name, self.session_service)
+        self.imagen_agent = VertexImagenAgent()
 
         # define Rag service
         self.vector_service = vector_service.VectorService()
@@ -216,10 +218,8 @@ class AgentService:
                     content=self.query_service.get_explainer_query(user_id, course_id, idx, request.language, request.difficulty, ragInfos),
                 )
 
-                image_task = self.image_agent.run(
-                    user_id=user_id,
-                    state={},
-                    content=self.query_service.get_explainer_image_query(user_id, course_id, idx)
+                image_task = self.imagen_agent.run(
+                    self.query_service.get_explainer_image_query(user_id, course_id, idx)
                 )
 
                 # Await both tasks to complete in parallel
@@ -239,7 +239,7 @@ class AgentService:
                     summary=summary,
                     content=response_code['explanation'] if 'explanation' in response_code else "() => {<p>Something went wrong</p>}",
                     time_minutes=topic['time'],
-                    image_url=image_response['explanation'],
+                    image_data=image_response,
                 )
 
                 # Get response from tester agent
