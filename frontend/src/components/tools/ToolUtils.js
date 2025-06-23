@@ -25,6 +25,7 @@ export const TOOL_TABS = {
   PLOTTER: 'plotter',
   CHAT: 'chat',
   NOTES: 'notes', // Added Notes tab
+  POMODORO: 'pomodoro',
 };
 
 // Default header styles
