@@ -8,6 +8,9 @@ import traceback
 from google.adk.sessions import InMemorySessionService
 from sqlalchemy.orm import Session
 
+from ..services import vector_service
+from ..services.course_content_service import CourseContentService
+
 from .query_service import QueryService
 from .state_service import StateService, CourseState
 from ..agents.explainer_agent.agent import ExplainerAgent
@@ -30,6 +33,8 @@ from ..api.schemas.course import CourseRequest
 from ..db.models.db_course import Course
 from google.genai import types
 
+from .data_processors.pdf_processor import PDFProcessor  
+
 
 
 class AgentService:
@@ -48,6 +53,9 @@ class AgentService:
         self.tester_agent = TesterAgent(self.app_name, self.session_service)
         self.image_agent = ImageAgent(self.app_name, self.session_service)
         self.grader_agent = GraderAgent(self.app_name, self.session_service)
+
+        # define Rag service
+        self.vector_service = vector_service.VectorService()
 
 
     @staticmethod
@@ -104,7 +112,12 @@ class AgentService:
             print(f"[{task_id}] Retrieved {len(docs)} documents and {len(images)} images.")
 
             #Add Data to ChromaDB for RAG
-            
+            contentService = CourseContentService() 
+            contentService.process_course_documents(
+                course_id=str(course_id),
+                document_ids=request.document_ids,
+                db=db
+            )
 
             # Get a short course title and description from the info_agent
             info_response = await self.info_agent.run(
@@ -186,11 +199,23 @@ class AgentService:
 
             # Process each chapter and stream as it's created
             for idx, topic in enumerate(response_planner["chapters"]):
+                ragInfos = set()
+                queryRes = self.vector_service.search_by_course_id(course_id, topic['caption'])
+                for doc in queryRes['documents']:
+                    for str_inf in doc:
+                        ragInfos.add(str_inf)
+                for content in topic['content']:
+                    queryRes = self.vector_service.search_by_course_id(course_id, content)
+                    for doc in queryRes['documents']:
+                        for str_inf in doc:
+                            ragInfos.add(str_inf)
+                ragInfos = list(set(ragInfos))
+
                 # Schedule image and coding agents to run concurrently as they do not depend on each other
                 coding_task = self.coding_agent.run(
                     user_id=user_id,
                     state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
-                    content=self.query_service.get_explainer_query(user_id, course_id, idx, request.language, request.difficulty),
+                    content=self.query_service.get_explainer_query(user_id, course_id, idx, request.language, request.difficulty, ragInfos),
                 )
 
                 image_task = self.image_agent.run(

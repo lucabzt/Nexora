@@ -1,5 +1,7 @@
 {
   "loadingCourseDetails": "Kursdetails werden geladen...",
+  "courseLoadingTitle": "Lädt...",
+  "courseLoadingDescription": "",
   "errors": {
     "loadFailed": "Kursdetails konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
     "genericTitle": "Fehler!",
@@ -16,7 +18,7 @@
     "progressLabel": "Gesamtfortschritt",
     "currentStatusLabel": "Aktueller Status:",
     "description": "Ihre personalisierte Lernerfahrung wird von unserer KI maßgeschneidert. Dies kann einen Moment dauern.",
-    "chaptersCreatedLabel_one": "{{chaptersCreated}} von gesch. {{estimatedTotal}} Kapitel erstellt",
+    "chaptersCreatedLabel_one": "Kapitel erstellt",
     "chaptersCreatedLabel_other": "{{chaptersCreated}} von gesch. {{estimatedTotal}} Kapiteln erstellt",
     "estimatedTotalLabel": "Geschätzte Gesamtzahl Kapitel",
     "learningTimeLabel": "Gesch. Lernzeit",

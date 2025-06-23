@@ -9,41 +9,31 @@ import {
   Button,
   Text,
   Anchor,
-  Divider, // Import Divider
-  Box, // Import Box for spacing if needed
-  Group, // Import Group for button grouping
+  Stack,
+  Divider,
+  Image,
+  useMantineColorScheme,
+  useMantineTheme,
+  Group
 } from "@mantine/core";
+import { IconSun, IconMoonStars } from "@tabler/icons-react";
 import { useForm } from "@mantine/form";
 import { useAuth } from "../contexts/AuthContext";
-import authService from "../api/authService"; // Import authService
-import {
-  IconBrandGithubFilled,
-  IconBrandGoogleFilled,
-} from "@tabler/icons-react";
+import authService from "../api/authService";
+import { IconBrandGoogleFilled } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 
-import discordGif from "../assets/wired-flat-2566-logo-discord-hover-wink.gif"; // Import local Discord GIF
-
-// Use Discord GIF icon from local asset
-const DiscordIcon = (props) => {
-  const { t } = useTranslation("auth");
-  return (
-    <img
-      src={discordGif}
-      alt={t("discordAltText")}
-      width={32}
-      height={32}
-      style={{ display: "block" }}
-      {...props}
-    />
-  );
-};
 
 function Register() {
   const { t } = useTranslation("auth");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { register } = useAuth();
+  const { colorScheme } = useMantineColorScheme();
+  const theme = useMantineTheme();
+  
+  // Use white logo for dark theme, black for light theme
+  const logoPath = colorScheme === 'dark' ? '/logo_white.png' : '/logo_black.png';
 
   const form = useForm({
     initialValues: {
@@ -108,105 +98,97 @@ function Register() {
     authService.redirectToGoogleOAuth();
   };
 
-  const handleGithubLogin = () => {
-    authService.redirectToGithubOAuth();
-  };
-
-  const handleDiscordLogin = () => {
-    authService.redirectToDiscordOAuth();
-  };
+  // GitHub and Discord login handlers removed from UI but kept in code for future use
 
   return (
-    <Container
-      size="xs"
-      py="md"
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-      }}
-    >
-      {" "}
-      <Title align="center" mb="md">
-        {t("registerTitle")}
-      </Title>
-      <Paper withBorder shadow="md" p="xl" radius="md" mt="lg">
+    <Container size={460} my={40}>
+      <Group position="center" align="center" spacing="xs" mb={20}>
+              <Image src={logoPath} width={80} mb="md" alt="TeachAI Logo" />
+              <Stack spacing="xxs">
+                <Title order={1} size={32} weight={700} align="center">
+                  {t("welcomeBack")}
+                </Title>
+                <Text color="dimmed" size="lg" align="center" mb="xl">
+                  {t("signInToContinue")}
+                </Text>
+              </Stack>
+            </Group>
+
+      <Paper withBorder p={30} radius="md">
+        <Button
+          leftIcon={<IconBrandGoogleFilled size={20} />}
+          variant="default"
+          fullWidth
+          size="md"
+          onClick={handleGoogleLogin}
+          mb="xl"
+          style={{ height: 46 }}
+        >
+          {t("continueWithGoogle")}
+        </Button>
+        
+        <Divider 
+          label={
+            <Text size="sm" color="dimmed">
+              {t("orContinueWithEmail")}
+            </Text>
+          } 
+          labelPosition="center" 
+          my="lg" 
+        />
+        
         <form onSubmit={form.onSubmit(handleSubmit)}>
-          <TextInput
-            label={t("username")}
-            placeholder={t("usernamePlaceholder")}
-            required
-            {...form.getInputProps("username")}
-            mb="md"
-          />
-          <TextInput
-            label={t("email")}
-            placeholder={t("emailPlaceholder", "Your email")}
-            required
-            {...form.getInputProps("email")}
-            mb="md"
-          />
-          <PasswordInput
-            label={t("password")}
-            placeholder={t("passwordPlaceholder")}
-            required
-            {...form.getInputProps("password")}
-            mb="md"
-          />
-          <PasswordInput
-            label={t("confirmPassword")}
-            placeholder={t(
-              "confirmPasswordPlaceholder",
-              "Confirm your password"
-            )}
-            required
-            {...form.getInputProps("confirmPassword")}
-            mb="lg"
-          />
-          <Button
-            fullWidth
-            type="submit"
-            variant="gradient"
-            gradient={{ from: "cyan", to: "teal", deg: 45 }}
-            loading={isLoading}
-          >
-            {t("signUp")}
-          </Button>
-          <Divider label={t("continueWith")} labelPosition="center" my="md" />
-          <Group position="center" spacing="md" mb="lg">
+          <Stack spacing="md">
+            <TextInput
+              label={t("username")}
+              placeholder={t("usernamePlaceholder")}
+              required
+              size="md"
+              {...form.getInputProps("username")}
+            />
+            
+            <TextInput
+              label={t("email")}
+              placeholder={t("emailPlaceholder", "Your email")}
+              required
+              size="md"
+              {...form.getInputProps("email")}
+            />
+            
+            <PasswordInput
+              label={t("password")}
+              placeholder={t("passwordPlaceholder")}
+              required
+              size="md"
+              {...form.getInputProps("password")}
+            />
+            
+            <PasswordInput
+              label={t("confirmPassword")}
+              placeholder={t("confirmPasswordPlaceholder", "Confirm your password")}
+              required
+              size="md"
+              {...form.getInputProps("confirmPassword")}
+            />
+
             <Button
-              variant="outline"
-              onClick={handleGoogleLogin}
-              px="md"
-              style={{ width: 48, height: 48, padding: 0 }}
+              fullWidth
+              type="submit"
+              size="md"
+              loading={isLoading}
+              style={{ height: 46 }}
             >
-              <IconBrandGoogleFilled size={24} />
+              {t("signUp")}
             </Button>
-            <Button
-              variant="outline"
-              onClick={handleGithubLogin}
-              px="md"
-              style={{ width: 48, height: 48, padding: 0 }}
-            >
-              <IconBrandGithubFilled size={24} />
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleDiscordLogin}
-              px="md"
-              style={{ width: 48, height: 48, padding: 0 }}
-            >
-              <DiscordIcon />
-            </Button>
-          </Group>{" "}
-          <Text align="center" mt="md">
-            {t("haveAccount")}{" "}
-            <Anchor component={Link} to="/login">
-              {t("signIn")}
-            </Anchor>
-          </Text>
+          </Stack>
         </form>
+
+        <Text align="center" mt="lg">
+          {t("haveAccount")}{" "}
+          <Anchor component={Link} to="/login" weight={600}>
+            {t("signIn")}
+          </Anchor>
+        </Text>
       </Paper>
     </Container>
   );

@@ -50,7 +50,8 @@
   "status": {
     "inProgress": "In Progress",
     "creating": "Creating...",
-    "completed": "Completed"
+    "completed": "Completed",
+    "finished": "Ready"
   },
   
   "errors": {

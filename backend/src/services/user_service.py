@@ -72,3 +72,4 @@ def delete_user(db: Session, user_id: str, current_user: user_model.User):
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
     return users_crud.delete_user(db, db_user)
+

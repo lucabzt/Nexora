@@ -117,6 +117,7 @@ class User(UserBase):
     profile_image_base64: Optional[str] = None # Added for profile image
     created_at: datetime
     last_login: datetime
+    login_streak: int
 
     class Config:
         from_attributes = True

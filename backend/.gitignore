@@ -176,3 +176,5 @@ cython_debug/
 .pypirc
 app/__pycache__/
 
+# GOOGLE VERTEX AUTH FILE
+dev-poet-*.json

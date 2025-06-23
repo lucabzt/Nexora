@@ -29,7 +29,7 @@ class ChatAgent:
     session_service: DatabaseSessionService 
 
 
-    def __init__(self, app_name: str, session_service):
+    def __init__(self, app_name: str, session_service: DatabaseSessionService):
         # Call the base class constructor
         self.chat_agent = LlmAgent(
             name="chat_agent",
@@ -69,21 +69,21 @@ class ChatAgent:
                 session = await self.session_service.get_session(
                     app_name=self.app_name,
                     user_id=user_id,
-                    session_id=str(chapter_id),
+                    session_id=str(chapter_id)
                 )
+                
                 if not session:
                     session = await self.session_service.create_session(
                         app_name=self.app_name,
                         user_id=user_id,
                         session_id=str(chapter_id),
-                        state=state
+                        state=state or {}
                     )
-                session_id = session.id
-
+                
                 # We iterate through events and yield them as they come in
                 async for event in self.runner.run_async(
                     user_id=user_id,
-                    session_id=session_id,
+                    session_id=session.id,
                     new_message=content,
                     run_config=RunConfig(streaming_mode=StreamingMode.SSE)
                 ):

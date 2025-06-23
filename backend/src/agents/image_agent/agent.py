@@ -44,7 +44,7 @@ class ImageAgent(StandardAgent):
         # Create the image agent
         image_agent = LlmAgent(
             name="image_agent",
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash-lite-preview-06-17",
             description="Agent for searching an image for a course using an external service.",
             instruction=load_instruction_from_file("image_agent/instructions.txt"),
             tools=[unsplash_mcp_toolset],

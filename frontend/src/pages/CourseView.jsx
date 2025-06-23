@@ -350,7 +350,7 @@ function CourseView() {
             <Group position="center" mt="md" spacing="xl">
               <Box sx={{ textAlign: 'center' }}>
                 <Text size="xl" weight={700}>{creationProgressUI.chaptersCreated}</Text>
-                <Text size="xs" color="dimmed">{t('creation.chaptersCreatedLabelCount', { count: creationProgressUI.chaptersCreated })}</Text>
+                <Text size="xs" color="dimmed">{t('creation.chaptersCreatedLabel_one')}</Text>
               </Box>
 
               <Divider orientation="vertical" />
@@ -399,8 +399,10 @@ function CourseView() {
 
                     {course.status === "CourseStatus.CREATING" ? (
                       <Badge size="lg" color="blue" variant="filled" px="md" py="sm">
-                        <IconClock size={16} style={{ marginRight: 6 }} />
-                        {t('creation.statusCreatingCourse')}
+                        <Group spacing="xs" noWrap>
+                          <IconClock size={16} />
+                          {t('creation.statusCreatingCourse')}
+                        </Group>
                       </Badge>
                     ) : (
                       <Badge size="lg" color="teal" variant="filled" px="md" py="sm">
@@ -422,11 +424,11 @@ function CourseView() {
                       WebkitTextFillColor: 'transparent',
                     })}
                   >
-                    {course.title || t('courseLoadingTitle')}
+                    {course.title && course.title != 'None' ? course.title : t('courseLoadingTitle')}
                   </Title>
 
                   <Text size="md" mb="lg" color="dimmed" sx={{ maxWidth: '600px' }}>
-                    {course.description || t('courseLoadingDescription')}
+                    {course.description && course.description != 'None' ? course.description : t('courseLoadingDescription')}
                   </Text>
 
                   <Group position="apart" mb="lg">
