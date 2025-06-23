@@ -2,8 +2,11 @@ import { apiWithCookies } from './baseApi';
 
 export const courseService = {
   // Get all courses for current user
-  getUserCourses: async () =>
-    (await apiWithCookies.get('/courses/')).data,
+  getUserCourses: async () => {
+    const response = await apiWithCookies.get('/courses/');
+    console.log('getUserCourses response:', response.data);
+    return response.data;
+  },
 
   // Get a course by ID
   getCourseById: async (courseId) =>

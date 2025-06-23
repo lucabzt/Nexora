@@ -10,6 +10,9 @@ from ...services.agent_service import AgentService
 from ...utils.auth import get_current_active_user
 from ...db.database import get_db
 from ...db.crud import courses_crud, chapters_crud, users_crud
+from ...services import course_service
+from ...services.course_service import verify_course_ownership
+
 
 #from ...services.notification_service import manager as ws_manager
 from ..schemas.course import (
@@ -28,22 +31,7 @@ router = APIRouter(
 )
 agent_service = AgentService()
 
-async def _verify_course_ownership(course_id: int, user_id: str, db: Session) -> Course:
-    """
-    Verify that a course belongs to the current user.
-    Returns the course if valid, raises HTTPException if not found or unauthorized.
-    """
-    course = (db.query(Course)
-              .filter(Course.id == course_id, Course.user_id == user_id)
-              .first())
-    
-    if not course:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Course not found or access denied"
-        )
-    
-    return course
+
 
 
 @router.post("/create")
@@ -66,6 +54,7 @@ async def create_course_request(
         language=course_request.language,
         difficulty=course_request.difficulty,
         status=CourseStatus.CREATING  # Set initial status to CREATING
+
     )
     if not course:
         raise HTTPException(
@@ -91,6 +80,7 @@ async def create_course_request(
         course_id=int(course.id),
         total_time_hours=course_request.time_hours,
         status=course.status.value,  # Convert enum to string
+        completed_chapter_count=0,
     )
 
 
@@ -105,26 +95,7 @@ async def get_user_courses(
     Get all courses belonging to the current user.
     Pagination supported with skip and limit parameters.
     """
-    # Query courses that belong to the current user
-    courses = (db.query(Course)
-              .filter(Course.user_id == current_user.id)
-              .offset(skip)
-              .limit(limit)
-              .all())
-    
-    return [
-        CourseInfo(
-            course_id=int(course.id),
-            total_time_hours=int(course.total_time_hours),
-            status=str(course.status),
-
-            title=str(course.title),
-            description=str(course.description),
-            chapter_count=int(course.chapter_count) if course.chapter_count else None,
-            image_url= str(course.image_url) if course.image_url else None
-
-        ) for course in courses
-    ]
+    return course_service.get_user_courses( db, current_user.id, skip, limit)
 
 
 @router.get("/{course_id}", response_model=CourseInfo)
@@ -137,7 +108,7 @@ async def get_course_by_id(
     Get a specific course by ID.
     Only accessible if the course belongs to the current user.
     """
-    course = await _verify_course_ownership(course_id, str(current_user.id), db)
+    course = await verify_course_ownership(course_id, str(current_user.id), db)
     
     return CourseInfo(
         course_id=int(course.id),
@@ -147,7 +118,8 @@ async def get_course_by_id(
         title=str(course.title),
         description=str(course.description),
         chapter_count=int(course.chapter_count) if course.chapter_count else None,
-        image_url= str(course.image_url) if course.image_url else None
+        image_url= str(course.image_url) if course.image_url else None,
+        completed_chapter_count=course_service.get_completed_chapters_count(db, course.id)
     )
 
 
@@ -162,7 +134,7 @@ async def get_course_chapters(
     Get all chapters for a specific course.
     Only accessible if the course belongs to the current user.
     """
-    course = await _verify_course_ownership(course_id, str(current_user.id), db)
+    course = await verify_course_ownership(course_id, str(current_user.id), db)
    
     chapters = course.chapters
 
@@ -195,18 +167,10 @@ async def get_chapter_by_id(
     Only accessible if the course belongs to the current user.
     """
     # First verify course ownership
-    course = await _verify_course_ownership(course_id, str(current_user.id), db)
+    course = await verify_course_ownership(course_id, str(current_user.id), db)
     
     # Find the specific chapter
-    chapter = (db.query(Chapter)
-              .filter(Chapter.id == chapter_id, Chapter.course_id == course_id)
-              .first())
-    
-    if not chapter:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Chapter not found in this course"
-        )
+    chapter = course_service.get_chapter_by_id(course_id, chapter_id, db)
     
     # Build chapter response
     return ChapterSchema(
@@ -233,18 +197,10 @@ async def mark_chapter_complete(
     Only accessible if the course belongs to the current user.
     """
     # First verify course ownership
-    course = await _verify_course_ownership(course_id, current_user.id, db)
+    course = await verify_course_ownership(course_id, current_user.id, db)
     
     # Find the specific chapter
-    chapter = (db.query(Chapter)
-              .filter(Chapter.id == chapter_id, Chapter.course_id == course_id)
-              .first())
-    
-    if not chapter:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Chapter not found in this course"
-        )
+    chapter = course_service.get_chapter_by_id(course_id, chapter_id, db)
     
     # Mark as completed
     chapter.is_completed = True
@@ -271,7 +227,7 @@ async def update_course_details(
     """
     Update a course's title and description.
     """
-    course = await _verify_course_ownership(course_id, str(current_user.id), db)
+    course = await verify_course_ownership(course_id, str(current_user.id), db)
 
     update_data = {}
     if title:
@@ -288,7 +244,8 @@ async def update_course_details(
         title=str(updated_course.title),
         description=str(updated_course.description),
         chapter_count=int(updated_course.chapter_count) if updated_course.chapter_count else None,
-        image_url=str(updated_course.image_url) if updated_course.image_url else None
+        image_url=str(updated_course.image_url) if updated_course.image_url else None,
+        completed_chapter_count=course_service.get_completed_chapters_count(db, course_id)
     )
 
 
@@ -303,7 +260,7 @@ async def delete_course(
     Only accessible if the course belongs to the current user.
     """
     # Verify course ownership
-    course = await _verify_course_ownership(course_id, current_user.id, db)
+    course = await verify_course_ownership(course_id, current_user.id, db)
 
     # Delete the course (cascades to chapters)
     success = courses_crud.delete_course(db, course_id)
@@ -339,19 +296,8 @@ async def update_chapter(
     Only accessible if the course belongs to the current user.
     """
     # First verify course ownership
-    _ = await _verify_course_ownership(course_id, str(current_user.id), db)
+    _ = await verify_course_ownership(course_id, str(current_user.id), db)
     
-    # Find the specific chapter
-    chapter = (db.query(Chapter)
-               .filter(Chapter.id == chapter_id, Chapter.course_id == course_id)
-               .first())
-
-    if not chapter:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Chapter not found in this course"
-        )
-
     # Build update data
     update_data = {}
     if caption is not None:
@@ -405,18 +351,10 @@ async def delete_chapter(
     Only accessible if the course belongs to the current user.
     """
     # First verify course ownership
-    course = await _verify_course_ownership(course_id, current_user.id, db)
+    course = await verify_course_ownership(course_id, current_user.id, db)
 
     # Find the specific chapter
-    chapter = (db.query(Chapter)
-               .filter(Chapter.id == chapter_id, Chapter.course_id == course_id)
-               .first())
-
-    if not chapter:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Chapter not found in this course"
-        )
+    chapter = course_service.get_chapter_by_id(course_id, chapter_id, db)
 
     chapter_caption = chapter.caption
 
@@ -448,12 +386,10 @@ async def mark_chapter_incomplete(
     Only accessible if the course belongs to the current user.
     """
     # First verify course ownership
-    course = await _verify_course_ownership(course_id, current_user.id, db)
+    course = await verify_course_ownership(course_id, current_user.id, db)
 
     # Find the specific chapter
-    chapter = (db.query(Chapter)
-               .filter(Chapter.id == chapter_id, Chapter.course_id == course_id)
-               .first())
+    chapter = course_service.get_chapter_by_id(course_id, chapter_id, db)
 
     if not chapter:
         raise HTTPException(

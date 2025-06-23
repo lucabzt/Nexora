@@ -52,6 +52,7 @@ Please only include content about the chapter that is assigned to you in the fol
             description="Agent for creating engaging visual explanations using react",
             global_instruction=lambda _: full_instructions,
             instruction=dynamic_instructions,
+            
         )
 
         # Assign attributes

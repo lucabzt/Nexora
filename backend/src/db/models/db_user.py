@@ -18,6 +18,6 @@ class User(Base):
     profile_image_base64 = Column(LONGTEXT, nullable=True) # New field for profile image
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=True)
     last_login = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=True) # Will be updated manually on login
-
-
     courses = relationship("Course", back_populates="user", cascade="all, delete-orphan")
+    login_streak = Column(Integer, default=0)
+    

@@ -1,7 +1,14 @@
 
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from ..models.db_course import Course, CourseStatus
+from ..models.db_course import Course, CourseStatus, Chapter
+from typing import List
+from ..models.db_course import Course, Chapter
+from sqlalchemy.orm import Session
+from sqlalchemy.sql import select, func as sql_func
+from ...api.schemas.course import CourseInfo
+
+
 
 ############### COURSES
 def get_course_by_id(db: Session, course_id: int) -> Optional[Course]:
@@ -17,6 +24,10 @@ def get_course_by_session_id(db: Session, session_id: str) -> Optional[Course]:
 def get_courses_by_user_id(db: Session, user_id: str) -> List[Course]:
     """Get all courses for a specific user"""
     return db.query(Course).filter(Course.user_id == user_id).all()
+
+def get_courses_by_course_id_user_id(db: Session, course_id: int, user_id: str) -> Optional[Course]:
+    """Get all courses for a specific user"""
+    return db.query(Course).filter(Course.user_id == user_id, Course.id == course_id).first()
 
 
 def get_courses_by_status(db: Session, status: CourseStatus) -> List[Course]:
@@ -79,6 +90,61 @@ def get_all_course_ids(db: Session) -> List[int]:
     """Get all course IDs"""
     return [course[0] for course in db.query(Course.id).all()]
 
+
+
+def get_courses_infos(db: Session, user_id: str, skip: int = 0, limit: int = 200) -> List[CourseInfo]:
+    """Get course info by user ID with completed chapter count
+    
+    Args:
+        db: Database session
+        user_id: ID of the user to get courses for
+        skip: Number of records to skip (for pagination)
+        limit: Maximum number of records to return
+        
+    Returns:
+        List of CourseInfo objects containing course info with completed chapter count
+    """
+    # Subquery to count completed chapters per course
+    completed_chapters_subq = (
+        select(
+            Chapter.course_id,
+            sql_func.count(Chapter.id).label('completed_count')
+        )
+        .where(Chapter.is_completed == True)
+        .group_by(Chapter.course_id)
+        .subquery()
+    )
+    
+    # Main query joining with the subquery
+    courses = (db.query(
+            Course,
+            sql_func.coalesce(completed_chapters_subq.c.completed_count, 0).label('completed_chapters')
+        )
+        .outerjoin(
+            completed_chapters_subq,
+            Course.id == completed_chapters_subq.c.course_id
+        )
+        .filter(Course.user_id == user_id)
+        .offset(skip)
+        .limit(limit)
+        .all())
+    
+    # Convert to list of CourseInfo objects
+    result = []
+    for course, completed_chapters in courses:
+        course_info = CourseInfo(
+            course_id=course.id,
+            total_time_hours=course.total_time_hours,
+            status=course.status.value,  # Convert enum to string
+            title=course.title,
+            description=course.description,
+            chapter_count=course.chapter_count,
+            image_url=course.image_url,
+            completed_chapter_count=completed_chapters
+        )
+        result.append(course_info)
+    
+    return result
 
 def search_courses(db: Session, query: str, user_id: str, limit: int = 10) -> List[Course]:
     """

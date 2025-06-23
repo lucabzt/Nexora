@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     # Define variable
     environment:
-      - WORKERS=4
+      - WORKERS=1
     ports:
       - "8127:8000"
     env_file:
@@ -24,6 +24,8 @@ services:
       - CHROMA_SERVER_HOST=0.0.0.0
       - CHROMA_SERVER_HTTP_PORT=8000
       - PERSIST_DIRECTORY=/chroma/chroma
+      - CHROMA_SERVER_ALLOW_RESET=true
+      - CHROMA_SERVER_CORS_ALLOW_ORIGINS=["*"] 
     volumes:
       - chroma-data:/chroma/chroma
     restart: always
