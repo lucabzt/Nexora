@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 import {MainLink} from "../layouts/AppLayout.jsx";
 import {useMediaQuery} from "@mantine/hooks";
 
-const ChapterLink = ({ chapter, activeChapter, index, handleChapterClick, handleNavigation, chapterId, courseId, opened, currentTab, ...props }) => {
+const ChapterLink = ({ chapter, activeChapter, index, handleChapterClick, handleNavigation, chapterId, courseId, opened, currentTab, isExpanded, ...props }) => {
   const [hasQuestions, setHasQuestions] = useState(false);
   const intervalRef = useRef(null);
   const theme = useMantineTheme();
@@ -57,7 +57,7 @@ const ChapterLink = ({ chapter, activeChapter, index, handleChapterClick, handle
     return (
       <ActionIcon
         key={chapter.id}
-        variant="light"
+        variant={"light"}
         size="xl"
         color={chapter.is_completed ? 'green' : 'gray'}
         onClick={() => handleNavigation(chapter.id, 'content')}
@@ -67,6 +67,7 @@ const ChapterLink = ({ chapter, activeChapter, index, handleChapterClick, handle
           width: '100%',
           marginBottom: theme.spacing.xs,
           minHeight: 48,
+          backgroundColor: chapterId === chapter.id.toString() ? theme.colors.green[0] : undefined,
         }}
         title={`${index + 1}. ${chapter.caption}`}
       >
@@ -77,17 +78,23 @@ const ChapterLink = ({ chapter, activeChapter, index, handleChapterClick, handle
 
   // When expanded, render full navigation structure
   return (
+    <div style={{
+      backgroundColor: chapterId === chapter.id.toString() ? theme.colors.green[0] : undefined,
+    }}>
     <NavLink
       key={chapter.id}
       label={`${index + 1}. ${chapter.caption}`}
-      opened={activeChapter === chapter.id.toString()}
+      opened={isExpanded}
       onClick={() => handleChapterClick(chapter.id.toString())}
+      style={{
+        backgroundColor: chapterId === chapter.id.toString() ? theme.colors.green[0] : undefined,
+      }}
       icon={
         <ThemeIcon variant="light" size="sm" color={chapter.is_completed ? 'green' : 'gray'}>
           {chapter.is_completed ? <IconCircleCheck size={14} /> : <IconCircleDashed size={14} />}
         </ThemeIcon>
       }
-      rightSection={activeChapter === chapter.id.toString() ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
+      rightSection={isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
     >
       <NavLink
         label="Content"
@@ -97,6 +104,13 @@ const ChapterLink = ({ chapter, activeChapter, index, handleChapterClick, handle
           handleNavigation(chapter.id, 'content');
         }}
         active={chapterId === chapter.id.toString() && currentTab === 'content'}
+        styles={{
+          root: {
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.05)', // Replace with your desired color
+            },
+          },
+        }}
       />
       {chapter.file_count > 0 && (
         <NavLink
@@ -107,6 +121,13 @@ const ChapterLink = ({ chapter, activeChapter, index, handleChapterClick, handle
             handleNavigation(chapter.id, 'files');
           }}
           active={chapterId === chapter.id.toString() && currentTab === 'files'}
+          styles={{
+            root: {
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.05)', // Replace with your desired color
+            },
+          },
+          }}
         />
       )}
       {hasQuestions && (
@@ -118,9 +139,17 @@ const ChapterLink = ({ chapter, activeChapter, index, handleChapterClick, handle
             handleNavigation(chapter.id, 'quiz');
           }}
           active={chapterId === chapter.id.toString() && currentTab === 'quiz'}
+          styles={{
+            root: {
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.05)', // Replace with your desired color
+            },
+          },
+          }}
         />
       )}
     </NavLink>
+    </div>
   );
 };
 
@@ -133,7 +162,7 @@ const CourseSidebar = ({opened, setopen}) => {
   const [course, setCourse] = useState(null);
   const [chapters, setChapters] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeChapter, setActiveChapter] = useState(chapterId);
+  const [expandedChapters, setExpandedChapters] = useState(new Set());
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   // Get current tab from URL search params
@@ -145,8 +174,24 @@ const CourseSidebar = ({opened, setopen}) => {
 
   // Update activeChapter when chapterId changes
   useEffect(() => {
-    setActiveChapter(chapterId);
+    // Ensure the active chapter is always expanded
+    if (chapterId && !expandedChapters.has(chapterId)) {
+      setExpandedChapters(prev => new Set([...prev, chapterId]));
+    }
   }, [chapterId]);
+
+  // Toggle chapter expansion
+  const toggleChapter = (chapterId) => {
+    setExpandedChapters(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(chapterId)) {
+        newSet.delete(chapterId);
+      } else {
+        newSet.add(chapterId);
+      }
+      return newSet;
+    });
+  };
 
   // --- Polling and Data Fetching Logic ---
 
@@ -227,7 +272,7 @@ const CourseSidebar = ({opened, setopen}) => {
   // --- Handlers ---
 
   const handleChapterClick = (id) => {
-    setActiveChapter(prev => (prev === id ? null : id));
+    toggleChapter(id);
   };
 
   const handleNavigation = (chapId, tab) => {
@@ -305,16 +350,17 @@ const CourseSidebar = ({opened, setopen}) => {
 
       {chapters.map((chapter, index) => (
         <ChapterLink
+          key={chapter.id}
           chapter={chapter}
-          activeChapter={activeChapter}
           index={index}
+          activeChapter={chapterId}
           handleChapterClick={handleChapterClick}
           handleNavigation={handleNavigation}
           chapterId={chapterId}
           courseId={courseId}
-          currentTab={currentTab}
-          key={chapter.id}
           opened={opened}
+          currentTab={currentTab}
+          isExpanded={expandedChapters.has(chapter.id.toString())}
         />
       ))}
     </Box>

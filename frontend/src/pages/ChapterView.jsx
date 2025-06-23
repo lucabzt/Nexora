@@ -407,9 +407,13 @@ function ChapterView() {
   return (
     <div
       style={{
-        marginRight: sidebarWidth,
+        marginRight: toolbarOpen ? `${toolbarWidth}px` : 0,
         transition: 'margin-right 0.3s ease',
         minHeight: '100vh',
+        width: toolbarOpen ? `calc(100% - ${toolbarWidth}px)` : '100%',
+        maxWidth: '100%',
+        marginLeft: 0,
+        padding: 0,
       }}
     >
       {/* Add CSS for blinking animation */}
@@ -435,7 +439,15 @@ function ChapterView() {
         `}
       </style>
 
-      <Container size="xl" py="xl">
+      <Container 
+        size="xl" 
+        py="xl"
+        style={{
+          maxWidth: '100%',
+          width: '100%',
+          padding: '0 16px',
+        }}
+      >
         {chapter && (
           <>
             <Group position="apart" mb="xl">
@@ -499,18 +511,18 @@ function ChapterView() {
                 )}
               </Tabs.List>
 
-              <Tabs.Panel value="content" pt="xs">
+              <Tabs.Panel value="content" pt="xs" style={{ width: '100%' }}>
                 <FullscreenContentWrapper>
-                  <Paper shadow="xs" p="md" withBorder ref={contentRef}>
-                    <div className="markdown-content">
+                  <Paper shadow="xs" p="md" withBorder ref={contentRef} style={{ width: '100%' }}>
+                    <div className="markdown-content" style={{ width: '100%' }}>
                       <AiCodeWrapper>{chapter.content}</AiCodeWrapper>
                     </div>
                   </Paper>
                 </FullscreenContentWrapper>
               </Tabs.Panel>
 
-              <Tabs.Panel value="images" pt="xs">
-                <Paper shadow="xs" p="md" withBorder>
+              <Tabs.Panel value="images" pt="xs" style={{ width: '100%' }}>
+                <Paper shadow="xs" p="md" withBorder style={{ width: '100%' }}>
                   <MediaGallery
                     images={images}
                     onDelete={handleDeleteImage}
@@ -520,8 +532,8 @@ function ChapterView() {
                 </Paper>
               </Tabs.Panel>
 
-              <Tabs.Panel value="files" pt="xs">
-                <Paper shadow="xs" p="md" withBorder>
+              <Tabs.Panel value="files" pt="xs" style={{ width: '100%' }}>
+                <Paper shadow="xs" p="md" withBorder style={{ width: '100%' }}>
                   <FileList
                     files={files}
                     onDelete={handleDeleteFile}
@@ -531,15 +543,16 @@ function ChapterView() {
                 </Paper>
               </Tabs.Panel>
 
-              <Tabs.Panel value="quiz" pt="xs">
+              <Tabs.Panel value="quiz" pt="xs" style={{ width: '100%' }}>
                 <Quiz
-                  key={quizKey} // Force re-mount when questions become available
+                  key={quizKey}
                   courseId={courseId}
                   chapterId={chapterId}
                   onQuestionCountChange={(count) => {
                     setQuestionCount(count);
                     setHasQuestions(count > 0);
                   }}
+                  style={{ width: '100%' }}
                 />
               </Tabs.Panel>
             </Tabs>
