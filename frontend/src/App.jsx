@@ -30,6 +30,7 @@ import Impressum from './pages/Impressum';
 import About from './pages/About';
 import NotFoundPage from './pages/NotFoundPage'; // Import the NotFoundPage component
 import AdminView from './pages/AdminView'; // Import AdminView component
+import CourseLayout from './layouts/CourseLayout'; // Import CourseLayout
 
 function App() {
   const [colorScheme, setColorScheme] = useState(() => {
@@ -82,13 +83,17 @@ function App() {
                 </Route>
                   {/* Protected routes now based at /dashboard */}
                 <Route element={<ProtectedRoute />}>
-                  <Route path="/dashboard" element={<AppLayout />}> {/* Base path for dashboard and other protected routes */}
-                    <Route index element={<Dashboard />} /> {/* This will be /dashboard */}
-                    <Route path="create-course" element={<CreateCourse />} /> {/* /dashboard/create-course */}
-                    <Route path="courses/:courseId" element={<CourseView />} /> {/* /dashboard/courses/:courseId */}
-                    <Route path="courses/:courseId/chapters/:chapterId" element={<ChapterView />} /> {/* /dashboard/courses/:courseId/chapters/:chapterId */}
-                    <Route path="settings" element={<SettingsPage />} /> {/* /dashboard/settings */}
-                    <Route path="statistics" element={<StatisticsPage />} /> {/* /dashboard/statistics */}
+                  <Route path="/dashboard" element={<AppLayout />}> {/* Routes with the main AppLayout */}
+                    <Route index element={<Dashboard />} />
+                    <Route path="create-course" element={<CreateCourse />} />
+                    <Route path="settings" element={<SettingsPage />} />
+                    <Route path="statistics" element={<StatisticsPage />} />
+                  </Route>
+
+                  {/* Routes with the dedicated CourseLayout */}
+                  <Route path="/dashboard/courses/:courseId" element={<CourseLayout />}>
+                    <Route index element={<CourseView />} />
+                    <Route path="chapters/:chapterId/*" element={<ChapterView />} />
                   </Route>
                 </Route>
                   {/* Admin-only routes - Using AppLayout for consistent interface */}
