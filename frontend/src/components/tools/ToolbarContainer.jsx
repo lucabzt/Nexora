@@ -45,7 +45,6 @@ function ToolbarContainer({ courseId, chapterId }) {
 
   if (!toolbarOpen) {
     return (
-      <Tooltip label={t('buttons.openToolbar')} withArrow position="left">
         <ActionIcon
           size="xl"
           variant="filled"
@@ -62,7 +61,6 @@ function ToolbarContainer({ courseId, chapterId }) {
         >
           <IconPencil size={24} />
         </ActionIcon>
-      </Tooltip>
     );
   }
 
@@ -114,6 +112,7 @@ function ToolbarContainer({ courseId, chapterId }) {
         flex: 1, 
         overflowY: 'auto',
         overscrollBehavior: 'contain',
+
         scrollbarWidth: 'thin',
         scrollbarColor: `${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[4]} transparent`,
         '&::-webkit-scrollbar': {

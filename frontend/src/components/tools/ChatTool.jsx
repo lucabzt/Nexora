@@ -1,10 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { 
-  Title, 
   Text, 
-  TextInput, 
-  Button, 
-  Paper, 
+  Textarea, 
   Avatar, 
   Group, 
   Box, 
@@ -13,10 +10,11 @@ import {
   useMantineTheme,
   Code,
   Blockquote,
-  List,
-  Anchor
+  Anchor,
+  ActionIcon,
+  Tooltip
 } from '@mantine/core';
-import { IconSend, IconRobot, IconUser, IconQuote } from '@tabler/icons-react';
+import { IconSend, IconRobot, IconUser, IconQuote, IconPlus } from '@tabler/icons-react';
 import { chatService } from '../../api/chatService';
 import { getToolContainerStyle } from './ToolUtils';
 import { useTranslation } from 'react-i18next';
@@ -42,6 +40,7 @@ function ChatTool({ isOpen, courseId, chapterId }) {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messageEndRef = useRef(null);
+  const textareaRef = useRef(null);
   const chatContainerRef = useRef(null);
 
   // Scroll to bottom when new messages arrive
@@ -50,6 +49,19 @@ function ChatTool({ isOpen, courseId, chapterId }) {
       messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isOpen]);
+
+
+
+  const handleNewChat = () => {
+    setMessages([
+      {
+        id: 'welcome',
+        sender: 'ai',
+        content: t('welcomeMessage'),
+        timestamp: new Date().toISOString()
+      }
+    ]);
+  };
 
   // Fetch chat history when component mounts or chapter changes
   useEffect(() => {
@@ -208,159 +220,163 @@ function ChatTool({ isOpen, courseId, chapterId }) {
       setIsLoading(false);
     }
   };
+
   return (
-    <div style={getToolContainerStyle(isOpen)}>
-      <Title order={3} mb="md">{t('title')}</Title>
-      <Text size="sm" color="dimmed" mb="md">
-        {t('description')}
-      </Text>
+    <div style={{...getToolContainerStyle(isOpen, theme), display: 'flex', flexDirection: 'column', height: '100%', padding: 0, margin: 0, width: '100%' }}>
+      <Group position="apart" sx={{ padding: '0.5rem 1rem', borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}` }}>
+        <Text weight={500}>{t('title')}</Text>
+        <Tooltip label={t('newChat')} withArrow>
+          <ActionIcon onClick={handleNewChat} size="sm">
+            <IconPlus size={16} />
+          </ActionIcon>
+        </Tooltip>
+      </Group>
       
-      <Box 
-        ref={chatContainerRef}
-        sx={{ 
-          flexGrow: 1,
-          overflow: 'auto',
-          marginBottom: '15px',
-          border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]}`,
-          borderRadius: theme.radius.sm,
-          padding: theme.spacing.md,
-          backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
-        }}
-      >
-        <Stack spacing="md">
+      <Box sx={{ flexGrow: 1, overflowY: 'auto', padding: '1rem 1rem 1rem 0' }} ref={chatContainerRef}>
+        <Stack spacing="lg">
           {messages.map((message) => (
-            <Paper
-              key={message.id}
-              p="md"
-              withBorder
-              sx={{
-                backgroundColor: theme.colorScheme === 'dark' 
-                  ? (message.sender === 'user' ? theme.colors.dark[5] : theme.colors.dark[6])
-                  : (message.sender === 'user' ? theme.colors.blue[0] : 'white'),
-                maxWidth: '85%',
-                alignSelf: message.sender === 'user' ? 'flex-end' : 'flex-start',
-                marginLeft: message.sender === 'user' ? 'auto' : 0,
-                borderColor: message.isError 
-                  ? theme.colors.red[5]
-                  : theme.colorScheme === 'dark' 
-                    ? theme.colors.dark[4] 
-                    : theme.colors.gray[3]
-              }}
-            >
-              <Group noWrap spacing="xs" mb="xs" align="center">
+            <Group key={message.id} noWrap spacing="xs" align="flex-start" sx={{ alignSelf: message.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '90%' }}>
+              {message.sender === 'ai' && (
                 <Avatar 
-                  size="sm" 
-                  color={message.sender === 'user' ? 'blue' : 'green'}
+                  src={'/ai-avatar.png'}
                   radius="xl"
                 >
-                  {message.sender === 'user' ? <IconUser size={18} /> : <IconRobot size={18} />}
+                  <IconRobot size={20} />
                 </Avatar>
-                <Text weight={500} size="sm">
-                  {message.sender === 'user' ? t('userSender') : t('aiSender')}
-                </Text>
-              </Group>
-              
-              <div style={{ fontSize: '0.875rem' }}>
-                {message.sender === 'ai' ? (
-                  <ReactMarkdown
-                    components={{
-                      code({node, inline, className, children, ...props}) {
-                        const match = /language-(\w+)/.exec(className || '');
-                        return !inline && match ? (
-                          <SyntaxHighlighter
-                            style={oneDark}
-                            language={match[1]}
-                            PreTag="div"
-                            {...props}
-                          >
-                            {String(children).replace(/\n$/, '')}
-                          </SyntaxHighlighter>
-                        ) : (
-                          <Code {...props}>
-                            {children}
-                          </Code>
-                        );
-                      },
-                      p: ({node, ...props}) => <p style={{ marginTop: 0, marginBottom: '0.5rem' }} {...props} />,
-                      blockquote: ({node, ...props}) => (
-                        <Blockquote
-                          icon={<IconQuote size={18} />}
-                          styles={(theme) => ({
-                            root: { margin: '0.5rem 0', padding: '0.25rem 0 0.25rem 1rem' },
-                            cite: { fontSize: '0.85em' }
-                          })}
-                          {...props}
-                        />
-                      ),
-                      ul: ({node, ordered, ...props}) => {
-                        const Component = ordered ? 'ol' : 'ul';
-                        return (
-                          <Component 
-                            style={{
-                              paddingLeft: '1.5em',
-                              margin: '0.5em 0',
-                              listStyleType: ordered ? 'decimal' : 'disc'
+              )}
+              <Box
+                sx={theme => ({
+                  padding: '0.5rem 1rem',
+                  borderRadius: theme.radius.lg,
+                  backgroundColor: message.sender === 'user' 
+                    ? (theme.colorScheme === 'dark' ? theme.colors.blue[8] : theme.colors.blue[0])
+                    : (theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[1]),
+                  color: message.isError ? theme.colors.red[5] : 'inherit',
+                  border: message.isError ? `1px solid ${theme.colors.red[5]}` : 'none',
+                })}
+              >
+                <div>
+                  {message.sender === 'ai' ? (
+                    <ReactMarkdown
+                      components={{
+                        code({inline, className, children, ...props}) {
+                          const match = /language-(\w+)/.exec(className || '');
+                          return !inline && match ? (
+                            <SyntaxHighlighter
+                              style={oneDark}
+                              language={match[1]}
+                              PreTag="div"
+                              {...props}
+                            >
+                              {String(children).replace(/\n$/, '')}
+                            </SyntaxHighlighter>
+                          ) : (
+                            <Code {...props}>
+                              {children}
+                            </Code>
+                          );
+                        },
+                        p: (props) => <Text size="sm" as="p" {...props} />,
+                        blockquote: (props) => (
+                          <Blockquote
+                            icon={<IconQuote size={18} />}
+                            styles={{
+                              root: { margin: '0.5rem 0', padding: '0.25rem 0 0.25rem 1rem' },
+                              cite: { fontSize: '0.85em' }
                             }}
                             {...props}
                           />
-                        );
-                      },
-                      ol: ({node, ...props}) => (
-                        <ol 
-                          style={{
-                            paddingLeft: '1.5em',
-                            margin: '0.5em 0',
-                            listStyleType: 'decimal'
-                          }}
-                          {...props} 
-                        />
-                      ),
-                      li: ({node, ordered, ...props}) => (
-                        <li 
-                          style={{
-                            marginBottom: '0.25em',
-                            lineHeight: '1.5'
-                          }}
-                          {...props} 
-                        />
-                      ),
-                      a: ({node, ...props}) => <Anchor target="_blank" rel="noopener noreferrer" {...props} />,
-                    }}
-                  >
-                    {message.content}
-                  </ReactMarkdown>
-                ) : (
-                  <Text size="sm" sx={{ whiteSpace: 'pre-wrap' }}>
-                    {message.content}
-                  </Text>
-                )}
-                {message.isStreaming && (
-                  <Loader size="xs" variant="dots" ml="xs" display="inline" />
-                )}
-              </div>
-            </Paper>
+                        ),
+                        ul: ({ordered, ...props}) => {
+                          const Component = ordered ? 'ol' : 'ul';
+                          return (
+                            <Component 
+                              style={{
+                                paddingLeft: '1.5em',
+                                margin: '0.5em 0',
+                                listStyleType: ordered ? 'decimal' : 'disc'
+                              }}
+                              {...props}
+                            />
+                          );
+                        },
+                        ol: (props) => (
+                          <ol 
+                            style={{
+                              paddingLeft: '1.5em',
+                              margin: '0.5em 0',
+                              listStyleType: 'decimal'
+                            }}
+                            {...props} 
+                          />
+                        ),
+                        li: (props) => (
+                          <li 
+                            style={{
+                              marginBottom: '0.25em',
+                              lineHeight: '1.5'
+                            }}
+                            {...props} 
+                          />
+                        ),
+                        a: (props) => <Anchor target="_blank" rel="noopener noreferrer" {...props} />,
+                      }}
+                    >
+                      {message.content}
+                    </ReactMarkdown>
+                  ) : (
+                    <Text size="sm" sx={{ whiteSpace: 'pre-wrap' }}>
+                      {message.content}
+                    </Text>
+                  )}
+                  {message.isStreaming && (
+                    <Loader size="xs" variant="dots" ml="xs" display="inline" />
+                  )}
+                </div>
+              </Box>
+              {message.sender === 'user' && (
+                <Avatar 
+                  radius="xl"
+                  color={'blue'}
+                >
+                  <IconUser size={20} />
+                </Avatar>
+              )}
+            </Group>
           ))}
           <div ref={messageEndRef} />
         </Stack>
       </Box>
 
-      <form onSubmit={handleSendMessage} style={{ width: '100%' }}>
-        <Group spacing="xs" position="center" sx={{ width: '100%' }}>
-          <TextInput
+      <form onSubmit={handleSendMessage} style={{ padding: '0.5rem 1rem', borderTop: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}` }}>
+        <Group spacing="xs" align="flex-end">
+          <Textarea
+            ref={textareaRef}
             placeholder={t('inputPlaceholder')}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             disabled={isLoading}
             sx={{ flexGrow: 1 }}
+            minRows={1}
+            maxRows={3}
+            autosize
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage(e);
+              }
+            }}
           />
-          <Button 
-            leftIcon={<IconSend size={16} />}
+          <ActionIcon 
             type="submit" 
             disabled={!inputValue.trim() || isLoading}
             loading={isLoading}
+            variant="filled"
+            color="blue"
+            size="xl"
           >
-            {t('sendMessage')}
-          </Button>
+            <IconSend size={18} />
+          </ActionIcon>
         </Group>
       </form>
     </div>
