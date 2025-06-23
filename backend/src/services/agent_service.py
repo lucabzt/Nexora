@@ -8,6 +8,8 @@ import traceback
 from google.adk.sessions import InMemorySessionService
 from sqlalchemy.orm import Session
 
+from src.services.course_content_service import CourseContentService
+
 from .query_service import QueryService
 from .state_service import StateService, CourseState
 from ..agents.explainer_agent.agent import ExplainerAgent
@@ -29,6 +31,8 @@ from ..api.schemas.course import CourseRequest
 #from ..services.notification_service import WebSocketConnectionManager
 from ..db.models.db_course import Course
 from google.genai import types
+
+from .data_processors.pdf_processor import PDFProcessor  
 
 
 
@@ -104,7 +108,12 @@ class AgentService:
             print(f"[{task_id}] Retrieved {len(docs)} documents and {len(images)} images.")
 
             #Add Data to ChromaDB for RAG
-            
+            contentService = CourseContentService() 
+            contentService.process_course_documents(
+                course_id=str(course_id),
+                document_ids=request.document_ids,
+                db=db
+            )
 
             # Get a short course title and description from the info_agent
             info_response = await self.info_agent.run(
