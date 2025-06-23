@@ -8,6 +8,8 @@ services:
     # Define variable
     environment:
       - WORKERS=1
+    volumes:
+      - ./dev-poet-461212-d9-35a36f7ab681.json:/home/app/web/dev-poet-461212-d9-35a36f7ab681.json:ro
     ports:
       - "8127:8000"
     env_file:
