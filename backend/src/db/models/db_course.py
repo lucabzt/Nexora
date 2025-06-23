@@ -1,5 +1,6 @@
 import enum
 from sqlalchemy import Boolean, Column, Integer, String, Text, DateTime, ForeignKey, Enum, Index
+from sqlalchemy.dialects.mysql import LONGBLOB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from ...db.database import Base
@@ -60,6 +61,7 @@ class Chapter(Base):
     is_completed = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     image_url = Column(Text, nullable=True)
+    image_data = Column(LONGBLOB, nullable=True)  # Actual image content
 
     # Relationships
     course = relationship("Course", back_populates="chapters")

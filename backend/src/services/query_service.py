@@ -56,7 +56,7 @@ User Answer: {users_answer}
                 Content Summary: \n{json.dumps(chapter['content'], indent=2)}
                 Note by Planner Agent: {json.dumps(chapter['note'], indent=2)}
             """
-        return create_text_query(pretty_chapter)
+        return pretty_chapter
 
     @staticmethod
     def get_info_query(request, docs, images):
