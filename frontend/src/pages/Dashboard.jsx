@@ -68,11 +68,11 @@ function Dashboard() {
   const { t } = useTranslation('dashboard');
 
   // Mock user stats - in real app, this would come from API
-  const userStats = {
+  /*const userStats = {
     coursesCompleted: courses.filter(course => course.status === 'CourseStatus.COMPLETED').length,
     currentStreak: 7,
     totalHoursLearned: 24,
-  };
+  };*/
 
   // Show limited courses unless "View All" is clicked
   const displayedCourses = viewAllCourses ? courses : courses.slice(0, 6);
@@ -145,12 +145,13 @@ function Dashboard() {
 
   // Helper function to get status badge color and icon
   const getStatusInfo = (status) => {
-    const label = t(`status.${status}`, { defaultValue: status });
-
+    const label = t(`status.${status.replace(/^.*\./, '').toLowerCase()}`, { defaultValue: status });
+    console.log(status)
     switch (status) {
       case 'CourseStatus.CREATING':
         return { label, color: 'yellow', Icon: IconLoader };
       case 'CourseStatus.FINISHED':
+        return { label, color: 'green', Icon: IconCheck };
       case 'CourseStatus.COMPLETED':
         return { label, color: 'green', Icon: IconCheck };
       case 'CourseStatus.FAILED':
@@ -284,7 +285,7 @@ function Dashboard() {
       )}
 
       {/* User Statistics */}
-      {!loading && !error && courses.length > 0 && (
+      {/*!loading && !error && courses.length > 0 && (
         <SimpleGrid cols={3} spacing="lg" mb="xl" breakpoints={[{ maxWidth: 'sm', cols: 1 }]}>
           <Paper withBorder p="md" radius="md" shadow="sm">
             <Group position="apart">
@@ -337,7 +338,7 @@ function Dashboard() {
             </Text>
           </Paper>
         </SimpleGrid>
-      )}
+      )*/}
 
       {/* Empty state */}
       {!loading && !error && courses.length === 0 && (

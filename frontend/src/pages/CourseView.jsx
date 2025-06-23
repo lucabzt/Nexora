@@ -350,7 +350,7 @@ function CourseView() {
             <Group position="center" mt="md" spacing="xl">
               <Box sx={{ textAlign: 'center' }}>
                 <Text size="xl" weight={700}>{creationProgressUI.chaptersCreated}</Text>
-                <Text size="xs" color="dimmed">{t('creation.chaptersCreatedLabelCount', { count: creationProgressUI.chaptersCreated })}</Text>
+                <Text size="xs" color="dimmed">{t('creation.chaptersCreatedLabel_one')}</Text>
               </Box>
 
               <Divider orientation="vertical" />

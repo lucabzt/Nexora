@@ -18,7 +18,7 @@
     "progressLabel": "Overall Progress",
     "currentStatusLabel": "Current Status:",
     "description": "Your personalized learning experience is being tailored by our AI. This might take a few moments.",
-    "chaptersCreatedLabel_one": "{{chaptersCreated}} of est. {{estimatedTotal}} chapter created",
+    "chaptersCreatedLabel_one": "Chapters created",
     "chaptersCreatedLabel_other": "{{chaptersCreated}} of est. {{estimatedTotal}} chapters created",
     "estimatedTotalLabel": "Estimated Total Chapters",
     "learningTimeLabel": "Est. Learning Time",
