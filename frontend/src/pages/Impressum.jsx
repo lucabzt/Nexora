@@ -79,99 +79,21 @@ function Impressum() {
               <Paper withBorder p="md" radius="md" className={classes.section}>
                 <Group spacing="md" mb="xs">
                   <IconBuilding size={24} color={theme.colors.teal[5]} />
-                  <Title order={3}>{t('companyInfo.title')}</Title>
+                  <Title order={3}>{t('projectPhase.title')}</Title>
                 </Group>
                 <Divider mb="md" />
-                <Stack spacing="xs">
-                  <Text size="lg" weight={700}>{t('companyInfo.name')}</Text>
-                  <Text>{t('companyInfo.tagline')}</Text>
-                  <Text color="dimmed">{t('companyInfo.registration')}</Text>
-                  <Text color="dimmed">{t('companyInfo.vatId')}</Text>
-                </Stack>
+                <Text size="lg" weight={700}>{t('projectPhase.info')}</Text>
+                <Text>{t('projectPhase.contact')}</Text>
               </Paper>
-              
-              <Group grow align="stretch">
-                <Paper withBorder p="md" radius="md" className={classes.section}>
-                  <Group spacing="md" mb="xs">
-                    <IconUser size={24} color={theme.colors.blue[5]} />
-                    <Title order={3}>{t('legalRepresentative.title')}</Title>
-                  </Group>
-                  <Divider mb="md" />
-                  <Text>{t('legalRepresentative.name')}</Text>
-                  <Text color="dimmed">{t('legalRepresentative.role')}</Text>
-                </Paper>
-                
-                <Paper withBorder p="md" radius="md" className={classes.section}>
-                  <Group spacing="md" mb="xs">
-                    <IconMapPin size={24} color={theme.colors.red[5]} />
-                    <Title order={3}>{t('address.title')}</Title>
-                  </Group>
-                  <Divider mb="md" />
-                  <Text>{t('address.street')}</Text>
-                  <Text>{t('address.city')}</Text>
-                  <Text>{t('address.country')}</Text>
-                </Paper>
-              </Group>
-              
-              <Group grow align="stretch">
-                <Paper withBorder p="md" radius="md" className={classes.section}>
-                  <Group spacing="md" mb="xs">
-                    <IconMail size={24} color={theme.colors.violet[5]} />
-                    <Title order={3}>{t('contact.title')}</Title>
-                  </Group>
-                  <Divider mb="md" />
-                  <Text>{t('contact.email')}</Text>
-                  <Text>{t('contact.phone')}</Text>
-                </Paper>
-                
-                <Paper withBorder p="md" radius="md" className={classes.section}>
-                  <Group spacing="md" mb="xs">
-                    <IconWorld size={24} color={theme.colors.cyan[5]} />
-                    <Title order={3}>{t('onlinePresence.title')}</Title>
-                  </Group>
-                  <Divider mb="md" />
-                  <Text>{t('onlinePresence.website')}</Text>
-                  <Text>{t('onlinePresence.socialMedia')}</Text>
-                </Paper>
-              </Group>
               
               <Paper withBorder p="md" radius="md" className={classes.section}>
                 <Group spacing="md" mb="xs">
-                  <IconScale size={24} color={theme.colors.yellow[5]} />
-                  <Title order={3}>{t('legalDisclaimer.title')}</Title>
+                  <IconCertificate size={24} color={theme.colors.orange[5]} />
+                  <Title order={3}>{t('creativeInfo.title')}</Title>
                 </Group>
                 <Divider mb="md" />
-                <Text mb="md">
-                  {t('legalDisclaimer.externalLinks')}
-                </Text>
-                <Text>
-                  {t('legalDisclaimer.copyright')}
-                </Text>
+                <Text>{t('creativeInfo.text')}</Text>
               </Paper>
-              
-              <Group grow align="stretch">
-                <Paper withBorder p="md" radius="md" className={classes.section}>
-                  <Group spacing="md" mb="xs">
-                    <IconFileText size={24} color={theme.colors.green[5]} />
-                    <Title order={3}>{t('contentResponsibility.title')}</Title>
-                  </Group>
-                  <Divider mb="md" />
-                  <Text>
-                    {t('contentResponsibility.details')}
-                  </Text>
-                </Paper>
-                
-                <Paper withBorder p="md" radius="md" className={classes.section}>
-                  <Group spacing="md" mb="xs">
-                    <IconCertificate size={24} color={theme.colors.orange[5]} />
-                    <Title order={3}>{t('dataProtection.title')}</Title>
-                  </Group>
-                  <Divider mb="md" />
-                  <Text>
-                    {t('dataProtection.info')}
-                  </Text>
-                </Paper>
-              </Group>
               
               <Box mt="xl">
                 <Text color="dimmed" size="sm" align="center">
