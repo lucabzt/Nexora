@@ -1,15 +1,26 @@
-# Nexora AI Project
+# Nexora AI
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/M4RKUS28/Nexora/blob/main/frontend/public/logo_white.png?raw=true">
-  <source media="(prefers-color-scheme: light)" srcset="https://github.com/M4RKUS28/Nexora/blob/main/doc/logo_black.png?raw=true">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/M4RKUS28/Nexora/blob/main/frontend/public/logo_black.png?raw=true">
   <img alt="Nexora AI Logo" src="https://github.com/M4RKUS28/Nexora/blob/main/frontend/public/logo_white.png?raw=true">
 </picture>
 
-Welcome to **Nexora AI**!  
+#### Welcome to **Nexora AI**!
+
 This project is a full-stack application designed to deliver cutting-edge **AI solutions for personalized learning assistance**. It leverages a powerful Python backend and a modern React frontend to offer an innovative educational platform.
 
 **🌐 Try it live:** [nexora-ai.de](https://nexora-ai.de)
+
+
+---
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=https://github.com/M4RKUS28/Nexora/blob/main/doc/dashboard_dark.png?raw=true">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/M4RKUS28/Nexora/blob/main/doc/dashboard_white.png?raw=true">
+  <img alt="Nexora AI Logo" src="https://github.com/M4RKUS28/Nexora/blob/main/doc/logo.png?raw=true">
+</picture>
+
 
 ---
 
@@ -98,6 +109,7 @@ nexora-project/
 ├── README.md
 └── ...
 ---
+```
 
 ## 🗓️ Roadmap
 
