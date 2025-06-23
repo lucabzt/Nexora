@@ -2,7 +2,7 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/M4RKUS28/Nexora/blob/main/frontend/public/logo_white.png?raw=true">
-  <source media="(prefers-color-scheme: light)" srcset="https://github.com/M4RKUS28/Nexora/blob/main/doc/logo_black.png?raw=true">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/M4RKUS28/Nexora/blob/main/frontend/public/logo_black.png?raw=true">
   <img alt="Nexora AI Logo" src="https://github.com/M4RKUS28/Nexora/blob/main/frontend/public/logo_white.png?raw=true">
 </picture>
 
@@ -17,7 +17,7 @@ This project is a full-stack application designed to deliver cutting-edge **AI s
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset=https://github.com/M4RKUS28/Nexora/blob/main/doc/dashboard_dark.png?raw=true">
-  <source media="(prefers-color-scheme: light)" srcset="https://github.com/M4RKUS28/Nexora/blob/main/doc/dashboard_white?raw=true">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/M4RKUS28/Nexora/blob/main/doc/dashboard_white.png?raw=true">
   <img alt="Nexora AI Logo" src="https://github.com/M4RKUS28/Nexora/blob/main/doc/logo.png?raw=true">
 </picture>
 
