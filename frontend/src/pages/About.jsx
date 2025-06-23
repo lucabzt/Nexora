@@ -41,8 +41,8 @@ const useStyles = createStyles((theme) => ({
     fontFamily: `'Roboto', ${theme.fontFamily}`,
     fontWeight: 900,
     textAlign: 'center',
-    marginTop: 120,
-    marginBottom: 30,
+    marginTop: 10,
+    marginBottom: 50,
     
     [theme.fn.smallerThan('sm')]: {
       fontSize: 28,
@@ -139,11 +139,8 @@ function About() {
             >
               {t('mainTitle.about')} {t('mainTitle.nexora')}
             </Title>
-
-
-
         
-            <Grid gutter={50} mb={60}>
+            <Grid position="center" align='center' gutter={50} mb={60}>
               <Grid.Col md={6}>
                 <Stack spacing="xl">
                   <Text size="xl">

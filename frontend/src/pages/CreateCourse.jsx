@@ -400,7 +400,7 @@ function CreateCourse() {
                   )}
                   {uploadedImages.length > 0 && (
                     <div>
-                      <Text size="sm" weight={500} mb="xs">{t('form.images.uploadedTitle') || 'Images'}</Text>
+                      {/* <Text size="sm" weight={500} mb="xs">{t('form.images.uploadedTitle') || 'Images'}</Text> */}
                       <List size="sm" spacing="xs">
                         {uploadedImages.map((img, index) => (
                           <List.Item key={img.id} icon={<IconPhoto size={14} />}>
@@ -438,7 +438,7 @@ function CreateCourse() {
 
       case 1:
         return (
-          <Stack spacing="lg">
+          <Stack spacing="">
             <Box ta="center" mb="sm">
               <ThemeIcon 
                 size={60} 
@@ -470,7 +470,7 @@ function CreateCourse() {
                       <Text size="lg" weight={700} color={theme.colors.blue[6]}>
                         {form.values.time_hours}
                       </Text>
-                      <Text size="xs" color="dimmed">hours</Text>
+                      <Text size="xs" color="dimmed">{form.values.time_hours === 1 ? 'hour' : 'hours'}</Text>
                     </Stack>
                   }
                 />
