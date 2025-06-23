@@ -133,7 +133,7 @@ function Dashboard() {
         setCourses(coursesData);
         setError(null);
       } catch (error) {
-        setError(t('errors.loadCourses'));
+        setError(t('loadCoursesError'));
         console.error('Error fetching courses:', error);
       } finally {
         setLoading(false);
