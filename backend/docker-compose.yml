@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     # Define variable
     environment:
-      - WORKERS=4
+      - WORKERS=1
     ports:
       - "8127:8000"
     env_file:

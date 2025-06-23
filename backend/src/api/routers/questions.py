@@ -7,9 +7,11 @@ from ..schemas.questions import QuestionResponse
 from ...db.crud import questions_crud
 from ...db.models.db_course import Chapter, PracticeQuestion
 from ...db.models.db_user import User
-from ...services.agent_service import AgentService
+#from ...services.agent_service import AgentService
 from ...utils.auth import get_current_active_user
-from .courses import _verify_course_ownership, agent_service
+from ...services.course_service import verify_course_ownership
+
+
 
 router = APIRouter(
     prefix="/chapters",
@@ -46,7 +48,7 @@ async def get_questions_by_chapter_id(
         current_user: User = Depends(get_current_active_user),
         db: Session = Depends(get_db)
 ):
-    course = await _verify_course_ownership(course_id, str(current_user.id), db)
+    course = await verify_course_ownership(course_id, str(current_user.id), db)
     # Find the specific chapter
     chapter = (db.query(Chapter)
                .filter(Chapter.id == chapter_id, Chapter.course_id == course_id)
@@ -72,7 +74,7 @@ async def save_answer(
         db: Session = Depends(get_db)
 ):
     """ Save a user's answer to a question. Also saves user answer plus feedback in the database. """
-    course = await _verify_course_ownership(course_id, str(current_user.id), db)
+    course = await verify_course_ownership(course_id, str(current_user.id), db)
 
     # Find the question first
     question = (db.query(PracticeQuestion)
@@ -121,7 +123,7 @@ async def get_feedback(
     db: Session = Depends(get_db)
 ):
     """ Get feedback on an open text question. Also saves user answer plus feedback in the database. """
-    course = await _verify_course_ownership(course_id, str(current_user.id), db)
+    course = await verify_course_ownership(course_id, str(current_user.id), db)
 
     # Find the question
     question = (db.query(PracticeQuestion)

@@ -4,7 +4,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 from ..models.db_user import User
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 def get_user_by_id(db: Session, user_id: str) -> Optional[User]:
     """Retrieve a user by their ID."""
@@ -35,6 +35,7 @@ def create_user(db: Session,
         hashed_password=hashed_password,
         is_active=is_active,
         is_admin=is_admin,
+        
     )
     if profile_image_base64:
         user.profile_image_base64 = profile_image_base64
@@ -47,6 +48,24 @@ def update_user_last_login(db: Session, user_id: str) -> Optional[User]:
     """Update the last_login time for a user."""
     user = get_user_by_id(db, user_id)
     if user:
+        # If last_login is not set, this is the first login - start streak at 1
+        if not user.last_login:
+            user.login_streak = 1
+        else:
+            # Calculate the difference in days using timedelta
+            time_diff: timedelta = datetime.now(timezone.utc).date() - user.last_login.date()
+            days_since_last_login = time_diff.days
+            
+            if days_since_last_login == 0:
+                # Same day login - keep current streak
+                pass
+            elif days_since_last_login == 1:
+                # Consecutive day - increment streak
+                user.login_streak += 1
+            else:
+                # More than one day gap - reset streak to 1
+                user.login_streak = 1
+
         user.last_login = datetime.now(timezone.utc)
         db.commit()
         db.refresh(user)
@@ -145,3 +164,5 @@ def delete_user(db: Session, db_user: User):
     db.commit()
     
     return db_user
+
+

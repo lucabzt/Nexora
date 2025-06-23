@@ -34,3 +34,4 @@ class CourseInfo(BaseModel):
     description: Optional[str] = None
     chapter_count: Optional[int] = None
     image_url: Optional[str] = None
+    completed_chapter_count: Optional[int] = None
