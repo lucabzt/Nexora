@@ -7,9 +7,9 @@ from ..schemas.questions import QuestionResponse
 from ...db.crud import questions_crud
 from ...db.models.db_course import Chapter, PracticeQuestion
 from ...db.models.db_user import User
-#from ...services.agent_service import AgentService
 from ...utils.auth import get_current_active_user
 from ...services.course_service import verify_course_ownership
+from .courses import agent_service
 
 
 
