@@ -13,7 +13,8 @@ import {
   Divider,
   Image,
   useMantineColorScheme,
-  useMantineTheme
+  useMantineTheme,
+  Group
 } from "@mantine/core";
 import { IconSun, IconMoonStars } from "@tabler/icons-react";
 import { useForm } from "@mantine/form";
@@ -100,16 +101,18 @@ function Register() {
   // GitHub and Discord login handlers removed from UI but kept in code for future use
 
   return (
-    <Container size={460} my={120}>
-      <Stack align="center" spacing="xs" mb={40}>
-        <Image src={logoPath} width={80} mb="md" alt="TeachAI Logo" />
-        <Title order={1} size={32} weight={700} align="center">
-          {t("createAccount")}
-        </Title>
-        <Text color="dimmed" size="lg" align="center" mb="xl">
-          {t("getStartedForFree")}
-        </Text>
-      </Stack>
+    <Container size={460} my={40}>
+      <Group position="center" align="center" spacing="xs" mb={20}>
+              <Image src={logoPath} width={80} mb="md" alt="TeachAI Logo" />
+              <Stack spacing="xxs">
+                <Title order={1} size={32} weight={700} align="center">
+                  {t("welcomeBack")}
+                </Title>
+                <Text color="dimmed" size="lg" align="center" mb="xl">
+                  {t("signInToContinue")}
+                </Text>
+              </Stack>
+            </Group>
 
       <Paper withBorder p={30} radius="md">
         <Button
@@ -181,7 +184,7 @@ function Register() {
         </form>
 
         <Text align="center" mt="lg">
-          {t("alreadyHaveAccount")}{" "}
+          {t("haveAccount")}{" "}
           <Anchor component={Link} to="/login" weight={600}>
             {t("signIn")}
           </Anchor>

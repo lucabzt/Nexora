@@ -13,7 +13,8 @@ import {
   Stack,
   ThemeIcon,
   Transition,
-  createStyles
+  createStyles,
+  ActionIcon,
 } from '@mantine/core';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -25,7 +26,9 @@ import {
   IconBrain, 
   IconDeviceLaptop, 
   IconChartBar, 
-  IconHeart 
+  IconHeart ,
+  IconBrandLinkedin,
+  IconBrandGithub
 } from '@tabler/icons-react';
 
 const useStyles = createStyles((theme) => ({
@@ -93,37 +96,33 @@ function About() {
       name: 'Markus Huber',
       role: t('team.members.markusHuber.role'),
       bio: t('team.members.markusHuber.bio'),
-      avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3'
+      avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d',
+      linkedin: 'https://www.linkedin.com/in/markus-huber-0132282bb/',
+      github: 'https://github.com/M4RKUS28'
     },
     {
       name: 'Luca Bozzetti',
       role: t('team.members.lucaBozzetti.role'),
       bio: t('team.members.lucaBozzetti.bio'),
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3'
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb',
+      linkedin: 'https://www.linkedin.com/in/luca-bozzetti-371379282/',
+      github: 'https://github.com/lucabzt'
     },
- /*   {
-      name: 'Sebastian Rogg',
-      role: t('team.members.sebastianRogg.role'),
-      bio: t('team.members.sebastianRogg.bio'),
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3'
-    },*/
     {
       name: 'Matthias Meierlohr',
       role: t('team.members.matthiasMeierlohr.role'),
       bio: t('team.members.matthiasMeierlohr.bio'),
-      avatar: 'https://m.media-amazon.com/images/S/pv-target-images/16627900db04b76fae3b64266ca161511422059cd24062fb5d900971003a0b70._SX1080_FMjpg_.jpg'
-    },{
+      avatar: 'https://m.media-amazon.com/images/S/pv-target-images/...jpg',
+      linkedin: 'https://www.linkedin.com/in/matthias-meierlohr',
+      github: 'https://github.com/Maths24'
+    },
+    {
       name: 'Jonas Hörter',
       role: t('team.members.jonasHoerter.role'),
       bio: t('team.members.jonasHoerter.bio'),
-      avatar: 'https://m.media-amazon.com/images/S/pv-target-images/16627900db04b76fae3b64266ca161511422059cd24062fb5d900971003a0b70._SX1080_FMjpg_.jpg'
+      avatar: 'https://m.media-amazon.com/images/S/pv-target-images/...jpg',
+      linkedin: 'https://www.linkedin.com/in/jonas-hörter-4b22562bb/',
     },
-    /*{
-      name: 'Paul Vorderbrügge',
-      role: t('team.members.paulVorderbruegge.role'),
-      bio: t('team.members.paulVorderbruegge.bio'),
-      avatar: 'https://cdn.vectorstock.com/i/1000v/73/85/avatar-portrait-bartender-gieen-bier-vector-16227385.jpg'
-    },*/
   ];
 
   return (
@@ -245,56 +244,9 @@ function About() {
             </Card>
             
             {/* Our Story */}
-            <Grid gutter={50} mb={60}>
-              <Grid.Col md={5}>
-                <Title order={2} mb="xl">{t('journey.title')}</Title>
-                
-                <Timeline active={4} bulletSize={24} lineWidth={2}>
-                  <Timeline.Item 
-                    bullet={<IconBulb size={12} />} 
-                    title={t('journey.event1.title')} 
-                  >
-                    <Text color="dimmed" size="sm">
-                      {t('journey.event1.description')}
-                    </Text>
-                    <Text size="xs" mt={4}>{t('journey.event1.date')}</Text>
-                  </Timeline.Item>
-                  
-                  <Timeline.Item 
-                    bullet={<IconRocket size={12} />} 
-                    title={t('journey.event2.title')} 
-                  >
-                    <Text color="dimmed" size="sm">
-                      {t('journey.event2.description')}
-                    </Text>
-                    <Text size="xs" mt={4}>{t('journey.event2.date')}</Text>
-                  </Timeline.Item>
-                  
-                  <Timeline.Item 
-                    bullet={<IconChartBar size={12} />} 
-                    title={t('journey.event3.title')} 
-                  >
-                    <Text color="dimmed" size="sm">
-                      {t('journey.event3.description')}
-                    </Text>
-                    <Text size="xs" mt={4}>{t('journey.event3.date')}</Text>
-                  </Timeline.Item>
-                  
-                  <Timeline.Item 
-                    bullet={<IconHeart size={12} />}
-                    title={t('journey.event4.title')}
-                  >
-                    <Text color="dimmed" size="sm">
-                      {t('journey.event4.description')}
-                    </Text>
-                    <Text size="xs" mt={4}>{t('journey.event4.date')}</Text>
-                  </Timeline.Item>
-                  
-                </Timeline>
-              </Grid.Col>
+
+            <Grid gutter={50} mx="xl" my="xl">
               
-              <Grid.Col md={7}>
-                <Title order={2} mb="xl">{t('team.title')}</Title>
                 
                 <Grid>
                   {teamMembers.map((member, index) => (
@@ -305,11 +257,31 @@ function About() {
                         </Card.Section>
                         
                         <Stack spacing={5} mt="md" align="center">
-                          <Text weight={700}>{member.name}</Text>
-                          <Badge color="teal" variant="light">
-                            {member.role}
-                          </Badge>
-                        </Stack>
+                        <Text weight={700}>{member.name}</Text>
+                        <Badge color="teal" variant="light">{member.role}</Badge>
+                        <Group spacing={5}>
+                          <ActionIcon
+                            component="a"
+                            href={member.linkedin}
+                            target="_blank"
+
+                            size="sm"
+                            color="blue"
+                          >
+                            <IconBrandLinkedin size={18} />
+                          </ActionIcon>
+                          <ActionIcon
+                            component="a"
+                            href={member.github}
+                            target="_blank"
+
+                            size="sm"
+                            color="blue"
+                          >
+                            <IconBrandGithub size={18} />
+                          </ActionIcon>
+                        </Group>
+                      </Stack>
                         
                         <Text size="sm" color="dimmed" mt="sm" align="center">
                           {member.bio}
@@ -320,9 +292,9 @@ function About() {
                   
              
                 </Grid>
-              </Grid.Col>
+
             </Grid>
-            
+
             {/* Contact CTA */}
             <Card 
               p="xl" 

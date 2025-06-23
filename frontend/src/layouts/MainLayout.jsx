@@ -224,7 +224,7 @@ function MainLayout() {
                     >
                       {t('dashboard', { ns: 'navigation' })}
                     </Menu.Item>
-                    <Menu.Item 
+                    {/*<Menu.Item 
                       icon={<IconChartLine size={14} />} 
                       onClick={() => navigate('/dashboard/statistics')}
                       sx={{
@@ -235,6 +235,7 @@ function MainLayout() {
                     >
                       {t('statistics', { ns: 'navigation' })}
                     </Menu.Item>
+                    */}
                     <Menu.Item 
                       icon={<IconSettings size={14} />} 
                       onClick={() => navigate('/dashboard/settings')}

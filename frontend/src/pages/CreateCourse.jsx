@@ -378,7 +378,7 @@ function CreateCourse() {
                 <Group grow align="start">
                   {uploadedDocuments.length > 0 && (
                     <div>
-                      <Text size="sm" weight={500} mb="xs">{t('form.documents.uploadedTitle') || 'Documents'}</Text>
+                     {/* <Text size="sm" weight={500} mb="xs">{t('form.documents.uploadedTitle') || 'Documents'}</Text> */}
                       <List size="sm" spacing="xs">
                         {uploadedDocuments.map((doc, index) => (
                           <List.Item key={doc.id} icon={<IconFileText size={14} />}>
@@ -784,7 +784,7 @@ function CreateCourse() {
           {/* Progress indicator */}
           <Progress 
             value={(activeStep + 1) / steps.length * 100} 
-            color="white" 
+            color={theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7]}
             mt="md"
             size="sm"
             radius="xl"
