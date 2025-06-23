@@ -109,7 +109,7 @@ function MainLayout() {
                     order={3}
                     size="1.6rem"
                     component={RouterLink}
-                    to="/dashboard"
+                    to={isAuthenticated ? "/dashboard" : "/"}
                     sx={(theme) => ({
                       // gradient text
                       textDecoration: "none",
