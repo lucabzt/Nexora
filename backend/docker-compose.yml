@@ -20,8 +20,6 @@ services:
   chromadb:
     container_name: nexora-chromadb
     image: chromadb/chroma:latest
-    ports:
-      - "8001:8000" # Expose on different port to avoid conflict
     environment:
       - CHROMA_SERVER_HOST=0.0.0.0
       - CHROMA_SERVER_HTTP_PORT=8000
