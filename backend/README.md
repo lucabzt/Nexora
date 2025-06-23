@@ -59,7 +59,7 @@ Follow these instructions to set up and run the backend application on your loca
     -   Fill in the required values (database credentials, API keys, etc.).
 
 5.  **Run the development server:**
-    The `run.sh` script starts the application using Gunicorn.
+    The `run.sh` script starts the application using uvicorn.
     ```bash
     # For macOS/Linux
     ./run.sh
