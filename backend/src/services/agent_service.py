@@ -203,12 +203,14 @@ class AgentService:
             for idx, topic in enumerate(response_planner["chapters"]):
                 ragInfos = set()
                 queryRes = self.vector_service.search_by_course_id(course_id, topic['caption'])
-                for doc in queryRes.documents:
-                        ragInfos.add(doc)
+                for doc in queryRes['documents']:
+                    for str_inf in doc:
+                        ragInfos.add(str_inf)
                 for content in topic['content']:
                     queryRes = self.vector_service.search_by_course_id(course_id, content)
-                    for doc in queryRes.documents:
-                        ragInfos.add(doc)
+                    for doc in queryRes['documents']:
+                        for str_inf in doc:
+                            ragInfos.add(str_inf)
                 ragInfos = list(set(ragInfos))
 
                 # Schedule image and coding agents to run concurrently as they do not depend on each other
