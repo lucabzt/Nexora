@@ -220,67 +220,29 @@ class AgentService:
                     content=self.query_service.get_explainer_query(user_id, course_id, idx, request.language, request.difficulty, ragInfos),
                 )
 
-                try:
-                    # Schedule image and coding agents to run concurrently as they do not depend on each other
-                    coding_task = self.coding_agent.run(
-                        user_id=user_id,
-                        state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
-                        content=self.query_service.get_explainer_query(user_id, course_id, idx, request.language,
-                                                                       request.difficulty, ragInfos),
-                    )
+                image_task = self.imagen_agent.run(
+                    self.query_service.get_explainer_image_query(user_id, course_id, idx)
+                )
 
-                    # Note: This is now an async call
-                    image_task = self.imagen_agent.run(
-                        self.query_service.get_explainer_image_query(user_id, course_id, idx)
-                    )
+                # Await both tasks to complete in parallel
+                response_code, image_response = await asyncio.gather(
+                    coding_task,
+                    image_task
+                )
 
-                    # Await both tasks to complete in parallel
-                    response_code, image_response = await asyncio.gather(
-                        coding_task,
-                        image_task,
-                        return_exceptions=True  # This prevents one failure from killing the other task
-                    )
+                summary = "\n".join(topic['content'][:3])
 
-                    # Handle potential exceptions in the results
-                    if isinstance(response_code, Exception):
-                        print(f"[{task_id}] Coding agent failed: {response_code}")
-                        response_code = {'explanation': "() => {<p>Content generation failed</p>}"}
-
-                    if isinstance(image_response, Exception):
-                        print(f"[{task_id}] Image generation failed: {image_response}")
-                        # Create a fallback image
-                        from PIL import Image, ImageDraw
-                        from io import BytesIO
-
-                        # Create simple fallback image
-                        img = Image.new('RGB', (512, 288), color='white')
-                        draw = ImageDraw.Draw(img)
-                        draw.rectangle([10, 10, 502, 278], outline='black', width=2)
-                        draw.text((256, 144), "Chapter Image", fill='black', anchor='mm')
-
-                        img_byte_arr = BytesIO()
-                        img.save(img_byte_arr, format='JPEG')
-                        image_response = img_byte_arr.getvalue()
-
-                    summary = "\n".join(topic['content'][:3])
-
-                    # Save the chapter in db
-                    chapter_db = chapters_crud.create_chapter(
-                        db=db,
-                        course_id=course_id,
-                        index=idx + 1,
-                        caption=topic['caption'],
-                        summary=summary,
-                        content=response_code[
-                            'explanation'] if 'explanation' in response_code else "() => {<p>Something went wrong</p>}",
-                        time_minutes=topic['time'],
-                        image_data=image_response,
-                    )
-
-                except Exception as chapter_error:
-                    print(f"[{task_id}] Error processing chapter {idx}: {chapter_error}")
-                    # Continue with next chapter rather than failing entirely
-                    continue
+                # Save the chapter in db first
+                chapter_db = chapters_crud.create_chapter(
+                    db=db,
+                    course_id=course_id,
+                    index=idx + 1,
+                    caption=topic['caption'],
+                    summary=summary,
+                    content=response_code['explanation'] if 'explanation' in response_code else "() => {<p>Something went wrong</p>}",
+                    time_minutes=topic['time'],
+                    image_data=image_response,
+                )
 
                 # Get response from tester agent
                 response_tester = await self.tester_agent.run(

@@ -146,7 +146,7 @@ async def get_course_chapters(
             caption=chapter.caption,
             summary=chapter.summary or "",
             content=chapter.content,
-            image_data=chapter.image_data,
+            image_url=chapter.image_url,
             time_minutes=chapter.time_minutes,
             is_completed=chapter.is_completed  
         ) for chapter in chapters
@@ -179,7 +179,7 @@ async def get_chapter_by_id(
         caption=chapter.caption,
         summary=chapter.summary or "",
         content=chapter.content,
-        image_data=chapter.image_data,
+        image_url=chapter.image_url,
         time_minutes=chapter.time_minutes,
         is_completed=chapter.is_completed  
     )
@@ -288,7 +288,6 @@ async def update_chapter(
         content: str,
         time_minutes: int,
         image_url: Optional[str] = None,
-        image_data: Optional[bytes] = None,
         current_user: User = Depends(get_current_active_user),
         db: Session = Depends(get_db)
 ):
@@ -311,8 +310,6 @@ async def update_chapter(
         update_data["time_minutes"] = time_minutes
     if image_url is not None:
         update_data["image_url"] = image_url
-    if image_data is not None:
-        update_data["image_data"] = image_data
 
     if not update_data:
         raise HTTPException(
@@ -336,7 +333,7 @@ async def update_chapter(
         caption=updated_chapter.caption,
         summary=updated_chapter.summary or "",
         content=updated_chapter.content,
-        image_data=updated_chapter.image_data,
+        image_url=updated_chapter.image_url,
         time_minutes=updated_chapter.time_minutes,
         is_completed=updated_chapter.is_completed
     )

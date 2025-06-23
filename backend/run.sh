@@ -9,4 +9,4 @@ if ! source venv/Scripts/activate 2>/dev/null; then
     fi
 fi
 
-python3 ./run_dev.py
+python ./run_dev.py

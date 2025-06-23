@@ -21,7 +21,7 @@ class Chapter(BaseModel):
     content: str
     time_minutes: int
     is_completed: bool = False  # Also useful for the frontend
-    image_data: Optional[bytes] = None  # Optional image data for the chapter
+    image_url: Optional[str] = None  # Optional image URL for the chapter
 
 
 class CourseInfo(BaseModel):
