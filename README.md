@@ -72,6 +72,12 @@ This project is a full-stack application designed to deliver cutting-edge **AI s
 
 ---
 
+## Course Creation process
+
+![Course Creation Process](https://github.com/M4RKUS28/Nexora/blob/main/doc/final_diagram.png?raw=true)
+
+
+
 ## 📐 Software Architecture
 
 ![Software Architecture](https://github.com/M4RKUS28/Nexora/blob/main/doc/Editor%20_%20Mermaid%20Chart-2025-06-18-210221.png?raw=true)
