@@ -8,6 +8,7 @@ import traceback
 from google.adk.sessions import InMemorySessionService
 from sqlalchemy.orm import Session
 
+from src.services import vector_service
 from src.services.course_content_service import CourseContentService
 
 from .query_service import QueryService
@@ -52,6 +53,9 @@ class AgentService:
         self.tester_agent = TesterAgent(self.app_name, self.session_service)
         self.image_agent = ImageAgent(self.app_name, self.session_service)
         self.grader_agent = GraderAgent(self.app_name, self.session_service)
+
+        # define Rag service
+        self.vector_service = vector_service.VectorService()
 
 
     @staticmethod
@@ -195,11 +199,21 @@ class AgentService:
 
             # Process each chapter and stream as it's created
             for idx, topic in enumerate(response_planner["chapters"]):
+                ragInfos = set()
+                queryRes = self.vector_service.search_by_course_id(course_id, topic['caption'])
+                for doc in queryRes.documents:
+                        ragInfos.add(doc)
+                for content in topic['content']:
+                    queryRes = self.vector_service.search_by_course_id(course_id, content)
+                    for doc in queryRes.documents:
+                        ragInfos.add(doc)
+                ragInfos = list(set(ragInfos))
+
                 # Schedule image and coding agents to run concurrently as they do not depend on each other
                 coding_task = self.coding_agent.run(
                     user_id=user_id,
                     state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
-                    content=self.query_service.get_explainer_query(user_id, course_id, idx, request.language, request.difficulty),
+                    content=self.query_service.get_explainer_query(user_id, course_id, idx, request.language, request.difficulty, ragInfos),
                 )
 
                 image_task = self.image_agent.run(
