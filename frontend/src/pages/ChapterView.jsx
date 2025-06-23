@@ -1,6 +1,6 @@
-//ChapterView.jsx - Fixed polling logic
+//ChapterView.jsx - Fixed tab switching logic
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -15,8 +15,6 @@ import {
   Loader,
   Paper,
   Badge,
-  ActionIcon,
-  
 } from '@mantine/core';
 import { IconDownload } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
@@ -36,17 +34,21 @@ function ChapterView() {
   const { t } = useTranslation('chapterView');
   const { courseId, chapterId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation(); // Get location to read query params
   const { toolbarOpen, toolbarWidth } = useToolbar();
   const isMobile = useMediaQuery('(max-width: 768px)');
-  
+
+  // Read tab from URL, default to 'content'
+  const queryParams = new URLSearchParams(location.search);
+  const initialTab = queryParams.get('tab') || 'content';
+
   const [chapter, setChapter] = useState(null);
   const [images, setImages] = useState([]);
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mediaLoading, setMediaLoading] = useState(true);
   const [error, setError] = useState(null);
-  const location = useLocation();
-  const [activeTab, setActiveTab] = useState(location.hash.replace('#', '') || 'content');
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [markingComplete, setMarkingComplete] = useState(false);
   const [downloadingPDF, setDownloadingPDF] = useState(false);
   const [deletingItem, setDeletingItem] = useState(null);
@@ -55,34 +57,25 @@ function ChapterView() {
   const [questionCount, setQuestionCount] = useState(0);
   const [isBlinking, setIsBlinking] = useState(false); // New state for blinking
   const [quizKey, setQuizKey] = useState(0); // Force Quiz component re-mount
-  const [courseChapters, setCourseChapters] = useState([]);
-
-  const { isLastChapter, nextChapterId } = useMemo(() => {
-    
-    if (!courseChapters || courseChapters.length === 0) {
-      return { isLastChapter: false, nextChapterId: null };
-    }
-    // Ensure IDs are compared as strings, as chapterId from URL is a string
-    const currentIndex = courseChapters.findIndex(c => String(c.id) === chapterId);
-    if (currentIndex === -1) {
-      return { isLastChapter: false, nextChapterId: null };
-    }
-    const isLast = currentIndex === courseChapters.length - 1;
-    const nextId = isLast ? null : courseChapters[currentIndex + 1].id;
-    return { isLastChapter: isLast, nextChapterId: nextId };
-  }, [courseChapters, chapterId]);
 
   // Refs for cleanup
   const contentRef = useRef(null);
   const pollIntervalRef = useRef(null);
   const blinkTimeoutRef = useRef(null);
 
+  // Listen for URL parameter changes and update active tab
   useEffect(() => {
-    const hash = location.hash.replace('#', '');
-    if (hash) {
-      setActiveTab(hash);
-    }
-  }, [location.hash]);
+    const queryParams = new URLSearchParams(location.search);
+    const urlTab = queryParams.get('tab') || 'content';
+    setActiveTab(urlTab);
+  }, [location.search]);
+
+  // Handle tab change and update URL
+  const handleTabChange = (newTab) => {
+    const currentParams = new URLSearchParams(location.search);
+    currentParams.set('tab', newTab);
+    navigate(`${location.pathname}?${currentParams.toString()}`, { replace: true });
+  };
 
   useEffect(() => {
     console.log("Toolbar state changed:", { open: toolbarOpen, width: toolbarWidth });
@@ -94,16 +87,14 @@ function ChapterView() {
       try {
         setLoading(true);
         // Fetch chapter data and media info (including questions check)
-        const [chapterData, imagesData, filesData, questionsData, chaptersData] = await Promise.all([
+        const [chapterData, imagesData, filesData, questionsData] = await Promise.all([
           courseService.getChapter(courseId, chapterId),
           courseService.getImages(courseId),
           courseService.getFiles(courseId),
           courseService.getChapterQuestions(courseId, chapterId),
-          courseService.getCourseChapters(courseId),
         ]);
 
         setChapter(chapterData);
-        setCourseChapters(chaptersData || []);
 
         // Check if chapter has questions
         if (questionsData && questionsData.length > 0) {
@@ -227,33 +218,33 @@ function ChapterView() {
     }
 
     console.log('Starting polling for quiz questions...');
-    
+
     const pollForQuestions = async () => {
       try {
         const questionsData = await courseService.getChapterQuestions(courseId, chapterId);
-        
+
         if (questionsData && questionsData.length > 0) {
           console.log('Questions found! Stopping polling.');
-          
+
           // Clear the polling interval
           if (pollIntervalRef.current) {
             clearInterval(pollIntervalRef.current);
             pollIntervalRef.current = null;
           }
-          
+
           // Update state
           setHasQuestions(true);
           setQuestionCount(questionsData.length);
           setQuestionsCreated(true);
           toast.success(t("quizReady"))
 
-          
+
           // Force Quiz component to re-mount and fetch new data
           setQuizKey(prev => prev + 1);
-          
+
           // Start blinking animation
           setIsBlinking(true);
-          
+
           // Stop blinking after 4 seconds
           blinkTimeoutRef.current = setTimeout(() => {
             setIsBlinking(false);
@@ -275,7 +266,7 @@ function ChapterView() {
         pollIntervalRef.current = null;
       }
     };
-  }, [courseId, chapterId, questionsCreated, loading, t]);
+  }, [courseId, chapterId, questionsCreated, loading]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -291,7 +282,7 @@ function ChapterView() {
           URL.revokeObjectURL(file.objectUrl);
         }
       });
-      
+
       // Cleanup intervals and timeouts
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
@@ -300,7 +291,7 @@ function ChapterView() {
         clearTimeout(blinkTimeoutRef.current);
       }
     };
-  }, [images, files]);
+  }, []);
 
   const handleDeleteImage = async (imageId) => {
     try {
@@ -351,7 +342,7 @@ function ChapterView() {
       setMarkingComplete(true);
       await courseService.markChapterComplete(courseId, chapterId);
       toast.success(t('toast.markedCompleteSuccess'));
-      //navigate(`/dashboard/courses/${courseId}`);
+      navigate(`/dashboard/courses/${courseId}`);
     } catch (error) {
       toast.error(t('toast.markedCompleteError'));
       console.error('Error marking chapter complete:', error);
@@ -383,15 +374,9 @@ function ChapterView() {
     }
   };
 
-  const handleNextChapter = () => {
-    console.log("nextChapterId", nextChapterId);
-    if (nextChapterId) {
-      navigate(`/dashboard/courses/${courseId}/chapters/${nextChapterId}`);
-      window.scrollTo(0, 0);
-    }
-  };
-
-
+  const sidebarWidth = isMobile
+    ? (toolbarOpen ? window.innerWidth : 0)
+    : (toolbarOpen ? toolbarWidth : 0);
 
   if (loading) {
     return (
@@ -420,153 +405,182 @@ function ChapterView() {
   }
 
   return (
-    <>
-      <div style={{
-        paddingRight: isMobile ? 0 : (toolbarOpen ? `${toolbarWidth}px` : '0'),
-        transition: 'padding-right 0.3s ease-in-out',
-        height: '100%',
-        overflowY: 'auto'
-      }}>
-        <Container my="md" fluid>
-          {loading ? (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-              <Loader size="lg" />
-            </div>
-          ) : error ? (
-            <Alert title="Error" color="red" icon={<IconAlertCircle />}>
-              {error}
-            </Alert>
-          ) : (
-            <>
-              <Group position="apart" align="flex-start">
-                <div>
-                  <Title order={2}>{chapter.caption}</Title>
-                  <Text color="dimmed">{chapter.description}</Text>
-                </div>
+    <div
+      style={{
+        marginRight: toolbarOpen ? `${toolbarWidth}px` : 0,
+        transition: 'margin-right 0.3s ease',
+        minHeight: '100vh',
+        width: toolbarOpen ? `calc(100% - ${toolbarWidth}px)` : '100%',
+        maxWidth: '100%',
+        marginLeft: 0,
+        padding: 0,
+      }}
+    >
+      {/* Add CSS for blinking animation */}
+      <style>
+        {`
+          @keyframes tabBlink {
+            0%, 50% { 
+              background-color: #339af0; 
+              color: white;
+              transform: scale(1.05);
+            }
+            25%, 75% { 
+              background-color: #74c0fc; 
+              color: white;
+              transform: scale(1.02);
+            }
+          }
+          
+          .quiz-tab-blinking {
+            animation: tabBlink 1s ease-in-out 4;
+            border-radius: 4px;
+          }
+        `}
+      </style>
+
+      <Container 
+        size="xl" 
+        py="xl"
+        style={{
+          maxWidth: '100%',
+          width: '100%',
+          padding: '0 16px',
+        }}
+      >
+        {chapter && (
+          <>
+            <Group position="apart" mb="xl">
+              <Box>
+                <Title order={1} mb="xs">
+                  {chapter.caption || 'Chapter'}
+                </Title>
                 <Group>
-                  <Button
-                    leftIcon={<IconDownload size={16} />}
-                    onClick={handleDownloadPDF}
-                    loading={downloadingPDF}
-                    variant="outline"
-                  >
-                    {t('buttons.downloadPDF', 'Download as PDF')}
-                  </Button>
+                  {chapter.estimated_minutes && (
+                    <Text color="dimmed" size="sm">
+                      {t('estimatedTime', { minutes: chapter.estimated_minutes })}
+                    </Text>
+                  )}
+                  {chapter.is_completed && (
+                    <Badge color="green" variant="filled">
+                      {t('badge.completed')}
+                    </Badge>
+                  )}
                 </Group>
-              </Group>
+              </Box>
 
-              <Tabs value={activeTab} onTabChange={(value) => { setActiveTab(value); navigate(`#${value}`); }} mt="md">
-                <Tabs.List>
-                  <Tabs.Tab value="content" icon={<IconBookmark size={14} />}>{t('tabs.content', 'Content')}</Tabs.Tab>
-                  {images.length > 0 && (
-                    <Tabs.Tab value="images" icon={<IconPhoto size={14} />}>{t('tabs.images', 'Images')}</Tabs.Tab>
-                  )}
-                  {files.length > 0 && (
-                    <Tabs.Tab value="files" icon={<IconFileText size={14} />}>{t('tabs.files', 'Files')}</Tabs.Tab>
-                  )}
-                  {hasQuestions && (
-                    <Tabs.Tab 
-                      value="quiz" 
-                      icon={<IconQuestionMark size={14} />}
-                      className={isBlinking ? 'quiz-tab-blinking' : ''}
-                    >
-                      {questionCount > 0 ? t('tabs.quiz', { count: questionCount }) : 'Quiz'}
-                    </Tabs.Tab>
-                  )}
-                </Tabs.List>
-
-                <Tabs.Panel value="content" pt="xs">
-                  <FullscreenContentWrapper>
-                    <Paper shadow="xs" p="md" withBorder ref={contentRef}>
-                      <div className="markdown-content">
-                        <AiCodeWrapper>{chapter.content}</AiCodeWrapper>
-                      </div>
-                    </Paper>
-                  </FullscreenContentWrapper>
-                </Tabs.Panel>
-
-                <Tabs.Panel value="images" pt="xs">
-                  <Paper shadow="xs" p="md" withBorder>
-                    <MediaGallery
-                      images={images}
-                      onDelete={handleDeleteImage}
-                      deletingItem={deletingItem}
-                      isMobile={isMobile}
-                    />
-                  </Paper>
-                </Tabs.Panel>
-
-                <Tabs.Panel value="files" pt="xs">
-                  <Paper shadow="xs" p="md" withBorder>
-                    <FileList
-                      files={files}
-                      onDelete={handleDeleteFile}
-                      deletingItem={deletingItem}
-                      mediaLoading={mediaLoading}
-                    />
-                  </Paper>
-                </Tabs.Panel>
-
-                <Tabs.Panel value="quiz" pt="xs">
-                  <Quiz
-                    key={quizKey} // Force re-mount when questions become available
-                    courseId={courseId}
-                    chapterId={chapterId}
-                    onQuestionCountChange={(count) => {
-                      setQuestionCount(count);
-                      setHasQuestions(count > 0);
-                    }}
-                  />
-                </Tabs.Panel>
-              </Tabs>
-
-              <Group position="apart" mt="md">
+              <Group spacing="sm">
                 <Button
                   variant="outline"
-                  onClick={() => navigate(`/dashboard/courses/${courseId}`)}
+                  color="blue"
+                  leftIcon={<IconDownload size={16} />}
+                  onClick={handleDownloadPDF}
+                  loading={downloadingPDF}
+                  disabled={downloadingPDF || activeTab !== 'content'}
                 >
-                  {t('buttons.backToCourse', 'Back to Course')}
+                  Download PDF
                 </Button>
-                <Group spacing="sm">
-                  {!chapter?.is_completed ? (
-                    <Button
-                      color="green"
-                      onClick={markChapterComplete}
-                      loading={markingComplete}
-                    >
-                      {t('buttons.markComplete', 'Mark as Complete')}
-                    </Button>
-                  ) : hasQuestions ? (
-                    activeTab === 'quiz' ? (
-                      !isLastChapter ? (
-                        <Button onClick={handleNextChapter}>
-                          {t('buttons.nextChapter', 'Continue with Next Chapter')}
-                        </Button>
-                      ) : (
-                        <Text weight={500} color="teal">{t('messages.courseComplete', 'Well done, you mastered this course!')}</Text>
-                      )
-                    ) : (
-                      <Button onClick={() => { setActiveTab('quiz'); navigate(`#quiz`); }}>
-                        {t('buttons.testYourself', 'Test Yourself')}
-                      </Button>
-                    )
-                  ) : (
-                    !isLastChapter ? (
-                      <Button onClick={handleNextChapter}>
-                        {t('buttons.nextChapter', 'Next Chapter')}
-                      </Button>
-                    ) : (
-                      <Text weight={500} color="teal">{t('messages.courseComplete', 'Well done, you mastered this course!')}</Text>
-                    )
-                  )}
-                </Group>
+                <Button
+                  color="green"
+                  onClick={markChapterComplete}
+                  loading={markingComplete}
+                  disabled={markingComplete}
+                >
+                  {t('buttons.markComplete')}
+                </Button>
               </Group>
-            </>
-          )}
-        </Container>
-      </div>
+            </Group>
+
+            <Tabs value={activeTab} onTabChange={handleTabChange} mb="xl">
+              <Tabs.List>
+                <Tabs.Tab value="content" icon={<IconBookmark size={14} />}>{t('tabs.content')}</Tabs.Tab>
+                {images.length > 0 && (
+                  <Tabs.Tab value="images" icon={<IconPhoto size={14} />}>{t('tabs.images')}</Tabs.Tab>
+                )}
+                {files.length > 0 && (
+                  <Tabs.Tab value="files" icon={<IconFileText size={14} />}>{t('tabs.files')}</Tabs.Tab>
+                )}
+                {hasQuestions && (
+                  <Tabs.Tab 
+                    value="quiz" 
+                    icon={<IconQuestionMark size={14} />}
+                    className={isBlinking ? 'quiz-tab-blinking' : ''}
+                  >
+                    {questionCount > 0 ? t('tabs.quiz', { count: questionCount }) : 'Quiz'}
+                  </Tabs.Tab>
+                )}
+              </Tabs.List>
+
+              <Tabs.Panel value="content" pt="xs" style={{ width: '100%' }}>
+                <FullscreenContentWrapper>
+                  <Paper shadow="xs" p="md" withBorder ref={contentRef} style={{ width: '100%' }}>
+                    <div className="markdown-content" style={{ width: '100%' }}>
+                      <AiCodeWrapper>{chapter.content}</AiCodeWrapper>
+                    </div>
+                  </Paper>
+                </FullscreenContentWrapper>
+              </Tabs.Panel>
+
+              <Tabs.Panel value="images" pt="xs" style={{ width: '100%' }}>
+                <Paper shadow="xs" p="md" withBorder style={{ width: '100%' }}>
+                  <MediaGallery
+                    images={images}
+                    onDelete={handleDeleteImage}
+                    deletingItem={deletingItem}
+                    isMobile={isMobile}
+                  />
+                </Paper>
+              </Tabs.Panel>
+
+              <Tabs.Panel value="files" pt="xs" style={{ width: '100%' }}>
+                <Paper shadow="xs" p="md" withBorder style={{ width: '100%' }}>
+                  <FileList
+                    files={files}
+                    onDelete={handleDeleteFile}
+                    deletingItem={deletingItem}
+                    mediaLoading={mediaLoading}
+                  />
+                </Paper>
+              </Tabs.Panel>
+
+              <Tabs.Panel value="quiz" pt="xs" style={{ width: '100%' }}>
+                <Quiz
+                  key={quizKey}
+                  courseId={courseId}
+                  chapterId={chapterId}
+                  onQuestionCountChange={(count) => {
+                    setQuestionCount(count);
+                    setHasQuestions(count > 0);
+                  }}
+                  style={{ width: '100%' }}
+                />
+              </Tabs.Panel>
+            </Tabs>
+
+            <Group position="apart" mt="md">
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/dashboard/courses/${courseId}`)}
+              >
+                {t('buttons.backToCourse')}
+              </Button>
+              <Group spacing="sm">
+                <Button
+                  color="green"
+                  onClick={markChapterComplete}
+                  loading={markingComplete}
+                  disabled={markingComplete || chapter?.is_completed}
+                >
+                  {chapter?.is_completed ? t('badge.completed') : t('buttons.markComplete')}
+                </Button>
+              </Group>
+            </Group>
+          </>
+        )}
+      </Container>
+
       <ToolbarContainer courseId={courseId} chapterId={chapterId} />
-    </>
+    </div>
   );
 }
 
