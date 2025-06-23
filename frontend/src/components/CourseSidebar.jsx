@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import { Box, NavLink, Text, Button, ThemeIcon, Loader } from '@mantine/core';
+import { useNavigate, useParams, useLocation, Link } from 'react-router-dom';
+import { Box, NavLink, Text, Button, ThemeIcon, Loader, useMantineTheme, ActionIcon } from '@mantine/core';
 import {
   IconHome2,
   IconChevronRight,
@@ -10,21 +10,143 @@ import {
   IconQuestionMark,
   IconCircleCheck,
   IconCircleDashed,
+  IconSchool,
 } from '@tabler/icons-react';
 import { courseService } from '../api/courseService';
+import { useTranslation } from 'react-i18next';
+import {MainLink} from "../layouts/AppLayout.jsx";
+import {useMediaQuery} from "@mantine/hooks";
 
-const CourseSidebar = () => {
+const ChapterLink = ({ chapter, activeChapter, index, handleChapterClick, handleNavigation, chapterId, courseId, opened, currentTab, ...props }) => {
+  const [hasQuestions, setHasQuestions] = useState(false);
+  const intervalRef = useRef(null);
+  const theme = useMantineTheme();
+
+  useEffect(() => {
+    // If this chapter already has a quiz, don't poll.
+    if (hasQuestions) {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      return;
+    }
+
+    // Poll for quiz questions for this specific chapter
+    intervalRef.current = setInterval(async () => {
+      try {
+        // Use chapter.id from the mapped chapter, not the active chapterId from params
+        const questions = await courseService.getChapterQuestions(courseId, chapter.id);
+        if (questions && questions.length > 0) {
+          setHasQuestions(true);
+          clearInterval(intervalRef.current);
+        }
+      } catch (error) {
+        console.error(`Error polling for quiz in chapter ${chapter.id}:`, error);
+        clearInterval(intervalRef.current);
+      }
+    }, 500); // Poll every 500ms
+
+    // Cleanup function for when the component unmounts or dependencies change
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [courseId, chapter.id, hasQuestions]); // Dependencies for the effect
+
+  // When collapsed, render as a simple numbered button
+  if (!opened) {
+    return (
+      <ActionIcon
+        key={chapter.id}
+        variant="light"
+        size="xl"
+        color={chapter.is_completed ? 'green' : 'gray'}
+        onClick={() => handleNavigation(chapter.id, 'content')}
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          width: '100%',
+          marginBottom: theme.spacing.xs,
+          minHeight: 48,
+        }}
+        title={`${index + 1}. ${chapter.caption}`}
+      >
+        <Text size="sm" weight={600}>{index + 1}</Text>
+      </ActionIcon>
+    );
+  }
+
+  // When expanded, render full navigation structure
+  return (
+    <NavLink
+      key={chapter.id}
+      label={`${index + 1}. ${chapter.caption}`}
+      opened={activeChapter === chapter.id.toString()}
+      onClick={() => handleChapterClick(chapter.id.toString())}
+      icon={
+        <ThemeIcon variant="light" size="sm" color={chapter.is_completed ? 'green' : 'gray'}>
+          {chapter.is_completed ? <IconCircleCheck size={14} /> : <IconCircleDashed size={14} />}
+        </ThemeIcon>
+      }
+      rightSection={activeChapter === chapter.id.toString() ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
+    >
+      <NavLink
+        label="Content"
+        icon={<IconFileText size={16} />}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleNavigation(chapter.id, 'content');
+        }}
+        active={chapterId === chapter.id.toString() && currentTab === 'content'}
+      />
+      {chapter.file_count > 0 && (
+        <NavLink
+          label="Files"
+          icon={<IconPhoto size={16} />}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleNavigation(chapter.id, 'files');
+          }}
+          active={chapterId === chapter.id.toString() && currentTab === 'files'}
+        />
+      )}
+      {hasQuestions && (
+        <NavLink
+          label="Quiz"
+          icon={<IconQuestionMark size={16} />}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleNavigation(chapter.id, 'quiz');
+          }}
+          active={chapterId === chapter.id.toString() && currentTab === 'quiz'}
+        />
+      )}
+    </NavLink>
+  );
+};
+
+const CourseSidebar = ({opened, setopen}) => {
+  const { t } = useTranslation(['navigation', 'app', 'settings']);
   const navigate = useNavigate();
+  const location = useLocation();
   const { courseId, chapterId } = useParams();
 
   const [course, setCourse] = useState(null);
   const [chapters, setChapters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeChapter, setActiveChapter] = useState(chapterId);
+  const isMobile = useMediaQuery('(max-width: 768px)');
+
+  // Get current tab from URL search params
+  const searchParams = new URLSearchParams(location.search);
+  const currentTab = searchParams.get('tab') || 'content';
 
   // Refs to hold interval IDs for cleanup
   const coursePollInterval = useRef(null);
-  const quizPollIntervals = useRef({});
+
+  // Update activeChapter when chapterId changes
+  useEffect(() => {
+    setActiveChapter(chapterId);
+  }, [chapterId]);
 
   // --- Polling and Data Fetching Logic ---
 
@@ -43,9 +165,6 @@ const CourseSidebar = () => {
       const initialChapters = (chaptersData || []).map(ch => ({ ...ch, has_questions: false }));
       setChapters(initialChapters);
 
-      // Start polling for quiz questions for each chapter
-      initialChapters.forEach(chapter => pollForQuiz(chapter.id));
-
       // If the course is being created, start polling for updates
       if (courseData?.status === 'CourseStatus.CREATING') {
         startCoursePolling();
@@ -55,29 +174,6 @@ const CourseSidebar = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Polls for quiz questions for a single chapter
-  const pollForQuiz = (chapId) => {
-    // Avoid starting a new poll if one is already running for this chapter
-    if (quizPollIntervals.current[chapId]) return;
-
-    quizPollIntervals.current[chapId] = setInterval(async () => {
-      try {
-        const questions = await courseService.getChapterQuestions(courseId, chapId);
-        if (questions && questions.length > 0) {
-          // Once questions are found, update the state and stop polling for this chapter
-          setChapters(prev => prev.map(ch => ch.id === chapId ? { ...ch, has_questions: true } : ch));
-          clearInterval(quizPollIntervals.current[chapId]);
-          delete quizPollIntervals.current[chapId];
-        }
-      } catch (error) {
-        // Stop polling on error to avoid spamming logs
-        console.error(`Error polling for quiz in chapter ${chapId}:`, error);
-        clearInterval(quizPollIntervals.current[chapId]);
-        delete quizPollIntervals.current[chapId];
-      }
-    }, 2000); // Poll every 2 seconds
   };
 
   // Polls for course status and new chapters
@@ -98,14 +194,6 @@ const CourseSidebar = () => {
           const newChapters = (updatedChaptersData || []).map(newChap => {
             const existing = prevChapters.find(p => p.id === newChap.id);
             return existing ? existing : { ...newChap, has_questions: false };
-          });
-
-          // Start polling for quizzes in any brand new chapters
-          newChapters.forEach(chapter => {
-            const isAlreadyPolling = !!quizPollIntervals.current[chapter.id];
-            if (!chapter.has_questions && !isAlreadyPolling) {
-              pollForQuiz(chapter.id);
-            }
           });
 
           return newChapters;
@@ -133,7 +221,6 @@ const CourseSidebar = () => {
       if (coursePollInterval.current) {
         clearInterval(coursePollInterval.current);
       }
-      Object.values(quizPollIntervals.current).forEach(clearInterval);
     };
   }, [courseId]);
 
@@ -144,11 +231,29 @@ const CourseSidebar = () => {
   };
 
   const handleNavigation = (chapId, tab) => {
-    navigate(`/dashboard/courses/${courseId}/chapters/${chapId}?tab=${tab}`);
+    // Force navigation even if we're already on the same chapter
+    const newUrl = `/dashboard/courses/${courseId}/chapters/${chapId}?tab=${tab}`;
+    navigate(newUrl);
+
+    // Close mobile sidebar after navigation
+    if (isMobile) {
+      setopen(false);
+    }
   };
 
   const handleCourseTitleClick = () => {
     navigate(`/dashboard/courses/${courseId}`);
+
+    // Close mobile sidebar after navigation
+    if (isMobile) {
+      setopen(false);
+    }
+  };
+
+  const handleNavigate = () => {
+    if (isMobile) {
+      setopen(false);
+    }
   };
 
   // --- Render Logic ---
@@ -162,64 +267,55 @@ const CourseSidebar = () => {
     );
   }
 
+  const link = { icon: <IconHome2 size={20} />, color: 'blue', label: t('home', { ns: 'navigation' }), to: '/dashboard' }
+
   return (
     <Box>
-      <NavLink
-        component={Link}
-        to="/dashboard"
-        label="Home"
-        icon={<IconHome2 size={18} />}
-        styles={(theme) => ({ root: { marginBottom: theme.spacing.sm } })}
+      <MainLink
+        {...link}
+        key={link.label}
+        isActive={false} // Home is not active when we're in course view
+        collapsed={!opened}
+        onNavigate={handleNavigate}
       />
 
-      <Button
-        variant="subtle"
-        fullWidth
-        onClick={handleCourseTitleClick}
-        styles={(theme) => ({
-          root: { padding: `0 ${theme.spacing.md}px`, height: 'auto', marginBottom: theme.spacing.md },
-          label: { whiteSpace: 'normal', fontSize: theme.fontSizes.lg, fontWeight: 700 },
-        })}
-      >
-        {course?.title || 'Course Overview'}
-      </Button>
+      {opened ? (
+        <Button
+          variant="subtle"
+          fullWidth
+          onClick={handleCourseTitleClick}
+          styles={(theme) => ({
+            root: { padding: `0 ${theme.spacing.md}px`, height: 'auto', marginBottom: theme.spacing.md, marginTop: 30 },
+            label: { whiteSpace: 'normal', fontSize: theme.fontSizes.lg, fontWeight: 700 },
+          })}
+        >
+          {course?.title && course?.title != "None" ? course?.title : 'Course Overview'}
+        </Button>
+      ) : (
+        <ActionIcon
+          variant="transparent"
+          size="xl"
+          onClick={handleCourseTitleClick}
+          style={{ display: 'flex', justifyContent: 'center', width: '100%', margin: '30px 0' }}
+          title={course?.title || 'Course Overview'}
+        >
+          <IconSchool size={24} />
+        </ActionIcon>
+      )}
 
       {chapters.map((chapter, index) => (
-        <NavLink
+        <ChapterLink
+          chapter={chapter}
+          activeChapter={activeChapter}
+          index={index}
+          handleChapterClick={handleChapterClick}
+          handleNavigation={handleNavigation}
+          chapterId={chapterId}
+          courseId={courseId}
+          currentTab={currentTab}
           key={chapter.id}
-          label={`${index + 1}. ${chapter.caption}`}
-          opened={activeChapter === chapter.id.toString()}
-          onClick={() => handleChapterClick(chapter.id.toString())}
-          icon={
-            <ThemeIcon variant="light" size="sm" color={chapter.is_completed ? 'green' : 'gray'}>
-              {chapter.is_completed ? <IconCircleCheck size={14} /> : <IconCircleDashed size={14} />}
-            </ThemeIcon>
-          }
-          rightSection={activeChapter === chapter.id.toString() ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
-        >
-          <NavLink
-            label="Content"
-            icon={<IconFileText size={16} />}
-            onClick={() => handleNavigation(chapter.id, 'content')}
-            active={chapterId === chapter.id.toString() && new URLSearchParams(window.location.search).get('tab') === 'content'}
-          />
-          {chapter.file_count > 0 && (
-            <NavLink
-              label="Files"
-              icon={<IconPhoto size={16} />}
-              onClick={() => handleNavigation(chapter.id, 'files')}
-              active={chapterId === chapter.id.toString() && new URLSearchParams(window.location.search).get('tab') === 'files'}
-            />
-          )}
-          {chapter.has_questions && (
-            <NavLink
-              label="Quiz"
-              icon={<IconQuestionMark size={16} />}
-              onClick={() => handleNavigation(chapter.id, 'quiz')}
-              active={chapterId === chapter.id.toString() && new URLSearchParams(window.location.search).get('tab') === 'quiz'}
-            />
-          )}
-        </NavLink>
+          opened={opened}
+        />
       ))}
     </Box>
   );

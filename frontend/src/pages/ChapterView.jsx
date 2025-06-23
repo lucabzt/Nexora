@@ -1,4 +1,4 @@
-//ChapterView.jsx - Fixed polling logic
+//ChapterView.jsx - Fixed tab switching logic
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
@@ -41,7 +41,7 @@ function ChapterView() {
   // Read tab from URL, default to 'content'
   const queryParams = new URLSearchParams(location.search);
   const initialTab = queryParams.get('tab') || 'content';
-  
+
   const [chapter, setChapter] = useState(null);
   const [images, setImages] = useState([]);
   const [files, setFiles] = useState([]);
@@ -62,6 +62,20 @@ function ChapterView() {
   const contentRef = useRef(null);
   const pollIntervalRef = useRef(null);
   const blinkTimeoutRef = useRef(null);
+
+  // Listen for URL parameter changes and update active tab
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const urlTab = queryParams.get('tab') || 'content';
+    setActiveTab(urlTab);
+  }, [location.search]);
+
+  // Handle tab change and update URL
+  const handleTabChange = (newTab) => {
+    const currentParams = new URLSearchParams(location.search);
+    currentParams.set('tab', newTab);
+    navigate(`${location.pathname}?${currentParams.toString()}`, { replace: true });
+  };
 
   useEffect(() => {
     console.log("Toolbar state changed:", { open: toolbarOpen, width: toolbarWidth });
@@ -204,33 +218,33 @@ function ChapterView() {
     }
 
     console.log('Starting polling for quiz questions...');
-    
+
     const pollForQuestions = async () => {
       try {
         const questionsData = await courseService.getChapterQuestions(courseId, chapterId);
-        
+
         if (questionsData && questionsData.length > 0) {
           console.log('Questions found! Stopping polling.');
-          
+
           // Clear the polling interval
           if (pollIntervalRef.current) {
             clearInterval(pollIntervalRef.current);
             pollIntervalRef.current = null;
           }
-          
+
           // Update state
           setHasQuestions(true);
           setQuestionCount(questionsData.length);
           setQuestionsCreated(true);
           toast.success(t("quizReady"))
 
-          
+
           // Force Quiz component to re-mount and fetch new data
           setQuizKey(prev => prev + 1);
-          
+
           // Start blinking animation
           setIsBlinking(true);
-          
+
           // Stop blinking after 4 seconds
           blinkTimeoutRef.current = setTimeout(() => {
             setIsBlinking(false);
@@ -268,7 +282,7 @@ function ChapterView() {
           URL.revokeObjectURL(file.objectUrl);
         }
       });
-      
+
       // Cleanup intervals and timeouts
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
@@ -465,7 +479,7 @@ function ChapterView() {
               </Group>
             </Group>
 
-            <Tabs value={activeTab} onTabChange={setActiveTab} mb="xl">
+            <Tabs value={activeTab} onTabChange={handleTabChange} mb="xl">
               <Tabs.List>
                 <Tabs.Tab value="content" icon={<IconBookmark size={14} />}>{t('tabs.content')}</Tabs.Tab>
                 {images.length > 0 && (

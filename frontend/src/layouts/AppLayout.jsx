@@ -345,7 +345,7 @@ function AppLayout() {
           {/* Navigation Links */}
           <Navbar.Section grow mt="xs">
             {isCoursePage ? (
-              <CourseSidebar course={course} chapters={chapters} />
+              <CourseSidebar opened={opened} setopen={setOpened}/>
             ) : (
               <Stack spacing="xs">
                 {mainLinksComponents}
