@@ -2,7 +2,7 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/M4RKUS28/Nexora/blob/main/frontend/public/logo_white.png?raw=true">
-  <source media="(prefers-color-scheme: light)" srcset="https://github.com/M4RKUS28/Nexora/blob/main/doc/logo_black.png?raw=true">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/M4RKUS28/Nexora/blob/main/frontend/public/logo_black.png?raw=true">
   <img alt="Nexora AI Logo" src="https://github.com/M4RKUS28/Nexora/blob/main/frontend/public/logo_white.png?raw=true">
 </picture>
 
