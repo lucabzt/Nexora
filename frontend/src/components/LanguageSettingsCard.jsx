@@ -10,10 +10,34 @@ import {
 } from '@mantine/core';
 import { IconLanguage } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import ReactCountryFlag from 'react-country-flag';
+import { forwardRef } from 'react';
+
+const SelectItem = forwardRef(({ label, countryCode, ...others }, ref) => (
+  <div ref={ref} {...others}>
+    <Group noWrap>
+      <ReactCountryFlag
+        countryCode={countryCode}
+        svg
+        style={{
+          width: '1.5em',
+          height: '1.5em',
+        }}
+        title={countryCode}
+      />
+      <Text size="sm">{label}</Text>
+    </Group>
+  </div>
+));
 
 function LanguageSettingsCard({ className }) {
   const { t, i18n } = useTranslation(['settings', 'language']);
   const theme = useMantineTheme();
+
+  const languageData = [
+    { value: 'en', label: t('english', { ns: 'language' }), countryCode: 'US' },
+    { value: 'de', label: t('german', { ns: 'language' }), countryCode: 'DE' },
+  ];
 
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder className={className}>
@@ -39,10 +63,8 @@ function LanguageSettingsCard({ className }) {
             label={t('selectLanguage', { ns: 'settings' })}
             value={i18n.language}
             onChange={(value) => i18n.changeLanguage(value)}
-            data={[
-              { value: 'en', label: t('english', { ns: 'language' }) },
-              { value: 'de', label: t('german', { ns: 'language' }) },
-            ]}
+            data={languageData}
+            itemComponent={SelectItem}
             icon={<IconLanguage size={18} />}
             radius="md"
           />

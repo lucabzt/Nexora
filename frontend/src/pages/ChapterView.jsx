@@ -1,7 +1,7 @@
-//ChapterView.jsx - Fixed polling logic
+//ChapterView.jsx - Fixed tab switching logic
 
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Container,
@@ -34,16 +34,21 @@ function ChapterView() {
   const { t } = useTranslation('chapterView');
   const { courseId, chapterId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation(); // Get location to read query params
   const { toolbarOpen, toolbarWidth } = useToolbar();
   const isMobile = useMediaQuery('(max-width: 768px)');
-  
+
+  // Read tab from URL, default to 'content'
+  const queryParams = new URLSearchParams(location.search);
+  const initialTab = queryParams.get('tab') || 'content';
+
   const [chapter, setChapter] = useState(null);
   const [images, setImages] = useState([]);
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mediaLoading, setMediaLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('content');
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [markingComplete, setMarkingComplete] = useState(false);
   const [downloadingPDF, setDownloadingPDF] = useState(false);
   const [deletingItem, setDeletingItem] = useState(null);
@@ -57,6 +62,20 @@ function ChapterView() {
   const contentRef = useRef(null);
   const pollIntervalRef = useRef(null);
   const blinkTimeoutRef = useRef(null);
+
+  // Listen for URL parameter changes and update active tab
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const urlTab = queryParams.get('tab') || 'content';
+    setActiveTab(urlTab);
+  }, [location.search]);
+
+  // Handle tab change and update URL
+  const handleTabChange = (newTab) => {
+    const currentParams = new URLSearchParams(location.search);
+    currentParams.set('tab', newTab);
+    navigate(`${location.pathname}?${currentParams.toString()}`, { replace: true });
+  };
 
   useEffect(() => {
     console.log("Toolbar state changed:", { open: toolbarOpen, width: toolbarWidth });
@@ -199,33 +218,33 @@ function ChapterView() {
     }
 
     console.log('Starting polling for quiz questions...');
-    
+
     const pollForQuestions = async () => {
       try {
         const questionsData = await courseService.getChapterQuestions(courseId, chapterId);
-        
+
         if (questionsData && questionsData.length > 0) {
           console.log('Questions found! Stopping polling.');
-          
+
           // Clear the polling interval
           if (pollIntervalRef.current) {
             clearInterval(pollIntervalRef.current);
             pollIntervalRef.current = null;
           }
-          
+
           // Update state
           setHasQuestions(true);
           setQuestionCount(questionsData.length);
           setQuestionsCreated(true);
           toast.success(t("quizReady"))
 
-          
+
           // Force Quiz component to re-mount and fetch new data
           setQuizKey(prev => prev + 1);
-          
+
           // Start blinking animation
           setIsBlinking(true);
-          
+
           // Stop blinking after 4 seconds
           blinkTimeoutRef.current = setTimeout(() => {
             setIsBlinking(false);
@@ -263,7 +282,7 @@ function ChapterView() {
           URL.revokeObjectURL(file.objectUrl);
         }
       });
-      
+
       // Cleanup intervals and timeouts
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
@@ -388,9 +407,13 @@ function ChapterView() {
   return (
     <div
       style={{
-        marginRight: sidebarWidth,
+        marginRight: toolbarOpen ? `${toolbarWidth}px` : 0,
         transition: 'margin-right 0.3s ease',
         minHeight: '100vh',
+        width: toolbarOpen ? `calc(100% - ${toolbarWidth}px)` : '100%',
+        maxWidth: '100%',
+        marginLeft: 0,
+        padding: 0,
       }}
     >
       {/* Add CSS for blinking animation */}
@@ -416,7 +439,15 @@ function ChapterView() {
         `}
       </style>
 
-      <Container size="xl" py="xl">
+      <Container 
+        size="xl" 
+        py="xl"
+        style={{
+          maxWidth: '100%',
+          width: '100%',
+          padding: '0 16px',
+        }}
+      >
         {chapter && (
           <>
             <Group position="apart" mb="xl">
@@ -460,7 +491,7 @@ function ChapterView() {
               </Group>
             </Group>
 
-            <Tabs value={activeTab} onTabChange={setActiveTab} mb="xl">
+            <Tabs value={activeTab} onTabChange={handleTabChange} mb="xl">
               <Tabs.List>
                 <Tabs.Tab value="content" icon={<IconBookmark size={14} />}>{t('tabs.content')}</Tabs.Tab>
                 {images.length > 0 && (
@@ -480,18 +511,18 @@ function ChapterView() {
                 )}
               </Tabs.List>
 
-              <Tabs.Panel value="content" pt="xs">
+              <Tabs.Panel value="content" pt="xs" style={{ width: '100%' }}>
                 <FullscreenContentWrapper>
-                  <Paper shadow="xs" p="md" withBorder ref={contentRef}>
-                    <div className="markdown-content">
+                  <Paper shadow="xs" p="md" withBorder ref={contentRef} style={{ width: '100%' }}>
+                    <div className="markdown-content" style={{ width: '100%' }}>
                       <AiCodeWrapper>{chapter.content}</AiCodeWrapper>
                     </div>
                   </Paper>
                 </FullscreenContentWrapper>
               </Tabs.Panel>
 
-              <Tabs.Panel value="images" pt="xs">
-                <Paper shadow="xs" p="md" withBorder>
+              <Tabs.Panel value="images" pt="xs" style={{ width: '100%' }}>
+                <Paper shadow="xs" p="md" withBorder style={{ width: '100%' }}>
                   <MediaGallery
                     images={images}
                     onDelete={handleDeleteImage}
@@ -501,8 +532,8 @@ function ChapterView() {
                 </Paper>
               </Tabs.Panel>
 
-              <Tabs.Panel value="files" pt="xs">
-                <Paper shadow="xs" p="md" withBorder>
+              <Tabs.Panel value="files" pt="xs" style={{ width: '100%' }}>
+                <Paper shadow="xs" p="md" withBorder style={{ width: '100%' }}>
                   <FileList
                     files={files}
                     onDelete={handleDeleteFile}
@@ -512,15 +543,16 @@ function ChapterView() {
                 </Paper>
               </Tabs.Panel>
 
-              <Tabs.Panel value="quiz" pt="xs">
+              <Tabs.Panel value="quiz" pt="xs" style={{ width: '100%' }}>
                 <Quiz
-                  key={quizKey} // Force re-mount when questions become available
+                  key={quizKey}
                   courseId={courseId}
                   chapterId={chapterId}
                   onQuestionCountChange={(count) => {
                     setQuestionCount(count);
                     setHasQuestions(count > 0);
                   }}
+                  style={{ width: '100%' }}
                 />
               </Tabs.Panel>
             </Tabs>

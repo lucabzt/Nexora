@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useToolbar } from '../contexts/ToolbarContext';
 import { ActionIcon, Box } from '@mantine/core';
 import { IconMaximize, IconMinimize } from '@tabler/icons-react';
 
 const FullscreenContentWrapper = ({ children }) => {
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const { isFullscreen, setIsFullscreen } = useToolbar();
   const [buttonVisible, setButtonVisible] = useState(true);
 
   // Make button visible on load, then fade to transparent after 3 seconds

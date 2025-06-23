@@ -106,30 +106,48 @@ function MainLayout() {
                 />
               )}
               <Title
-                order={3}
-                size="1.6rem"
-                component={RouterLink}
-                to={isAuthenticated ? "/dashboard" : "/"}
-                sx={(theme) => ({
-                  textDecoration: 'none',
-                  background: `linear-gradient(135deg, ${theme.colors.violet[6]}, ${theme.colors.violet[4]})`,
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  fontWeight: 800,
-                  letterSpacing: '-1px',
-                  transition: 'all 0.3s ease',
-                  filter: 'drop-shadow(0 2px 4px rgba(139, 92, 246, 0.2))',
-                  '&:hover': {
-                    transform: 'scale(1.02)',
-                    textDecoration: 'none',
-                    cursor: 'pointer',
-                    filter: 'drop-shadow(0 4px 8px rgba(139, 92, 246, 0.4))',
-                  },
-                })}
-              >
-                {t('title', { ns: 'app' })}
-              </Title>
+                    order={3}
+                    size="1.6rem"
+                    component={RouterLink}
+                    to="/dashboard"
+                    sx={(theme) => ({
+                      // gradient text
+                      textDecoration: "none",
+                      background: `linear-gradient(135deg, ${theme.colors.teal[6]}, ${theme.colors.cyan[4]})`,
+                      backgroundClip: "text",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      fontWeight: 800,
+                      letterSpacing: "-1px",
+
+                      // keep the pseudo‐element for hover‐bg if you like
+                      display: "inline-block",
+                      position: "relative",
+                      padding: theme.spacing.xs,
+
+                      // smooth transition
+                      transition: "transform 0.2s ease",
+
+                      "&::before": {
+                        content: '""',
+                        position: "absolute",
+                        inset: 0,
+                        borderRadius: theme.radius.sm,
+                        background: "transparent",
+                        zIndex: -1,
+                        transition: "background 0.2s ease",
+                      },
+
+                      "&:hover": {
+                        transform: "scale(1.02)",
+                        cursor: "pointer",
+                      },
+
+                      
+                    })}
+                  >
+                    {t("title", { ns: "app" })}
+                  </Title>
             </Group>
             
             <Box sx={{ flexGrow: 1 }} />
@@ -224,7 +242,7 @@ function MainLayout() {
                     >
                       {t('dashboard', { ns: 'navigation' })}
                     </Menu.Item>
-                    <Menu.Item 
+                    {/*<Menu.Item 
                       icon={<IconChartLine size={14} />} 
                       onClick={() => navigate('/dashboard/statistics')}
                       sx={{
@@ -235,6 +253,7 @@ function MainLayout() {
                     >
                       {t('statistics', { ns: 'navigation' })}
                     </Menu.Item>
+                    */}
                     <Menu.Item 
                       icon={<IconSettings size={14} />} 
                       onClick={() => navigate('/dashboard/settings')}
