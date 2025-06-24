@@ -163,11 +163,17 @@ function LandingPage() {
         
         <Grid.Col md={6}>
           <Box className={classes.heroImage}>
-            <Image
-              radius="md"
-              src="https://onlineschool.co.za/wp-content/uploads/2020/04/online-learing-image.jpg"
-              alt={t('hero.imageAlt')}
-              caption={t('hero.imageCaption')}
+            <iframe
+              width="100%"
+              height="315"
+              src="https://www.youtube.com/embed/JImJJ9RcCog"
+              title={t('hero.videoTitle', 'Introduction to Our Platform')}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              style={{ 
+                borderRadius: '8px',
+                border: 'none'
+              }}
             />
           </Box>
         </Grid.Col>
