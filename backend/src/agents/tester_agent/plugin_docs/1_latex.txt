@@ -21,3 +21,6 @@ Guidelines:
 This will result in an error. Instead, you would write this:
 
 <th style={{padding: 7}}>Estimated <Latex>{"$P(\\mathrm{Win}\\mid \\mathrm{Serve})$"}</Latex></th>
+
+If you want to write Latex into the ANSWER fields (answer_a, answer_b, etc.) use $$ to delimit the latex expressions e.g. like this:
+"answer_a": "We give illustrations for the processes $e^+e^-$, gluon-gluon and $\\gamma\\gamma \\to W t\\bar b$."

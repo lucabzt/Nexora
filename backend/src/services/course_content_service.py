@@ -11,8 +11,24 @@ class CourseContentService:
         self.pdf_processor = PDFProcessor()
         self.vector_service = VectorService()
         self.logger = logging.getLogger(__name__)
+
+    def get_rag_infos(self, course_id: int, topic: dict[str, str]):
+        """
+        Get the important rag infos for a given chapter topic.
+        """
+        ragInfos = set()
+        queryRes = self.vector_service.search_by_course_id(course_id, topic['caption'], n_results=2)
+        for doc in queryRes['documents']:
+            for str_inf in doc:
+                ragInfos.add(str_inf)
+        for content in topic['content']:
+            queryRes = self.vector_service.search_by_course_id(course_id, content, n_results=3)
+            for doc in queryRes['documents']:
+                for str_inf in doc:
+                    ragInfos.add(str_inf)
+        return list(set(ragInfos))
     
-    def process_course_documents(self, course_id: str, document_ids: List[int], db: Session):
+    def process_course_documents(self, course_id: int, document_ids: List[int], db: Session):
         """
         Process all uploaded documents for a course and add to vector database.
         """
@@ -38,7 +54,7 @@ class CourseContentService:
             self.logger.error(f"Failed to process documents for course {course_id}: {e}")
             raise
     
-    def _process_pdf_document(self, course_id: str, document: Document, collection):
+    def _process_pdf_document(self, course_id: int, document: Document, collection):
         """
         Extract paragraphs from PDF and add to vector database.
         """
