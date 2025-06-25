@@ -51,8 +51,10 @@ function Register() {
           ? t("usernameLength", "Username must be at least 3 characters")
           : null,
       email: (value) =>
-        !/^\S+@\S+$/.test(value)
-          ? t("emailInvalid", "Invalid email address")
+        !value
+          ? t("emailRequired", "Email is required")
+          : !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)
+          ? t("emailInvalid", "Please enter a valid email address (e.g., example@domain.com)")
           : null,
       password: (value) =>
         !value
