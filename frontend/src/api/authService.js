@@ -10,7 +10,7 @@ class AuthService {
     formData.append('password', password);
 
     // The backend at /auth/token should set an HTTP-only cookie upon successful login.
-    const response = await apiWithCookies.post('/auth/login', formData, {
+    const response = await apiWithoutCookies.post('/auth/login', formData, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
