@@ -94,14 +94,24 @@ function Register() {
         if (responseData.detail) {
           // If there's a detail message from the backend, use it
           setError(responseData.detail);
+          
+          // Check for username or email conflicts in the error message
+          if (responseData.detail.toLowerCase().includes('username')) {
+            form.setFieldError('username', responseData.detail);
+          } else if (responseData.detail.toLowerCase().includes('email')) {
+            form.setFieldError('email', responseData.detail);
+          }
         } else if (error.response.status === 422) {
           // Handle validation errors (like invalid email format)
           if (responseData.message?.includes('email')) {
-            setError(t("emailInvalid", "Invalid email address"));
+            const errorMsg = t("emailInvalid", "Invalid email address");
+            setError(errorMsg);
+            form.setFieldError('email', errorMsg);
           } else if (responseData.message) {
             setError(responseData.message);
           } else {
-            setError(t("registrationFailed", "Registration failed. Please check your details and try again."));
+            const errorMsg = t("registrationFailed", "Registration failed. Please check your details and try again.");
+            setError(errorMsg);
           }
         } else if (error.response.status === 400) {
           // For 400 errors, try to get the first error message if available
@@ -109,12 +119,35 @@ function Register() {
                               (responseData.message && typeof responseData.message === 'string' ? responseData.message : null) ||
                               t("badRequest", "Invalid request. Please check your details and try again.");
           setError(errorMessage);
+          
+          // Try to set field-level errors for common 400 errors
+          if (responseData.detail) {
+            if (responseData.detail.toLowerCase().includes('username')) {
+              form.setFieldError('username', responseData.detail);
+            } else if (responseData.detail.toLowerCase().includes('email')) {
+              form.setFieldError('email', responseData.detail);
+            } else if (responseData.detail.toLowerCase().includes('password')) {
+              form.setFieldError('password', responseData.detail);
+            }
+          }
         } else if (error.response.status === 409) {
           // For 409 conflicts, check if it's email or username that already exists
-          const conflictMessage = responseData.detail || 
-                                (responseData.message?.includes('email') ? 
-                                  t("userExists", "An account with this email already exists.") :
-                                  t("usernameExists", "This username is already taken."));
+          let conflictMessage = responseData.detail || 
+                              (responseData.message?.includes('email') ? 
+                                t("userExists", "An account with this email already exists.") :
+                                t("usernameExists", "This username is already taken."));
+          
+          // If we couldn't determine the conflict type from the message, try to guess from the detail
+          if (responseData.detail) {
+            if (responseData.detail.toLowerCase().includes('email')) {
+              conflictMessage = t("userExists", "An account with this email already exists.");
+              form.setFieldError('email', conflictMessage);
+            } else if (responseData.detail.toLowerCase().includes('username')) {
+              conflictMessage = t("usernameExists", "This username is already taken.");
+              form.setFieldError('username', conflictMessage);
+            }
+          }
+          
           setError(conflictMessage);
         } else {
           // For other error status codes, use the error message if available, or a generic one
