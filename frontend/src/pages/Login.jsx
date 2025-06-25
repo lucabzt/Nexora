@@ -56,22 +56,62 @@ function Login() {
 
   const handleSubmit = async (values) => {
     setIsLoading(true);
+    setError("");
+    form.clearErrors();
+    
     try {
-      // The login function from AuthContext now returns the user object on success
-      // or throws an error on failure.
       const user = await login(values.username, values.password);
-
-      // If login is successful and returns a user object, navigate.
       if (user) {
-        navigate("/dashboard"); // Navigate to the dashboard
+        navigate("/dashboard");
       }
-      // No explicit 'else' needed here because if 'user' is not returned,
-      // an error would have been thrown by the login() function and caught below.
     } catch (error) {
-      // Errors (e.g., invalid credentials, network issues) are already handled by
-      // the login function in AuthContext (it shows a toast).
-      // You can add additional error handling specific to this page if needed.
       console.error("Login page: Login failed", error);
+      
+      let errorMessage = t("loginError", "Invalid username or password. Please try again.");
+      
+      if (error.response) {
+        // Server responded with an error status code
+        const responseData = error.response.data || {};
+        
+        if (responseData.detail) {
+          // If there's a detail message from the backend, use it
+          errorMessage = responseData.detail;
+          
+          // Check for username or password errors in the message
+          const errorLower = errorMessage.toLowerCase();
+          if (errorLower.includes('username') || errorLower.includes('benutzername') || errorLower.includes('user')) {
+            form.setFieldError('username', errorMessage);
+          } else if (errorLower.includes('password') || errorLower.includes('passwort')) {
+            form.setFieldError('password', errorMessage);
+          }
+        } else if (error.response.status === 400) {
+          // For 400 errors, try to get the first error message if available
+          errorMessage = responseData.detail || 
+                        (responseData.message && typeof responseData.message === 'string' ? responseData.message : 
+                        t("loginError", "Invalid username or password. Please try again."));
+          
+          // Set a general field error if we can't determine the specific field
+          if (!form.isValid()) {
+            form.setFieldError('username', ' ');
+            form.setFieldError('password', ' ');
+          }
+        } else if (error.response.status === 401) {
+          // For 401 Unauthorized (invalid credentials)
+          errorMessage = t("invalidCredentials", "Invalid username or password.");
+          form.setFieldError('username', ' ');
+          form.setFieldError('password', ' ');
+        } else {
+          // For other error status codes
+          errorMessage = responseData.detail || 
+                        (responseData.message && typeof responseData.message === 'string' ? responseData.message : 
+                        t("loginFailed", "An error occurred during login. Please try again later."));
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        errorMessage = t("networkError", "Network error. Please check your connection and try again.");
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -98,6 +138,11 @@ function Login() {
       </Group>
 
       <Paper withBorder p={30} radius="md">
+        {error && (
+          <Text color="red" size="sm" mb="md">
+            {error}
+          </Text>
+        )}
         <Button
           leftIcon={<IconBrandGoogleFilled size={20} />}
           variant="default"
