@@ -27,6 +27,7 @@ import { useTranslation } from "react-i18next";
 function Register() {
   const { t } = useTranslation("auth");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
   const { register } = useAuth();
   const { colorScheme } = useMantineColorScheme();
@@ -68,27 +69,46 @@ function Register() {
 
   const handleSubmit = async (values) => {
     setIsLoading(true);
+    setError(""); // Clear previous errors
     try {
-      // The login function from AuthContext now returns the user object on success
-      // or throws an error on failure.
       const result = await register(
         values.username,
         values.email,
         values.password
       );
 
-      // If login is successful and returns a user object, navigate.
       if (result) {
-        navigate("/dashboard"); // Navigate to the dashboard
+        navigate("/dashboard");
       }
-
-      // No explicit 'else' needed here because if 'user' is not returned,
-      // an error would have been thrown by the login() function and caught below.
     } catch (error) {
-      // Errors (e.g., invalid credentials, network issues) are already handled by
-      // the login function in AuthContext (it shows a toast).
-      // You can add additional error handling specific to this page if needed.
       console.error("Register page: reg failed", error);
+      
+      // Handle different types of errors
+      if (error.response) {
+        // Server responded with an error status code
+        if (error.response.status === 422) {
+          // Handle validation errors (like invalid email format)
+          if (error.response.data?.message?.includes('email')) {
+            setError(t("emailInvalid", "Invalid email address"));
+          } else if (error.response.data?.message) {
+            setError(error.response.data.message);
+          } else {
+            setError(t("registrationFailed", "Registration failed. Please check your details and try again."));
+          }
+        } else if (error.response.status === 400) {
+          setError(t("badRequest", "Invalid request. Please check your details and try again."));
+        } else if (error.response.status === 409) {
+          setError(t("userExists", "An account with this email already exists."));
+        } else {
+          setError(t("registrationError", "An error occurred during registration. Please try again later."));
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        setError(t("networkError", "Network error. Please check your connection and try again."));
+      } else {
+        // Something happened in setting up the request
+        setError(t("requestError", "An error occurred. Please try again."));
+      }
     } finally {
       setIsLoading(false);
     }
@@ -138,6 +158,11 @@ function Register() {
         />
         
         <form onSubmit={form.onSubmit(handleSubmit)}>
+          {error && (
+            <Text color="red" size="sm" mb="md">
+              {error}
+            </Text>
+          )}
           <Stack spacing="md">
             <TextInput
               label={t("username")}
