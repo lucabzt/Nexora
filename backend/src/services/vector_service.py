@@ -52,6 +52,7 @@ class VectorService:
             where=filter_metadata
         )
         return results
+
     
     def delete_content_by_course_id(self, course_id: int, content_id: str):
         """Delete content from vector store"""

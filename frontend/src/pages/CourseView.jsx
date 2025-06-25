@@ -22,6 +22,9 @@ import {
   Divider,
   RingProgress,
   Overlay,
+  Modal,
+  ActionIcon,
+  Stack,
 } from '@mantine/core';
 import {
   IconAlertCircle,
@@ -32,7 +35,9 @@ import {
   IconTrophy,
   IconArrowBack,
   IconCheck,
-  IconChevronRight
+  IconChevronRight,
+  IconX,
+  IconPlayerPlay,
 } from '@tabler/icons-react';
 import { courseService } from '../api/courseService';
 
@@ -46,12 +51,52 @@ function CourseView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // NEW: State for first-time video popup
+  const [showVideoPopup, setShowVideoPopup] = useState(false);
+  const [hasSeenVideo, setHasSeenVideo] = useState(false);
+  const [contentReady, setContentReady] = useState(false);
+
   const [creationProgressUI, setCreationProgressUI] = useState({
     statusText: t('creation.statusInitializing'),
     percentage: 0,
     chaptersCreated: 0,
     estimatedTotal: 0,
   });
+
+  // NEW: Check localStorage on mount
+  useEffect(() => {
+    const hasSeenVideoFlag = localStorage.getItem('hasSeenFirstCourseVideo');
+    if (hasSeenVideoFlag === 'true') {
+      setHasSeenVideo(true);
+    }
+  }, []);
+
+  // NEW: Monitor when course content becomes ready
+  useEffect(() => {
+    if (course && course.title && course.description && course.image_url &&
+        course.title !== 'None' && course.description !== 'None') {
+      setContentReady(true);
+    }
+  }, [course]);
+
+  // NEW: Show video popup after content is ready (with 2 second delay)
+  useEffect(() => {
+    if (contentReady && !hasSeenVideo && course?.status === 'CourseStatus.CREATING') {
+      const timer = setTimeout(() => {
+        setShowVideoPopup(true);
+        // Mark as seen when popup is shown
+        localStorage.setItem('hasSeenFirstCourseVideo', 'true');
+        setHasSeenVideo(true);
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [contentReady, hasSeenVideo, course?.status]);
+
+  // NEW: Function to close video popup
+  const closeVideoPopup = () => {
+    setShowVideoPopup(false);
+  };
 
   // Initial data fetch
   useEffect(() => {
@@ -159,9 +204,6 @@ function CourseView() {
     };
   }, [course, courseId, t]); // The 'chapters' state is not needed here as it's an outcome, not a trigger for this effect.
 
-  // REMOVED: This useMemo is no longer needed as we have a dedicated `chapters` state
-  // const chapters = useMemo(() => course?.chapters || [], [course]);
-
   // Learning progress calculation
   const { learningPercentage, actualCompletedLearningChapters, totalCourseChaptersForLearning } = useMemo(() => {
     // CHANGED: This logic now uses the separate `chapters` state
@@ -178,10 +220,6 @@ function CourseView() {
       totalCourseChaptersForLearning: totalCount
     };
   }, [course, chapters]); // CHANGED: Dependency array now includes `chapters`
-
-  // ... THE REST OF THE JSX REMAINS EXACTLY THE SAME ...
-  // No changes are needed in the return() statement because it was already
-  // correctly using the `chapters` variable, which now correctly points to your state.
 
   if (loading && !course) {
     return (
@@ -212,6 +250,114 @@ function CourseView() {
 
   return (
     <Container size="lg" py="xl">
+      {/* NEW: First-time video popup */}
+      <Modal
+        opened={showVideoPopup}
+        onClose={closeVideoPopup}
+        fullScreen
+        padding={0}
+        withCloseButton={false}
+        overlayProps={{
+          color: '#000',
+          opacity: 0.95,
+        }}
+        styles={{
+          content: {
+            background: 'transparent',
+          },
+          body: {
+            padding: 0,
+            height: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+          },
+        }}
+      >
+        <Box
+          sx={{
+            position: 'relative',
+            width: '90%',
+            maxWidth: '1000px',
+            height: '80%',
+            maxHeight: '600px',
+          }}
+        >
+          {/* Close button */}
+          <ActionIcon
+            size="xl"
+            radius="xl"
+            color="white"
+            variant="filled"
+            onClick={closeVideoPopup}
+            sx={{
+              position: 'absolute',
+              top: -60,
+              right: 0,
+              zIndex: 1000,
+              background: 'rgba(255, 255, 255, 0.9)',
+              color: '#000',
+              '&:hover': {
+                background: 'rgba(255, 255, 255, 1)',
+              },
+            }}
+          >
+            <IconX size={24} />
+          </ActionIcon>
+
+          {/* Video container */}
+          <Box
+            sx={{
+              width: '100%',
+              height: '100%',
+              position: 'relative',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+            }}
+          >
+            <iframe
+              width="100%"
+              height="100%"
+              src="https://www.youtube.com/embed/uRXTp_C2jYk?autoplay=1&rel=0"
+              title="Welcome Video"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              style={{
+                borderRadius: '12px',
+              }}
+            />
+          </Box>
+
+          {/* Welcome text above video */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: -120,
+              left: 0,
+              right: 0,
+              textAlign: 'center',
+            }}
+          >
+            <Stack spacing="xs">
+              <Group position="center" spacing="xs">
+                <ThemeIcon size="lg" radius="xl" color="teal" variant="filled">
+                  <IconPlayerPlay size={20} />
+                </ThemeIcon>
+                <Title order={2} color="white" weight={600}>
+                  Welcome to your AI Learning Journey!
+                </Title>
+              </Group>
+              <Text color="rgba(255, 255, 255, 0.8)" size="lg">
+                Watch this quick intro to get the most out of your personalized course
+              </Text>
+            </Stack>
+          </Box>
+        </Box>
+      </Modal>
+
       {showNonCriticalError && (
          <Alert
          icon={<IconAlertCircle size={16} />}

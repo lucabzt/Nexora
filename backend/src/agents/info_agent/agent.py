@@ -25,7 +25,7 @@ class InfoAgent(StructuredAgent):
         # Create the info agent
         info_agent = LlmAgent(
             name="info_agent",
-            model="gemini-1.5-flash-8b",
+            model="gemini-2.5-flash-lite-preview-06-17",
             output_schema=CourseInfo,
             description="Agent for creating a small info for a course",
             instruction=load_instruction_from_file("info_agent/instructions.txt"),

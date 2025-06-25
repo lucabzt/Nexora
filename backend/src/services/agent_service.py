@@ -56,6 +56,7 @@ class AgentService:
 
         # define Rag service
         self.vector_service = vector_service.VectorService()
+        self.contentService = CourseContentService()
 
 
     @staticmethod
@@ -112,9 +113,8 @@ class AgentService:
             print(f"[{task_id}] Retrieved {len(docs)} documents and {len(images)} images.")
 
             #Add Data to ChromaDB for RAG
-            contentService = CourseContentService() 
-            contentService.process_course_documents(
-                course_id=str(course_id),
+            self.contentService.process_course_documents(
+                course_id=course_id,
                 document_ids=request.document_ids,
                 db=db
             )
@@ -199,17 +199,8 @@ class AgentService:
 
             # Process each chapter and stream as it's created
             for idx, topic in enumerate(response_planner["chapters"]):
-                ragInfos = set()
-                queryRes = self.vector_service.search_by_course_id(course_id, topic['caption'])
-                for doc in queryRes['documents']:
-                    for str_inf in doc:
-                        ragInfos.add(str_inf)
-                for content in topic['content']:
-                    queryRes = self.vector_service.search_by_course_id(course_id, content)
-                    for doc in queryRes['documents']:
-                        for str_inf in doc:
-                            ragInfos.add(str_inf)
-                ragInfos = list(set(ragInfos))
+                # course_id, topic
+                ragInfos = self.contentService.get_rag_infos(course_id, topic)
 
                 # Schedule image and coding agents to run concurrently as they do not depend on each other
                 coding_task = self.coding_agent.run(
