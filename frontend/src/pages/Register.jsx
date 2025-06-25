@@ -88,21 +88,40 @@ function Register() {
       // Handle different types of errors
       if (error.response) {
         // Server responded with an error status code
-        if (error.response.status === 422) {
+        const responseData = error.response.data || {};
+        
+        // Check for specific error messages in the response
+        if (responseData.detail) {
+          // If there's a detail message from the backend, use it
+          setError(responseData.detail);
+        } else if (error.response.status === 422) {
           // Handle validation errors (like invalid email format)
-          if (error.response.data?.message?.includes('email')) {
+          if (responseData.message?.includes('email')) {
             setError(t("emailInvalid", "Invalid email address"));
-          } else if (error.response.data?.message) {
-            setError(error.response.data.message);
+          } else if (responseData.message) {
+            setError(responseData.message);
           } else {
             setError(t("registrationFailed", "Registration failed. Please check your details and try again."));
           }
         } else if (error.response.status === 400) {
-          setError(t("badRequest", "Invalid request. Please check your details and try again."));
+          // For 400 errors, try to get the first error message if available
+          const errorMessage = responseData.detail || 
+                              (responseData.message && typeof responseData.message === 'string' ? responseData.message : null) ||
+                              t("badRequest", "Invalid request. Please check your details and try again.");
+          setError(errorMessage);
         } else if (error.response.status === 409) {
-          setError(t("userExists", "An account with this email already exists."));
+          // For 409 conflicts, check if it's email or username that already exists
+          const conflictMessage = responseData.detail || 
+                                (responseData.message?.includes('email') ? 
+                                  t("userExists", "An account with this email already exists.") :
+                                  t("usernameExists", "This username is already taken."));
+          setError(conflictMessage);
         } else {
-          setError(t("registrationError", "An error occurred during registration. Please try again later."));
+          // For other error status codes, use the error message if available, or a generic one
+          const errorMessage = responseData.detail || 
+                              (responseData.message && typeof responseData.message === 'string' ? responseData.message : null) ||
+                              t("registrationError", "An error occurred during registration. Please try again later.");
+          setError(errorMessage);
         }
       } else if (error.request) {
         // The request was made but no response was received
