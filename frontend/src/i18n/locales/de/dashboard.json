@@ -7,6 +7,10 @@
   "recommendedForYou": "Für dich empfohlen",
   "yourProgress": "Fortschritt",
 
+  "featuredCourse": {
+    "defaultTitle": "Lädt...",
+    "defaultDescription": "Lädt..."
+  },
   "stats": {
     "coursesCompleted": "Abgeschlossene Kurse",
     "currentStreak": "Aktuelle Serie",

@@ -7,6 +7,10 @@
   "recommendedForYou": "Recommended for you",
   "yourProgress": "Progress",
 
+  "featuredCourse": {
+    "defaultTitle": "Loading...",
+    "defaultDescription": "Loading..."
+  },
   "stats": {
     "coursesCompleted": "Courses Completed",
     "currentStreak": "Current Streak",

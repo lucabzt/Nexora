@@ -27,6 +27,7 @@ import { useTranslation } from "react-i18next";
 function Register() {
   const { t } = useTranslation("auth");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
   const { register } = useAuth();
   const { colorScheme } = useMantineColorScheme();
@@ -50,8 +51,10 @@ function Register() {
           ? t("usernameLength", "Username must be at least 3 characters")
           : null,
       email: (value) =>
-        !/^\S+@\S+$/.test(value)
-          ? t("emailInvalid", "Invalid email address")
+        !value
+          ? t("emailRequired", "Email is required")
+          : !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)
+          ? t("emailInvalid", "Please enter a valid email address (e.g., example@domain.com)")
           : null,
       password: (value) =>
         !value
@@ -68,27 +71,98 @@ function Register() {
 
   const handleSubmit = async (values) => {
     setIsLoading(true);
+    setError(""); // Clear previous errors
     try {
-      // The login function from AuthContext now returns the user object on success
-      // or throws an error on failure.
       const result = await register(
         values.username,
         values.email,
         values.password
       );
 
-      // If login is successful and returns a user object, navigate.
       if (result) {
-        navigate("/dashboard"); // Navigate to the dashboard
+        navigate("/dashboard");
       }
-
-      // No explicit 'else' needed here because if 'user' is not returned,
-      // an error would have been thrown by the login() function and caught below.
     } catch (error) {
-      // Errors (e.g., invalid credentials, network issues) are already handled by
-      // the login function in AuthContext (it shows a toast).
-      // You can add additional error handling specific to this page if needed.
       console.error("Register page: reg failed", error);
+      
+      // Handle different types of errors
+      if (error.response) {
+        // Server responded with an error status code
+        const responseData = error.response.data || {};
+        
+        // Check for specific error messages in the response
+        if (responseData.detail) {
+          // If there's a detail message from the backend, use it
+          setError(responseData.detail);
+          
+          // Check for username or email conflicts in the error message
+          if (responseData.detail.toLowerCase().includes('username')) {
+            form.setFieldError('username', responseData.detail);
+          } else if (responseData.detail.toLowerCase().includes('email')) {
+            form.setFieldError('email', responseData.detail);
+          }
+        } else if (error.response.status === 422) {
+          // Handle validation errors (like invalid email format)
+          if (responseData.message?.includes('email')) {
+            const errorMsg = t("emailInvalid", "Invalid email address");
+            setError(errorMsg);
+            form.setFieldError('email', errorMsg);
+          } else if (responseData.message) {
+            setError(responseData.message);
+          } else {
+            const errorMsg = t("registrationFailed", "Registration failed. Please check your details and try again.");
+            setError(errorMsg);
+          }
+        } else if (error.response.status === 400) {
+          // For 400 errors, try to get the first error message if available
+          const errorMessage = responseData.detail || 
+                              (responseData.message && typeof responseData.message === 'string' ? responseData.message : null) ||
+                              t("badRequest", "Invalid request. Please check your details and try again.");
+          setError(errorMessage);
+          
+          // Try to set field-level errors for common 400 errors
+          if (responseData.detail) {
+            if (responseData.detail.toLowerCase().includes('username')) {
+              form.setFieldError('username', responseData.detail);
+            } else if (responseData.detail.toLowerCase().includes('email')) {
+              form.setFieldError('email', responseData.detail);
+            } else if (responseData.detail.toLowerCase().includes('password')) {
+              form.setFieldError('password', responseData.detail);
+            }
+          }
+        } else if (error.response.status === 409) {
+          // For 409 conflicts, check if it's email or username that already exists
+          let conflictMessage = responseData.detail || 
+                              (responseData.message?.includes('email') ? 
+                                t("userExists", "An account with this email already exists.") :
+                                t("usernameExists", "This username is already taken."));
+          
+          // If we couldn't determine the conflict type from the message, try to guess from the detail
+          if (responseData.detail) {
+            if (responseData.detail.toLowerCase().includes('email')) {
+              conflictMessage = t("userExists", "An account with this email already exists.");
+              form.setFieldError('email', conflictMessage);
+            } else if (responseData.detail.toLowerCase().includes('username')) {
+              conflictMessage = t("usernameExists", "This username is already taken.");
+              form.setFieldError('username', conflictMessage);
+            }
+          }
+          
+          setError(conflictMessage);
+        } else {
+          // For other error status codes, use the error message if available, or a generic one
+          const errorMessage = responseData.detail || 
+                              (responseData.message && typeof responseData.message === 'string' ? responseData.message : null) ||
+                              t("registrationError", "An error occurred during registration. Please try again later.");
+          setError(errorMessage);
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        setError(t("networkError", "Network error. Please check your connection and try again."));
+      } else {
+        // Something happened in setting up the request
+        setError(t("requestError", "An error occurred. Please try again."));
+      }
     } finally {
       setIsLoading(false);
     }
@@ -103,7 +177,7 @@ function Register() {
   return (
     <Container size={460} my={40}>
       <Group position="center" align="center" spacing="xs" mb={20}>
-              <Image src={logoPath} width={80} mb="md" alt="Nexora Logo" />
+
               <Stack spacing="xxs">
                 <Title order={1} size={32} weight={700} align="center">
                   {t("welcomeBack")}
@@ -138,6 +212,11 @@ function Register() {
         />
         
         <form onSubmit={form.onSubmit(handleSubmit)}>
+          {error && (
+            <Text color="red" size="sm" mb="md">
+              {error}
+            </Text>
+          )}
           <Stack spacing="md">
             <TextInput
               label={t("username")}
