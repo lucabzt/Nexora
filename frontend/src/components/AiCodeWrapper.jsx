@@ -18,6 +18,7 @@ import '@xyflow/react/dist/style.css';
 import { motion } from "motion/react"
 import CustomReactFlow from "./ai_helper_components/CustomReactFlow.jsx";
 import TestComponent from "./ai_helper_components/playground2.jsx";
+import simpleSafeHtmlDecode from "./ai_helper_components/htmlDecoder.js";
 
 
 // Create a modified RF object with custom ReactFlow defaults
@@ -34,7 +35,7 @@ function AiCodeWrapper({ children, Background = true }) {
 
   const full_react_component = `${header}${children}`;
 
-  const decodedString = he.decode(full_react_component);
+  const decodedString = simpleSafeHtmlDecode(full_react_component);
 
   // Get translations
   const { t } = useTranslation('common');
