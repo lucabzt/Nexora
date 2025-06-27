@@ -43,18 +43,5 @@ const PaperBackground = ({ children }) => {
   );
 };
 
------
-IMPORTANT JSX RULE: When writing JSX components, never use unescaped apostrophes (') or quotes (") directly in JSX text content.
-Instead:
-1. Use curly braces with template literals: {"plot's data"}
-2. Use HTML entities: plot&apos;s data
-3. Use the preferred HTML entity &apos; for apostrophes
-4. Use &quot; for quotes
-
-Examples:
-❌ Wrong: <p>plot's data</p>
-✅ Correct: <p>plot&apos;s data</p>
-✅ Correct: <p>{"plot's data"}</p>
-
 ## Libraries and Plugins
 You will have access to several libraries and plugins which you will now receive documentation for:

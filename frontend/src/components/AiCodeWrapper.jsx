@@ -2,7 +2,6 @@ import React, {Suspense, lazy} from "react";
 import PaperBackground from "./PaperBackground.jsx";
 import { ErrorBoundary } from 'react-error-boundary';
 const LazyStringToReactComponent = lazy(() => import('string-to-react-component'));
-import he from 'he';
 import { useTranslation } from 'react-i18next';
 
 
@@ -18,7 +17,7 @@ import '@xyflow/react/dist/style.css';
 import { motion } from "motion/react"
 import CustomReactFlow from "./ai_helper_components/CustomReactFlow.jsx";
 import TestComponent from "./ai_helper_components/playground2.jsx";
-import simpleSafeHtmlDecode from "./ai_helper_components/htmlDecoder.js";
+import comprehensiveHtmlDecode from "./ai_helper_components/htmlDecoder.js";
 
 
 // Create a modified RF object with custom ReactFlow defaults
@@ -35,7 +34,8 @@ function AiCodeWrapper({ children, Background = true }) {
 
   const full_react_component = `${header}${children}`;
 
-  const decodedString = simpleSafeHtmlDecode(full_react_component);
+  //const decodedString = comprehensiveHtmlDecode(full_react_component);
+    const decodedString = full_react_component
 
   // Get translations
   const { t } = useTranslation('common');
