@@ -4,11 +4,27 @@ import he from 'he';
  * Simple but effective HTML entity decoder that preserves syntax-critical entities
  */
 function simpleSafeHtmlDecode(code) {
-    // Step 1: Fix single-quoted JS strings containing &apos; (your existing fix)
-    const jsStringPattern = /(\w+\s*:\s*{\s*\w+\s*:\s*)'([^']*&apos;[^']*)'/g;
-    let processedCode = code.replace(jsStringPattern, (match, prefix, content) => {
-        const cleanContent = content.replace(/&apos;/g, "'");
-        return `${prefix}"${cleanContent}"`;
+    // Step 1: Fix ALL single-quoted JS strings that contain apostrophes or &apos;
+    let processedCode = code;
+
+    // Match any single-quoted string (handling escaped quotes properly)
+    const singleQuotePattern = /'((?:[^'\\]|\\.)*)'/g;
+
+    processedCode = processedCode.replace(singleQuotePattern, (match, content) => {
+        // Check if this string contains apostrophes (either literal or &apos;)
+        const hasApostrophe = content.includes("'") || content.includes("&apos;");
+
+        if (hasApostrophe) {
+            // Convert &apos; to literal apostrophes
+            const cleanContent = content.replace(/&apos;/g, "'");
+
+            // Escape any double quotes in the content and wrap in double quotes
+            const escapedContent = cleanContent.replace(/"/g, '\\"');
+            return `"${escapedContent}"`;
+        }
+
+        // Keep as single-quoted if no apostrophes
+        return match;
     });
 
     // Step 2: Protect JSX-critical entities before decoding
