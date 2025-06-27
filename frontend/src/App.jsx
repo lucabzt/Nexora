@@ -36,7 +36,7 @@ import CourseLayout from './layouts/CourseLayout'; // Import CourseLayout
 function App() {
   const [colorScheme, setColorScheme] = useState(() => {
     // Load saved theme from localStorage or default to 'dark'
-    return localStorage.getItem('mantine-color-scheme') || 'dark';
+    return localStorage.getItem('mantine-color-scheme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   });
   
   const toggleColorScheme = (value) => {
