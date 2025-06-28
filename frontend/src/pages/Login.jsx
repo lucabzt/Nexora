@@ -32,6 +32,7 @@ function Login() {
   const { login } = useAuth();
   const { colorScheme } = useMantineColorScheme();
   const theme = useMantineTheme();
+  const [error, setError] = useState("");
 
   // Use white logo for dark theme, black for light theme
   const logoPath =
