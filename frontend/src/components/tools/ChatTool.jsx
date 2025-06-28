@@ -21,6 +21,8 @@ import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import Latex from 'react-latex-next';
+import 'katex/dist/katex.min.css';
 
 /**
  * ChatTool component
@@ -276,7 +278,11 @@ function ChatTool({ isOpen, courseId, chapterId }) {
                             </Code>
                           );
                         },
-                        p: (props) => <Text size="sm" as="p" {...props} />,
+                        p: (props) => (
+                          <Text size="sm" as="p">
+                            <Latex>{props.children}</Latex>
+                          </Text>
+                        ),
                         blockquote: (props) => (
                           <Blockquote
                             icon={<IconQuote size={18} />}
