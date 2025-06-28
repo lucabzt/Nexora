@@ -169,7 +169,9 @@ function Dashboard() {
     if (course.status === 'CourseStatus.CREATING') return 0;
     
     // For in-progress courses, generate a random progress between 10-90%
-    return (course && course.chapter_count && course.chapter_count > 0) ? (100 * course.completed_chapter_count / course.chapter_count) : 0;
+    return (course && course.chapter_count && course.chapter_count > 0)
+      ? Math.round((100 * course.completed_chapter_count / course.chapter_count) * 100) / 100
+      : 0;
 };
 
 
