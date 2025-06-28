@@ -21,7 +21,9 @@ import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import Latex from 'react-latex-next';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import rehypeRaw from 'rehype-raw';
 import 'katex/dist/katex.min.css';
 
 /**
@@ -260,6 +262,8 @@ function ChatTool({ isOpen, courseId, chapterId }) {
                 <div>
                   {message.sender === 'ai' ? (
                     <ReactMarkdown
+                      remarkPlugins={[remarkMath]}
+                      rehypePlugins={[rehypeKatex, rehypeRaw]}
                       components={{
                         code({inline, className, children, ...props}) {
                           const match = /language-(\w+)/.exec(className || '');
@@ -278,11 +282,7 @@ function ChatTool({ isOpen, courseId, chapterId }) {
                             </Code>
                           );
                         },
-                        p: (props) => (
-                          <Text size="sm" as="p">
-                            <Latex>{props.children}</Latex>
-                          </Text>
-                        ),
+                        p: (props) => <Text size="sm" as="p" {...props} />,
                         blockquote: (props) => (
                           <Blockquote
                             icon={<IconQuote size={18} />}
