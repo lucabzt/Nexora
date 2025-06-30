@@ -36,6 +36,8 @@ from google.genai import types
 
 from .data_processors.pdf_processor import PDFProcessor  
 
+from logging import getLogger
+logger = getLogger(__name__)
 
 
 class AgentService:
@@ -203,6 +205,9 @@ class AgentService:
             self.state_manager.save_chapters(user_id, course_id, response_planner["chapters"])
 
             async def process_chapter(idx: int, topic: dict):
+
+                logger.info(f"[{task_id}] Processing chapter {idx + 1}: {topic['caption']}")
+
                 # Get RAG infos for the topic
                 ragInfos = self.contentService.get_rag_infos(course_id, topic)
 
@@ -246,6 +251,8 @@ class AgentService:
                     state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
                     content=self.query_service.get_tester_query(user_id, course_id, idx, response_code["explanation"], request.language, request.difficulty) 
                 )
+
+                logger.info(f"Finished")
 
                 # Save questions in db
                 with get_db_context() as db:
