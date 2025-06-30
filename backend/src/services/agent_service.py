@@ -24,7 +24,7 @@ from ..agents.planner_agent import PlannerAgent
 from ..agents.info_agent.agent import InfoAgent
 
 from ..agents.image_agent.agent import ImageAgent
-from ..agents.image_creation_agent.agent import VertexImagenAgent
+from ..agents.imagen_agent.agent import VertexImagenAgent
 
 from ..agents.tester_agent import TesterAgent
 from ..agents.utils import create_text_query
