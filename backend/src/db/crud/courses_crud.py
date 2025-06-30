@@ -125,9 +125,9 @@ def get_courses_infos(db: Session, user_id: str, skip: int = 0, limit: int = 200
             Course.id == completed_chapters_subq.c.course_id
         )
         .filter(Course.user_id == user_id)
+        .order_by(Course.created_at.desc())
         .offset(skip)
         .limit(limit)
-        .order_by(Course.created_at.desc())
         .all())
     
     # Convert to list of CourseInfo objects

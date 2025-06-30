@@ -4,9 +4,11 @@ This file defines the service that coordinates the interaction between all the a
 import json
 import asyncio
 import traceback
+from typing import List
+from logging import getLogger
+
 
 from google.adk.sessions import InMemorySessionService
-from sqlalchemy.orm import Session
 
 from ..services import vector_service
 from ..services.course_content_service import CourseContentService
@@ -34,9 +36,11 @@ from ..db.models.db_course import Course
 from ..db.database import get_db_context
 from google.genai import types
 
-from .data_processors.pdf_processor import PDFProcessor  
+#from .data_processors.pdf_processor import PDFProcessor
 
-from logging import getLogger
+from ..db.models.db_file import Document, Image
+
+
 logger = getLogger(__name__)
 
 
@@ -100,7 +104,7 @@ class AgentService:
         """
         course_db = None
         try:
-            print(f"[{task_id}] Starting course creation for user {user_id}")
+            logger.info("[%s] Starting course creation for user %s", task_id, user_id)
             # Create a memory session for the course creation
             session = await self.session_service.create_session(
                 app_name=self.app_name,
@@ -108,14 +112,14 @@ class AgentService:
                 state={}
             )
             session_id = session.id
-            print(f"[{task_id}] Session created: {session_id}")
+            logger.info("[%s] Session created: %s", task_id, session_id)
 
             # Retrieve documents from database
             with get_db_context() as db:
                 docs: List[Document] = documents_crud.get_documents_by_ids(db, request.document_ids)
                 images: List[Image] = images_crud.get_images_by_ids(db, request.picture_ids)
             
-            print(f"[{task_id}] Retrieved {len(docs)} documents and {len(images)} images.")
+            logger.info("[%s] Retrieved %d documents and %d images.", task_id, len(docs), len(images))
 
             #Add Data to ChromaDB for RAG
             self.contentService.process_course_documents(
@@ -129,7 +133,7 @@ class AgentService:
                 state={},
                 content=self.query_service.get_info_query(request, docs, images,)
             )
-            print(f"[{task_id}] InfoAgent response: {info_response['title']}")
+            logger.info("[%s] InfoAgent response: %s", task_id, info_response['title'])
 
             # Get unsplash image url
             image_response = await self.image_agent.run(
@@ -206,7 +210,7 @@ class AgentService:
 
             async def process_chapter(idx: int, topic: dict):
 
-                logger.info(f"[{task_id}] Processing chapter {idx + 1}: {topic['caption']}")
+                logger.info("[%s] Processing chapter %d: %s", task_id, idx + 1, topic['caption'])
 
                 # Get RAG infos for the topic
                 ragInfos = self.contentService.get_rag_infos(course_id, topic)
