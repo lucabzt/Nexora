@@ -2,13 +2,16 @@
 This file defines the base class for all agents.
 """
 import json
-from google.genai import types
-from abc import ABC, abstractmethod
-from typing import Dict, Any
-
-
 import logging
-#logging.getLogger("google_adk.google.adk.models.google_llm").setLevel(logging.WARNING)
+from abc import ABC, abstractmethod
+from typing import Any, Dict
+
+from google.genai import types
+
+from ..config import settings
+
+if not settings.AGENT_DEBUG_MODE:
+    logging.getLogger("google_adk.google.adk.models.google_llm").setLevel(logging.WARNING)
 
 
 
