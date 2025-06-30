@@ -197,9 +197,8 @@ class AgentService:
             # Save chapters to state
             self.state_manager.save_chapters(user_id, course_id, response_planner["chapters"])
 
-            # Process each chapter and stream as it's created
-            for idx, topic in enumerate(response_planner["chapters"]):
-                # course_id, topic
+            async def process_chapter(idx: int, topic: dict):
+                # Get RAG infos for the topic
                 ragInfos = self.contentService.get_rag_infos(course_id, topic)
 
                 # Schedule image and coding agents to run concurrently as they do not depend on each other
@@ -239,11 +238,22 @@ class AgentService:
                 response_tester = await self.tester_agent.run(
                     user_id=user_id,
                     state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
-                    content=self.query_service.get_tester_query(user_id, course_id, idx, response_code["explanation"], request.language, request.difficulty)
+                    content=self.query_service.get_tester_query(user_id, course_id, idx, response_code["explanation"], request.language, request.difficulty) 
                 )
 
                 # Save questions in db
                 await self.save_questions(db, response_tester['questions'], chapter_db.id)
+                
+                return chapter_db
+
+            # Process all chapters in parallel
+            chapter_tasks = [
+                process_chapter(idx, topic) 
+                for idx, topic in enumerate(response_planner["chapters"])
+            ]
+            
+            # Wait for all chapters to be processed
+            await asyncio.gather(*chapter_tasks)
 
             # Update course status to finished
             courses_crud.update_course_status(db, course_id, CourseStatus.FINISHED)
