@@ -9,9 +9,11 @@ from sqlalchemy.orm import Session
 
 from ...db.database import get_db
 from ...db.models.db_user import User
-from ...services.chat_service_instance import get_chat_service
+from ...db.database import get_db_context
+
 from ...utils.auth import get_current_active_user
 from ..schemas.chat import ChatRequest, ChatResponse
+from ...services.chat_service import chat_service
 from ...db.crud import chapters_crud
 
 logger = logging.getLogger(__name__)
@@ -69,9 +71,7 @@ def _validate_chat_request(chat_request: ChatRequest) -> None:
 async def chat_with_agent(
     chapter_id: str,
     chat_request: ChatRequest,
-    request: Request,
-    current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    current_user: User = Depends(get_current_active_user)
 ) -> StreamingResponse:
     """Chat with the AI agent for a specific chapter.
     
@@ -82,7 +82,6 @@ async def chat_with_agent(
         chapter_id: The ID of the chapter to chat about
         chat_request: The chat request containing the user's message
         current_user: The currently authenticated user
-        db: Database session
         
     Returns:
         StreamingResponse: Server-Sent Events stream with the AI's response
@@ -91,11 +90,12 @@ async def chat_with_agent(
         HTTPException: If validation fails or an error occurs
     """
     try:
-        chapter = chapters_crud.get_chapter_by_id(db, chapter_id)
-        if not chapter:
-            raise HTTPException(status_code=404, detail="Chapter not found")
-        if chapter.course.user_id != current_user.id:
-            raise HTTPException(status_code=403, detail="You do not have access to this chapter")
+        with get_db_context() as db:
+            chapter = chapters_crud.get_chapter_by_id(db, chapter_id)
+            if not chapter:
+                raise HTTPException(status_code=404, detail="Chapter not found")
+            if chapter.course.user_id != current_user.id:
+                raise HTTPException(status_code=403, detail="You do not have access to this chapter")
 
         # Validate the request
         _validate_chat_request(chat_request)
@@ -109,25 +109,13 @@ async def chat_with_agent(
                 "message_length": len(chat_request.message)
             }
         )
-        
-        # Set response headers for SSE
-        headers = {
-            "Content-Type": "text/event-stream; charset=utf-8",
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Content-Type-Options": "nosniff"
-        }
-        
-        # Get the chat service instance from the application state
-        chat_service = get_chat_service()
-        
+                
         # Process the chat message and return a streaming response
         return StreamingResponse(
             chat_service.process_chat_message(
                 user_id=str(current_user.id),
                 chapter_id=chapter_id,
                 request=chat_request,
-                db=db
             ),
             media_type="text/event-stream",
             headers={
@@ -137,9 +125,9 @@ async def chat_with_agent(
             }
         )
         
-    except HTTPException:
+    except HTTPException as e:
         # Re-raise HTTP exceptions (like validation errors)
-        raise
+        raise e
     except Exception as e:
         # Log unexpected errors
         logger.error(

@@ -28,33 +28,29 @@ class CourseContentService:
                     ragInfos.add(str_inf)
         return list(set(ragInfos))
     
-    def process_course_documents(self, course_id: int, document_ids: List[int], db: Session):
+    def process_course_documents(self, course_id: int, documents: List[Document]):
         """
         Process all uploaded documents for a course and add to vector database.
         """
         try:
-            # Get course-specific collection
-            collection = self.vector_service.get_collection_by_course_id(course_id)
-            
-            for doc_id in document_ids:
-                document = db.query(Document).filter(Document.id == doc_id).first()
+            for document in documents:
                 if not document:
-                    self.logger.warning(f"Document {doc_id} not found")
+                    self.logger.warning(f"Document {document.id} not found")
                     continue
                 
                 # Only process PDFs for now
                 if document.content_type == "application/pdf":
-                    self._process_pdf_document(course_id, document, collection)
+                    self._process_pdf_document(course_id, document)
                 else:
                     self.logger.info(f"Skipping non-PDF document: {document.filename}")
             
-            self.logger.info(f"Processed {len(document_ids)} documents for course {course_id}")
+            self.logger.info(f"Processed {len(documents)} documents for course {course_id}")
             
         except Exception as e:
             self.logger.error(f"Failed to process documents for course {course_id}: {e}")
             raise
     
-    def _process_pdf_document(self, course_id: int, document: Document, collection):
+    def _process_pdf_document(self, course_id: int, document: Document):
         """
         Extract paragraphs from PDF and add to vector database.
         """

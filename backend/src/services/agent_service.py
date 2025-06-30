@@ -31,6 +31,7 @@ from ..db.models.db_course import CourseStatus
 from ..api.schemas.course import CourseRequest
 #from ..services.notification_service import WebSocketConnectionManager
 from ..db.models.db_course import Course
+from ..db.database import get_db_context
 from google.genai import types
 
 from .data_processors.pdf_processor import PDFProcessor  
@@ -84,7 +85,7 @@ class AgentService:
                 )
 
 
-    async def create_course(self, user_id: str, course_id: int, request: CourseRequest, db: Session, task_id: str):#, ws_manager: WebSocketConnectionManager):
+    async def create_course(self, user_id: str, course_id: int, request: CourseRequest, task_id: str):#, ws_manager: WebSocketConnectionManager):
         """
         Main function for handling the course creation logic. Uses WebSocket for progress.
 
@@ -108,15 +109,16 @@ class AgentService:
             print(f"[{task_id}] Session created: {session_id}")
 
             # Retrieve documents from database
-            docs = documents_crud.get_documents_by_ids(db, request.document_ids)
-            images = images_crud.get_images_by_ids(db, request.picture_ids)
+            with get_db_context() as db:
+                docs: List[Document] = documents_crud.get_documents_by_ids(db, request.document_ids)
+                images: List[Image] = images_crud.get_images_by_ids(db, request.picture_ids)
+            
             print(f"[{task_id}] Retrieved {len(docs)} documents and {len(images)} images.")
 
             #Add Data to ChromaDB for RAG
             self.contentService.process_course_documents(
                 course_id=course_id,
-                document_ids=request.document_ids,
-                db=db
+                documents=docs
             )
 
             # Get a short course title and description from the info_agent
@@ -136,17 +138,18 @@ class AgentService:
             )
 
             # Update course in database
-            course_db = courses_crud.update_course(
-                db=db,
-                course_id=course_id,
-                session_id=session_id,
-                title=info_response['title'],
-                description=info_response['description'],
-                image_url=image_response['explanation'],
-                total_time_hours=request.time_hours,
-            )
-            if not course_db:
-                raise ValueError(f"Failed to update course in DB for user {user_id} with course_id {course_id}")
+            with get_db_context() as db:
+                course_db = courses_crud.update_course(
+                    db=db,
+                    course_id=course_id,
+                    session_id=session_id,
+                    title=info_response['title'],
+                    description=info_response['description'],
+                    image_url=image_response['explanation'],
+                    total_time_hours=request.time_hours,
+                )
+                if not course_db:
+                    raise ValueError(f"Failed to update course in DB for user {user_id} with course_id {course_id}")
             print(f"[{task_id}] Course updated in DB with ID: {course_id}")
 
             # Send Notification to WebSocket
@@ -164,10 +167,11 @@ class AgentService:
 
  
             # Bind documents to this course
-            for doc in docs:
-                documents_crud.update_document(db, int(doc.id), course_id=course_id)
-            for img in images:
-                images_crud.update_image(db, int(img.id), course_id=course_id)
+            with get_db_context() as db:
+                for doc in docs:
+                    documents_crud.update_document(db, int(doc.id), course_id=course_id)
+                for img in images:
+                    images_crud.update_image(db, int(img.id), course_id=course_id)
             print(f"[{task_id}] Documents and images bound to course.")
 
             # Notify WebSocket about course info
@@ -186,11 +190,12 @@ class AgentService:
             print(f"[{task_id}] PlannerAgent responded with {len(response_planner.get('chapters', []))} chapters.")
 
             # Update course in database
-            course_db = courses_crud.update_course(
-                db=db,
-                course_id=course_id,
-                chapter_count=len(response_planner["chapters"])
-            )
+            with get_db_context() as db:
+                course_db = courses_crud.update_course(
+                    db=db,
+                    course_id=course_id,
+                    chapter_count=len(response_planner["chapters"])
+                )
             # Send notification to WebSocket that course info is being updated
             ###await ws_manager.send_json_message(task_id, {"type": "course_info", "data": "updating course info"})
 
@@ -223,16 +228,17 @@ class AgentService:
                 summary = "\n".join(topic['content'][:3])
 
                 # Save the chapter in db first
-                chapter_db = chapters_crud.create_chapter(
-                    db=db,
-                    course_id=course_id,
-                    index=idx + 1,
-                    caption=topic['caption'],
-                    summary=summary,
-                    content=response_code['explanation'] if 'explanation' in response_code else "() => {<p>Something went wrong</p>}",
-                    time_minutes=topic['time'],
-                    image_url=image_response['explanation'],
-                )
+                with get_db_context() as db:
+                    chapter_db = chapters_crud.create_chapter(
+                        db=db,
+                        course_id=course_id,
+                        index=idx + 1,
+                        caption=topic['caption'],
+                        summary=summary,
+                        content=response_code['explanation'] if 'explanation' in response_code else "() => {<p>Something went wrong</p>}",
+                        time_minutes=topic['time'],
+                        image_url=image_response['explanation'],
+                    )
 
                 # Get response from tester agent
                 response_tester = await self.tester_agent.run(
@@ -242,7 +248,8 @@ class AgentService:
                 )
 
                 # Save questions in db
-                await self.save_questions(db, response_tester['questions'], chapter_db.id)
+                with get_db_context() as db:
+                    await self.save_questions(db, response_tester['questions'], chapter_db.id)
                 
                 return chapter_db
 
@@ -256,7 +263,8 @@ class AgentService:
             await asyncio.gather(*chapter_tasks)
 
             # Update course status to finished
-            courses_crud.update_course_status(db, course_id, CourseStatus.FINISHED)
+            with get_db_context() as db:
+                courses_crud.update_course_status(db, course_id, CourseStatus.FINISHED)
 
             # Send completion signal
             #await ws_manager.send_json_message(task_id, {
@@ -272,8 +280,9 @@ class AgentService:
             # Log detailed error traceback here if possible, e.g., import traceback; traceback.print_exc()
             if course_db:
                 try:
-                    courses_crud.update_course_status(db, course_id, CourseStatus.FAILED)
-                    courses_crud.update_course(db, course_id, error_msg=error_message)
+                    with get_db_context() as db:
+                        courses_crud.update_course_status(db, course_id, CourseStatus.FAILED)
+                        courses_crud.update_course(db, course_id, error_msg=error_message)
                     print(f"[{task_id}] Course {course_id} status updated to FAILED due to error.")
                 except Exception as db_error:
                     print(f"[{task_id}] Additionally, failed to update course status to FAILED: {db_error}")

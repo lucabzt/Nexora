@@ -8,7 +8,7 @@ from ...db.models.db_course import Chapter, Course, CourseStatus
 from ...db.models.db_user import User
 from ...services.agent_service import AgentService
 from ...utils.auth import get_current_active_user
-from ...db.database import get_db
+from ...db.database import get_db, get_db_context, SessionLocal
 from ...db.crud import courses_crud, chapters_crud, users_crud
 from ...services import course_service
 from ...services.course_service import verify_course_ownership
@@ -38,50 +38,50 @@ agent_service = AgentService()
 async def create_course_request(
         course_request: CourseRequest,
         background_tasks: BackgroundTasks,
-        current_user: User = Depends(get_current_active_user),
-        db: Session = Depends(get_db)
+        current_user: User = Depends(get_current_active_user)
 ) -> CourseInfo:
     """
     Initiate course creation as a background task and return a task ID for WebSocket progress updates.
     """
-   
-   # Create empty course in the database
-    course = courses_crud.create_new_course(
-        db=db,
-        user_id=str(current_user.id),
-        total_time_hours=course_request.time_hours,
-        query_=course_request.query,
-        language=course_request.language,
-        difficulty=course_request.difficulty,
-        status=CourseStatus.CREATING  # Set initial status to CREATING
-
-    )
-    if not course:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create course in the database"
+    
+    with get_db_context() as db:
+        # Create empty course in the database
+        course = courses_crud.create_new_course(
+            db=db,
+            user_id=str(current_user.id),
+            total_time_hours=course_request.time_hours,
+            query_=course_request.query,
+            language=course_request.language,
+            difficulty=course_request.difficulty,
+            status=CourseStatus.CREATING  # Set initial status to CREATING
+        
+        )
+        if not course:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to create course in the database"
+            )
+        
+    
+        task_id = str(uuid.uuid4())
+        # Add the long-running course creation to background tasks
+        # The agent_service.create_course will need to be modified to accept ws_manager and task_id
+        background_tasks.add_task(
+            agent_service.create_course,
+                            user_id=str(current_user.id),
+                            course_id=course.id,
+                            request=course_request,
+            task_id=task_id
         )
 
-    
-    # Add the long-running course creation to background tasks
-    # The agent_service.create_course will need to be modified to accept ws_manager and task_id
-    # and use ws_manager.send_json_message(task_id, progress_data) to send updates.
-    background_tasks.add_task(
-        agent_service.create_course,
-        user_id=str(current_user.id),
-        course_id=course.id,
-        request=course_request,
-        db=db,
-        task_id=str(uuid.uuid4())#,  # Generate a unique task ID
-        #ws_manager=ws_manager
-    )
-    
-    return CourseInfo(
-        course_id=int(course.id),
-        total_time_hours=course_request.time_hours,
-        status=course.status.value,  # Convert enum to string
-        completed_chapter_count=0,
-    )
+        return CourseInfo(
+            course_id=int(course.id),
+            total_time_hours=course_request.time_hours,
+            status=course.status.value,  # Convert enum to string
+            completed_chapter_count=0,
+        )
+                
+
 
 
 @router.get("/", response_model=List[CourseInfo])
