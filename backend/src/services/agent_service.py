@@ -252,7 +252,7 @@ class AgentService:
                     content=self.query_service.get_tester_query(user_id, course_id, idx, response_code["explanation"], request.language, request.difficulty) 
                 )
 
-                logger.info(f"Finished")
+                logger.info("Finished")
 
                 # Save questions in db
                 with get_db_context() as db:
