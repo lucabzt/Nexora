@@ -10,8 +10,6 @@ import { PomodoroProvider } from './contexts/PomodoroContext';
 //import { NotificationProvider } from './contexts/NotificationContext';
 import './i18n/i18n'; // Import i18n configuration
 
-
-
 // Pages
 import Dashboard from './pages/Dashboard';
 import CreateCourse from './pages/CreateCourse';
