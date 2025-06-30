@@ -127,6 +127,7 @@ def get_courses_infos(db: Session, user_id: str, skip: int = 0, limit: int = 200
         .filter(Course.user_id == user_id)
         .offset(skip)
         .limit(limit)
+        .order_by(Course.created_at.desc())
         .all())
     
     # Convert to list of CourseInfo objects
