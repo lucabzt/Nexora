@@ -19,7 +19,6 @@ from .api.schemas import user as user_schema
 from .db.database import engine, SessionLocal
 from .db.models import db_user as user_model
 from .utils import auth
-from .services.chat_service_instance import get_chat_service
 
 from .core.routines import update_stuck_courses
 from .config.settings import SESSION_SECRET_KEY
@@ -37,7 +36,6 @@ app = FastAPI(
     lifespan=lifespan  # Use the lifespan context manager
 )
 
-# Chat service is now managed in services.chat_service_instance
 
 app.add_middleware(
     SessionMiddleware,
