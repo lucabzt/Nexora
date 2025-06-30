@@ -80,3 +80,6 @@ DISCORD_REDIRECT_URI = os.getenv("DISCORD_REDIRECT_URI", "https://www.nexora-ai.
 
 UNSPLASH_ACCESS_KEY = os.getenv("UNSPLASH_ACCESS_KEY")
 UNSPLASH_SECRET_KEY = os.getenv("UNSPLASH_SECRET_KEY")
+
+
+CHROMA_DB_URL = os.getenv("CHROMA_DB_URL", "http://localhost:8000")
