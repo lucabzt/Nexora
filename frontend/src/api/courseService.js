@@ -21,11 +21,11 @@ export const courseService = {
     const maxIndex = Math.max(...chapters.map(ch => ch.index));
     
     // Create an array with maxIndex + 1 elements, filling missing indices with empty objects
-    const result = Array(maxIndex + 1).fill().map((_, index) => {
-      const existingChapter = chapters.find(ch => ch.index === index);
+    const result = Array(maxIndex).fill().map((_, index) => {
+      const existingChapter = chapters.find(ch => ch.index === index + 1);
       return existingChapter || {
         id: null,
-        index: index,
+        index: index + 1,
         caption: null,
         summary: null,
         content: null,
