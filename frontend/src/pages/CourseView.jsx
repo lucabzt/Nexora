@@ -612,7 +612,7 @@ function CourseView() {
                     </Box>
                   </Group>
 
-                  {course.status !== "CourseStatus.CREATING" && chapters.length > 0 && (
+                  {course.status !== "CourseStatus.CREATING" && chapters.length > 0 && chapters[0]?.id !== null && (
                     <Button
                       size="md"
                       variant="gradient"
@@ -849,7 +849,7 @@ function CourseView() {
                     mt="md"
                     rightIcon={chapter.is_completed ? <IconCircleCheck size={16} /> : <IconChevronRight size={16} />}
                     onClick={() => navigate(`/dashboard/courses/${courseId}/chapters/${chapter.id}`)}
-                    disabled={course.status === "CourseStatus.CREATING" && index > (chapters.length -1) }
+                    disabled={chapter.id === null}
                     sx={(theme) =>
                       chapter.is_completed
                         ? {}
