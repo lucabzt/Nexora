@@ -123,15 +123,16 @@ function CourseView() {
         // Initialize creationProgressUI if course is in creating state
         if (courseData.status === 'CourseStatus.CREATING') {
           const totalChapters = courseData.chapter_count || 0;
-          const progressPercent = totalChapters > 0 ? Math.round((currentChapters.length / totalChapters) * 100) : 0;
+          const currentChapters_length = currentChapters === null ? 0 : currentChapters.filter(chapter => chapter.id !== null).length;
+          const progressPercent = totalChapters > 0 ? Math.round((currentChapters_length / totalChapters) * 100) : 0;
 
           setCreationProgressUI({
             statusText: t('creation.statusCreatingChapters', {
-              chaptersCreated: currentChapters.length,
+              chaptersCreated: currentChapters_length,
               totalChapters: totalChapters || t('creation.unknownTotal')
             }),
             percentage: progressPercent,
-            chaptersCreated: currentChapters.length,
+            chaptersCreated: currentChapters_length,
             estimatedTotal: totalChapters,
           });
         }
@@ -168,13 +169,15 @@ function CourseView() {
         setChapters(currentChapters);  // ADDED: Update the chapters state on each poll
 
         const totalChapters = polledData.chapter_count || 0;
-        const progressPercent = totalChapters > 0 ? Math.round((currentChapters.length / totalChapters) * 100) : 0;
+
+        const currentChapters_length = currentChapters === null ? 0 : currentChapters.filter(chapter => chapter.id !== null).length;
+        const progressPercent = totalChapters > 0 ? Math.round((currentChapters_length / totalChapters) * 100) : 0;
 
         if (polledData.status === 'CourseStatus.FINISHED') {
           setCreationProgressUI({
             statusText: t('creation.statusComplete'),
             percentage: 100,
-            chaptersCreated: currentChapters.length,
+            chaptersCreated: currentChapters_length,
             estimatedTotal: totalChapters,
           });
           console.log('Course creation completed. Stopping poll.');
@@ -182,11 +185,11 @@ function CourseView() {
         } else if (polledData.status === 'CourseStatus.CREATING') {
           setCreationProgressUI({
             statusText: t('creation.statusCreatingChapters', {
-                chaptersCreated: currentChapters.length,
+                chaptersCreated: currentChapters_length,
                 totalChapters: totalChapters || t('creation.unknownTotal')
             }),
             percentage: progressPercent,
-            chaptersCreated: currentChapters.length,
+            chaptersCreated: currentChapters_length,
             estimatedTotal: totalChapters,
           });
         } else {

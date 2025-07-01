@@ -51,8 +51,8 @@
     "statusInProgress": "In Bearbeitung",
     "statusNotStarted": "Nicht begonnen",
     "defaultCaptionText": "Kapitel {{chapterNumber}}",
-    "defaultTitleText": "Kapitel {{chapterNumber}}",
-    "quizCount_one": "{{count}} Quiz",
+    "defaultSummaryText": "Wird erstellt...",
+    "statusCreating": "Wird erstellt...",
     "quizCount_other": "{{count}} Quizze"
   },
   "sessionIdLabel": "Sitzungs-ID:",
