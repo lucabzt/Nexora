@@ -138,10 +138,7 @@ async def get_course_chapters(
 
     chapters = chapters_crud.get_chapters_by_course_id(db, course_id)
     if not chapters:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No chapters found for this course"
-        )
+        return []
 
     # Convert SQLAlchemy Chapter objects to ChapterSchema using model_validate
     chapter_schemas = [ChapterSchema.model_validate(chapter) for chapter in chapters]
