@@ -51,7 +51,7 @@
     "statusInProgress": "In Bearbeitung",
     "statusNotStarted": "Nicht begonnen",
     "defaultCaptionText": "Kapitel {{chapterNumber}}",
-    "defaultSummaryText": "Wird erstellt...",
+    "defaultSummaryText": "Letzten Schritte werden angewendet...",
     "statusCreating": "Wird erstellt...",
     "quizCount_other": "{{count}} Quizze"
   },
