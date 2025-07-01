@@ -755,7 +755,7 @@ function CourseView() {
 
                   <Card.Section sx={{ position: 'relative' }}>
                     <Image
-                      src={chapter.image_url || "https://cdn.prod.website-files.com/62b5697fd4d1b864ed69a0ac/636b26c56d140b27f7c14c1f_Blogthumbnail%20Kursstruktur%20plain%20(1)%20(1).png"}
+                      src={chapter.image_url || "https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png"}
                       alt={chapter.caption || t('chapters.defaultCaptionText', { chapterNumber: index + 1 })}
                       height={180}
                       sx={{
@@ -842,26 +842,40 @@ function CourseView() {
                     </Text>
                   </Box>
 
-                  <Button
-                    variant={chapter.is_completed ? "light" : "filled"}
-                    color={chapter.is_completed ? "green" : "teal"}
-                    fullWidth
-                    mt="md"
-                    rightIcon={chapter.is_completed ? <IconCircleCheck size={16} /> : <IconChevronRight size={16} />}
-                    onClick={() => navigate(`/dashboard/courses/${courseId}/chapters/${chapter.id}`)}
-                    disabled={chapter.id === null}
-                    sx={(theme) =>
-                      chapter.is_completed
-                        ? {}
-                        : {
-                          background: theme.colorScheme === 'dark' ?
-                            `linear-gradient(45deg, ${theme.colors.teal[9]}, ${theme.colors.blue[8]})` :
-                            `linear-gradient(45deg, ${theme.colors.teal[6]}, ${theme.colors.cyan[5]})`,
-                        }
-                    }
-                  >
-                    {chapter.is_completed ? t('buttons.reviewChapter') : t('buttons.startChapter')}
-                  </Button>
+                  {chapter.id !== null && (
+                    <Button
+                      variant={chapter.is_completed ? "light" : "filled"}
+                      color={chapter.is_completed ? "green" : "teal"}
+                      fullWidth
+                      mt="md"
+                      rightIcon={chapter.is_completed ? <IconCircleCheck size={16} /> : <IconChevronRight size={16} />}
+                      onClick={() => navigate(`/dashboard/courses/${courseId}/chapters/${chapter.id}`)}
+                      disabled={chapter.id === null}
+                      sx={(theme) =>
+                        chapter.is_completed
+                          ? {}
+                          : {
+                            background: theme.colorScheme === 'dark' ?
+                              `linear-gradient(45deg, ${theme.colors.teal[9]}, ${theme.colors.blue[8]})` :
+                              `linear-gradient(45deg, ${theme.colors.teal[6]}, ${theme.colors.cyan[5]})`,
+                          }
+                      }
+                    >
+                      {chapter.is_completed ? t('buttons.reviewChapter') : t('buttons.startChapter')}
+                    </Button>
+                  )}
+                  {chapter.id === null && (
+                    <Button
+                      variant="light"
+                      color="gray"
+                      fullWidth
+                      mt="md"
+                      rightIcon={<IconCircleCheck size={16} />}
+                      disabled
+                    >
+                      {t('buttons.startChapter')}
+                    </Button>
+                  )}
                 </Card>
               );
             })}
