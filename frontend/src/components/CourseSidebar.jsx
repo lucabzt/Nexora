@@ -350,21 +350,23 @@ const CourseSidebar = ({opened, setopen}) => {
         </ActionIcon>
       )}
 
-      {chapters.map((chapter, index) => (
-        <ChapterLink
-          key={chapter.id}
-          chapter={chapter}
-          index={index}
-          activeChapter={chapterId}
-          handleChapterClick={handleChapterClick}
-          handleNavigation={handleNavigation}
-          chapterId={chapterId}
-          courseId={courseId}
-          opened={opened}
-          currentTab={currentTab}
-          isExpanded={expandedChapters.has(chapter.id.toString())}
-        />
-      ))}
+      {chapters.map((chapter, index) => 
+        (chapter.id !== null && chapter.is_completed) ? (
+          <ChapterLink
+            key={chapter.id}
+            chapter={chapter}
+            index={index}
+            activeChapter={chapterId}
+            handleChapterClick={handleChapterClick}
+            handleNavigation={handleNavigation}
+            chapterId={chapterId}
+            courseId={courseId}
+            opened={opened}
+            currentTab={currentTab}
+            isExpanded={expandedChapters.has(chapter.id.toString())}
+          />
+        ) : <></>
+      )}
     </Box>
   );
 };
