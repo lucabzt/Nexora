@@ -351,7 +351,7 @@ const CourseSidebar = ({opened, setopen}) => {
       )}
 
       {chapters.map((chapter, index) => 
-        (chapter.id !== null && chapter.is_completed) ? (
+        (chapter.id !== null) ? (
           <ChapterLink
             key={chapter.id}
             chapter={chapter}
