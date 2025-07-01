@@ -13,8 +13,30 @@ export const courseService = {
     (await apiWithCookies.get(`/courses/${courseId}`)).data,
 
   // Get all courses with pagination
-  getCourseChapters: async (courseId) =>
-    (await apiWithCookies.get(`/courses/${courseId}/chapters`)).data,
+  getCourseChapters: async (courseId) => {
+    const chapters = (await apiWithCookies.get(`/courses/${courseId}/chapters`)).data;
+    if (!chapters || chapters.length === 0) return [];
+    
+    // Find the highest index
+    const maxIndex = Math.max(...chapters.map(ch => ch.index));
+    
+    // Create an array with maxIndex + 1 elements, filling missing indices with empty objects
+    const result = Array(maxIndex + 1).fill().map((_, index) => {
+      const existingChapter = chapters.find(ch => ch.index === index);
+      return existingChapter || {
+        id: null,
+        index,
+        caption: '',
+        summary: '',
+        content: '',
+        time_minutes: 0,
+        is_completed: false,
+        image_url: null
+      };
+    });
+    
+    return result;
+  },
 
   // Get a specific chapter by ID
   getChapter: async (courseId, chapterId) =>
