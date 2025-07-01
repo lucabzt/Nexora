@@ -25,11 +25,11 @@ export const courseService = {
       const existingChapter = chapters.find(ch => ch.index === index);
       return existingChapter || {
         id: null,
-        index,
-        caption: '',
-        summary: '',
-        content: '',
-        time_minutes: 0,
+        index: index,
+        caption: null,
+        summary: null,
+        content: null,
+        time_minutes: null,
         is_completed: false,
         image_url: null
       };
