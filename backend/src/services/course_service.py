@@ -40,7 +40,7 @@ async def verify_course_ownership(course_id: int, user_id: str, db: Session) -> 
     
     return course
 
-def get_chapter_by_id(course_id: int, chapter_id: int, db: Session) -> Optional[Chapter]:
+def get_chapter_by_id(course_id: int, chapter_id: int, db: Session) -> Chapter:
     chapter = (db.query(Chapter)
               .filter(Chapter.id == chapter_id, Chapter.course_id == course_id)
               .first())

@@ -134,25 +134,19 @@ async def get_course_chapters(
     Get all chapters for a specific course.
     Only accessible if the course belongs to the current user.
     """
-    course = await verify_course_ownership(course_id, str(current_user.id), db)
-   
-    chapters = course.chapters
+    await verify_course_ownership(course_id, str(current_user.id), db)
 
-    # Build chapter response
-    chapters = [
-        ChapterSchema(
-            id=chapter.id,  
-            index=chapter.index,
-            caption=chapter.caption,
-            summary=chapter.summary or "",
-            content=chapter.content,
-            image_url=chapter.image_url,
-            time_minutes=chapter.time_minutes,
-            is_completed=chapter.is_completed  
-        ) for chapter in chapters
-    ]
+    chapters = chapters_crud.get_chapters_by_course_id(db, course_id)
+    if not chapters:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No chapters found for this course"
+        )
 
-    return chapters if chapters else []
+    # Convert SQLAlchemy Chapter objects to ChapterSchema using model_validate
+    chapter_schemas = [ChapterSchema.model_validate(chapter) for chapter in chapters]
+
+    return chapter_schemas
 
 
 @router.get("/{course_id}/chapters/{chapter_id}", response_model=ChapterSchema)

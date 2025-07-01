@@ -141,7 +141,7 @@ function Dashboard() {
     };
 
     fetchCourses();
-  }, []);
+  }, [t]);
 
   // Helper function to get status badge color and icon
   const getStatusInfo = (status) => {

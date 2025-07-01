@@ -23,6 +23,9 @@ class Chapter(BaseModel):
     is_completed: bool = False  # Also useful for the frontend
     image_url: Optional[str] = None  # Optional image URL for the chapter
 
+    class Config:
+        from_attributes = True  # For Pydantic v2 (replaces orm_mode = True)
+
 
 class CourseInfo(BaseModel):
     """Schema for a list of courses."""
@@ -35,3 +38,6 @@ class CourseInfo(BaseModel):
     chapter_count: Optional[int] = None
     image_url: Optional[str] = None
     completed_chapter_count: Optional[int] = None
+
+    class Config:
+        from_attributes = True  # For Pydantic v2 (replaces orm_mode = True)
