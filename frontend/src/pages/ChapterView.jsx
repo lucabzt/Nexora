@@ -81,52 +81,91 @@ function ChapterView() {
     console.log("Toolbar state changed:", { open: toolbarOpen, width: toolbarWidth });
   }, [toolbarOpen, toolbarWidth]);
 
-  // Handle chapter open/close on mount/unmount and visibility changes
+  // Track chapter open/close events for usage analytics
   useEffect(() => {
     let isMounted = true;
     let isVisible = true;
+    let lastEvent = null;
+    const RETRY_DELAY = 5000; // 5 seconds
+    const MAX_RETRIES = 3;
 
-    const openChapter = async () => {
-      if (isMounted && isVisible) {
-        try {
-          await courseService.openChapter(courseId, chapterId);
-        } catch (error) {
-          console.error('Error opening chapter:', error);
+    // Function to send open event with retry logic
+    const sendOpenEvent = async (retryCount = 0) => {
+      if (!isMounted || !isVisible) return;
+      
+      try {
+        console.log(`[ChapterView] Sending OPEN event for chapter ${chapterId}`);
+        await courseService.openChapter(courseId, chapterId);
+        lastEvent = 'open';
+      } catch (error) {
+        console.error('Error sending open event:', error);
+        if (retryCount < MAX_RETRIES) {
+          console.log(`Retrying open event (${retryCount + 1}/${MAX_RETRIES})...`);
+          setTimeout(() => sendOpenEvent(retryCount + 1), RETRY_DELAY);
         }
       }
     };
 
-    const closeChapter = async () => {
-      if (isMounted) {
-        try {
+    // Function to send close event with retry logic
+    const sendCloseEvent = async (retryCount = 0) => {
+      if (!isMounted) return;
+      
+      try {
+        // Only send close if we had an open event
+        if (lastEvent === 'open') {
+          console.log(`[ChapterView] Sending CLOSE event for chapter ${chapterId}`);
           await courseService.closeChapter(courseId, chapterId);
-        } catch (error) {
-          console.error('Error closing chapter:', error);
+          lastEvent = 'close';
+        }
+      } catch (error) {
+        console.error('Error sending close event:', error);
+        if (retryCount < MAX_RETRIES) {
+          console.log(`Retrying close event (${retryCount + 1}/${MAX_RETRIES})...`);
+          setTimeout(() => sendCloseEvent(retryCount + 1), RETRY_DELAY);
         }
       }
     };
 
+    // Handle tab visibility changes
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
+        console.log('[ChapterView] Tab hidden, sending close event');
         isVisible = false;
-        closeChapter();
+        sendCloseEvent();
       } else {
+        console.log('[ChapterView] Tab visible, sending open event');
         isVisible = true;
-        openChapter();
+        sendOpenEvent();
       }
     };
 
-    // Open chapter on mount
-    openChapter();
+    // Handle beforeunload (browser close/tab close)
+    const handleBeforeUnload = () => {
+      console.log('[ChapterView] Page unloading, sending close event');
+      // Use sendBeacon for more reliable delivery during page unload
+      const data = new Blob([JSON.stringify({ courseId, chapterId })], { type: 'application/json' });
+      navigator.sendBeacon(`/api/courses/${courseId}/chapters/${chapterId}/close`, data);
+    };
+
+    // Initial open event when component mounts
+    console.log('[ChapterView] Component mounted, sending initial open event');
+    sendOpenEvent();
     
-    // Set up visibility change listener
+    // Set up event listeners
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
     // Cleanup function
     return () => {
+      console.log('[ChapterView] Component unmounting, sending close event');
       isMounted = false;
+      
+      // Remove event listeners
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      closeChapter();
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      
+      // Send final close event
+      sendCloseEvent();
     };
   }, [courseId, chapterId]);
 
