@@ -51,7 +51,7 @@ class ChatService:
     async def process_chat_message(
         self, 
         user_id: str, 
-        chapter_id: str, 
+        chapter_id: int, 
         request: ChatRequest
     ) -> AsyncGenerator[str, None]:
         """Process a chat message and stream the response.
@@ -79,12 +79,29 @@ class ChatService:
                     "message_length": len(request.message)
                 }
             )
-            
+
             # Get chapter content for the agent state
             with get_db_context() as db:
                 chapter = chapters_crud.get_chapter_by_id(db, chapter_id)
-            if not chapter:
-                raise HTTPException(status_code=404, detail="Chapter not found")
+                if not chapter:
+                    raise HTTPException(status_code=404, detail="Chapter not found")
+            
+                # Log the chat usage
+                usage_crud.log_chat_usage(
+                    db=db,
+                    user_id=user_id,
+                    message=request.message,
+                    course_id=chapter.course_id,
+                    chapter_id=chapter_id
+                )
+                logger.info(
+                    "Logged chat usage",
+                    extra={
+                        "user_id": user_id,
+                        "chapter_id": chapter_id,
+                        "message_length": len(request.message)
+                    }
+                )
             
             # Process the message through the chat agent and stream responses
             try:
@@ -109,7 +126,7 @@ class ChatService:
                     else:
                         # Format as SSE data (double newline indicates end of message)
                         yield f"data: {json.dumps({'content': text_chunk})}\n\n"
-                        
+      
             except Exception as e:
                 logger.error(f"Error in chat stream: {str(e)}", exc_info=True)
                 error_msg = json.dumps({"error": "An error occurred while processing your message"})
@@ -137,24 +154,6 @@ class ChatService:
                 detail="An error occurred while processing your message"
             ) from e
         
-        # Log the chat usage
-        with get_db_context() as db:
-            usage_crud.log_chat_usage(
-                db=db,
-                user_id=user_id,
-                message=request.message
-            )
-            logger.info(
-                "Logged chat usage",
-                extra={
-                    "user_id": user_id,
-                    "chapter_id": chapter_id,
-                    "message_length": len(request.message)
-                }
-            )
-        # return None  # No explicit return needed, generator yields responses
-        
-
 
 
 chat_service = ChatService()

@@ -51,7 +51,7 @@ def get_usage_by_action(db: Session, user_id: str, action: str) -> List[Usage]:
     """
     return db.query(Usage).filter(Usage.user_id == user_id, Usage.action == action).all()
 
-def log_chat_usage(db: Session, user_id: str, message: str) -> Usage:
+def log_chat_usage(db: Session, user_id: str, course_id: int, chapter_id: int, message: str) -> Usage:
     """
     Log a chat message sent by a user.
     
@@ -60,7 +60,7 @@ def log_chat_usage(db: Session, user_id: str, message: str) -> Usage:
     :param message: The chat message content
     :return: The created Usage object
     """
-    return log_usage(db, user_id, action="chat", details=message)
+    return log_usage(db, user_id, action="chat", course_id=course_id, chapter_id=chapter_id, details=message)
 
 
 def get_total_chat_usages(db: Session, user_id: str) -> int:
@@ -84,7 +84,7 @@ def get_total_created_courses(db: Session, user_id: str) -> int:
     """
     return db.query(Usage).filter(Usage.user_id == user_id, Usage.action == "create_course").count()
 
-def log_course_creation(db: Session, user_id: str, course_id: int) -> Usage:
+def log_course_creation(db: Session, user_id: str, course_id: int, detail: str) -> Usage:
     """
     Log the creation of a course by a user.
     
@@ -93,7 +93,7 @@ def log_course_creation(db: Session, user_id: str, course_id: int) -> Usage:
     :param course_id: ID of the created course
     :return: The created Usage object
     """
-    return log_usage(db, user_id, action="create_course", course_id=course_id)
+    return log_usage(db, user_id, action="create_course", course_id=course_id, details=detail)
 
 
 def log_chapter_open(db: Session, user_id: str, course_id: int, chapter_id: int) -> Usage:
@@ -164,42 +164,6 @@ def get_total_time_spent_on_chapters(db: Session, user_id: str) -> int:
 
     return int(total_time)
 
-
-
-def log_quizz_answer_validation(db: Session, user_id: str, course_id: int, chapter_id: int, question_id: int, is_correct: bool) -> Usage:
-    """
-    Log the validation of a quiz answer by a user.
-    
-    :param db: Database session
-    :param user_id: ID of the user validating the answer
-    :param course_id: ID of the course containing the quiz
-    :param chapter_id: ID of the chapter containing the quiz
-    :param question_id: ID of the question being validated
-    :param is_correct: Whether the answer is correct or not
-    :return: The created Usage object
-    """
-    action = "validate_quiz_answer_correct" if is_correct else "validate_quiz_answer_incorrect"
-    return log_usage(db, user_id, action=action, course_id=course_id, chapter_id=chapter_id, details=str(question_id))
-
-
-def get_quizz_answer_validation_count(db: Session, user_id: str, course_id: int, chapter_id: int) -> int:
-    """
-    Get the total count of quiz answer validations by a user.
-    
-    :param db: Database session
-    :param user_id: ID of the user
-    :param course_id: ID of the course containing the quiz
-    :param chapter_id: ID of the chapter containing the quiz
-    :param is_correct: Whether to count correct or incorrect validations
-    :return: Count of quiz answer validations
-    """
-
-    return db.query(Usage).filter(
-        Usage.user_id == user_id,
-        Usage.course_id == course_id,
-        Usage.chapter_id == chapter_id,
-        Usage.action.in_(["validate_quiz_answer_correct", "validate_quiz_answer_incorrect"])
-    ).count()
 
 
 

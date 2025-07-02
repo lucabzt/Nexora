@@ -69,7 +69,7 @@ def _validate_chat_request(chat_request: ChatRequest) -> None:
     }
 )
 async def chat_with_agent(
-    chapter_id: str,
+    chapter_id: int,
     chat_request: ChatRequest,
     current_user: User = Depends(get_current_active_user)
 ) -> StreamingResponse:

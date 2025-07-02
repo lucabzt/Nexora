@@ -110,11 +110,11 @@ class AgentService:
 
             # Log at the beginning of the task -> prevent over usage of limit
             with get_db_context() as db:
-                usage_crud.log_usage(
+                usage_crud.log_course_creation(
                     db=db,
                     user_id=user_id,
-                    action="create_course",
-                    details=json.dumps(request.model_dump())
+                    course_id=course_id,
+                    detail=json.dumps(request.model_dump())
                 )
                 logger.info("[%s] Usage logged for course creation by user %s", task_id, user_id)
 
@@ -330,7 +330,8 @@ class AgentService:
             # and not managed by FastAPI's Depends. For now, assuming Depends handles it.
             # db.close() # If db session is task-specific and not managed by Depends.
 
-    async def grade_question(self, user_id: str, course_id: int, question: str, correct_answer: str, users_answer: str):
+    async def grade_question(self, user_id: str, course_id: int, question: str, correct_answer: str, users_answer: str, 
+                             chapter_id: int, db):
         """ Receives an open text question plus answer from the user and returns received points and short feedback """
         query = self.query_service.get_grader_query(question, correct_answer, users_answer)
         grader_response = await self.grader_agent.run(
@@ -340,18 +341,21 @@ class AgentService:
         )
 
         # Log usage of grading
-        with get_db_context() as db:
-            usage_crud.log_usage(
-                db=db,
-                user_id=user_id,
-                action="grade_question",
-                details=json.dumps({
-                    "course_id": course_id,
-                    "question": question,
-                    "correct_answer": correct_answer,
-                    "users_answer": users_answer
-                })
-            )
+        usage_crud.log_usage(
+            db=db,
+            user_id=user_id,
+            action="grade_question",
+            course_id=course_id,
+            chapter_id=chapter_id,
+            details=json.dumps({
+                "course_id": course_id,
+                "question": question,
+                "correct_answer": correct_answer,
+                "users_answer": users_answer,
+                "points": grader_response['points'],
+                "explanation": grader_response['explanation']
+            })
+        )
 
         return grader_response['points'], grader_response['explanation']
 

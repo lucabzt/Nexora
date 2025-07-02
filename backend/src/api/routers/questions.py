@@ -137,6 +137,8 @@ async def get_feedback(
         question=question.question,
         correct_answer=question.correct_answer,
         users_answer=users_answer,
+        chapter_id=chapter_id,
+        db=db
     )
 
     # Update question in db
