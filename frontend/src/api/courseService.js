@@ -17,23 +17,22 @@ export const courseService = {
     const chapters = (await apiWithCookies.get(`/courses/${courseId}/chapters`)).data;
     if (!chapters || chapters.length === 0) return [];
     
-    // Find the highest index
-    const maxIndex = Math.max(...chapters.map(ch => ch.index));
+    // Sort chapters by index to ensure correct order
+    const sortedChapters = chapters.sort((a, b) => a.index - b.index);
     
-    // Create an array with maxIndex + 1 elements, filling missing indices with empty objects
-    const result = Array(maxIndex).fill().map((_, index) => {
-      const existingChapter = chapters.find(ch => ch.index === index + 1);
-      return existingChapter || {
-        id: null,
-        index: index + 1,
-        caption: null,
-        summary: null,
-        content: null,
-        time_minutes: null,
-        is_completed: false,
-        image_url: null
-      };
-    });
+    // Find the first missing index and remove everything from that point onwards
+    const result = [];
+    let expectedIndex = 1;
+    
+    for (const chapter of sortedChapters) {
+      if (chapter.index === expectedIndex) {
+        result.push(chapter);
+        expectedIndex++;
+      } else {
+        // Found a gap, stop here
+        break;
+      }
+    }
     
     return result;
   },
