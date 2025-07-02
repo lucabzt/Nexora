@@ -81,11 +81,31 @@ function ChapterView() {
     console.log("Toolbar state changed:", { open: toolbarOpen, width: toolbarWidth });
   }, [toolbarOpen, toolbarWidth]);
 
+  // Handle page visibility changes to open/close chapter
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        courseService.closeChapter(courseId, chapterId);
+      } else if (document.visibilityState === 'visible') {
+        courseService.openChapter(courseId, chapterId);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [courseId, chapterId]);
+
   // Fetch chapter data and media info
   useEffect(() => {
     const fetchChapterAndMediaInfo = async () => {
       try {
         setLoading(true);
+        // Open chapter
+        await courseService.openChapter(courseId, chapterId);
+
         // Fetch chapter data and media info (including questions check)
         const [chapterData, imagesData, filesData, questionsData] = await Promise.all([
           courseService.getChapter(courseId, chapterId),
@@ -266,7 +286,7 @@ function ChapterView() {
         pollIntervalRef.current = null;
       }
     };
-  }, [courseId, chapterId, questionsCreated, loading]);
+  }, [courseId, chapterId, questionsCreated, loading, t]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -290,8 +310,11 @@ function ChapterView() {
       if (blinkTimeoutRef.current) {
         clearTimeout(blinkTimeoutRef.current);
       }
+
+      // Ensure chapter is closed on unmount as a fallback
+      courseService.closeChapter(courseId, chapterId);
     };
-  }, []);
+  }, [courseId, chapterId, images, files]);
 
   const handleDeleteImage = async (imageId) => {
     try {
@@ -373,10 +396,6 @@ function ChapterView() {
       setDownloadingPDF(false);
     }
   };
-
-  const sidebarWidth = isMobile
-    ? (toolbarOpen ? window.innerWidth : 0)
-    : (toolbarOpen ? toolbarWidth : 0);
 
   if (loading) {
     return (

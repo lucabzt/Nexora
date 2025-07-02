@@ -23,6 +23,8 @@ from ..config.settings import SQLALCHEMY_DATABASE_URL
 from ..db.database import get_db_context
 
 from ..db.crud import chapters_crud
+from ..db.crud import usage_crud
+
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +51,7 @@ class ChatService:
     async def process_chat_message(
         self, 
         user_id: str, 
-        chapter_id: str, 
+        chapter_id: int, 
         request: ChatRequest
     ) -> AsyncGenerator[str, None]:
         """Process a chat message and stream the response.
@@ -77,12 +79,29 @@ class ChatService:
                     "message_length": len(request.message)
                 }
             )
-            
+
             # Get chapter content for the agent state
             with get_db_context() as db:
                 chapter = chapters_crud.get_chapter_by_id(db, chapter_id)
-            if not chapter:
-                raise HTTPException(status_code=404, detail="Chapter not found")
+                if not chapter:
+                    raise HTTPException(status_code=404, detail="Chapter not found")
+            
+                # Log the chat usage
+                usage_crud.log_chat_usage(
+                    db=db,
+                    user_id=user_id,
+                    message=request.message,
+                    course_id=chapter.course_id,
+                    chapter_id=chapter_id
+                )
+                logger.info(
+                    "Logged chat usage",
+                    extra={
+                        "user_id": user_id,
+                        "chapter_id": chapter_id,
+                        "message_length": len(request.message)
+                    }
+                )
             
             # Process the message through the chat agent and stream responses
             try:
@@ -107,7 +126,7 @@ class ChatService:
                     else:
                         # Format as SSE data (double newline indicates end of message)
                         yield f"data: {json.dumps({'content': text_chunk})}\n\n"
-                        
+      
             except Exception as e:
                 logger.error(f"Error in chat stream: {str(e)}", exc_info=True)
                 error_msg = json.dumps({"error": "An error occurred while processing your message"})
@@ -134,6 +153,7 @@ class ChatService:
                 status_code=500,
                 detail="An error occurred while processing your message"
             ) from e
+        
 
 
 chat_service = ChatService()

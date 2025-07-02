@@ -6,6 +6,8 @@ from .vector_service import VectorService
 from ..db.models.db_file import Document
 import logging
 
+
+
 class CourseContentService:
     def __init__(self):
         self.pdf_processor = PDFProcessor()

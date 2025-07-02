@@ -14,6 +14,11 @@ def get_chapter_by_id(db: Session, chapter_id: int) -> Optional[Chapter]:
     """Get chapter by ID"""
     return db.query(Chapter).filter(Chapter.id == chapter_id).first()
 
+def get_chapter_by_course_id_and_chapter_id(db: Session, course_id: int, chapter_id: int) -> Optional[Chapter]:
+    """Get chapter by course_id and ID. Unnecessary as chapters are unique per course."""
+    return db.query(Chapter).filter(Chapter.id == chapter_id, Chapter.course_id == course_id).first()
+
+
 
 def get_chapters_by_course_id(db: Session, course_id: int) -> List[Chapter]:
     """Get all chapters for a specific course, ordered by index"""

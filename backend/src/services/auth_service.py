@@ -24,6 +24,9 @@ from ..core import security
 from ..core.security import oauth
 from ..db.crud import users_crud
 from ..db.models.db_user import User as UserModel
+from ..db.crud import usage_crud
+
+
 
 logger = Logger(__name__)
 
@@ -63,6 +66,8 @@ async def login_user(form_data: OAuth2PasswordRequestForm, db: Session, response
     # Save last login time
     previous_last_login = user.last_login
     users_crud.update_user_last_login(db, user_id=str(user.id))
+    # Log the user login action
+    usage_crud.log_login(db, user_id=str(user.id))
 
 
     # Set the access token in the response cookie
@@ -132,7 +137,7 @@ async def register_user(user_data: user_schema.UserCreate, db: Session, response
 
 
 
-async def logout_user(_: user_schema.User, __: Session, response: Response) -> auth_schema.APIResponseStatus:
+async def logout_user(user: user_schema.User, db: Session, response: Response) -> auth_schema.APIResponseStatus:
     """Logs out a user by clearing the access and refresh tokens."""
     
     # Disable the user session in the database if needed
@@ -142,6 +147,10 @@ async def logout_user(_: user_schema.User, __: Session, response: Response) -> a
     security.clear_access_cookie(response)
     # Clear the refresh token cookie
     security.clear_refresh_cookie(response)
+
+    # Log logout
+    
+    usage_crud.log_logout(db, user_id=str(user.id))
 
     return auth_schema.APIResponseStatus(status="success", msg="Successfully logged out")
     
@@ -166,6 +175,8 @@ async def refresh_token(token: Optional[str], db: Session, response: Response) -
               "is_admin": user.is_admin,
               "email": user.email}
     )
+    # Log the user refresh action
+    usage_crud.log_refresh(db, user_id=str(user.id))
 
     # Set the access token in the response cookie
     security.set_access_cookie(response, access_token)
@@ -313,6 +324,8 @@ async def handle_oauth_callback(request: Request, db: Session, website: str = "g
 
     # Update the user's last login time
     users_crud.update_user_last_login(db, user_id=str(db_user.id))
+    # Log the user login action
+    usage_crud.log_login(db, user_id=str(db_user.id))
 
     # Redirect to the frontend
     frontend_base_url = settings.FRONTEND_BASE_URL
