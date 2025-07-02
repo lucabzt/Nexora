@@ -23,6 +23,8 @@ from ..config.settings import SQLALCHEMY_DATABASE_URL
 from ..db.database import get_db_context
 
 from ..db.crud import chapters_crud
+from ..db.crud import usage_crud
+
 
 logger = logging.getLogger(__name__)
 
@@ -134,6 +136,25 @@ class ChatService:
                 status_code=500,
                 detail="An error occurred while processing your message"
             ) from e
+        
+        # Log the chat usage
+        with get_db_context() as db:
+            usage_crud.log_chat_usage(
+                db=db,
+                user_id=user_id,
+                message=request.message
+            )
+            logger.info(
+                "Logged chat usage",
+                extra={
+                    "user_id": user_id,
+                    "chapter_id": chapter_id,
+                    "message_length": len(request.message)
+                }
+            )
+        # return None  # No explicit return needed, generator yields responses
+        
+
 
 
 chat_service = ChatService()

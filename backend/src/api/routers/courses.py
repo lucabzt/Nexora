@@ -13,7 +13,6 @@ from ...db.crud import courses_crud, chapters_crud, users_crud
 from ...services import course_service
 from ...services.course_service import verify_course_ownership
 
-
 #from ...services.notification_service import manager as ws_manager
 from ..schemas.course import (
     CourseInfo,
@@ -174,6 +173,34 @@ async def get_chapter_by_id(
         time_minutes=chapter.time_minutes,
         is_completed=chapter.is_completed  
     )
+
+
+@router.post("/{course_id}/chapters/{chapter_id}/close")
+async def close_chapter(
+        course_id: int,
+        chapter_id: int,
+        current_user: User = Depends(get_current_active_user),
+        db: Session = Depends(get_db)
+):
+    """
+    Close a chapter.
+    Only accessible if the course belongs to the current user.
+    """
+    # First verify course ownership
+    await verify_course_ownership(course_id, str(current_user.id), db)
+    
+    # Log
+    course_service.log_chapter_close(
+        db=db,
+        user_id=str(current_user.id),
+        course_id=course_id,
+        chapter_id=chapter_id
+    )
+
+    return {
+        "message": f"Chapter '{chapter_id}' has been closed",
+    }
+
 
 
 @router.patch("/{course_id}/chapters/{chapter_id}/complete")

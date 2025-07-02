@@ -39,6 +39,8 @@ from google.genai import types
 #from .data_processors.pdf_processor import PDFProcessor
 
 from ..db.models.db_file import Document, Image
+from ..db.crud import usage_crud
+
 
 
 logger = getLogger(__name__)
@@ -105,6 +107,19 @@ class AgentService:
         course_db = None
         try:
             logger.info("[%s] Starting course creation for user %s", task_id, user_id)
+
+            # Log at the beginning of the task -> prevent over usage of limit
+            with get_db_context() as db:
+                usage_crud.log_usage(
+                    db=db,
+                    user_id=user_id,
+                    action="create_course",
+                    details=json.dumps(request.model_dump())
+                )
+                logger.info("[%s] Usage logged for course creation by user %s", task_id, user_id)
+
+
+
             # Create a memory session for the course creation
             session = await self.session_service.create_session(
                 app_name=self.app_name,
@@ -323,5 +338,20 @@ class AgentService:
             state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
             content=query
         )
+
+        # Log usage of grading
+        with get_db_context() as db:
+            usage_crud.log_usage(
+                db=db,
+                user_id=user_id,
+                action="grade_question",
+                details=json.dumps({
+                    "course_id": course_id,
+                    "question": question,
+                    "correct_answer": correct_answer,
+                    "users_answer": users_answer
+                })
+            )
+
         return grader_response['points'], grader_response['explanation']
 
