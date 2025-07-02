@@ -81,10 +81,13 @@ class ChatService:
             )
 
             # Get chapter content for the agent state
+            chapter_content = None
             with get_db_context() as db:
                 chapter = chapters_crud.get_chapter_by_id(db, chapter_id)
                 if not chapter:
                     raise HTTPException(status_code=404, detail="Chapter not found")
+                
+                chapter_content = chapter.content
             
                 # Log the chat usage
                 usage_crud.log_chat_usage(
@@ -107,7 +110,7 @@ class ChatService:
             try:
                 async for text_chunk, is_final in self.chat_agent.run(
                     user_id=user_id,
-                    state={"chapter_content": chapter.content},
+                    state={"chapter_content": chapter_content},
                     chapter_id=chapter_id,
                     content=create_text_query(request.message),
                     debug=logger.isEnabledFor(logging.DEBUG)
