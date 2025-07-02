@@ -81,20 +81,52 @@ function ChapterView() {
     console.log("Toolbar state changed:", { open: toolbarOpen, width: toolbarWidth });
   }, [toolbarOpen, toolbarWidth]);
 
-  // Handle page visibility changes to open/close chapter
+  // Handle chapter open/close on mount/unmount and visibility changes
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        courseService.closeChapter(courseId, chapterId);
-      } else if (document.visibilityState === 'visible') {
-        courseService.openChapter(courseId, chapterId);
+    let isMounted = true;
+    let isVisible = true;
+
+    const openChapter = async () => {
+      if (isMounted && isVisible) {
+        try {
+          await courseService.openChapter(courseId, chapterId);
+        } catch (error) {
+          console.error('Error opening chapter:', error);
+        }
       }
     };
 
+    const closeChapter = async () => {
+      if (isMounted) {
+        try {
+          await courseService.closeChapter(courseId, chapterId);
+        } catch (error) {
+          console.error('Error closing chapter:', error);
+        }
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        isVisible = false;
+        closeChapter();
+      } else {
+        isVisible = true;
+        openChapter();
+      }
+    };
+
+    // Open chapter on mount
+    openChapter();
+    
+    // Set up visibility change listener
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
+    // Cleanup function
     return () => {
+      isMounted = false;
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      closeChapter();
     };
   }, [courseId, chapterId]);
 
@@ -103,9 +135,7 @@ function ChapterView() {
     const fetchChapterAndMediaInfo = async () => {
       try {
         setLoading(true);
-        // Open chapter
-        await courseService.openChapter(courseId, chapterId);
-
+        
         // Fetch chapter data and media info (including questions check)
         const [chapterData, imagesData, filesData, questionsData] = await Promise.all([
           courseService.getChapter(courseId, chapterId),
