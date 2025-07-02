@@ -27,6 +27,7 @@
       "username": "Username",
       "profilePicture": "Profile Picture",
       "email": "Email",
+      "learningTime": "Learning Time",
       "status": "Status",
       "role": "Role",
       "createdAt": "Created At",

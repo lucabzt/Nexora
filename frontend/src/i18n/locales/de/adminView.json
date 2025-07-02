@@ -27,6 +27,7 @@
       "username": "Benutzername",
       "profilePicture": "Profilbild",
       "email": "E-Mail",
+      "learningTime": "Lernzeit",
       "status": "Status",
       "role": "Rolle",
       "createdAt": "Erstellt am",

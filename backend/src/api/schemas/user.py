@@ -118,6 +118,7 @@ class User(UserBase):
     created_at: datetime
     last_login: datetime
     login_streak: int
+    total_learn_time: Optional[int] = None # Total time spent learning in Minutes
 
     class Config:
         from_attributes = True

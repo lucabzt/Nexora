@@ -158,7 +158,7 @@ def get_total_time_spent_on_chapters(db: Session, user_id: str) -> int:
         elif usage.action == "close_chapter":
             if key in open_times:
                 open_time = open_times.pop(key)
-                diff = (usage.timestamp - open_time).total_seconds() / 60
+                diff = (usage.timestamp - open_time).total_seconds()
                 if diff > 0:
                     total_time += diff
 

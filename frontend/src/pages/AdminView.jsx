@@ -168,6 +168,7 @@ function AdminView() {
     setError(null);
     try {
       const data = await userService.getAllUsers();
+      console.log('Fetched users:', data);
       setUsers(data);
     } catch (err) {
       console.error('Failed to fetch users:', err);
@@ -422,6 +423,7 @@ function AdminView() {
                   <th>{t('table.headers.profilePicture')}</th>
                   <th>{t('table.headers.username')}</th>
                   <th>{t('table.headers.email')}</th>
+                  <th>{t('table.headers.learningTime')}</th>
                   <th>{t('table.headers.status')}</th>
                   <th>{t('table.headers.role')}</th>
                   <th>{t('table.headers.createdAt')}</th>
@@ -446,6 +448,7 @@ function AdminView() {
                       </td>
                       <td>{user.username}</td>
                       <td>{user.email}</td>
+                      <td>{user.total_learn_time != null ? `${Math.floor(user.total_learn_time / 3600)}h ${Math.floor((user.total_learn_time % 3600) / 60)}m` : '?'}</td>
                       <td>
                         <Badge
                           color={user.is_active ? 'green' : 'red'}
@@ -498,7 +501,7 @@ function AdminView() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} style={{ textAlign: 'center', padding: '20px 0' }}>
+                    <td colSpan={8} style={{ textAlign: 'center', padding: '20px 0' }}>
                       {t('table.noUsersFound')}
                     </td>
                   </tr>
