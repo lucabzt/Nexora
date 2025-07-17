@@ -44,7 +44,7 @@
     "title": "Edit Course",
     "titleLabel": "Title",
     "descriptionLabel": "Description",
-    "confirmButton": "Save",
+    "saveButton": "Save",
     "cancelButton": "Cancel",
     "publicLabel": "Make course public",
     "publicDescription": "Public courses can be viewed by anyone."
@@ -81,6 +81,9 @@
   "viewCourseButton": "View Course",
   "searchPublicCoursesPlaceholder": "Search courses by title or description...",
   "noSearchResults": "No courses match your search.",
+  "tryDifferentKeywords": "Try searching with different keywords.",
+  "checkBackLater": "Please check back later for new content.",
   "publicCourseTooltip": "This course is public",
-  "publicBadge": "Public"
+  "publicBadge": "Public",
+  "searchPlaceholder": "Search courses..."
 }

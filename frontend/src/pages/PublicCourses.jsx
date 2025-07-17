@@ -14,8 +14,10 @@ import {
   useMantineTheme,
   Box,
   TextInput,
+  Paper,
+  Stack,
 } from '@mantine/core';
-import { IconBook, IconAlertCircle, IconWorld, IconSearch } from '@tabler/icons-react';
+import { IconBook, IconAlertCircle, IconWorld, IconSearch, IconUser, IconBooks } from '@tabler/icons-react';
 import courseService from '../api/courseService';
 import { useTranslation } from 'react-i18next';
 import PlaceGolderImage from '../assets/place_holder_image.png';
@@ -27,6 +29,7 @@ function PublicCourses() {
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const { t } = useTranslation('dashboard');
+  const theme = useMantineTheme();
 
   useEffect(() => {
     const fetchPublicCourses = async () => {
@@ -70,15 +73,25 @@ function PublicCourses() {
 
   return (
     <Container size="lg" py="xl">
-      <Group position="apart" mb="xl">
-        <Box>
-          <Group>
-            <IconWorld size={32} />
+      <Box
+        pb="xl"
+        mb="xl"
+        style={{
+          borderBottom: `1px solid ${
+            theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[2]
+          }`,
+        }}
+      >
+        <Group position="apart">
+          <div>
             <Title order={2}>{t('publicCoursesTitle', { ns: 'dashboard', defaultValue: 'Public Courses' })}</Title>
-          </Group>
-          <Text color="dimmed" mt="sm">{t('publicCoursesSubtitle', { ns: 'dashboard', defaultValue: 'Explore courses shared by the community.' })}</Text>
-        </Box>
-      </Group>
+            <Text color="dimmed" mt={4}>
+              {t('publicCoursesSubtitle', { ns: 'dashboard', defaultValue: 'Explore courses shared by the community.' })}
+            </Text>
+          </div>
+          <IconWorld size={40} color={theme.colors.teal[5]} stroke={1.5} />
+        </Group>
+      </Box>
 
       <TextInput
         placeholder={t('searchPublicCoursesPlaceholder', { ns: 'dashboard', defaultValue: 'Search courses by title or description...' })}
@@ -89,13 +102,25 @@ function PublicCourses() {
       />
 
       {filteredCourses.length === 0 && !loading ? (
-        <Text align="center" mt="xl">
-          {searchQuery ? t('noSearchResults', { ns: 'dashboard', defaultValue: 'No courses match your search.' }) : t('noPublicCourses', { ns: 'dashboard', defaultValue: 'There are no public courses available at the moment.' })}
-        </Text>
+        <Paper withBorder radius="md" p="xl" mt="xl" bg={theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0]}>
+          <Stack align="center" spacing="md" py="xl">
+            <IconBooks size={60} color={theme.colors.gray[6]} stroke={1.5} />
+            <Title order={3} align="center">
+              {searchQuery 
+                ? t('noSearchResults', { ns: 'dashboard', defaultValue: 'No courses match your search.' }) 
+                : t('noPublicCourses', { ns: 'dashboard', defaultValue: 'There are no public courses available at the moment.' })}
+            </Title>
+            <Text color="dimmed" size="sm" align="center">
+              {searchQuery 
+                ? t('tryDifferentKeywords', { ns: 'dashboard', defaultValue: 'Try searching with different keywords.' }) 
+                : t('checkBackLater', { ns: 'dashboard', defaultValue: 'Please check back later for new content.' })}
+            </Text>
+          </Stack>
+        </Paper>
       ) : (
-        <Grid gutter="x1">
+        <Grid gutter="xl">
           {filteredCourses.map((course) => (
-            <Grid.Col key={course.course_id} sm={12} md={6} lg={4}>
+            <Grid.Col key={course.course_id} sm={6} md={4} lg={4}>
               <Card 
                 shadow="sm" 
                 p="lg" 
@@ -103,6 +128,13 @@ function PublicCourses() {
                 withBorder
                 style={{ display: 'flex', flexDirection: 'column', height: '100%', cursor: 'pointer' }}
                 onClick={() => navigate(`/dashboard/courses/${course.course_id}`)}
+                sx={{
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                  '&:hover': {
+                    transform: 'translateY(-5px)',
+                    boxShadow: theme.shadows.lg,
+                  },
+                }}
               >
                 <Card.Section>
                   <Image src={course.image_url || PlaceGolderImage} height={180} alt={course.title} />
@@ -112,11 +144,17 @@ function PublicCourses() {
                   {course.title}
                 </Title>
 
-                <Text size="xs" color="dimmed" mb="md">
-                  {t('byAuthor', { ns: 'dashboard', defaultValue: 'By' })} {course.user_name}
-                </Text>
+                <Group spacing="xs" mb="md">
+                  <IconUser size={14} color={theme.colors.gray[6]} />
+                  <Text size="xs" color="dimmed">
+                    {t('byAuthor', { ns: 'dashboard', defaultValue: 'By' })}{' '}
+                    <Text component="span" weight={700} style={{ color: 'var(--mantine-color-text)' }}>
+                      {course.user_name}
+                    </Text>
+                  </Text>
+                </Group>
 
-                <Text size="sm" color="dimmed"  lineClamp={5}mb="md" sx={{
+                <Text size="sm" color="dimmed"  lineClamp={5} mb="md" sx={{
                   flex: 1,
                   height: '6rem',
                   overflow: 'auto',

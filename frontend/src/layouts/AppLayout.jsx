@@ -241,7 +241,7 @@ function AppLayout() {
     },
     {
       icon: <IconWorld size={22} />,
-      color: "grape",
+      color: "orange",
       label: t("publicCourses", { ns: "navigation", defaultValue: "Public Courses" }),
       to: "/dashboard/public-courses",
     },
