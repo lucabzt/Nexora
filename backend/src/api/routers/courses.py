@@ -299,7 +299,8 @@ async def update_course_details(
         description=str(updated_course.description),
         chapter_count=int(updated_course.chapter_count) if updated_course.chapter_count else None,
         image_url=str(updated_course.image_url) if updated_course.image_url else None,
-        completed_chapter_count=course_service.get_completed_chapters_count(db, course_id)
+        completed_chapter_count=course_service.get_completed_chapters_count(db, course_id),
+        is_public=updated_course.is_public,
     )
 
 
