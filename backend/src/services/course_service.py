@@ -23,6 +23,13 @@ def get_user_courses(db: Session, user_id: str, skip: int = 0, limit: int = 200)
     """
     return courses_crud.get_courses_infos(db, user_id, skip, limit)
 
+def get_public_courses(db: Session, skip: int = 0, limit: int = 100) -> List[CourseInfo]:
+    """
+    Get all public courses.
+    """
+    # The CRUD function `get_public_courses_infos` expects a user_id, but it's not used.
+    # We can pass an empty string or any placeholder. This could be refactored later.
+    return courses_crud.get_public_courses_infos(db, user_id="", skip=skip, limit=limit)
 
 def get_completed_chapters_count(db: Session, course_id: int) -> int:
     """
@@ -49,6 +56,10 @@ async def verify_course_ownership(course_id: int, user_id: str, db: Session) -> 
     course = get_course_by_id(db, course_id, user_id)
     
     if not course:
+        course = courses_crud.get_course_by_id(db, course_id)
+        if course and course.is_public:
+            return course
+
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Course not found or access denied"

@@ -1,5 +1,5 @@
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from ..models.db_course import Course, CourseStatus, Chapter
 from typing import List
@@ -71,6 +71,11 @@ def update_course_status(db: Session, course_id: int, status: CourseStatus) -> O
     return update_course(db, course_id, status=status)
 
 
+def update_course_public_status(db: Session, course_id: int, is_public: bool) -> Optional[Course]:
+    """Update the public status of a course"""
+    return update_course(db, course_id, is_public=is_public)
+
+
 def delete_course(db: Session, course_id: int) -> bool:
     """Delete course by ID (cascades to chapters and questions)"""
     course = db.query(Course).filter(Course.id == course_id).first()
@@ -90,6 +95,49 @@ def get_all_course_ids(db: Session) -> List[int]:
     """Get all course IDs"""
     return [course[0] for course in db.query(Course.id).all()]
 
+
+
+def get_public_courses_infos(db: Session, user_id: str, skip: int = 0, limit: int = 200) -> List[CourseInfo]:
+    """Get course info by user ID with completed chapter count
+    
+    Args:
+        db: Database session
+        user_id: ID of the user to get courses for
+        skip: Number of records to skip (for pagination)
+        limit: Maximum number of records to return
+        
+    Returns:
+        List of CourseInfo objects containing course info with completed chapter count
+    """
+    
+    # Eagerly load the related User object to get the username efficiently
+    courses = (
+        db.query(Course)
+        .options(joinedload(Course.user))
+        .filter(Course.is_public == True)
+        .order_by(Course.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+    
+    # Convert to list of CourseInfo objects
+    result = []
+    for course in courses:
+        course_info = CourseInfo(
+            course_id=course.id,
+            total_time_hours=course.total_time_hours,
+            status=course.status.value,  # Convert enum to string
+            title=course.title,
+            description=course.description,
+            chapter_count=course.chapter_count,
+            image_url=course.image_url,
+            completed_chapter_count=0, # This can be calculated if needed
+            user_name=course.user.username if course.user else None
+        )
+        result.append(course_info)
+    
+    return result
 
 
 def get_courses_infos(db: Session, user_id: str, skip: int = 0, limit: int = 200) -> List[CourseInfo]:

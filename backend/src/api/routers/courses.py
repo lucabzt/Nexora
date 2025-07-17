@@ -18,6 +18,7 @@ from ..schemas.course import (
     CourseInfo,
     CourseRequest,
     Chapter as ChapterSchema,
+    UpdateCoursePublicStatusRequest,
 )
 
 
@@ -81,6 +82,14 @@ async def create_course_request(
         )
                 
 
+
+
+@router.get("/public", response_model=List[CourseInfo])
+async def get_public_courses(db: Session = Depends(get_db), skip: int = 0, limit: int = 100):
+    """
+    Get all public courses.
+    """
+    return course_service.get_public_courses(db, skip=skip, limit=limit)
 
 
 @router.get("/", response_model=List[CourseInfo])
@@ -291,6 +300,31 @@ async def update_course_details(
         image_url=str(updated_course.image_url) if updated_course.image_url else None,
         completed_chapter_count=course_service.get_completed_chapters_count(db, course_id)
     )
+
+
+@router.patch("/{course_id}/public")
+async def update_course_public_status(
+    course_id: int,
+    request: UpdateCoursePublicStatusRequest,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Update the public status of a course.
+    """
+    # Verify course ownership
+    await verify_course_ownership(course_id, str(current_user.id), db)
+
+    # Update the public status
+    updated_course = courses_crud.update_course_public_status(db, course_id, request.is_public)
+
+    if not updated_course:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update course public status"
+        )
+
+    return {"message": f"Course public status updated to {request.is_public}"}
 
 
 @router.delete("/{course_id}")

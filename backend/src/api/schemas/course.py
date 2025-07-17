@@ -38,6 +38,12 @@ class CourseInfo(BaseModel):
     chapter_count: Optional[int] = None
     image_url: Optional[str] = None
     completed_chapter_count: Optional[int] = None
+    user_name: Optional[str] = None
 
     class Config:
         from_attributes = True  # For Pydantic v2 (replaces orm_mode = True)
+
+
+class UpdateCoursePublicStatusRequest(BaseModel):
+    """Schema for updating the public status of a course."""
+    is_public: bool
