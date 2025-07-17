@@ -11,6 +11,21 @@ const debounce = (func, wait) => {
 
 export const courseService = {
   // Get all courses for current user
+  getPublicCourses: async () => {
+    // Mocked for now, replace with actual API call when backend is ready
+    console.warn('Fetching mocked public courses. Update when backend endpoint is available.');
+    const allCourses = await courseService.getUserCourses(); // Mock by fetching all user courses
+    return allCourses.filter(c => c.is_public);
+    // const response = await apiWithCookies.get('/courses/public');
+    // return response.data;
+  },
+
+  updateCoursePublicStatus: async (courseId, isPublic) => {
+    const response = await apiWithCookies.patch(`/courses/${courseId}/public`, { is_public: isPublic });
+    return response.data;
+  },
+
+  // Get all courses for current user
   getUserCourses: async () => {
     const response = await apiWithCookies.get('/courses/');
     console.log('getUserCourses response:', response.data);

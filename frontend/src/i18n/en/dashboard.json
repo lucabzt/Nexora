@@ -1,0 +1,45 @@
+{
+  "title": "Dashboard",
+  "subtitle": "Welcome back! Here's an overview of your learning progress.",
+  "loadCoursesError": "Could not load courses. Please try again later.",
+  "yourCoursesTitle": "Your Courses",
+  "viewAllButton": "View All",
+  "showLessButton": "Show Less",
+  "noCourses": "You don't have any courses yet. Create one to get started!",
+  "createNewCourseButton": "Create New Course",
+  "continueLearningButton": "Continue Learning",
+  "viewCreationProgressButton": "View Creation Progress",
+  "estimatedTime": "Estimated time: {{hours}} hours",
+  "courseStatus": {
+    "creating": "Creating",
+    "available": "Available",
+    "completed": "Completed"
+  },
+  "deleteCourseTooltip": "Delete course",
+  "renameCourseTooltip": "Edit course",
+  "deleteModal": {
+    "title": "Confirm Deletion",
+    "message": "Are you sure you want to delete the course '{{title}}'? This action cannot be undone.",
+    "confirmButton": "Delete",
+    "cancelButton": "Cancel"
+  },
+  "renameModal": {
+    "title": "Edit Course",
+    "titleLabel": "Title",
+    "descriptionLabel": "Description",
+    "confirmButton": "Save",
+    "cancelButton": "Cancel",
+    "publicLabel": "Make course public",
+    "publicDescription": "Public courses can be viewed by anyone."
+  },
+  "errors": {
+    "deleteCourse": "Error deleting course: {{message}}",
+    "renameCourse": "Error renaming course: {{message}}"
+  },
+  "publicCoursesTitle": "Public Courses",
+  "publicCoursesSubtitle": "Explore courses shared by the community.",
+  "noPublicCourses": "There are no public courses available at the moment.",
+  "viewCourseButton": "View Course",
+  "publicCourseTooltip": "This course is public",
+  "publicBadge": "Public"
+}

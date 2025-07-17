@@ -26,6 +26,7 @@ import {
   rem,
   useMantineTheme,
   Tooltip,
+  Switch,
 } from '@mantine/core';
 import {
   IconBrain,
@@ -44,6 +45,8 @@ import {
   IconTrash,
   IconPencil,
   IconArrowUpRight,
+  IconWorld,
+  IconX,
 } from '@tabler/icons-react';
 import courseService from '../api/courseService';
 import { useTranslation } from 'react-i18next';
@@ -61,6 +64,7 @@ function Dashboard() {
   const [courseToRename, setCourseToRename] = useState(null);
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
+  const [isPublic, setIsPublic] = useState(false);
   
   const navigate = useNavigate();
   const theme = useMantineTheme();
@@ -87,6 +91,7 @@ function Dashboard() {
     setCourseToRename(course);
     setNewTitle(course.title || '');
     setNewDescription(course.description || '');
+    setIsPublic(course.is_public || false);
     setRenameModalOpen(true);
   };
 
@@ -111,11 +116,18 @@ function Dashboard() {
     if (!courseToRename) return;
 
     try {
+      // First, update the public status
+      await courseService.updateCoursePublicStatus(courseToRename.course_id, isPublic);
+
+      // Then, update the title and description
       const updatedCourse = await courseService.updateCourse(courseToRename.course_id, newTitle, newDescription);
+
+      // Combine updates for the UI
+      const finalUpdatedCourse = { ...updatedCourse, is_public: isPublic };
 
       setCourses(prevCourses =>
         prevCourses.map(course =>
-          course.course_id === courseToRename.course_id ? updatedCourse : course
+          course.course_id === courseToRename.course_id ? finalUpdatedCourse : course
         )
       );
       setRenameModalOpen(false);
@@ -224,10 +236,29 @@ function Dashboard() {
           />
           <Textarea
             label={t('renameModal.descriptionLabel')}
-            placeholder={t('renameModal.descriptionPlaceholder')}
             value={newDescription}
             onChange={(event) => setNewDescription(event.currentTarget.value)}
+            autosize
+            minRows={3}
+            maxRows={6}
+            mt="md"
           />
+
+          <Switch
+            mt="lg"
+            checked={isPublic}
+            onChange={(event) => setIsPublic(event.currentTarget.checked)}
+            label={t('renameModal.publicLabel', { defaultValue: 'Make course public' })}
+            description={t('renameModal.publicDescription', { defaultValue: 'Public courses can be viewed by anyone.' })}
+            thumbIcon={
+              isPublic ? (
+                <IconWorld size={12} color={theme.colors.teal[6]} stroke={3} />
+              ) : (
+                <IconX size={12} color={theme.colors.red[6]} stroke={3} />
+              )
+            }
+          />
+
           <Group position="right" mt="md">
             <Button variant="default" onClick={() => setRenameModalOpen(false)}>
               {t('renameModal.cancelButton')}
@@ -571,6 +602,17 @@ function Dashboard() {
                         >
                           {statusInfo.label}
                         </Badge>
+                        {course.is_public && (
+                          <Tooltip label={t('publicCourseTooltip', { defaultValue: 'This course is public' })}>
+                            <Badge 
+                              color="grape" 
+                              variant="light" 
+                              leftSection={<IconWorld size={12} />}
+                            >
+                              {t('publicBadge', { defaultValue: 'Public' })}
+                            </Badge>
+                          </Tooltip>
+                        )}
                         <Group spacing="xs" position="right">
                           <ActionIcon 
                             color="red" 

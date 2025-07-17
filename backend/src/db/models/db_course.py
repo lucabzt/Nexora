@@ -39,6 +39,8 @@ class Course(Base):
     chapter_count = Column(Integer, nullable=True)
     error_msg = Column(Text, nullable=True)
 
+    is_public = Column(Boolean, default=False)
+
     # Relationships
     chapters = relationship("Chapter", back_populates="course", cascade="all, delete-orphan")
     user = relationship("User", back_populates="courses")

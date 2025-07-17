@@ -1,0 +1,45 @@
+{
+  "title": "Dashboard",
+  "subtitle": "Willkommen zurück! Hier ist eine Übersicht über deine Lernfortschritte.",
+  "loadCoursesError": "Kurse konnten nicht geladen werden. Bitte versuche es später erneut.",
+  "yourCoursesTitle": "Deine Kurse",
+  "viewAllButton": "Alle anzeigen",
+  "showLessButton": "Weniger anzeigen",
+  "noCourses": "Du hast noch keine Kurse. Erstelle einen, um zu beginnen!",
+  "createNewCourseButton": "Neuen Kurs erstellen",
+  "continueLearningButton": "Weiterlernen",
+  "viewCreationProgressButton": "Erstellungsfortschritt anzeigen",
+  "estimatedTime": "Geschätzte Zeit: {{hours}} Stunden",
+  "courseStatus": {
+    "creating": "Wird erstellt",
+    "available": "Verfügbar",
+    "completed": "Abgeschlossen"
+  },
+  "deleteCourseTooltip": "Kurs löschen",
+  "renameCourseTooltip": "Kurs bearbeiten",
+  "deleteModal": {
+    "title": "Kurs löschen bestätigen",
+    "message": "Bist du sicher, dass du den Kurs '{{title}}' löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "confirmButton": "Löschen",
+    "cancelButton": "Abbrechen"
+  },
+  "renameModal": {
+    "title": "Kurs bearbeiten",
+    "titleLabel": "Titel",
+    "descriptionLabel": "Beschreibung",
+    "confirmButton": "Speichern",
+    "cancelButton": "Abbrechen",
+    "publicLabel": "Kurs öffentlich machen",
+    "publicDescription": "Öffentliche Kurse können von jedem eingesehen werden."
+  },
+  "errors": {
+    "deleteCourse": "Fehler beim Löschen des Kurses: {{message}}",
+    "renameCourse": "Fehler beim Umbenennen des Kurses: {{message}}"
+  },
+  "publicCoursesTitle": "Öffentliche Kurse",
+  "publicCoursesSubtitle": "Entdecke Kurse, die von der Community geteilt wurden.",
+  "noPublicCourses": "Im Moment sind keine öffentlichen Kurse verfügbar.",
+  "viewCourseButton": "Kurs ansehen",
+  "publicCourseTooltip": "Dieser Kurs ist öffentlich",
+  "publicBadge": "Öffentlich"
+}
