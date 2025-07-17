@@ -95,7 +95,7 @@ function PublicCourses() {
       ) : (
         <Grid gutter="x1">
           {filteredCourses.map((course) => (
-            <Grid.Col key={course.course_id} sm={6} md={4}>
+            <Grid.Col key={course.course_id} sm={12} md={6} lg={4}>
               <Card 
                 shadow="sm" 
                 p="lg" 
@@ -116,9 +116,9 @@ function PublicCourses() {
                   {t('byAuthor', { ns: 'dashboard', defaultValue: 'By' })} {course.user_name}
                 </Text>
 
-                <Text size="sm" color="dimmed" lineClamp={2} mb="md" sx={{
+                <Text size="sm" color="dimmed"  lineClamp={5}mb="md" sx={{
                   flex: 1,
-                  height: '5.5rem',
+                  height: '6rem',
                   overflow: 'auto',
                   paddingRight: '4px',
                   '&::-webkit-scrollbar': {
