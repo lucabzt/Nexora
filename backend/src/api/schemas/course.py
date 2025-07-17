@@ -39,6 +39,7 @@ class CourseInfo(BaseModel):
     image_url: Optional[str] = None
     completed_chapter_count: Optional[int] = None
     user_name: Optional[str] = None
+    is_public: Optional[bool] = None
 
     class Config:
         from_attributes = True  # For Pydantic v2 (replaces orm_mode = True)
