@@ -1,12 +1,13 @@
 {
+  "title": "Dashboard",
+  "subtitle": "Welcome back! Here's an overview of your learning progress.",
   "myLearningJourney": "My Learning Journey",
   "welcomeMessage": "Welcome back! Let's continue your learning journey.",
-  "loadCoursesError": "Failed to load your courses. Please try again later.",
+  "loadCoursesError": "Could not load courses. Please try again later.",
   "deleteCourseError": "Failed to delete the course. {{message}}",
   "renameCourseError": "Failed to rename the course. {{message}}",
   "recommendedForYou": "Recommended for you",
   "yourProgress": "Progress",
-
   "featuredCourse": {
     "defaultTitle": "Loading...",
     "defaultDescription": "Loading..."
@@ -22,57 +23,67 @@
     "coursesCompletedDescription": "Each course is a step forward in your journey.",
     "totalHoursLearnedDescription": "Time well spent investing in your knowledge."
   },
-
   "continueLearningTitle": "Continue Where You Left Off",
-
+  "yourCoursesTitle": "Your Courses",
   "viewAllButton": "View All",
-  "viewLessButton": "View Less",
-  
+  "showLessButton": "Show Less",
   "emptyState": {
     "title": "No Courses Yet",
     "message": "Get started by creating your first course to begin your learning journey.",
     "button": "Create First Course"
   },
-  
+  "noCourses": "You don't have any courses yet. Create one to get started!",
+  "createNewCourseButton": "Create New Course",
   "deleteModal": {
-    "title": "Delete Course",
-    "message": "Are you sure you want to delete this course? This action is irreversible.",
-    "cancelButton": "Cancel",
-    "confirmButton": "Delete"
+    "title": "Confirm Deletion",
+    "message": "Are you sure you want to delete the course '{{title}}'? This action cannot be undone.",
+    "confirmButton": "Delete",
+    "cancelButton": "Cancel"
   },
-
   "renameModal": {
-    "title": "Rename Course",
+    "title": "Edit Course",
     "titleLabel": "Title",
-    "titlePlaceholder": "Enter the new course title",
     "descriptionLabel": "Description",
-    "descriptionPlaceholder": "Enter the new course description",
+    "saveButton": "Save",
     "cancelButton": "Cancel",
-    "saveButton": "Save Changes"
+    "publicLabel": "Make course public",
+    "publicDescription": "Public courses can be viewed by anyone."
   },
-
   "status": {
     "inProgress": "In Progress",
-    "creating": "Creating...",
+    "creating": "Creating",
     "completed": "Completed",
     "finished": "Ready"
   },
-  
-  "errors": {
-    "deleteCourse": "An error occurred while deleting the course. Please try again."
+  "courseStatus": {
+    "creating": "Creating",
+    "available": "Available",
+    "completed": "Completed"
   },
-  
+  "errors": {
+    "deleteCourse": "Error deleting course: {{message}}",
+    "renameCourse": "Error renaming course: {{message}}"
+  },
   "errorAlertTitle": "Error",
-  
   "myCourses": "My Courses",
   "noCoursesMessage": "You haven't created any courses yet. Get started now!",
   "createNewCourse": "Create New Course",
-
   "courseProgressTooltip": "{{progress}}% complete",
   "deleteCourseTooltip": "Delete course",
-  "renameCourseTooltip": "Rename course",
-  
-  "estimatedTime": "Est. time: {{hours}} hours",
+  "renameCourseTooltip": "Edit course",
+  "estimatedTime": "Estimated time: {{hours}} hours",
   "viewCreationProgressButton": "View Creation Progress",
-  "continueLearningButton": "Continue Learning"
+  "continueLearningButton": "Continue Learning",
+  "publicCoursesTitle": "Public Courses",
+  "publicCoursesSubtitle": "Explore courses shared by the community.",
+  "noPublicCourses": "There are no public courses available at the moment.",
+  "byAuthor": "By",
+  "viewCourseButton": "View Course",
+  "searchPublicCoursesPlaceholder": "Search courses by title or description...",
+  "noSearchResults": "No courses match your search.",
+  "tryDifferentKeywords": "Try searching with different keywords.",
+  "checkBackLater": "Please check back later for new content.",
+  "publicCourseTooltip": "This course is public",
+  "publicBadge": "Public",
+  "searchPlaceholder": "Search courses..."
 }

@@ -27,6 +27,7 @@ import StatisticsPage from './pages/StatisticsPage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage'; // Import the OAuth callback page
 import Impressum from './pages/Impressum';
 import About from './pages/About';
+import PublicCourses from './pages/PublicCourses'; // Import the new Public Courses page
 import NotFoundPage from './pages/NotFoundPage'; // Import the NotFoundPage component
 import AdminView from './pages/AdminView'; // Import AdminView component
 import CourseLayout from './layouts/CourseLayout'; // Import CourseLayout
@@ -84,6 +85,7 @@ function App() {
                       {/* Protected routes now based at /dashboard */}
                     <Route element={<ProtectedRoute />}>
                       <Route path="/dashboard" element={<AppLayout />}> {/* Base path for dashboard and other protected routes */}
+                        <Route path="public-courses" element={<PublicCourses />} />
                         <Route index element={<Dashboard />} /> {/* This will be /dashboard */}
                         <Route path="create-course" element={<CreateCourse />} /> {/* /dashboard/create-course */}
                         <Route path="courses/:courseId" element={<CourseView />} /> {/* /dashboard/courses/:courseId */}

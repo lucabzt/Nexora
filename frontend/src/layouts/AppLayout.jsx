@@ -35,6 +35,7 @@ import {
   IconChartLine,
   IconShieldCheck,
   IconInfoCircle,
+  IconWorld,
   IconChevronRight,
   IconX,
   IconMenu2,
@@ -237,6 +238,12 @@ function AppLayout() {
       color: "teal",
       label: t("newCourse", { ns: "navigation" }),
       to: "/dashboard/create-course",
+    },
+    {
+      icon: <IconWorld size={22} />,
+      color: "orange",
+      label: t("publicCourses", { ns: "navigation", defaultValue: "Public Courses" }),
+      to: "/dashboard/public-courses",
     },
     //{ icon: <IconChartLine size={20} />, color: 'grape', label: t('statistics', { ns: 'navigation' }), to: '/dashboard/statistics' },
     {

@@ -11,6 +11,17 @@ const debounce = (func, wait) => {
 
 export const courseService = {
   // Get all courses for current user
+  getPublicCourses: async () => {
+    const response = await apiWithCookies.get('/courses/public');
+    return response.data;
+  },
+
+  updateCoursePublicStatus: async (courseId, isPublic) => {
+    const response = await apiWithCookies.patch(`/courses/${courseId}/public`, { is_public: isPublic });
+    return response.data;
+  },
+
+  // Get all courses for current user
   getUserCourses: async () => {
     const response = await apiWithCookies.get('/courses/');
     console.log('getUserCourses response:', response.data);

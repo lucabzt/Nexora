@@ -1,12 +1,13 @@
 {
+  "title": "Dashboard",
+  "subtitle": "Willkommen zurück! Hier ist eine Übersicht über deine Lernfortschritte.",
   "myLearningJourney": "Meine Lernreise",
   "welcomeMessage": "Willkommen zurück! Lass uns deine Lernreise fortsetzen.",
-  "loadCoursesError": "Deine Kurse konnten nicht geladen werden. Bitte versuche es später erneut.",
+  "loadCoursesError": "Kurse konnten nicht geladen werden. Bitte versuche es später erneut.",
   "deleteCourseError": "Der Kurs konnte nicht gelöscht werden. {{message}}",
   "renameCourseError": "Der Kurs konnte nicht umbenannt werden. {{message}}",
   "recommendedForYou": "Für dich empfohlen",
   "yourProgress": "Fortschritt",
-
   "featuredCourse": {
     "defaultTitle": "Lädt...",
     "defaultDescription": "Lädt..."
@@ -22,57 +23,67 @@
     "coursesCompletedDescription": "Jeder Kurs ist ein Schritt nach vorne auf deiner Reise.",
     "totalHoursLearnedDescription": "Gut investierte Zeit in dein Wissen."
   },
-
   "continueLearningTitle": "Mach da weiter, wo du aufgehört hast",
-
+  "yourCoursesTitle": "Deine Kurse",
   "viewAllButton": "Alle anzeigen",
-  "viewLessButton": "Weniger anzeigen",
-  
+  "showLessButton": "Weniger anzeigen",
   "emptyState": {
     "title": "Noch keine Kurse",
     "message": "Erstelle deinen ersten Kurs, um mit deiner Lernreise zu beginnen.",
     "button": "Ersten Kurs erstellen"
   },
-  
+  "noCourses": "Du hast noch keine Kurse. Erstelle einen, um zu beginnen!",
+  "createNewCourseButton": "Neuen Kurs erstellen",
   "deleteModal": {
-    "title": "Kurs löschen",
-    "message": "Möchtest du diesen Kurs wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
-    "cancelButton": "Abbrechen",
-    "confirmButton": "Löschen"
+    "title": "Kurs löschen bestätigen",
+    "message": "Bist du sicher, dass du den Kurs '{{title}}' löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "confirmButton": "Löschen",
+    "cancelButton": "Abbrechen"
   },
-
   "renameModal": {
-    "title": "Kurs umbenennen",
+    "title": "Kurs bearbeiten",
     "titleLabel": "Titel",
-    "titlePlaceholder": "Gib den neuen Kurstitel ein",
     "descriptionLabel": "Beschreibung",
-    "descriptionPlaceholder": "Gib die neue Kursbeschreibung ein",
+    "saveButton": "Speichern",
     "cancelButton": "Abbrechen",
-    "saveButton": "Änderungen speichern"
+    "publicLabel": "Kurs öffentlich machen",
+    "publicDescription": "Öffentliche Kurse können von jedem eingesehen werden."
   },
-
   "status": {
     "inProgress": "In Bearbeitung",
-    "creating": "Wird erstellt...",
+    "creating": "Wird erstellt",
     "completed": "Abgeschlossen",
-    "finished": "Abgeschlossen"
+    "finished": "Bereit"
   },
-  
+  "courseStatus": {
+    "creating": "Wird erstellt",
+    "available": "Verfügbar",
+    "completed": "Abgeschlossen"
+  },
   "errors": {
-    "deleteCourse": "Beim Löschen des Kurses ist ein Fehler aufgetreten. Bitte versuche es später erneut."
+    "deleteCourse": "Fehler beim Löschen des Kurses: {{message}}",
+    "renameCourse": "Fehler beim Umbenennen des Kurses: {{message}}"
   },
-  
   "errorAlertTitle": "Fehler",
-  
   "myCourses": "Meine Kurse",
   "noCoursesMessage": "Du hast noch keine Kurse erstellt. Leg jetzt los!",
   "createNewCourse": "Neuen Kurs erstellen",
-
   "courseProgressTooltip": "{{progress}}% abgeschlossen",
   "deleteCourseTooltip": "Kurs löschen",
-  "renameCourseTooltip": "Kurs umbenennen",
-  
-  "estimatedTime": "Gesch. Zeit: {{hours}} Stunden",
+  "renameCourseTooltip": "Kurs bearbeiten",
+  "estimatedTime": "Geschätzte Zeit: {{hours}} Stunden",
   "viewCreationProgressButton": "Erstellungsfortschritt anzeigen",
-  "continueLearningButton": "Weiterlernen"
+  "continueLearningButton": "Weiterlernen",
+  "publicCoursesTitle": "Öffentliche Kurse",
+  "publicCoursesSubtitle": "Entdecke Kurse, die von der Community geteilt wurden.",
+  "noPublicCourses": "Im Moment sind keine öffentlichen Kurse verfügbar.",
+  "byAuthor": "Von",
+  "viewCourseButton": "Kurs ansehen",
+  "searchPublicCoursesPlaceholder": "Kurse nach Titel oder Beschreibung suchen...",
+  "noSearchResults": "Keine Kurse entsprechen Ihrer Suche.",
+  "tryDifferentKeywords": "Versuchen Sie, mit anderen Schlüsselwörtern zu suchen.",
+  "checkBackLater": "Bitte schauen Sie später noch einmal vorbei, um neue Inhalte zu sehen.",
+  "publicCourseTooltip": "Dieser Kurs ist öffentlich",
+  "publicBadge": "Öffentlich",
+  "searchPlaceholder": "Kurse suchen..."
 }
