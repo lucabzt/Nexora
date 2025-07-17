@@ -85,8 +85,8 @@ function App() {
                       {/* Protected routes now based at /dashboard */}
                     <Route element={<ProtectedRoute />}>
                       <Route path="/dashboard" element={<AppLayout />}> {/* Base path for dashboard and other protected routes */}
-                        <Route path="public-courses" element={<PublicCourses />} />
                         <Route index element={<Dashboard />} /> {/* This will be /dashboard */}
+                        <Route path="public-courses" element={<PublicCourses />} />
                         <Route path="create-course" element={<CreateCourse />} /> {/* /dashboard/create-course */}
                         <Route path="courses/:courseId" element={<CourseView />} /> {/* /dashboard/courses/:courseId */}
                         <Route path="courses/:courseId/chapters/:chapterId" element={<ChapterView />} /> {/* /dashboard/courses/:courseId/chapters/:chapterId */}
