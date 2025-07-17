@@ -817,6 +817,7 @@ function CourseView() {
                       {chapter.caption || t('chapters.defaultTitleText', { chapterNumber: index + 1 })}
                     </Text>
 
+
                     <Text
                       color="dimmed"
                       size="sm"
