@@ -189,7 +189,8 @@ def get_courses_infos(db: Session, user_id: str, skip: int = 0, limit: int = 200
             description=course.description,
             chapter_count=course.chapter_count,
             image_url=course.image_url,
-            completed_chapter_count=completed_chapters
+            completed_chapter_count=completed_chapters,
+            is_public=course.is_public,
         )
         result.append(course_info)
     
