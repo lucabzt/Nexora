@@ -72,18 +72,24 @@ function PublicCourses() {
   const confirmRenameHandler = async () => {
     if (!courseToRename) return;
     try {
+      // First update title and description
       const updatedCourse = await courseService.updateCourse(
-        courseToRename.course_id, 
-        { 
-          title: newTitle, 
-          description: newDescription,
-          is_public: isPublic
-        }
+        courseToRename.course_id,
+        newTitle,
+        newDescription
       );
       
+      // Then update the public status separately since it's a different endpoint
+      if (isPublic !== courseToRename.is_public) {
+        await courseService.updateCoursePublicStatus(courseToRename.course_id, isPublic);
+        updatedCourse.is_public = isPublic;
+      }
+      
+      // Update the local state with the updated course
       setCourses(courses.map(course => 
-        course.course_id === updatedCourse.course_id ? updatedCourse : course
+        course.course_id === updatedCourse.course_id ? { ...course, ...updatedCourse } : course
       ));
+      
       setRenameModalOpen(false);
     } catch (error) {
       console.error('Error updating course:', error);
@@ -286,7 +292,7 @@ function PublicCourses() {
         title={t('deleteModal.title')}
         centered
       >
-        <Text>{t('deleteModal.message', { courseName: courses.find(c => c.course_id === courseToDeleteId)?.title || '' })}</Text>
+        <Text>{t('deleteModal.message', { title: courses.find(c => c.course_id === courseToDeleteId)?.title || '' })}</Text>
         <Group position="right" mt="md">
           <Button 
             variant="default" 
