@@ -27,6 +27,7 @@
   "yourCoursesTitle": "Your Courses",
   "viewAllButton": "View All",
   "showLessButton": "Show Less",
+  "viewLessButton": "View Less",
   "emptyState": {
     "title": "No Courses Yet",
     "message": "Get started by creating your first course to begin your learning journey.",

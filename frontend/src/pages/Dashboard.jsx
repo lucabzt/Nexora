@@ -79,7 +79,7 @@ function Dashboard() {
   };*/
 
   // Show limited courses unless "View All" is clicked
-  const displayedCourses = viewAllCourses ? courses : courses.slice(0, 6);
+  const displayedCourses = viewAllCourses ? courses : courses.slice(0, 9);
 
   // Handlers for course actions
   const handleDelete = (courseId) => {

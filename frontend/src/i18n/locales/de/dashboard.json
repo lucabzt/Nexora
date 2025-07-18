@@ -27,6 +27,7 @@
   "yourCoursesTitle": "Deine Kurse",
   "viewAllButton": "Alle anzeigen",
   "showLessButton": "Weniger anzeigen",
+  "viewLessButton": "Weniger anzeigen",
   "emptyState": {
     "title": "Noch keine Kurse",
     "message": "Erstelle deinen ersten Kurs, um mit deiner Lernreise zu beginnen.",
