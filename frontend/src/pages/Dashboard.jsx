@@ -158,7 +158,7 @@ function Dashboard() {
   // Helper function to get status badge color and icon
   const getStatusInfo = (status) => {
     const label = t(`status.${status.replace(/^.*\./, '').toLowerCase()}`, { defaultValue: status });
-    console.log(status)
+
     switch (status) {
       case 'CourseStatus.CREATING':
         return { label, color: 'yellow', Icon: IconLoader };
@@ -175,7 +175,6 @@ function Dashboard() {
 
   // Function to calculate progress for a course (placeholder logic)
   const calculateProgress = (course) => {
-    console.log(course.status, " sollte so was wie CourseStatus.FAILED sein");
     // This is placeholder logic - in a real app, this would come from actual user progress data
     if (course.status === 'CourseStatus.COMPLETED') return 100;
     if (course.status === 'CourseStatus.CREATING') return 0;
@@ -199,7 +198,7 @@ function Dashboard() {
         title={t('deleteModal.title')}
         centered
       >
-        <Text>{t('deleteModal.message', { courseName: courses.find(c => c.course_id === courseToDeleteId)?.title || '' })}</Text>
+        <Text>{t('deleteModal.message', { title: courses.find(c => c.course_id === courseToDeleteId)?.title || '' })}</Text>
         <Group position="right" mt="md">
           <Button 
             variant="default" 
