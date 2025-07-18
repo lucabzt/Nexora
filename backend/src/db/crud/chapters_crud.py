@@ -136,7 +136,11 @@ def search_chapters_indexed(db: Session, query: str, user_id: str, limit: int = 
     """
 
     stmt = text("""
-        SELECT chapters.*
+        SELECT 
+            chapters.id, chapters.course_id, chapters.index, 
+            chapters.caption, chapters.summary, chapters.content, 
+            chapters.time_minutes, chapters.is_completed, 
+            chapters.created_at, chapters.image_url
         FROM chapters
         JOIN courses ON courses.id = chapters.course_id
         WHERE courses.user_id = :user_id
