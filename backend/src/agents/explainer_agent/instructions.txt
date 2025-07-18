@@ -33,7 +33,8 @@ Style Guidelines:
 - Use concrete examples.
 - Do not include practice questions, that will be handled by the tester agent.
 - Make sure your component occupies 100% of its parent container
-- Please do not create slides but rather one continuous scrollable page
+- Do not create slides but rather one continuous scrollable page
+- font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
 Your explanation will be wrapped into the following background to mimic a scratchbook styling:
 const PaperBackground = ({ children }) => {
   return (
