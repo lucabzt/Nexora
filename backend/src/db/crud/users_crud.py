@@ -143,7 +143,10 @@ def delete_user(db: Session, db_user: User):
         # 5. Delete documents associated with the user's courses
         db.execute(text(f"DELETE FROM documents WHERE course_id IN {course_ids_placeholder}"), params)
         
-        # 6. Delete chapters related to courses
+        # 6. Delete notes associated with chapters of user's courses
+        db.execute(text(f"DELETE FROM notes WHERE chapter_id IN (SELECT id FROM chapters WHERE course_id IN {course_ids_placeholder})"), params)
+
+        # 7. Delete chapters related to courses
         db.execute(text(f"DELETE FROM chapters WHERE course_id IN {course_ids_placeholder}"), params)
         
         # 7. Finally, delete the courses themselves
