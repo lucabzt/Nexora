@@ -133,7 +133,8 @@ def get_public_courses_infos(db: Session, user_id: str, skip: int = 0, limit: in
             chapter_count=course.chapter_count,
             image_url=course.image_url,
             completed_chapter_count=0, # This can be calculated if needed
-            user_name=course.user.username if course.user else None
+            user_name=course.user.username if course.user else None,
+            is_public=course.is_public,
         )
         result.append(course_info)
     

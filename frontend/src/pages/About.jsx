@@ -18,6 +18,8 @@ import {
 } from '@mantine/core';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { 
   IconRocket, 
   IconBulb, 
@@ -86,6 +88,16 @@ function About() {
   const { t } = useTranslation('about');
   const { classes } = useStyles();
   const [visible, setVisible] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  
+  const handleButtonClick = () => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    } else {
+      navigate('/login');
+    }
+  };
   
   useEffect(() => {
     setVisible(true);
@@ -112,7 +124,7 @@ function About() {
       name: 'Matthias Meierlohr',
       role: t('team.members.matthiasMeierlohr.role'),
       bio: t('team.members.matthiasMeierlohr.bio'),
-      avatar: 'https://m.media-amazon.com/images/S/pv-target-images/...jpg',
+      avatar: 'https://static.wikia.nocookie.net/jamescameronsavatar/images/0/08/Neytiri_Profilbild.jpg/revision/latest?cb=20100107164021&path-prefix=de',
       linkedin: 'https://www.linkedin.com/in/matthias-meierlohr',
       github: 'https://github.com/Maths24'
     },
@@ -120,7 +132,7 @@ function About() {
       name: 'Jonas Hörter',
       role: t('team.members.jonasHoerter.role'),
       bio: t('team.members.jonasHoerter.bio'),
-      avatar: 'https://m.media-amazon.com/images/S/pv-target-images/...jpg',
+      avatar: 'https://static.wikia.nocookie.net/jamescameronsavatar/images/0/08/Neytiri_Profilbild.jpg/revision/latest?cb=20100107164021&path-prefix=de',
       linkedin: 'https://www.linkedin.com/in/jonas-hörter-4b22562bb/',
     },
   ];
@@ -158,6 +170,7 @@ function About() {
                       size="lg"
                       radius="md"
                       leftIcon={<IconRocket size={20} />}
+                      onClick={handleButtonClick}
                     >
                       {t('buttons.startYourJourney')}
                     </Button>
@@ -314,6 +327,7 @@ function About() {
                     color="dark" 
                     size="lg" 
                     radius="md"
+                    onClick={handleButtonClick}
                   >
                     {t('cta.button')}
                   </Button>

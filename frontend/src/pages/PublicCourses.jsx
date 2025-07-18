@@ -16,10 +16,16 @@ import {
   TextInput,
   Paper,
   Stack,
+  ActionIcon,
+  Modal,
+  Textarea,
+  Switch,
+  rem,
 } from '@mantine/core';
-import { IconBook, IconAlertCircle, IconWorld, IconSearch, IconUser, IconBooks } from '@tabler/icons-react';
+import { IconBook, IconAlertCircle, IconWorld, IconSearch, IconUser, IconBooks, IconPencil, IconTrash, IconX } from '@tabler/icons-react';
 import courseService from '../api/courseService';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../contexts/AuthContext';
 import PlaceGolderImage from '../assets/place_holder_image.png';
 
 function PublicCourses() {
@@ -30,6 +36,59 @@ function PublicCourses() {
   const navigate = useNavigate();
   const { t } = useTranslation('dashboard');
   const theme = useMantineTheme();
+  const { user } = useAuth();
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [courseToDeleteId, setCourseToDeleteId] = useState(null);
+  const [renameModalOpen, setRenameModalOpen] = useState(false);
+  const [courseToRename, setCourseToRename] = useState(null);
+  const [newTitle, setNewTitle] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+  const [isPublic, setIsPublic] = useState(false);
+
+  const handleDelete = (courseId) => {
+    setCourseToDeleteId(courseId);
+    setDeleteModalOpen(true);
+  };
+
+  const handleRename = (course) => {
+    setCourseToRename(course);
+    setNewTitle(course.title || '');
+    setNewDescription(course.description || '');
+    setIsPublic(course.is_public || false);
+    setRenameModalOpen(true);
+  };
+
+  const confirmDeleteHandler = async () => {
+    if (!courseToDeleteId) return;
+    try {
+      await courseService.deleteCourse(courseToDeleteId);
+      setCourses(courses.filter(course => course.course_id !== courseToDeleteId));
+      setDeleteModalOpen(false);
+    } catch (error) {
+      console.error('Error deleting course:', error);
+    }
+  };
+
+  const confirmRenameHandler = async () => {
+    if (!courseToRename) return;
+    try {
+      const updatedCourse = await courseService.updateCourse(
+        courseToRename.course_id, 
+        { 
+          title: newTitle, 
+          description: newDescription,
+          is_public: isPublic
+        }
+      );
+      
+      setCourses(courses.map(course => 
+        course.course_id === updatedCourse.course_id ? updatedCourse : course
+      ));
+      setRenameModalOpen(false);
+    } catch (error) {
+      console.error('Error updating course:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchPublicCourses = async () => {
@@ -144,14 +203,44 @@ function PublicCourses() {
                   {course.title}
                 </Title>
 
-                <Group spacing="xs" mb="md">
-                  <IconUser size={14} color={theme.colors.gray[6]} />
-                  <Text size="xs" color="dimmed">
-                    {t('byAuthor', { ns: 'dashboard', defaultValue: 'By' })}{' '}
-                    <Text component="span" weight={700} style={{ color: 'var(--mantine-color-text)' }}>
-                      {course.user_name}
+                <Group position="apart" mb="md" noWrap>
+                  <Group spacing="xs" noWrap>
+                    <IconUser size={14} color={theme.colors.gray[6]} />
+                    <Text size="xs" color="dimmed">
+                      {t('byAuthor', { ns: 'dashboard', defaultValue: 'By' })}{' '}
+                      <Text component="span" weight={700} style={{ color: 'var(--mantine-color-text)' }}>
+                        {course.user_name}
+                      </Text>
                     </Text>
-                  </Text>
+                  </Group>
+                  {user?.is_admin && (
+                    <Group spacing={4}>
+                      <ActionIcon 
+                        size="sm"
+                        color="blue"
+                        variant="subtle"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRename(course);
+                        }}
+                        title={t('renameCourseTooltip')}
+                      >
+                        <IconPencil size={14} />
+                      </ActionIcon>
+                      <ActionIcon 
+                        size="sm"
+                        color="red"
+                        variant="subtle"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(course.course_id);
+                        }}
+                        title={t('deleteCourseTooltip')}
+                      >
+                        <IconTrash size={14} />
+                      </ActionIcon>
+                    </Group>
+                  )}
                 </Group>
 
                 <Text size="sm" color="dimmed"  lineClamp={5} mb="md" sx={{
@@ -190,6 +279,83 @@ function PublicCourses() {
           ))}
         </Grid>
       )}
+      {/* Delete Confirmation Modal */}
+      <Modal
+        opened={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        title={t('deleteModal.title')}
+        centered
+      >
+        <Text>{t('deleteModal.message', { courseName: courses.find(c => c.course_id === courseToDeleteId)?.title || '' })}</Text>
+        <Group position="right" mt="md">
+          <Button 
+            variant="default" 
+            onClick={() => {
+              setDeleteModalOpen(false);
+              setCourseToDeleteId(null);
+            }}
+          >
+            {t('deleteModal.cancelButton')}
+          </Button>
+          <Button 
+            color="red" 
+            onClick={confirmDeleteHandler}
+            leftIcon={<IconTrash size={rem(16)} />}
+          >
+            {t('deleteModal.confirmButton')}
+          </Button>
+        </Group>
+      </Modal>
+
+      {/* Rename Modal */}
+      <Modal
+        opened={renameModalOpen}
+        onClose={() => setRenameModalOpen(false)}
+        title={t('renameModal.title')}
+        centered
+      >
+        <Stack spacing="md">
+          <TextInput
+            label={t('renameModal.titleLabel')}
+            placeholder={t('renameModal.titlePlaceholder')}
+            value={newTitle}
+            onChange={(event) => setNewTitle(event.currentTarget.value)}
+          />
+          <Textarea
+            label={t('renameModal.descriptionLabel')}
+            value={newDescription}
+            onChange={(event) => setNewDescription(event.currentTarget.value)}
+            autosize
+            minRows={3}
+            maxRows={6}
+            mt="md"
+          />
+
+          <Switch
+            mt="lg"
+            checked={isPublic}
+            onChange={(event) => setIsPublic(event.currentTarget.checked)}
+            label={t('renameModal.publicLabel', { defaultValue: 'Make course public' })}
+            description={t('renameModal.publicDescription', { defaultValue: 'Public courses can be viewed by anyone.' })}
+            thumbIcon={
+              isPublic ? (
+                <IconWorld size={12} color={theme.colors.teal[6]} stroke={3} />
+              ) : (
+                <IconX size={12} color={theme.colors.red[6]} stroke={3} />
+              )
+            }
+          />
+
+          <Group position="right" mt="md">
+            <Button variant="default" onClick={() => setRenameModalOpen(false)}>
+              {t('renameModal.cancelButton')}
+            </Button>
+            <Button color="teal" onClick={confirmRenameHandler}>
+              {t('renameModal.saveButton')}
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </Container>
   );
 }
