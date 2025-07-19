@@ -145,7 +145,7 @@ class TestingFlashcardAgent(StandardAgent):
         
         self.llm_agent = LlmAgent(
             name="testing_flashcard_agent",
-            model="gemini-2.5-flash",
+            model="gemini-2.5-pro",
             description="Agent for generating multiple choice questions from PDF content",
             global_instruction=lambda _: instructions,
             instruction="Generate multiple choice questions from the provided text content. Focus on key concepts and create plausible distractors."
@@ -268,7 +268,7 @@ Generate exactly {num_questions} questions:
             remaining_questions = num_questions % len(chunks)
             
             # Create semaphore to limit concurrent API calls (prevent rate limiting)
-            max_concurrent = min(8, len(chunks))  # Limit to 8 concurrent requests (Flash has higher limits)
+            max_concurrent = min(4, len(chunks))  # Limit to 4 concurrent requests (Flash has higher limits)
             semaphore = asyncio.Semaphore(max_concurrent)
             
             # Report initial chunk processing details
@@ -497,7 +497,7 @@ class LearningFlashcardAgent(StandardAgent):
         
         self.llm_agent = LlmAgent(
             name="learning_flashcard_agent",
-            model="gemini-2.5-flash",
+            model="gemini-2.5-pro",
             description="Agent for generating learning flashcards from PDF content",
             global_instruction=lambda _: instructions,
             instruction="Generate front/back learning flashcards from the provided content. Focus on key concepts and understanding."
