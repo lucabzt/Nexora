@@ -291,7 +291,7 @@ Generate exactly {num_questions} questions:
                         processing_speed = i / elapsed_time if elapsed_time > 0 else 0
                         estimated_remaining = (len(chunks) - i) / processing_speed if processing_speed > 0 else 0
                         
-                        progress_callback(TaskStatus.GENERATING, 60 + (i / len(chunks)) * 25, {
+                        progress_callback(TaskStatus.GENERATING, int(60 + (i / len(chunks)) * 25), {
                             "current_step": "generating",
                             "chunks_total": len(chunks),
                             "chunks_completed": i,
@@ -364,7 +364,7 @@ Generate exactly {num_questions} questions:
                             processing_speed = (i + 1) / elapsed_time if elapsed_time > 0 else 0
                             estimated_remaining = (len(chunks) - i - 1) / processing_speed if processing_speed > 0 else 0
                             
-                            progress_callback(TaskStatus.GENERATING, 60 + ((i + 1) / len(chunks)) * 25, {
+                            progress_callback(TaskStatus.GENERATING, int(60 + ((i + 1) / len(chunks)) * 25), {
                                 "activity": f"Completed chunk {i + 1}/{len(chunks)} - generated {chunk_questions_generated} questions",
                                 "chunks_total": len(chunks),
                                 "chunks_completed": i + 1,
@@ -377,7 +377,7 @@ Generate exactly {num_questions} questions:
                     except Exception as chunk_error:
                         print(f"Error processing chunk {i + 1}: {chunk_error}")
                         if progress_callback:
-                            progress_callback(TaskStatus.GENERATING, 60 + ((i + 1) / len(chunks)) * 25, {
+                            progress_callback(TaskStatus.GENERATING, int(60 + ((i + 1) / len(chunks)) * 25), {
                                 "activity": f"Error in chunk {i + 1}: {str(chunk_error)}, continuing with next chunk",
                                 "error": str(chunk_error)
                             })
