@@ -229,3 +229,8 @@ checkpoints/
 # Frontend
 frontend/*/node_modules
 frontend/*/dist
+
+backend/chroma_db
+backend/flashcard_images
+backend/anki_output
+backend/flashcard_uploads
