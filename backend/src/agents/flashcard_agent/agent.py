@@ -596,6 +596,7 @@ document.addEventListener('DOMContentLoaded', function() {
     margin-top: 10px;
     font-style: italic;
     line-height: 1.4;
+    color: black;
 }
 
 /* Mobile responsiveness */
