@@ -583,7 +583,7 @@ function ChapterView() {
             <Tabs value={activeTab} onTabChange={handleTabChange} mb="xl">
               <Tabs.List>
                 <Tabs.Tab value="content" icon={<IconBookmark size={14} />}>{t('tabs.content')}</Tabs.Tab>
-                <Tabs.Tab value="flashcards" icon={<IconCards size={14} />}>Flashcards</Tabs.Tab>
+                {/* <Tabs.Tab value="flashcards" icon={<IconCards size={14} />}>Flashcards</Tabs.Tab>*/}
                 {images.length > 0 && (
                   <Tabs.Tab value="images" icon={<IconPhoto size={14} />}>{t('tabs.images')}</Tabs.Tab>
                 )}
