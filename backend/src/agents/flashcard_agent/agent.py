@@ -145,7 +145,7 @@ class TestingFlashcardAgent(StandardAgent):
         
         self.llm_agent = LlmAgent(
             name="testing_flashcard_agent",
-            model="gemini-2.5-pro",
+            model="gemini-2.5-flash",
             description="Agent for generating multiple choice questions from PDF content",
             global_instruction=lambda _: instructions,
             instruction="Generate multiple choice questions from the provided text content. Focus on key concepts and create plausible distractors."
@@ -248,9 +248,9 @@ Generate exactly {num_questions} questions:
         start_time = time.time()
         
         try:
-            # Split text into chunks of ~2500 characters with overlap
-            chunk_size = 2500
-            overlap = 250
+            # Split text into chunks of ~4000 characters with overlap for better context
+            chunk_size = 4000
+            overlap = 400
             chunks = self._split_text_into_chunks(text_content, chunk_size, overlap)
             
             if progress_callback:
@@ -497,7 +497,7 @@ class LearningFlashcardAgent(StandardAgent):
         
         self.llm_agent = LlmAgent(
             name="learning_flashcard_agent",
-            model="gemini-2.5-pro",
+            model="gemini-2.5-flash",
             description="Agent for generating learning flashcards from PDF content",
             global_instruction=lambda _: instructions,
             instruction="Generate front/back learning flashcards from the provided content. Focus on key concepts and understanding."
@@ -571,7 +571,7 @@ class LearningFlashcardAgent(StandardAgent):
                 Chapter: {chapter.get('title', f'Chapter {chapter_index+1}')}
                 
                 Content:
-                {chapter_text[:2000]}  # Limit to avoid token limits
+                {chapter_text[:3000]}  # Increased limit for better context
                 
                 Generate 3-5 flashcards with:
                 - Front: A concept, term, or question
