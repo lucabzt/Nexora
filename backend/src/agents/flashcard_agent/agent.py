@@ -169,20 +169,29 @@ class TestingFlashcardAgent(StandardAgent):
         {text_content[:3000]}  # Limit text to avoid token limits
         
         For each question, provide:
-        1. A clear question
-        2. Four answer choices (A, B, C, D)
-        3. The correct answer letter
+        1. A clear, well-formed question
+        2. Four answer choices (without A), B), C), D) prefixes - just the choice text)
+        3. The correct answer letter (A, B, C, or D)
+        4. A brief explanation of why the correct answer is right
         
         Format your response as JSON with this structure:
         {{
             "questions": [
                 {{
                     "question": "Question text here?",
-                    "choices": ["A) Choice 1", "B) Choice 2", "C) Choice 3", "D) Choice 4"],
-                    "correct_answer": "A"
+                    "choices": ["Choice 1 text", "Choice 2 text", "Choice 3 text", "Choice 4 text"],
+                    "correct_answer": "A",
+                    "explanation": "Brief explanation of why this answer is correct."
                 }}
             ]
         }}
+        
+        Make sure:
+        - Questions are clear and unambiguous
+        - All four choices are plausible but only one is correct
+        - Choices don't include A), B), C), D) prefixes
+        - Explanations are concise but informative
+        - Questions test understanding, not just memorization
         """
         
         try:
@@ -231,7 +240,8 @@ class TestingFlashcardAgent(StandardAgent):
                 questions.append(MultipleChoiceQuestion(
                     question=q_data['question'],
                     choices=q_data['choices'],
-                    correct_answer=q_data['correct_answer']
+                    correct_answer=q_data['correct_answer'],
+                    explanation=q_data.get('explanation', '')
                 ))
             
             return questions
@@ -365,40 +375,55 @@ class AnkiDeckGenerator:
         self.output_dir.mkdir(exist_ok=True)
     
     def create_testing_deck(self, questions: List[MultipleChoiceQuestion], deck_name: str) -> str:
-        """Create Anki deck for multiple choice questions."""
+        """Create Anki deck for multiple choice questions with clickable options."""
         deck_id = random.randrange(1 << 30, 1 << 31)
         deck = genanki.Deck(deck_id, deck_name)
         
-        # Define note model for multiple choice
+        # Define note model for interactive multiple choice
         model_id = random.randrange(1 << 30, 1 << 31)
         model = genanki.Model(
             model_id,
-            'Multiple Choice Model',
+            'Interactive Multiple Choice Model',
             fields=[
                 {'name': 'Question'},
-                {'name': 'Choices'},
-                {'name': 'Answer'},
+                {'name': 'ChoiceA'},
+                {'name': 'ChoiceB'},
+                {'name': 'ChoiceC'},
+                {'name': 'ChoiceD'},
+                {'name': 'CorrectAnswer'},
                 {'name': 'Explanation'},
             ],
             templates=[
                 {
-                    'name': 'Card 1',
-                    'qfmt': '{{Question}}<br><br>{{Choices}}',
-                    'afmt': '{{FrontSide}}<hr id="answer">{{Answer}}<br><br>{{Explanation}}',
+                    'name': 'Multiple Choice Card',
+                    'qfmt': self._get_front_template(),
+                    'afmt': self._get_back_template(),
                 },
-            ]
+            ],
+            css=self._get_mcq_css()
         )
         
         # Add notes to deck
         for question in questions:
-            choices_html = "<br>".join([f"{chr(65+i)}. {choice}" for i, choice in enumerate(question.choices)])
+            # Parse choices to individual fields
+            choices = [choice.strip() for choice in question.choices]
+            while len(choices) < 4:  # Ensure we have 4 choices
+                choices.append("")
+            
+            # Find correct answer index
+            correct_index = 0
+            if question.correct_answer.upper() in ['A', 'B', 'C', 'D']:
+                correct_index = ord(question.correct_answer.upper()) - ord('A')
             
             note = genanki.Note(
                 model=model,
                 fields=[
                     question.question,
-                    choices_html,
-                    question.correct_answer,
+                    choices[0] if len(choices) > 0 else "",
+                    choices[1] if len(choices) > 1 else "",
+                    choices[2] if len(choices) > 2 else "",
+                    choices[3] if len(choices) > 3 else "",
+                    chr(65 + correct_index),  # A, B, C, or D
                     question.explanation or ""
                 ]
             )
@@ -409,6 +434,187 @@ class AnkiDeckGenerator:
         genanki.Package(deck).write_to_file(str(output_path))
         
         return str(output_path)
+    
+    def _get_front_template(self) -> str:
+        """Get the front template for interactive multiple choice cards."""
+        return '''
+<div class="mcq-container">
+    <div class="question">{{Question}}</div>
+    <div class="choices">
+        {{#ChoiceA}}<div class="choice" data-choice="A" onclick="selectChoice(this)">A. {{ChoiceA}}</div>{{/ChoiceA}}
+        {{#ChoiceB}}<div class="choice" data-choice="B" onclick="selectChoice(this)">B. {{ChoiceB}}</div>{{/ChoiceB}}
+        {{#ChoiceC}}<div class="choice" data-choice="C" onclick="selectChoice(this)">C. {{ChoiceC}}</div>{{/ChoiceC}}
+        {{#ChoiceD}}<div class="choice" data-choice="D" onclick="selectChoice(this)">D. {{ChoiceD}}</div>{{/ChoiceD}}
+    </div>
+</div>
+
+<script>
+function selectChoice(element) {
+    // Remove previous selections
+    document.querySelectorAll('.choice').forEach(choice => {
+        choice.classList.remove('selected');
+    });
+    
+    // Mark this choice as selected
+    element.classList.add('selected');
+    
+    // Store the selected answer
+    window.selectedAnswer = element.getAttribute('data-choice');
+}
+</script>
+'''
+    
+    def _get_back_template(self) -> str:
+        """Get the back template for interactive multiple choice cards."""
+        return '''
+<div class="mcq-container">
+    <div class="question">{{Question}}</div>
+    <div class="choices">
+        {{#ChoiceA}}<div class="choice" data-choice="A" onclick="selectChoice(this)">A. {{ChoiceA}}</div>{{/ChoiceA}}
+        {{#ChoiceB}}<div class="choice" data-choice="B" onclick="selectChoice(this)">B. {{ChoiceB}}</div>{{/ChoiceB}}
+        {{#ChoiceC}}<div class="choice" data-choice="C" onclick="selectChoice(this)">C. {{ChoiceC}}</div>{{/ChoiceC}}
+        {{#ChoiceD}}<div class="choice" data-choice="D" onclick="selectChoice(this)">D. {{ChoiceD}}</div>{{/ChoiceD}}
+    </div>
+    
+    <div class="answer-section">
+        <div class="correct-answer">Correct Answer: {{CorrectAnswer}}</div>
+        {{#Explanation}}<div class="explanation">{{Explanation}}</div>{{/Explanation}}
+    </div>
+</div>
+
+<script>
+function selectChoice(element) {
+    // Remove previous selections
+    document.querySelectorAll('.choice').forEach(choice => {
+        choice.classList.remove('selected', 'correct', 'incorrect');
+    });
+    
+    // Mark this choice as selected
+    element.classList.add('selected');
+    
+    // Get the correct answer
+    const correctAnswer = '{{CorrectAnswer}}';
+    const selectedChoice = element.getAttribute('data-choice');
+    
+    // Show feedback
+    document.querySelectorAll('.choice').forEach(choice => {
+        const choiceValue = choice.getAttribute('data-choice');
+        if (choiceValue === correctAnswer) {
+            choice.classList.add('correct');
+        } else if (choiceValue === selectedChoice && selectedChoice !== correctAnswer) {
+            choice.classList.add('incorrect');
+        }
+    });
+}
+
+// Auto-highlight correct answer on back
+document.addEventListener('DOMContentLoaded', function() {
+    const correctAnswer = '{{CorrectAnswer}}';
+    document.querySelectorAll('.choice').forEach(choice => {
+        if (choice.getAttribute('data-choice') === correctAnswer) {
+            choice.classList.add('correct');
+        }
+    });
+});
+</script>
+'''
+    
+    def _get_mcq_css(self) -> str:
+        """Get the CSS styles for multiple choice cards."""
+        return '''
+.mcq-container {
+    font-family: Arial, sans-serif;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.question {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    line-height: 1.4;
+    color: white;
+}
+
+.choices {
+    margin-bottom: 20px;
+}
+
+.choice {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 8px 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    line-height: 1.4;
+    color: black;
+}
+
+.choice:hover {
+    background: #e9ecef;
+    border-color: #6c757d;
+}
+
+.choice.selected {
+    background: #cce5ff;
+    border-color: #007bff;
+}
+
+.choice.correct {
+    background: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+}
+
+.choice.incorrect {
+    background: #f8d7da;
+    border-color: #dc3545;
+    color: #721c24;
+}
+
+.answer-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid #e9ecef;
+}
+
+.correct-answer {
+    font-weight: bold;
+    color: #28a745;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.explanation {
+    background: #f8f9fa;
+    border-left: 4px solid #007bff;
+    padding: 12px 16px;
+    margin-top: 10px;
+    font-style: italic;
+    line-height: 1.4;
+    color: black;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .mcq-container {
+        padding: 15px;
+    }
+    
+    .question {
+        font-size: 16px;
+    }
+    
+    .choice {
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+}
+'''
     
     def create_learning_deck(self, cards: List[LearningCard], deck_name: str) -> str:
         """Create Anki deck for learning flashcards."""
