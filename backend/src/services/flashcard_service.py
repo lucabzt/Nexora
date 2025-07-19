@@ -2,9 +2,11 @@ import asyncio
 import uuid
 import os
 import tempfile
+import json
 from typing import Dict, Any, Optional, Callable, List
 from pathlib import Path
 import shutil
+from datetime import datetime
 
 from ..agents.flashcard_agent.agent import FlashcardAgent
 from ..agents.flashcard_agent.schema import (
@@ -19,6 +21,108 @@ class TaskManager:
         self.tasks: Dict[str, TaskProgress] = {}
         self.running_tasks: Dict[str, asyncio.Task] = {}
         self.task_configs: Dict[str, tuple] = {}  # Store (document_id, config) for retries
+        
+        # Setup persistent storage
+        self.storage_dir = Path("/tmp/flashcard_tasks") if os.path.exists("/tmp") else Path("./flashcard_tasks")
+        self.storage_dir.mkdir(exist_ok=True)
+        
+        # Load existing tasks from storage
+        self._load_tasks_from_storage()
+    
+    def _load_tasks_from_storage(self):
+        """Load tasks from persistent storage."""
+        try:
+            for task_file in self.storage_dir.glob("task_*.json"):
+                with open(task_file, 'r') as f:
+                    task_data = json.load(f)
+                    task_id = task_data['task_id']
+                    
+                    # Recreate TaskProgress object
+                    task = TaskProgress(
+                        task_id=task_id,
+                        status=TaskStatus(task_data['status']),
+                        progress_percentage=task_data.get('progress_percentage', 0),
+                        current_step=task_data.get('current_step', ''),
+                        completed_steps=task_data.get('completed_steps', []),
+                        error_message=task_data.get('error_message'),
+                        download_url=task_data.get('download_url'),
+                        step_details=task_data.get('step_details'),
+                        activity_log=task_data.get('activity_log'),
+                        stats=task_data.get('stats'),
+                        estimated_time_remaining=task_data.get('estimated_time_remaining'),
+                        started_at=task_data.get('started_at'),
+                        completed_at=task_data.get('completed_at')
+                    )
+                    
+                    self.tasks[task_id] = task
+                    
+                    # Load task config if available
+                    if 'document_id' in task_data and 'config' in task_data:
+                        config_data = task_data['config']
+                        from ..agents.flashcard_agent.schema import FlashcardType, Difficulty, ChapterMode
+                        config = FlashcardConfig(
+                            type=FlashcardType(config_data['type']),
+                            difficulty=Difficulty(config_data['difficulty']),
+                            title=config_data['title'],
+                            chapter_mode=ChapterMode(config_data['chapter_mode']),
+                            slides_per_chapter=config_data.get('slides_per_chapter')
+                        )
+                        self.task_configs[task_id] = (task_data['document_id'], config)
+                        
+        except Exception as e:
+            print(f"Warning: Failed to load tasks from storage: {e}")
+    
+    def _save_task_to_storage(self, task_id: str):
+        """Save a task to persistent storage."""
+        try:
+            if task_id not in self.tasks:
+                return
+                
+            task = self.tasks[task_id]
+            task_data = {
+                'task_id': task.task_id,
+                'status': task.status.value,
+                'progress_percentage': task.progress_percentage,
+                'current_step': task.current_step,
+                'completed_steps': task.completed_steps,
+                'error_message': task.error_message,
+                'download_url': task.download_url,
+                'step_details': task.step_details,
+                'activity_log': task.activity_log,
+                'stats': task.stats,
+                'estimated_time_remaining': task.estimated_time_remaining,
+                'started_at': task.started_at,
+                'completed_at': task.completed_at,
+                'saved_at': datetime.now().isoformat()
+            }
+            
+            # Add config data if available
+            if task_id in self.task_configs:
+                document_id, config = self.task_configs[task_id]
+                task_data['document_id'] = document_id
+                task_data['config'] = {
+                    'type': config.type.value,
+                    'difficulty': config.difficulty.value,
+                    'title': config.title,
+                    'chapter_mode': config.chapter_mode.value,
+                    'slides_per_chapter': config.slides_per_chapter
+                }
+            
+            task_file = self.storage_dir / f"task_{task_id}.json"
+            with open(task_file, 'w') as f:
+                json.dump(task_data, f, indent=2)
+                
+        except Exception as e:
+            print(f"Warning: Failed to save task {task_id} to storage: {e}")
+    
+    def _delete_task_from_storage(self, task_id: str):
+        """Delete a task from persistent storage."""
+        try:
+            task_file = self.storage_dir / f"task_{task_id}.json"
+            if task_file.exists():
+                task_file.unlink()
+        except Exception as e:
+            print(f"Warning: Failed to delete task {task_id} from storage: {e}")
     
     def create_task(self, document_id: str, config: FlashcardConfig) -> str:
         """Create a new flashcard generation task."""
@@ -29,11 +133,15 @@ class TaskManager:
             status=TaskStatus.PENDING,
             progress_percentage=0,
             current_step="Initializing",
-            completed_steps=[]
+            completed_steps=[],
+            started_at=datetime.now().isoformat()
         )
         
         # Store config for retry functionality
         self.task_configs[task_id] = (document_id, config)
+        
+        # Save to persistent storage
+        self._save_task_to_storage(task_id)
         
         return task_id
     
@@ -96,6 +204,11 @@ class TaskManager:
                 task.completed_steps.append("generating")
             elif status == TaskStatus.PACKAGING and "packaging" not in task.completed_steps:
                 task.completed_steps.append("packaging")
+            elif status == TaskStatus.COMPLETED:
+                task.completed_at = datetime.now().isoformat()
+        
+        # Save updated task to persistent storage
+        self._save_task_to_storage(task_id)
     
     def cancel_task(self, task_id: str) -> bool:
         """Cancel a running task."""
@@ -105,6 +218,8 @@ class TaskManager:
             
             if task_id in self.tasks:
                 self.tasks[task_id].status = TaskStatus.CANCELLED
+                # Save updated task to persistent storage
+                self._save_task_to_storage(task_id)
             
             return True
         return False
@@ -113,6 +228,8 @@ class TaskManager:
         """Set the download URL for a completed task."""
         if task_id in self.tasks:
             self.tasks[task_id].download_url = download_url
+            # Save updated task to persistent storage
+            self._save_task_to_storage(task_id)
 
 
 class DocumentManager:
@@ -342,6 +459,9 @@ class FlashcardService:
             file_path = self.output_dir / filename
             if file_path.exists():
                 file_path.unlink()
+        
+        # Remove from persistent storage
+        self.task_manager._delete_task_from_storage(task_id)
         
         # Remove from memory
         del self.task_manager.tasks[task_id]
