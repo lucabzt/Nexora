@@ -786,91 +786,37 @@ if (void 0 === window.Persistence) {
     <div class="question">{{Question}}</div>
     <div class="choices">
         {{#ChoiceA}}
-        <div class="choice" data-choice="A" 
-             onmousedown="this.style.transform='scale(0.98)';" 
-             onmouseup="this.style.transform='';" 
-             onmouseout="this.style.transform='';"
-             onclick="selectChoice(this, 'A');">
-            <span class="choice-letter">A.</span> {{ChoiceA}}
+        <div class="choice" data-choice="A">
+            <input type="radio" name="mcq-choice" id="choiceA">
+            <label for="choiceA"><span class="choice-letter">A.</span> {{ChoiceA}}</label>
         </div>
         {{/ChoiceA}}
         
         {{#ChoiceB}}
-        <div class="choice" data-choice="B" 
-             onmousedown="this.style.transform='scale(0.98)';" 
-             onmouseup="this.style.transform='';" 
-             onmouseout="this.style.transform='';"
-             onclick="selectChoice(this, 'B');">
-            <span class="choice-letter">B.</span> {{ChoiceB}}
+        <div class="choice" data-choice="B">
+            <input type="radio" name="mcq-choice" id="choiceB">
+            <label for="choiceB"><span class="choice-letter">B.</span> {{ChoiceB}}</label>
         </div>
         {{/ChoiceB}}
         
         {{#ChoiceC}}
-        <div class="choice" data-choice="C" 
-             onmousedown="this.style.transform='scale(0.98)';" 
-             onmouseup="this.style.transform='';" 
-             onmouseout="this.style.transform='';"
-             onclick="selectChoice(this, 'C');">
-            <span class="choice-letter">C.</span> {{ChoiceC}}
+        <div class="choice" data-choice="C">
+            <input type="radio" name="mcq-choice" id="choiceC">
+            <label for="choiceC"><span class="choice-letter">C.</span> {{ChoiceC}}</label>
         </div>
         {{/ChoiceC}}
         
         {{#ChoiceD}}
-        <div class="choice" data-choice="D" 
-             onmousedown="this.style.transform='scale(0.98)';" 
-             onmouseup="this.style.transform='';" 
-             onmouseout="this.style.transform='';"
-             onclick="selectChoice(this, 'D');">
-            <span class="choice-letter">D.</span> {{ChoiceD}}
+        <div class="choice" data-choice="D">
+            <input type="radio" name="mcq-choice" id="choiceD">
+            <label for="choiceD"><span class="choice-letter">D.</span> {{ChoiceD}}</label>
         </div>
         {{/ChoiceD}}
     </div>
 </div>
 
 <script>
-// Store the correct answer for later comparison
-const correctAnswer = '{{CorrectAnswer}}';
-
-function selectChoice(element, choice) {
-    // Remove previous selections
-    const choices = document.querySelectorAll('.choice');
-    for (let i = 0; i < choices.length; i++) {
-        choices[i].classList.remove('selected');
-    }
-    
-    // Mark this choice as selected
-    element.classList.add('selected');
-    
-    // Store the selection
-    if (Persistence.isAvailable()) {
-        Persistence.setItem('selected_choice', choice);
-        Persistence.setItem('correct_answer', correctAnswer);
-    } else {
-        // Fallback to data attribute
-        const card = document.querySelector('.card');
-        if (card) {
-            card.setAttribute('data-selected-choice', choice);
-            card.setAttribute('data-correct-answer', correctAnswer);
-        }
-    }
-    
-    // Show the answer (flip the card)
-    py.link('showQuestion:answer');
-}
-
-// Add keyboard navigation
-document.addEventListener('keydown', function(event) {
-    // Only handle number keys 1-4
-    if (event.key >= '1' && event.key <= '4') {
-        const index = parseInt(event.key) - 1;
-        const choices = document.querySelectorAll('.choice');
-        if (index < choices.length) {
-            const choice = choices[index];
-            const choiceLetter = choice.getAttribute('data-choice');
-            selectChoice(choice, choiceLetter);
-        }
-    }
-});
+setupMCQ(false);
 </script>
 '''
     
@@ -880,10 +826,33 @@ document.addEventListener('keydown', function(event) {
 <div class="mcq-container">
     <div class="question">{{Question}}</div>
     <div class="choices">
-        {{#ChoiceA}}<div class="choice" data-choice="A"><span class="choice-letter">A.</span> {{ChoiceA}}</div>{{/ChoiceA}}
-        {{#ChoiceB}}<div class="choice" data-choice="B"><span class="choice-letter">B.</span> {{ChoiceB}}</div>{{/ChoiceB}}
-        {{#ChoiceC}}<div class="choice" data-choice="C"><span class="choice-letter">C.</span> {{ChoiceC}}</div>{{/ChoiceC}}
-        {{#ChoiceD}}<div class="choice" data-choice="D"><span class="choice-letter">D.</span> {{ChoiceD}}</div>{{/ChoiceD}}
+        {{#ChoiceA}}
+        <div class="choice" data-choice="A">
+            <input type="radio" name="mcq-choice" id="choiceA" disabled>
+            <label for="choiceA"><span class="choice-letter">A.</span> {{ChoiceA}}</label>
+        </div>
+        {{/ChoiceA}}
+        
+        {{#ChoiceB}}
+        <div class="choice" data-choice="B">
+            <input type="radio" name="mcq-choice" id="choiceB" disabled>
+            <label for="choiceB"><span class="choice-letter">B.</span> {{ChoiceB}}</label>
+        </div>
+        {{/ChoiceB}}
+        
+        {{#ChoiceC}}
+        <div class="choice" data-choice="C">
+            <input type="radio" name="mcq-choice" id="choiceC" disabled>
+            <label for="choiceC"><span class="choice-letter">C.</span> {{ChoiceC}}</label>
+        </div>
+        {{/ChoiceC}}
+        
+        {{#ChoiceD}}
+        <div class="choice" data-choice="D">
+            <input type="radio" name="mcq-choice" id="choiceD" disabled>
+            <label for="choiceD"><span class="choice-letter">D.</span> {{ChoiceD}}</label>
+        </div>
+        {{/ChoiceD}}
     </div>
     
     <div class="answer-section">
@@ -893,49 +862,7 @@ document.addEventListener('keydown', function(event) {
 </div>
 
 <script>
-// Get the correct answer from template variables or persistence
-let correctAnswer = '{{CorrectAnswer}}';
-let selectedAnswer = null;
-
-// Try to get the selected answer from persistence
-if (Persistence.isAvailable()) {
-    selectedAnswer = Persistence.getItem('selected_choice');
-    // If we don't have a selected answer in persistence, check the card data attribute
-    if (!selectedAnswer) {
-        const card = document.querySelector('.card');
-        selectedAnswer = card ? card.getAttribute('data-selected-choice') : null;
-    }
-    
-    // Make sure we have the correct answer from persistence
-    const persistedCorrectAnswer = Persistence.getItem('correct_answer');
-    if (persistedCorrectAnswer) {
-        correctAnswer = persistedCorrectAnswer;
-    }
-}
-
-// Highlight the selected and correct answers when the back is shown
-document.addEventListener('DOMContentLoaded', function() {
-    // If we still don't have a selected answer, check the card's data attribute
-    if (!selectedAnswer) {
-        const card = document.querySelector('.card');
-        selectedAnswer = card ? card.getAttribute('data-selected-choice') : null;
-    }
-    
-    // Highlight answers
-    document.querySelectorAll('.choice').forEach(choice => {
-        const choiceValue = choice.getAttribute('data-choice');
-        
-        // Always highlight the correct answer in green
-        if (choiceValue === correctAnswer) {
-            choice.classList.add('correct');
-        }
-        
-        // If this choice was selected and is incorrect, highlight it in red
-        if (selectedAnswer && choiceValue === selectedAnswer && selectedAnswer !== correctAnswer) {
-            choice.classList.add('incorrect');
-        }
-    });
-});
+setupMCQ(true);
 </script>
 '''
     
@@ -1111,6 +1038,59 @@ document.addEventListener('DOMContentLoaded', function() {
         padding: 10px 12px;
     }
 }
+</style>
+
+<script>
+function setupMCQ(isBackSide) {
+    const correctAnswer = '{{CorrectAnswer}}';
+    let selectedAnswer = null;
+
+    if (Persistence.isAvailable()) {
+        selectedAnswer = Persistence.getItem('selected_choice');
+    }
+
+    document.querySelectorAll('.choice').forEach(choice => {
+        const radio = choice.querySelector('input[type="radio"]');
+        const choiceValue = choice.getAttribute('data-choice');
+
+        // --- FRONT SIDE LOGIC ---
+        if (!isBackSide) {
+            choice.onclick = () => {
+                document.querySelectorAll('.choice').forEach(c => c.classList.remove('selected'));
+                choice.classList.add('selected');
+                radio.checked = true;
+                if (Persistence.isAvailable()) {
+                    Persistence.clear();
+                    Persistence.setItem('selected_choice', choiceValue);
+                }
+            };
+        }
+    });
+
+    // --- BACK SIDE LOGIC ---
+    if (isBackSide) {
+        const correctChoice = document.querySelector(`.choice[data-choice="${correctAnswer}"]`);
+        const selectedChoice = selectedAnswer ? document.querySelector(`.choice[data-choice="${selectedAnswer}"]`) : null;
+
+        document.querySelectorAll('.choice input[type="radio"]').forEach(r => r.disabled = true);
+        document.querySelectorAll('.choice').forEach(c => c.classList.remove('selected'));
+
+        if (selectedChoice) {
+            selectedChoice.querySelector('input[type="radio"]').checked = true;
+            if (selectedAnswer === correctAnswer) {
+                selectedChoice.classList.add('correct');
+            } else {
+                selectedChoice.classList.add('incorrect');
+                if (correctChoice) correctChoice.classList.add('correct');
+            }
+        } else if (correctChoice) {
+            correctChoice.classList.add('correct');
+        }
+    }
+}
+</script>
+
+<style>
 '''
     
     def create_learning_deck(self, cards: List[LearningCard], deck_name: str) -> str:
