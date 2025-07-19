@@ -161,12 +161,17 @@ class TestingFlashcardAgent(StandardAgent):
     async def generate_questions(self, text_content: str, difficulty: str, num_questions: int = 20) -> List[MultipleChoiceQuestion]:
         """Generate multiple choice questions from text content."""
         
+        # Handle large PDFs by chunking the content
+        if len(text_content) > 3000:
+            return await self._generate_questions_from_chunks(text_content, difficulty, num_questions)
+        
+        # For smaller content, use the original approach
         prompt = f"""
         Generate {num_questions} multiple choice questions from the following text content.
         Difficulty level: {difficulty}
         
         Text content:
-        {text_content[:3000]}  # Limit text to avoid token limits
+        {text_content}
         
         For each question, provide:
         1. A clear, well-formed question
@@ -202,9 +207,135 @@ class TestingFlashcardAgent(StandardAgent):
                 content=create_text_query(prompt)
             )
             
-            # Parse the JSON response
+            # Parse the JSON response using helper method
+            questions_data = self._parse_questions_response(response)
+            
+            # Convert to MultipleChoiceQuestion objects
+            questions = []
+            for q_data in questions_data:
+                questions.append(MultipleChoiceQuestion(
+                    question=q_data['question'],
+                    choices=q_data['choices'],
+                    correct_answer=q_data['correct_answer'],
+                    explanation=q_data.get('explanation', '')
+                ))
+            
+            return questions
+            
+        except Exception as e:
+            print(f"Error generating questions: {e}")
+            return []
+    
+    async def _generate_questions_from_chunks(self, text_content: str, difficulty: str, num_questions: int) -> List[MultipleChoiceQuestion]:
+        """Generate questions from large text by processing it in chunks."""
+        try:
+            # Split text into chunks of ~2500 characters with overlap
+            chunk_size = 2500
+            overlap = 250
+            chunks = self._split_text_into_chunks(text_content, chunk_size, overlap)
+            
+            # Calculate questions per chunk
+            questions_per_chunk = max(1, num_questions // len(chunks))
+            remaining_questions = num_questions % len(chunks)
+            
+            all_questions = []
+            
+            for i, chunk in enumerate(chunks):
+                # Distribute remaining questions across first few chunks
+                chunk_questions = questions_per_chunk + (1 if i < remaining_questions else 0)
+                
+                if chunk_questions > 0:
+                    chunk_prompt = f"""
+                    Generate {chunk_questions} multiple choice questions from the following text content.
+                    Difficulty level: {difficulty}
+                    
+                    Text content:
+                    {chunk}
+                    
+                    For each question, provide:
+                    1. A clear, well-formed question
+                    2. Four answer choices (without A), B), C), D) prefixes - just the choice text)
+                    3. The correct answer letter (A, B, C, or D)
+                    4. A brief explanation of why the correct answer is right
+                    
+                    Format your response as JSON with this structure:
+                    {{
+                        "questions": [
+                            {{
+                                "question": "Question text here?",
+                                "choices": ["Choice 1 text", "Choice 2 text", "Choice 3 text", "Choice 4 text"],
+                                "correct_answer": "A",
+                                "explanation": "Brief explanation of why this answer is correct."
+                            }}
+                        ]
+                    }}
+                    
+                    Make sure:
+                    - Questions are clear and unambiguous
+                    - All four choices are plausible but only one is correct
+                    - Choices don't include A), B), C), D) prefixes
+                    - Explanations are concise but informative
+                    - Questions test understanding, not just memorization
+                    """
+                    
+                    # Generate questions for this chunk
+                    response = await self.run(
+                        user_id="system",
+                        state={},
+                        content=create_text_query(chunk_prompt)
+                    )
+                    
+                    # Parse response (same logic as original method)
+                    questions_data = self._parse_questions_response(response)
+                    
+                    # Convert to MultipleChoiceQuestion objects
+                    for q_data in questions_data:
+                        all_questions.append(MultipleChoiceQuestion(
+                            question=q_data['question'],
+                            choices=q_data['choices'],
+                            correct_answer=q_data['correct_answer'],
+                            explanation=q_data.get('explanation', '')
+                        ))
+            
+            return all_questions[:num_questions]  # Ensure we don't exceed requested number
+            
+        except Exception as e:
+            print(f"Error generating questions from chunks: {e}")
+            return []
+    
+    def _split_text_into_chunks(self, text: str, chunk_size: int, overlap: int) -> List[str]:
+        """Split text into overlapping chunks."""
+        chunks = []
+        start = 0
+        
+        while start < len(text):
+            end = start + chunk_size
+            chunk = text[start:end]
+            
+            # Try to break at sentence boundaries to avoid cutting mid-sentence
+            if end < len(text):
+                last_period = chunk.rfind('.')
+                last_newline = chunk.rfind('\n')
+                break_point = max(last_period, last_newline)
+                
+                if break_point > start + chunk_size // 2:  # Only break if it's not too early
+                    chunk = text[start:start + break_point + 1]
+                    end = start + break_point + 1
+            
+            chunks.append(chunk.strip())
+            
+            # Move start position with overlap
+            start = end - overlap
+            if start >= len(text):
+                break
+        
+        return [chunk for chunk in chunks if len(chunk.strip()) > 100]  # Filter out tiny chunks
+    
+    def _parse_questions_response(self, response) -> List[dict]:
+        """Parse the AI response to extract questions data."""
+        try:
             if isinstance(response, dict) and 'questions' in response:
-                questions_data = response['questions']
+                return response['questions']
             elif isinstance(response, dict) and 'explanation' in response:
                 # Extract from StandardAgent response format
                 import json
@@ -228,26 +359,11 @@ class TestingFlashcardAgent(StandardAgent):
                 if start >= 0 and end > start:
                     json_str = response_text[start:end]
                     parsed = json.loads(json_str)
-                    questions_data = parsed.get('questions', [])
-                else:
-                    questions_data = []
-            else:
-                questions_data = []
+                    return parsed.get('questions', [])
             
-            # Convert to MultipleChoiceQuestion objects
-            questions = []
-            for q_data in questions_data:
-                questions.append(MultipleChoiceQuestion(
-                    question=q_data['question'],
-                    choices=q_data['choices'],
-                    correct_answer=q_data['correct_answer'],
-                    explanation=q_data.get('explanation', '')
-                ))
-            
-            return questions
-            
+            return []
         except Exception as e:
-            print(f"Error generating questions: {e}")
+            print(f"Error parsing questions response: {e}")
             return []
 
 
@@ -410,20 +526,37 @@ class AnkiDeckGenerator:
             while len(choices) < 4:  # Ensure we have 4 choices
                 choices.append("")
             
-            # Find correct answer index
-            correct_index = 0
+            # Find the original correct answer index
+            original_correct_index = 0
             if question.correct_answer.upper() in ['A', 'B', 'C', 'D']:
-                correct_index = ord(question.correct_answer.upper()) - ord('A')
+                original_correct_index = ord(question.correct_answer.upper()) - ord('A')
+            
+            # Get the correct answer text
+            correct_answer_text = choices[original_correct_index] if original_correct_index < len(choices) else ""
+            
+            # Randomize the order of choices
+            choice_pairs = list(enumerate(choices))
+            random.shuffle(choice_pairs)
+            
+            # Create shuffled choices and find new correct answer position
+            shuffled_choices = ["", "", "", ""]
+            new_correct_index = 0
+            
+            for new_pos, (old_pos, choice_text) in enumerate(choice_pairs):
+                if new_pos < 4:  # Only fill first 4 positions
+                    shuffled_choices[new_pos] = choice_text
+                    if choice_text == correct_answer_text:
+                        new_correct_index = new_pos
             
             note = genanki.Note(
                 model=model,
                 fields=[
                     question.question,
-                    choices[0] if len(choices) > 0 else "",
-                    choices[1] if len(choices) > 1 else "",
-                    choices[2] if len(choices) > 2 else "",
-                    choices[3] if len(choices) > 3 else "",
-                    chr(65 + correct_index),  # A, B, C, or D
+                    shuffled_choices[0],
+                    shuffled_choices[1], 
+                    shuffled_choices[2],
+                    shuffled_choices[3],
+                    chr(65 + new_correct_index),  # A, B, C, or D based on new position
                     question.explanation or ""
                 ]
             )
@@ -735,9 +868,20 @@ class FlashcardAgent(StandardAgent):
                 if progress_callback:
                     progress_callback(TaskStatus.GENERATING, 60)
                 
+                # Calculate number of questions based on PDF content
+                total_pages = pdf_data["metadata"]["page_count"]
+                total_text_length = len(pdf_data["total_text"])
+                
+                # Dynamic calculation: base on pages and text length
+                # Minimum 5 questions, maximum 50 questions
+                # Roughly 1-3 questions per page depending on content density
+                questions_per_page = 2 if total_text_length / total_pages > 1000 else 1
+                calculated_questions = min(50, max(5, total_pages * questions_per_page))
+                
                 questions = await self.testing_agent.generate_questions(
                     pdf_data["total_text"], 
-                    config.difficulty.value
+                    config.difficulty.value,
+                    calculated_questions
                 )
                 
                 # Step 4: Package
