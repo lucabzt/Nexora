@@ -47,7 +47,8 @@
     "actions": {
       "editUser": "Benutzer bearbeiten",
       "changePassword": "Passwort ändern",
-      "deleteUser": "Benutzer löschen"
+      "deleteUser": "Benutzer löschen",
+      "loginAsUser": "Als Benutzer anmelden"
     },
     "noUsersFound": "Keine Benutzer gefunden"
   },

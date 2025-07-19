@@ -27,7 +27,6 @@ from ..db.models.db_user import User as UserModel
 from ..db.crud import usage_crud
 
 
-
 logger = Logger(__name__)
 
 async def login_user(form_data: OAuth2PasswordRequestForm, db: Session, response: Response) -> auth_schema.APIResponseStatus:
@@ -78,6 +77,79 @@ async def login_user(form_data: OAuth2PasswordRequestForm, db: Session, response
     return auth_schema.APIResponseStatus(status="success",
                                          msg="Successfully logged in",
                                          data={ "last_login": previous_last_login.isoformat()})
+
+async def admin_login_as(current_user_id: str, user_id: str, db: Session, response: Response) -> auth_schema.APIResponseStatus:
+    """
+    Logs in as a specified user (admin only).
+    
+    Args:
+        user_id: The ID of the user to log in as
+        db: Database session
+        response: FastAPI response object for setting cookies
+        
+    Returns:
+        APIResponseStatus with login status
+        
+    Raises:
+        HTTPException: If user not found or not active
+    """
+    # Get the target user
+    user = users_crud.get_user_by_id(db, user_id)
+    if not user:
+        logger.warning(f"Attempted to log in as non-existent user ID: {user_id}")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+        
+    # Check if the target user is active
+    if user.is_admin:
+        logger.warning(f"Attempted to log in as admin user: {user.username} (ID: {user.id})")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot log in as another admin user"
+        )
+        
+    # Log the admin action
+    logger.info(
+        f"Admin login-as action: "
+        f"Admin ID: {current_user_id} is logging in as user: {user.username} (ID: {user.id})"
+    )
+
+    # Generate access token with user details
+    access_token = security.create_access_token(
+        data={
+            "sub": user.username,
+            "user_id": user.id,
+            "is_admin": user.is_admin,
+            "email": user.email
+        }
+    )
+
+    refresh_token = security.create_refresh_token(
+        data={
+            "sub": user.username,
+            "user_id": user.id,
+            "is_admin": user.is_admin,
+            "email": user.email
+        }
+    )
+
+    # Set the access and refresh tokens in the response cookies
+    security.set_access_cookie(response, access_token)
+    security.set_refresh_cookie(response, refresh_token)
+    
+    # Update last login time
+    previous_last_login = user.last_login
+    # No update on last login!
+    usage_crud.log_admin_login_as(db, user_who=current_user_id, user_as=str(user.id))
+
+    return auth_schema.APIResponseStatus(
+        status="success",
+        msg="Successfully logged in as user",
+        data={"last_login": previous_last_login.isoformat() if previous_last_login else None}
+    )
+
 
 
 async def register_user(user_data: user_schema.UserCreate, db: Session, response: Response) -> auth_schema.APIResponseStatus:

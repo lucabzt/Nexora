@@ -178,6 +178,18 @@ def log_login(db: Session, user_id: str) -> Usage:
     """
     return log_usage(db, user_id, action="login")
 
+def log_admin_login_as(db: Session, user_who: str, user_as: str) -> Usage:
+    """
+    Log an admin login-as action.
+    
+    :param db: Database session
+    :param user_who: ID of the admin logging in as
+    :param user_as: ID of the user being logged in as
+    :return: The created Usage object
+    """
+    return log_usage(db, user_who, action="admin_login_as", details="Admin logged in as user: " + user_as)
+
+
 def log_refresh(db: Session, user_id: str) -> Usage:
     """
     Log a user refresh action.

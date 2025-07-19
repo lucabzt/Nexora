@@ -23,7 +23,9 @@ import {
   Skeleton,
   Alert,
   Select,
-  Tooltip
+  Tooltip,
+  Avatar,
+  Loader,
 } from '@mantine/core';
 import { 
   IconTrash, 
@@ -38,11 +40,13 @@ import {
   IconRefresh,
   IconCheck,
   IconX,
-  IconShieldCheck
+  IconShieldCheck,
+  IconLogin
 } from '@tabler/icons-react';
 import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import userService from '../api/userService';
+import authService from '../api/authService';
 import { useDisclosure } from '@mantine/hooks';
 
 
@@ -239,6 +243,27 @@ function AdminView() {
     } catch (err) {
       toast.error(t('toast.passwordChangeError'));
       console.error('Failed to change password:', err);
+    }
+  };
+
+  const [isLoggingInAs, setIsLoggingInAs] = useState(null);
+
+  const handleLoginAsUser = async (userId) => {
+    setIsLoggingInAs(userId);
+    try {
+      await authService.adminLoginAs(userId);
+      // Show success message before redirect
+      toast.success(t('toast.loginAsSuccess'));
+      // Small delay to show the success message, then redirect to dashboard with full page reload
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 500);
+    } catch (err) {
+      console.error('Failed to login as user:', err);
+      const errorMessage = err.message || t('toast.loginAsError');
+      toast.error(errorMessage);
+    } finally {
+      setIsLoggingInAs(null);
     }
   };
 
@@ -493,6 +518,20 @@ function AdminView() {
                               disabled={user.id === currentUser.id} // Prevent self-deletion
                             >
                               <IconTrash size="1rem" />
+                            </ActionIcon>
+                          </Tooltip>
+                          <Tooltip label={t('table.actions.loginAsUser')}>
+                            <ActionIcon 
+                              color="green" 
+                              onClick={() => handleLoginAsUser(user.id)}
+                              disabled={user.id === currentUser.id || isLoggingInAs === user.id || user.is_admin}
+                              loading={isLoggingInAs === user.id}
+                            >
+                              {isLoggingInAs === user.id ? (
+                                <Loader size="1rem" />
+                              ) : (
+                                <IconLogin size="1rem" />
+                              )}
                             </ActionIcon>
                           </Tooltip>
                         </Group>
