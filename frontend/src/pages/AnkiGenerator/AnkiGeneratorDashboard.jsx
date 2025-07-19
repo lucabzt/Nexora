@@ -92,11 +92,11 @@ const AnkiGeneratorDashboard = () => {
       return;
     }
 
-    // Validate file size (30MB limit)
-    if (file.size > 30 * 1024 * 1024) {
+    // Validate file size (50MB limit)
+    if (file.size > 50 * 1024 * 1024) {
       notifications.show({
         title: 'File Too Large',
-        message: 'Please select a PDF file smaller than 30MB',
+        message: 'Please select a PDF file smaller than 50MB',
         color: 'red',
         icon: <IconX size={16} />,
       });
@@ -325,7 +325,7 @@ const AnkiGeneratorDashboard = () => {
                       {isDragging ? 'Drop your PDF here' : 'Upload your PDF file'}
                     </Text>
                     <Text size="sm" color="dimmed" mb="md">
-                      Drag and drop or click to browse • PDF files only • Max 30MB
+                      Drag and drop or click to browse • PDF files only • Max 50MB
                     </Text>
                   </div>
                   <FileInput
@@ -529,7 +529,7 @@ const AnkiGeneratorDashboard = () => {
           <div>
             <Text weight={600} mb="xs">Step 1: Upload your PDF</Text>
             <Text size="sm" color="dimmed">
-              Upload any PDF document containing educational content. The system supports files up to 30MB.
+              Upload any PDF document containing educational content. The system supports files up to 50MB.
             </Text>
           </div>
 
