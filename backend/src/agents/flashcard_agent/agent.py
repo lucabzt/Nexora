@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import random
@@ -242,7 +243,7 @@ Generate exactly {num_questions} questions:
             return []
     
     async def _generate_questions_from_chunks(self, text_content: str, difficulty: str, num_questions: int, progress_callback=None) -> List[MultipleChoiceQuestion]:
-        """Generate questions from large text by processing it in chunks."""
+        """Generate questions from large text by processing it in chunks with parallel processing."""
         import time
         start_time = time.time()
         
@@ -254,18 +255,21 @@ Generate exactly {num_questions} questions:
             
             if progress_callback:
                 progress_callback(TaskStatus.GENERATING, 45, {
-                    "activity": f"Text divided into {len(chunks)} processing chunks",
+                    "activity": f"Text divided into {len(chunks)} processing chunks for parallel processing",
                     "chunks_total": len(chunks),
                     "chunks_completed": 0,
                     "text_length": len(text_content),
-                    "chunk_size": chunk_size
+                    "chunk_size": chunk_size,
+                    "parallel_processing": True
                 })
             
             # Calculate questions per chunk
             questions_per_chunk = max(1, num_questions // len(chunks))
             remaining_questions = num_questions % len(chunks)
             
-            all_questions = []
+            # Create semaphore to limit concurrent API calls (prevent rate limiting)
+            max_concurrent = min(5, len(chunks))  # Limit to 5 concurrent requests
+            semaphore = asyncio.Semaphore(max_concurrent)
             
             # Report initial chunk processing details
             if progress_callback:
@@ -273,121 +277,152 @@ Generate exactly {num_questions} questions:
                     "current_step": "generating",
                     "chunks_total": len(chunks),
                     "chunks_completed": 0,
-                    "current_chunk": 1,
                     "questions_generated": 0,
                     "estimated_questions": num_questions,
-                    "processing_speed": 0,
-                    "activity": f"Starting question generation from {len(chunks)} text chunks"
+                    "max_concurrent": max_concurrent,
+                    "activity": f"Starting parallel question generation from {len(chunks)} text chunks (max {max_concurrent} concurrent)"
                 })
             
+            # Create tasks for parallel processing
+            tasks = []
             for i, chunk in enumerate(chunks):
                 # Distribute remaining questions across first few chunks
                 chunk_questions = questions_per_chunk + (1 if i < remaining_questions else 0)
                 
                 if chunk_questions > 0:
-                    # Report progress before processing chunk
+                    task = self._process_chunk_parallel(
+                        chunk, difficulty, chunk_questions, i, len(chunks), 
+                        semaphore, progress_callback, start_time
+                    )
+                    tasks.append(task)
+            
+            # Execute all tasks in parallel
+            if progress_callback:
+                progress_callback(TaskStatus.GENERATING, 65, {
+                    "activity": f"Processing {len(tasks)} chunks in parallel...",
+                    "tasks_created": len(tasks),
+                    "max_concurrent": max_concurrent
+                })
+            
+            # Process tasks with progress tracking
+            all_questions = []
+            successful_chunks = 0
+            failed_chunks = 0
+            
+            # Use asyncio.as_completed for real-time progress updates
+            completed_tasks = 0
+            for completed_task in asyncio.as_completed(tasks):
+                try:
+                    result = await completed_task
+                    completed_tasks += 1
+                    
+                    if isinstance(result, list):
+                        all_questions.extend(result)
+                        successful_chunks += 1
+                    else:
+                        failed_chunks += 1
+                    
+                    # Report progress as each chunk completes
                     if progress_callback:
-                        elapsed_time = time.time() - start_time
-                        processing_speed = i / elapsed_time if elapsed_time > 0 else 0
-                        estimated_remaining = (len(chunks) - i) / processing_speed if processing_speed > 0 else 0
-                        
-                        progress_callback(TaskStatus.GENERATING, int(60 + (i / len(chunks)) * 25), {
-                            "current_step": "generating",
-                            "chunks_total": len(chunks),
-                            "chunks_completed": i,
-                            "current_chunk": i + 1,
+                        progress_percent = int(65 + (completed_tasks / len(tasks)) * 20)
+                        progress_callback(TaskStatus.GENERATING, progress_percent, {
+                            "activity": f"Completed {completed_tasks}/{len(tasks)} chunks - {len(all_questions)} questions generated",
                             "questions_generated": len(all_questions),
-                            "estimated_questions": num_questions,
-                            "processing_speed": round(processing_speed * 60, 1),  # chunks per minute
-                            "estimated_time_remaining": f"{int(estimated_remaining / 60)}m {int(estimated_remaining % 60)}s" if estimated_remaining > 0 else "Calculating...",
-                            "activity": f"Processing chunk {i + 1}/{len(chunks)} - generating {chunk_questions} questions"
+                            "chunks_completed": completed_tasks,
+                            "chunks_total": len(tasks),
+                            "successful_chunks": successful_chunks,
+                            "failed_chunks": failed_chunks,
+                            "processing_mode": "parallel"
                         })
-                    
-                    chunk_prompt = f"""
-                    Generate {chunk_questions} multiple choice questions from the following text content.
-                    Difficulty level: {difficulty}
-                    
-                    Text content:
-                    {chunk}
-                    
-                    For each question, provide:
-                    1. A clear, well-formed question
-                    2. Four answer choices (without A), B), C), D) prefixes - just the choice text)
-                    3. The correct answer letter (A, B, C, or D)
-                    4. A brief explanation of why the correct answer is right
-                    
-                    Format your response as JSON with this structure:
-                    {{
-                        "questions": [
-                            {{
-                                "question": "Question text here?",
-                                "choices": ["Choice 1 text", "Choice 2 text", "Choice 3 text", "Choice 4 text"],
-                                "correct_answer": "A",
-                                "explanation": "Brief explanation of why this answer is correct."
-                            }}
-                        ]
-                    }}
-                    
-                    Make sure:
-                    - Questions are clear and unambiguous
-                    - All four choices are plausible but only one is correct
-                    - Choices don't include A), B), C), D) prefixes
-                    - Explanations are concise but informative
-                    - Questions test understanding, not just memorization
-                    """
-                    
-                    try:
-                        # Generate questions for this chunk
-                        response = await self.run(
-                            user_id="system",
-                            state={},
-                            content=create_text_query(chunk_prompt)
-                        )
                         
-                        # Parse response (same logic as original method)
-                        questions_data = self._parse_questions_response(response)
-                        
-                        # Convert to MultipleChoiceQuestion objects
-                        chunk_questions_generated = 0
-                        for q_data in questions_data:
-                            all_questions.append(MultipleChoiceQuestion(
-                                question=q_data['question'],
-                                choices=q_data['choices'],
-                                correct_answer=q_data['correct_answer'],
-                                explanation=q_data.get('explanation', '')
-                            ))
-                            chunk_questions_generated += 1
-                        
-                        # Report progress after processing chunk
-                        if progress_callback:
-                            elapsed_time = time.time() - start_time
-                            processing_speed = (i + 1) / elapsed_time if elapsed_time > 0 else 0
-                            estimated_remaining = (len(chunks) - i - 1) / processing_speed if processing_speed > 0 else 0
-                            
-                            progress_callback(TaskStatus.GENERATING, int(60 + ((i + 1) / len(chunks)) * 25), {
-                                "activity": f"Completed chunk {i + 1}/{len(chunks)} - generated {chunk_questions_generated} questions",
-                                "chunks_total": len(chunks),
-                                "chunks_completed": i + 1,
-                                "questions_generated": len(all_questions),
-                                "estimated_questions": num_questions,
-                                "processing_speed": f"{round(processing_speed * 60, 1)} chunks/min",
-                                "estimated_time_remaining": f"{int(estimated_remaining / 60)}m {int(estimated_remaining % 60)}s" if estimated_remaining > 0 else "Almost done!"
-                            })
+                except Exception as e:
+                    completed_tasks += 1
+                    failed_chunks += 1
+                    print(f"Error in chunk processing: {e}")
                     
-                    except Exception as chunk_error:
-                        print(f"Error processing chunk {i + 1}: {chunk_error}")
-                        if progress_callback:
-                            progress_callback(TaskStatus.GENERATING, int(60 + ((i + 1) / len(chunks)) * 25), {
-                                "activity": f"Error in chunk {i + 1}: {str(chunk_error)}, continuing with next chunk",
-                                "error": str(chunk_error)
-                            })
-                        continue
+                    if progress_callback:
+                        progress_percent = int(65 + (completed_tasks / len(tasks)) * 20)
+                        progress_callback(TaskStatus.GENERATING, progress_percent, {
+                            "activity": f"Completed {completed_tasks}/{len(tasks)} chunks (with errors) - {len(all_questions)} questions generated",
+                            "questions_generated": len(all_questions),
+                            "chunks_completed": completed_tasks,
+                            "chunks_total": len(tasks),
+                            "successful_chunks": successful_chunks,
+                            "failed_chunks": failed_chunks,
+                            "processing_mode": "parallel",
+                            "last_error": str(e)
+                        })
             
-            return all_questions[:num_questions]  # Ensure we don't exceed requested number
-            
+            return all_questions[:num_questions]  # Trim to requested number
+        
         except Exception as e:
-            print(f"Error generating questions from chunks: {e}")
-            return []
+            print(f"Error in parallel chunk processing: {e}")
+            raise e
+    
+    async def _process_chunk_parallel(self, chunk: str, difficulty: str, chunk_questions: int, 
+                                    chunk_index: int, total_chunks: int, semaphore: asyncio.Semaphore, 
+                                    progress_callback=None, start_time=None) -> List[MultipleChoiceQuestion]:
+        """Process a single chunk in parallel with rate limiting."""
+        async with semaphore:  # Limit concurrent API calls
+            chunk_prompt = f"""
+            Generate {chunk_questions} multiple choice questions from the following text content.
+            Difficulty level: {difficulty}
+            
+            Text content:
+            {chunk}
+            
+            For each question, provide:
+            1. A clear, well-formed question
+            2. Four answer choices (without A), B), C), D) prefixes - just the choice text)
+            3. The correct answer letter (A, B, C, or D)
+            4. A brief explanation of why the correct answer is right
+            
+            Format your response as JSON with this structure:
+            {{
+                "questions": [
+                    {{
+                        "question": "Question text here?",
+                        "choices": ["Choice 1 text", "Choice 2 text", "Choice 3 text", "Choice 4 text"],
+                        "correct_answer": "A",
+                        "explanation": "Brief explanation of why this answer is correct."
+                    }}
+                ]
+            }}
+            
+            Make sure:
+            - Questions are clear and unambiguous
+            - All four choices are plausible but only one is correct
+            - Choices don't include A), B), C), D) prefixes
+            - Explanations are concise but informative
+            - Questions test understanding, not just memorization
+            """
+            
+            try:
+                # Generate questions for this chunk
+                response = await self.run(
+                    user_id="system",
+                    state={},
+                    content=create_text_query(chunk_prompt)
+                )
+                
+                # Parse response
+                questions_data = self._parse_questions_response(response)
+                
+                # Convert to MultipleChoiceQuestion objects
+                chunk_questions_list = []
+                for q_data in questions_data:
+                    chunk_questions_list.append(MultipleChoiceQuestion(
+                        question=q_data['question'],
+                        choices=q_data['choices'],
+                        correct_answer=q_data['correct_answer'],
+                        explanation=q_data.get('explanation', '')
+                    ))
+                
+                return chunk_questions_list
+                
+            except Exception as chunk_error:
+                print(f"Error processing chunk {chunk_index + 1}: {chunk_error}")
+                return []  # Return empty list on error
     
     def _split_text_into_chunks(self, text: str, chunk_size: int, overlap: int) -> List[str]:
         """Split text into overlapping chunks."""
@@ -477,42 +512,82 @@ class LearningFlashcardAgent(StandardAgent):
         )
     
     async def generate_learning_cards(self, chapters: List[Dict[str, Any]], image_paths: List[str], pdf_data: Dict[str, Any] = None) -> List[LearningCard]:
-        """Generate learning flashcards from chapter content."""
+        """Generate learning flashcards from chapter content with parallel processing."""
         
-        cards = []
+        # Create semaphore to limit concurrent API calls
+        max_concurrent = min(3, len(chapters))  # Limit to 3 concurrent requests for learning cards
+        semaphore = asyncio.Semaphore(max_concurrent)
         
+        # Create tasks for parallel processing
+        tasks = []
         for i, chapter in enumerate(chapters):
-            # Get chapter text
-            chapter_text = ""
-            if pdf_data and "pages" in pdf_data:
-                for page_num in chapter.get("pages", []):
-                    if page_num < len(pdf_data["pages"]):
-                        chapter_text += pdf_data["pages"][page_num]["text"] + "\n"
-            
-            # Generate cards for this chapter
-            prompt = f"""
-            Create learning flashcards from this chapter content.
-            Chapter: {chapter.get('title', f'Chapter {i+1}')}
-            
-            Content:
-            {chapter_text[:2000]}  # Limit to avoid token limits
-            
-            Generate 3-5 flashcards with:
-            - Front: A concept, term, or question
-            - Back: Detailed explanation or answer
-            
-            Format as JSON:
-            {{
-                "cards": [
-                    {{
-                        "front": "Concept or question",
-                        "back": "Detailed explanation"
-                    }}
-                ]
-            }}
-            """
-            
+            task = self._process_chapter_parallel(chapter, i, image_paths, pdf_data, semaphore)
+            tasks.append(task)
+        
+        # Process tasks with real-time progress tracking
+        all_cards = []
+        successful_chapters = 0
+        failed_chapters = 0
+        completed_chapters = 0
+        
+        # Use asyncio.as_completed for real-time progress updates
+        for completed_task in asyncio.as_completed(tasks):
             try:
+                result = await completed_task
+                completed_chapters += 1
+                
+                if isinstance(result, list):
+                    all_cards.extend(result)
+                    successful_chapters += 1
+                else:
+                    failed_chapters += 1
+                
+                print(f"Chapter {completed_chapters}/{len(chapters)} completed - {len(all_cards)} cards generated so far")
+                    
+            except Exception as e:
+                completed_chapters += 1
+                failed_chapters += 1
+                print(f"Error processing chapter {completed_chapters}: {e}")
+        
+        print(f"Learning cards generation completed: {len(all_cards)} cards from {successful_chapters}/{len(chapters)} chapters")
+        return all_cards
+    
+    async def _process_chapter_parallel(self, chapter: Dict[str, Any], chapter_index: int, 
+                                       image_paths: List[str], pdf_data: Dict[str, Any], 
+                                       semaphore: asyncio.Semaphore) -> List[LearningCard]:
+        """Process a single chapter in parallel with rate limiting."""
+        async with semaphore:  # Limit concurrent API calls
+            try:
+                # Get chapter text
+                chapter_text = ""
+                if pdf_data and "pages" in pdf_data:
+                    for page_num in chapter.get("pages", []):
+                        if page_num < len(pdf_data["pages"]):
+                            chapter_text += pdf_data["pages"][page_num]["text"] + "\n"
+                
+                # Generate cards for this chapter
+                prompt = f"""
+                Create learning flashcards from this chapter content.
+                Chapter: {chapter.get('title', f'Chapter {chapter_index+1}')}
+                
+                Content:
+                {chapter_text[:2000]}  # Limit to avoid token limits
+                
+                Generate 3-5 flashcards with:
+                - Front: A concept, term, or question
+                - Back: Detailed explanation or answer
+                
+                Format as JSON:
+                {{
+                    "cards": [
+                        {{
+                            "front": "Concept or question",
+                            "back": "Detailed explanation"
+                        }}
+                    ]
+                }}
+                """
+                
                 # Use the inherited run method from StandardAgent
                 response = await self.run(
                     user_id="system",
@@ -552,21 +627,23 @@ class LearningFlashcardAgent(StandardAgent):
                 else:
                     chapter_cards = []
                 
+                # Convert to LearningCard objects
+                cards = []
                 for card_data in chapter_cards:
                     # Use image if available
-                    image_path = image_paths[i] if i < len(image_paths) else None
+                    image_path = image_paths[chapter_index] if chapter_index < len(image_paths) else None
                     
                     cards.append(LearningCard(
                         front=card_data["front"],
                         back=card_data["back"],
                         image_path=image_path
                     ))
+                
+                return cards
                         
             except Exception as e:
-                print(f"Error generating cards for chapter {i}: {e}")
-                continue
-        
-        return cards
+                print(f"Error generating cards for chapter {chapter_index}: {e}")
+                return []  # Return empty list on error
 
 
 class AnkiDeckGenerator:
