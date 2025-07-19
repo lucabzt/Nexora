@@ -610,13 +610,13 @@ function ChapterView() {
                   </Paper>
                 </FullscreenContentWrapper>
               </Tabs.Panel>
-
+              {/* 
               <Tabs.Panel value="flashcards" pt="xs" style={{ width: '100%' }}>
                 <Paper shadow="xs" p="md" withBorder style={{ width: '100%' }}>
                   <FlashcardDeck courseId={courseId} chapterId={chapterId} />
                 </Paper>
               </Tabs.Panel>
-
+              */}  
               <Tabs.Panel value="images" pt="xs" style={{ width: '100%' }}>
                 <Paper shadow="xs" p="md" withBorder style={{ width: '100%' }}>
                   <MediaGallery
