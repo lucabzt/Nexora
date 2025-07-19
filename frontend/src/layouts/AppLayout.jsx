@@ -247,13 +247,6 @@ function AppLayout() {
       to: "/dashboard/public-courses",
     },
     {
-      icon: <IconFileExport size={20} />,
-      color: "violet",
-      label: "Anki Generator",
-      to: "/dashboard/anki-generator",
-    },
-    //{ icon: <IconChartLine size={20} />, color: 'grape', label: t('statistics', { ns: 'navigation' }), to: '/dashboard/statistics' },
-    {
       icon: <IconSettings size={20} />,
       color: "grape",
       label: t("settings", { ns: "navigation" }),
@@ -273,6 +266,18 @@ function AppLayout() {
             color: "red",
             label: t("adminArea", { ns: "navigation" }),
             to: "/admin",
+          },    
+          {
+            icon: <IconFileExport size={20} />,
+            color: "violet",
+            label: "Anki Generator",
+            to: "/dashboard/anki-generator",
+          },
+          {
+            icon: <IconChartLine size={20} />,
+            color: 'grape',
+            label: t('statistics', { ns: 'navigation' }),
+            to: '/dashboard/statistics',
           },
         ]
       : []),
