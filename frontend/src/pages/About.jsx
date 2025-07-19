@@ -108,7 +108,7 @@ function About() {
       name: 'Markus Huber',
       role: t('team.members.markusHuber.role'),
       bio: t('team.members.markusHuber.bio'),
-      avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQF_IhR6_2lmPQ/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1729876564052?e=1755734400&v=beta&t=FXUgK9ZXR68YOA9rsVHc-mOsoMer-ddfoUod4OVgZDU',
+      avatar: 'https://d112y698adiu2z.cloudfront.net/photos/production/user_photos/003/508/125/datas/profile.jpg',
       linkedin: 'https://www.linkedin.com/in/markus-huber-0132282bb/',
       github: 'https://github.com/M4RKUS28'
     },
