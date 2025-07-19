@@ -145,7 +145,13 @@ async def get_task_status(
         current_step=task.current_step,
         completed_steps=task.completed_steps,
         error_message=task.error_message,
-        download_url=task.download_url
+        download_url=task.download_url,
+        step_details=task.step_details,
+        activity_log=task.activity_log,
+        stats=task.stats,
+        estimated_time_remaining=task.estimated_time_remaining,
+        started_at=task.started_at,
+        completed_at=task.completed_at
     )
 
 

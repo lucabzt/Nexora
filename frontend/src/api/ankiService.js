@@ -58,7 +58,18 @@ export const ankiService = {
   /**
    * Get the status of an Anki generation task
    * @param {string} taskId - The task ID
-   * @returns {Promise<Object>} Task status and progress
+   * @returns {Promise<Object>} Task status and progress with enhanced tracking
+   * @returns {Object} response.task_id - Task identifier
+   * @returns {string} response.status - Current task status
+   * @returns {number} response.progress_percentage - Overall progress (0-100)
+   * @returns {string} response.current_step - Current processing step
+   * @returns {Array} response.completed_steps - List of completed steps
+   * @returns {string} response.error_message - Error message if failed
+   * @returns {string} response.download_url - Download URL if completed
+   * @returns {Object} response.step_details - Detailed step information (chunks, questions, etc.)
+   * @returns {Array} response.activity_log - Processing activity log with timestamps
+   * @returns {Object} response.stats - Processing statistics
+   * @returns {string} response.estimated_time_remaining - Estimated completion time
    */
   getTaskStatus: async (taskId) =>
     (await apiWithCookies.get(`/anki/tasks/${taskId}/status`)).data,

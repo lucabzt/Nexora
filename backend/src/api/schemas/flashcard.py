@@ -86,6 +86,13 @@ class TaskStatusResponse(BaseModel):
     completed_steps: List[str] = []
     error_message: Optional[str] = None
     download_url: Optional[str] = None
+    # Enhanced progress tracking
+    step_details: Optional[Dict[str, Any]] = None
+    activity_log: Optional[List[Dict[str, str]]] = None
+    stats: Optional[Dict[str, Any]] = None
+    estimated_time_remaining: Optional[str] = None
+    started_at: Optional[str] = None
+    completed_at: Optional[str] = None
 
 
 class TaskActionResponse(BaseModel):
