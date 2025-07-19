@@ -35,7 +35,8 @@ import {
   IconHome2,
   IconAlertCircle,
   IconList,
-  IconX
+  IconX,
+  IconCards
 } from '@tabler/icons-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
@@ -127,6 +128,16 @@ function CourseLayout() {
             <Group>
               <IconBook size={14} />
               <Text size="xs">Content</Text>
+            </Group>
+          </NavLink>
+          <NavLink
+            to={`/dashboard/courses/${courseId}/chapters/${chapter.id}?tab=flashcards`}
+            className="sub-nav-link"
+            onClick={handleNavLinkClick}
+          >
+            <Group>
+              <IconCards size={14} />
+              <Text size="xs">Flashcards</Text>
             </Group>
           </NavLink>
           <NavLink

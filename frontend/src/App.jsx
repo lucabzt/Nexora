@@ -30,14 +30,15 @@ import About from './pages/About';
 import PublicCourses from './pages/PublicCourses'; // Import the new Public Courses page
 import NotFoundPage from './pages/NotFoundPage'; // Import the NotFoundPage component
 import AdminView from './pages/AdminView'; // Import AdminView component
-import CourseLayout from './layouts/CourseLayout'; // Import CourseLayout
+import AnkiGeneratorDashboard from "./pages/AnkiGenerator/AnkiGeneratorDashboard.jsx";
+import AnkiProcessingStatus from "./pages/AnkiGenerator/AnkiProcessingStatus.jsx"; // Import CourseLayout
 
 function App() {
   const [colorScheme, setColorScheme] = useState(() => {
     // Load saved theme from localStorage or default to 'dark'
     return localStorage.getItem('mantine-color-scheme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   });
-  
+
   const toggleColorScheme = (value) => {
     const nextColorScheme = value || (colorScheme === 'dark' ? 'light' : 'dark');
     setColorScheme(nextColorScheme);
@@ -51,6 +52,7 @@ function App() {
       localStorage.setItem('mantine-color-scheme', colorScheme);
     }
   }, [colorScheme]);
+
   return (
     <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
       <MantineProvider withGlobalStyles withNormalizeCSS theme={{
@@ -92,6 +94,8 @@ function App() {
                         <Route path="courses/:courseId/chapters/:chapterId" element={<ChapterView />} /> {/* /dashboard/courses/:courseId/chapters/:chapterId */}
                         <Route path="settings" element={<SettingsPage />} /> {/* /dashboard/settings */}
                         <Route path="statistics" element={<StatisticsPage />} /> {/* /dashboard/statistics */}
+                        <Route path="anki-generator" element={<AnkiGeneratorDashboard />} />
+                        <Route path="anki-generator/processing/:taskId" element={<AnkiProcessingStatus />} />
                       </Route>
                     </Route>
                       {/* Admin-only routes - Using AppLayout for consistent interface */}

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from enum import Enum
 
@@ -30,7 +30,13 @@ class TaskStatus(str, Enum):
     CANCELLED = "cancelled"
 
 
-class FlashcardConfig(BaseModel):
+class UploadResponse(BaseModel):
+    id: str = Field(..., description="Document ID for the uploaded PDF")
+    filename: str = Field(..., description="Original filename")
+    size: int = Field(..., description="File size in bytes")
+
+
+class FlashcardConfigRequest(BaseModel):
     type: FlashcardType
     difficulty: Difficulty = Difficulty.MEDIUM
     title: str = "Generated Flashcards"
@@ -38,28 +44,41 @@ class FlashcardConfig(BaseModel):
     slides_per_chapter: Optional[int] = None
 
 
-class MultipleChoiceQuestion(BaseModel):
+class AnalyzeRequest(BaseModel):
+    document_id: str
+    config: FlashcardConfigRequest
+
+
+class MultipleChoicePreview(BaseModel):
     question: str
     choices: List[str]
-    correct_answer: str
-    explanation: Optional[str] = None
+    correct: str
 
 
-class LearningCard(BaseModel):
+class LearningCardPreview(BaseModel):
     front: str
     back: str
-    image_path: Optional[str] = None
 
 
-class FlashcardPreview(BaseModel):
-    type: FlashcardType
+class AnalyzeResponse(BaseModel):
     estimated_cards: int
-    sample_question: Optional[MultipleChoiceQuestion] = None
-    sample_learning_card: Optional[LearningCard] = None
-    chapters: Optional[List[str]] = None
+    chapters: List[str]
+    sample_question: Optional[MultipleChoicePreview] = None
+    sample_learning_card: Optional[LearningCardPreview] = None
 
 
-class TaskProgress(BaseModel):
+class GenerateRequest(BaseModel):
+    document_id: str
+    config: FlashcardConfigRequest
+
+
+class GenerateResponse(BaseModel):
+    task_id: str
+    status: TaskStatus = TaskStatus.PENDING
+    message: str = "Task created successfully"
+
+
+class TaskStatusResponse(BaseModel):
     task_id: str
     status: TaskStatus
     progress_percentage: int = 0
@@ -69,12 +88,7 @@ class TaskProgress(BaseModel):
     download_url: Optional[str] = None
 
 
-class GenerationRequest(BaseModel):
-    document_id: str
-    config: FlashcardConfig
-
-
-class GenerationResponse(BaseModel):
+class TaskActionResponse(BaseModel):
     task_id: str
-    status: TaskStatus = TaskStatus.PENDING
-    message: str = "Task created successfully"
+    status: TaskStatus
+    message: str

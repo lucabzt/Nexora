@@ -39,6 +39,7 @@ import {
   IconChevronRight,
   IconX,
   IconMenu2,
+  IconFileExport,
 } from "@tabler/icons-react";
 import AppFooter from "../components/AppFooter";
 import { useAuth } from "../contexts/AuthContext";
@@ -245,6 +246,12 @@ function AppLayout() {
       label: t("publicCourses", { ns: "navigation", defaultValue: "Public Courses" }),
       to: "/dashboard/public-courses",
     },
+    {
+      icon: <IconFileExport size={20} />,
+      color: "violet",
+      label: "Anki Generator",
+      to: "/dashboard/anki-generator",
+    },
     //{ icon: <IconChartLine size={20} />, color: 'grape', label: t('statistics', { ns: 'navigation' }), to: '/dashboard/statistics' },
     {
       icon: <IconSettings size={20} />,
@@ -424,7 +431,7 @@ function AppLayout() {
                         cursor: "pointer",
                       },
 
-                      
+
                     })}
                   >
                     {t("title", { ns: "app" })}
@@ -453,8 +460,8 @@ function AppLayout() {
             </Box>
 
             {/* Navigation Links - Scrollable Section */}
-            <Navbar.Section 
-              grow 
+            <Navbar.Section
+              grow
               mt="xs"
               sx={{
                 overflowY: 'auto',
