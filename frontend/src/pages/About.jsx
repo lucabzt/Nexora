@@ -116,7 +116,7 @@ function About() {
       name: 'Luca Bozzetti',
       role: t('team.members.lucaBozzetti.role'),
       bio: t('team.members.lucaBozzetti.bio'),
-      avatar: 'https://avatars.githubusercontent.com/u/141845727?v=4',
+      avatar: 'https://poker-spade.de/static/media/Luca.658c06336387cd26c193.jpeg',
       linkedin: 'https://www.linkedin.com/in/luca-bozzetti-371379282/',
       github: 'https://github.com/lucabzt'
     },
