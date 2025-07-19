@@ -268,7 +268,7 @@ Generate exactly {num_questions} questions:
             remaining_questions = num_questions % len(chunks)
             
             # Create semaphore to limit concurrent API calls (prevent rate limiting)
-            max_concurrent = min(5, len(chunks))  # Limit to 5 concurrent requests
+            max_concurrent = min(8, len(chunks))  # Limit to 8 concurrent requests (Flash has higher limits)
             semaphore = asyncio.Semaphore(max_concurrent)
             
             # Report initial chunk processing details
@@ -515,7 +515,7 @@ class LearningFlashcardAgent(StandardAgent):
         """Generate learning flashcards from chapter content with parallel processing."""
         
         # Create semaphore to limit concurrent API calls
-        max_concurrent = min(3, len(chapters))  # Limit to 3 concurrent requests for learning cards
+        max_concurrent = min(5, len(chapters))  # Limit to 5 concurrent requests for learning cards (Flash has higher limits)
         semaphore = asyncio.Semaphore(max_concurrent)
         
         # Create tasks for parallel processing
