@@ -169,7 +169,7 @@ class TestingFlashcardAgent(StandardAgent):
             
             # For smaller texts, generate directly
             if progress_callback:
-                progress_callback(TaskStatus.GENERATING, 45, "Preparing question generation...", {
+                progress_callback(TaskStatus.GENERATING, 45, {
                     "activity": "Analyzing text content for question generation",
                     "estimated_questions": num_questions,
                     "text_length": len(text_content),
@@ -205,25 +205,26 @@ Generate exactly {num_questions} questions:
 """
             
             if progress_callback:
-                progress_callback(TaskStatus.GENERATING, 55, "Sending request to AI model...", {
+                progress_callback(TaskStatus.GENERATING, 55, {
                     "activity": "Requesting question generation from AI model",
                     "processing_speed": "Processing single batch"
                 })
-            
-            response = await self.runner.run(
-                query=create_text_query(prompt),
-                session_id=self.session_id
+
+            response = await self.run(
+                user_id="system",
+                state={},
+                content=create_text_query(prompt)
             )
             
             if progress_callback:
-                progress_callback(TaskStatus.GENERATING, 75, "Processing AI response...", {
+                progress_callback(TaskStatus.GENERATING, 75, {
                     "activity": "Parsing and validating generated questions"
                 })
             
             questions = self._parse_questions_response(response)
             
             if progress_callback:
-                progress_callback(TaskStatus.GENERATING, 85, f"Successfully generated {len(questions)} questions", {
+                progress_callback(TaskStatus.GENERATING, 85, {
                     "activity": f"Question generation complete - {len(questions)} questions created",
                     "questions_generated": len(questions),
                     "success_rate": f"{(len(questions)/num_questions)*100:.1f}%" if num_questions > 0 else "100%"
@@ -234,8 +235,9 @@ Generate exactly {num_questions} questions:
         except Exception as e:
             print(f"Error generating questions: {e}")
             if progress_callback:
-                progress_callback(TaskStatus.FAILED, 0, f"Failed to generate questions: {str(e)}", {
-                    "activity": f"Error occurred: {str(e)}"
+                progress_callback(TaskStatus.FAILED, 0, {
+                    "activity": f"Error occurred: {str(e)}",
+                    "error": str(e)
                 })
             return []
     
@@ -251,7 +253,7 @@ Generate exactly {num_questions} questions:
             chunks = self._split_text_into_chunks(text_content, chunk_size, overlap)
             
             if progress_callback:
-                progress_callback(TaskStatus.GENERATING, 45, f"Split text into {len(chunks)} chunks", {
+                progress_callback(TaskStatus.GENERATING, 45, {
                     "activity": f"Text divided into {len(chunks)} processing chunks",
                     "chunks_total": len(chunks),
                     "chunks_completed": 0,
@@ -336,9 +338,10 @@ Generate exactly {num_questions} questions:
                     
                     try:
                         # Generate questions for this chunk
-                        response = await self.runner.run(
-                            query=create_text_query(chunk_prompt),
-                            session_id=self.session_id
+                        response = await self.run(
+                            user_id="system",
+                            state={},
+                            content=create_text_query(chunk_prompt)
                         )
                         
                         # Parse response (same logic as original method)
@@ -361,7 +364,7 @@ Generate exactly {num_questions} questions:
                             processing_speed = (i + 1) / elapsed_time if elapsed_time > 0 else 0
                             estimated_remaining = (len(chunks) - i - 1) / processing_speed if processing_speed > 0 else 0
                             
-                            progress_callback(TaskStatus.GENERATING, 60 + ((i + 1) / len(chunks)) * 25, f"Processed chunk {i + 1}/{len(chunks)}", {
+                            progress_callback(TaskStatus.GENERATING, 60 + ((i + 1) / len(chunks)) * 25, {
                                 "activity": f"Completed chunk {i + 1}/{len(chunks)} - generated {chunk_questions_generated} questions",
                                 "chunks_total": len(chunks),
                                 "chunks_completed": i + 1,
@@ -374,8 +377,9 @@ Generate exactly {num_questions} questions:
                     except Exception as chunk_error:
                         print(f"Error processing chunk {i + 1}: {chunk_error}")
                         if progress_callback:
-                            progress_callback(TaskStatus.GENERATING, 60 + ((i + 1) / len(chunks)) * 25, f"Error in chunk {i + 1}, continuing...", {
-                                "activity": f"Error in chunk {i + 1}: {str(chunk_error)}, continuing with next chunk"
+                            progress_callback(TaskStatus.GENERATING, 60 + ((i + 1) / len(chunks)) * 25, {
+                                "activity": f"Error in chunk {i + 1}: {str(chunk_error)}, continuing with next chunk",
+                                "error": str(chunk_error)
                             })
                         continue
             
@@ -939,14 +943,14 @@ class FlashcardAgent(StandardAgent):
         try:
             # Step 1: Analyze PDF
             if progress_callback:
-                progress_callback(TaskStatus.ANALYZING, 5, "Starting PDF analysis...", {
+                progress_callback(TaskStatus.ANALYZING, 5, {
                     "activity": "Initializing PDF analysis and metadata extraction"
                 })
             
             pdf_data = self.pdf_parser.extract_text_and_metadata(pdf_path)
             
             if progress_callback:
-                progress_callback(TaskStatus.ANALYZING, 15, "PDF metadata extracted", {
+                progress_callback(TaskStatus.ANALYZING, 15, {
                     "activity": f"Extracted {len(pdf_data['pages'])} pages, {len(pdf_data['total_text'])} characters",
                     "pages_count": len(pdf_data['pages']),
                     "text_length": len(pdf_data['total_text'])
@@ -955,7 +959,7 @@ class FlashcardAgent(StandardAgent):
             chapters = self.pdf_parser.identify_chapters(pdf_data, config.chapter_mode.value, config.slides_per_chapter)
             
             if progress_callback:
-                progress_callback(TaskStatus.ANALYZING, 25, "Chapter structure identified", {
+                progress_callback(TaskStatus.ANALYZING, 25, {
                     "activity": f"Identified {len(chapters)} chapters using {config.chapter_mode.value} mode",
                     "chapters_count": len(chapters),
                     "chapter_mode": config.chapter_mode.value
@@ -963,7 +967,7 @@ class FlashcardAgent(StandardAgent):
             
             # Step 2: Extract content
             if progress_callback:
-                progress_callback(TaskStatus.EXTRACTING, 35, "Preparing content extraction...", {
+                progress_callback(TaskStatus.EXTRACTING, 35, {
                     "activity": "Setting up content extraction for flashcard generation"
                 })
             
@@ -977,7 +981,7 @@ class FlashcardAgent(StandardAgent):
                 calculated_questions = min(1000, max(5, total_pages * questions_per_page))
                 
                 if progress_callback:
-                    progress_callback(TaskStatus.GENERATING, 40, "Starting question generation...", {
+                    progress_callback(TaskStatus.GENERATING, 40, {
                         "activity": f"Generating {calculated_questions} questions from {total_pages} pages",
                         "estimated_questions": calculated_questions,
                         "pages_count": total_pages,
@@ -993,7 +997,7 @@ class FlashcardAgent(StandardAgent):
                 
                 # Step 4: Package
                 if progress_callback:
-                    progress_callback(TaskStatus.PACKAGING, 90, "Creating Anki deck file...", {
+                    progress_callback(TaskStatus.PACKAGING, 90, {
                         "activity": f"Packaging {len(questions)} questions into .apkg file",
                         "questions_generated": len(questions)
                     })
@@ -1009,22 +1013,34 @@ class FlashcardAgent(StandardAgent):
                 
                 # Step 3: Generate learning cards
                 if progress_callback:
-                    progress_callback(TaskStatus.GENERATING, 60)
+                    progress_callback(TaskStatus.GENERATING, 60, {
+                        "activity": f"Generating learning cards from {len(chapters)} chapters",
+                        "chapters_count": len(chapters),
+                        "images_extracted": len(image_paths)
+                    })
                 
                 cards = await self.learning_agent.generate_learning_cards(chapters, image_paths, pdf_data)
                 
                 # Step 4: Package
                 if progress_callback:
-                    progress_callback(TaskStatus.PACKAGING, 90)
+                    progress_callback(TaskStatus.PACKAGING, 90, {
+                        "activity": f"Packaging {len(cards)} learning cards into .apkg file",
+                        "cards_generated": len(cards)
+                    })
                 
                 apkg_path = self.anki_generator.create_learning_deck(cards, config.title)
             
             if progress_callback:
-                progress_callback(TaskStatus.COMPLETED, 100)
+                progress_callback(TaskStatus.COMPLETED, 100, {
+                    "activity": "Flashcard generation completed successfully"
+                })
             
             return apkg_path
         
         except Exception as e:
             if progress_callback:
-                progress_callback(TaskStatus.FAILED, 0, str(e))
+                progress_callback(TaskStatus.FAILED, 0, {
+                    "activity": f"Flashcard generation failed: {str(e)}",
+                    "error": str(e)
+                })
             raise e

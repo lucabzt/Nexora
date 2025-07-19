@@ -471,6 +471,35 @@ const AnkiProcessingStatus = () => {
                   <Text size="sm">{taskStatus.estimated_cards}</Text>
                 </Group>
               )}
+              
+              {/* Processing Statistics */}
+              {taskStatus?.stats && (
+                <>
+                  <Divider />
+                  <Text size="sm" weight={500} color="dimmed">Processing Stats</Text>
+                  
+                  {taskStatus.stats.processing_speed && (
+                    <Group position="apart">
+                      <Text size="sm" color="dimmed">Speed</Text>
+                      <Text size="sm">{taskStatus.stats.processing_speed}</Text>
+                    </Group>
+                  )}
+                  
+                  {taskStatus.stats.questions_generated && (
+                    <Group position="apart">
+                      <Text size="sm" color="dimmed">Generated</Text>
+                      <Text size="sm">{taskStatus.stats.questions_generated} questions</Text>
+                    </Group>
+                  )}
+                  
+                  {taskStatus.stats.chunks_total && (
+                    <Group position="apart">
+                      <Text size="sm" color="dimmed">Text Chunks</Text>
+                      <Text size="sm">{taskStatus.stats.chunks_completed || 0}/{taskStatus.stats.chunks_total}</Text>
+                    </Group>
+                  )}
+                </>
+              )}
             </Stack>
           </Paper>
 
