@@ -55,27 +55,27 @@
     "members": {
       "markusHuber": {
         "role": "Software Architect & Full-Stack Developer",
-        "bio": "Information Systems student at TUM (B.Sc.) with a strong passion for software architecture, full-stack development, and machine learning."
+        "bio": "Information Systems student at TUM (B.Sc.) with expertise in software architecture, full-stack development, and machine learning."
       },
       "lucaBozzetti": {
         "role": "AI Researcher & Agent Developer",
         "bio": "Information Systems student at TUM (B.Sc.) with a strong passion for AI, machine learning, and agentic applications."
       },
       "sebastianRogg": {
-        "role": "Still in progress",
-        "bio": "Full-stack engineer specializing in AI integration and responsive learning systems."
+        "role": "Frontend Developer & Database Engineer",
+        "bio": "Information Systems student at TUM (B.Sc.) experienced in building a user friendly environment"
       },
       "matthiasMeierlohr": {
         "role": "Frontend Designer & UX Specialist",
-        "bio": "Information Systems student at TUM (B.Sc.) with a strong passion for clean and modern UX design."
+        "bio": "Information Systems student at TUM (B.Sc.) specialised in building clean and modern UX design."
       },
       "jonasHoerter": {
-        "role": "Eierlecker & Backend Developer",
+        "role": "Backend Developer",
         "bio": "Information Systems student at TUM (B.Sc.) with a strong passion for business applications."
       },
       "paulVorderbruegge": {
         "role": "Beer Lover & Backend Specialist",
-        "bio": "Swift UI designer focused on creating intuitive, user-friendly interfaces for AI applications."
+        "bio": "Information Systems student at TUM (B.Sc.) Focused on creating intuitive, user-friendly interfaces for AI applications."
       }
     }
   },
