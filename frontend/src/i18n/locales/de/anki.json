@@ -15,7 +15,7 @@
     "subtitle": "Upload your PDF file",
     "dragDrop": "Drag and drop or click to browse",
     "clickUpload": "Click to upload or drag and drop",
-    "supportedFormats": "PDF files only • Max 30MB",
+    "supportedFormats": "PDF files only • Max 50MB",
     "chooseFile": "Choose PDF File",
     "uploading": "Uploading...",
     "uploadSuccess": "PDF uploaded successfully",

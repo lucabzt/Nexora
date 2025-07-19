@@ -41,8 +41,8 @@ class TaskManager:
         """Get the current status of a task."""
         return self.tasks.get(task_id)
     
-    def update_task_progress(self, task_id: str, status: TaskStatus, progress: int, step: str = "", error: str = None):
-        """Update task progress."""
+    def update_task_progress(self, task_id: str, status: TaskStatus, progress: int, step: str = "", error: str = None, details: Dict[str, Any] = None):
+        """Update task progress with enhanced tracking."""
         if task_id in self.tasks:
             task = self.tasks[task_id]
             task.status = status
@@ -51,6 +51,41 @@ class TaskManager:
             
             if error:
                 task.error_message = error
+            
+            # Update step details if provided
+            if details:
+                if not task.step_details:
+                    task.step_details = {}
+                task.step_details.update(details)
+                
+                # Add activity to log
+                if "activity" in details:
+                    if not task.activity_log:
+                        task.activity_log = []
+                    
+                    import datetime
+                    timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+                    task.activity_log.append({
+                        "timestamp": timestamp,
+                        "message": details["activity"]
+                    })
+                    
+                    # Keep only last 20 activities to avoid memory bloat
+                    if len(task.activity_log) > 20:
+                        task.activity_log = task.activity_log[-20:]
+                
+                # Update estimated time remaining
+                if "estimated_time_remaining" in details:
+                    task.estimated_time_remaining = details["estimated_time_remaining"]
+                
+                # Update stats
+                if not task.stats:
+                    task.stats = {}
+                
+                # Update processing stats
+                for key in ["chunks_total", "chunks_completed", "questions_generated", "estimated_questions", "processing_speed"]:
+                    if key in details:
+                        task.stats[key] = details[key]
             
             # Add completed steps
             if status == TaskStatus.ANALYZING and "analyzing" not in task.completed_steps:
@@ -175,9 +210,10 @@ class FlashcardService:
         
         try:
             # Create progress callback
-            def progress_callback(status: TaskStatus, progress: int, error: str = None):
+            def progress_callback(status: TaskStatus, progress: int, details: Dict[str, Any] = None):
                 step_name = status.value.title()
-                self.task_manager.update_task_progress(task_id, status, progress, step_name, error)
+                error = details.get('error') if details else None
+                self.task_manager.update_task_progress(task_id, status, progress, step_name, error, details)
             
             # Generate flashcards
             apkg_path = await self.flashcard_agent.generate_flashcards(

@@ -15,7 +15,7 @@
     "subtitle": "Laden Sie Ihre PDF-Datei hoch",
     "dragDrop": "Ziehen und ablegen oder klicken zum Durchsuchen",
     "clickUpload": "Zum Hochladen klicken oder ziehen und ablegen",
-    "supportedFormats": "Nur PDF-Dateien • Max 30MB",
+    "supportedFormats": "Nur PDF-Dateien • Max 50MB",
     "chooseFile": "PDF-Datei wählen",
     "uploading": "Wird hochgeladen...",
     "uploadSuccess": "PDF erfolgreich hochgeladen",

@@ -23,6 +23,7 @@ import {
   Loader,
   Divider,
   List,
+  ScrollArea,
 } from '@mantine/core';
 import {
   IconCheck,
@@ -202,7 +203,7 @@ const AnkiProcessingStatus = () => {
   };
 
   // Get processing step info
-  const getStepInfo = (step, isActive = false, isComplete = false) => {
+  const getStepInfo = (step, isCompleted = false, isFailed = false, stepDetails = null) => {
     const steps = {
       'analyzing': { icon: <IconBrain size={16} />, label: 'Analyzing PDF', description: 'Reading and understanding content' },
       'extracting': { icon: <IconSparkles size={16} />, label: 'Extracting Content', description: 'Identifying key concepts' },
@@ -213,10 +214,25 @@ const AnkiProcessingStatus = () => {
 
     const stepInfo = steps[step] || { icon: <IconClock size={16} />, label: step, description: '' };
 
-    return {
-      ...stepInfo,
-      color: isComplete ? 'green' : isActive ? 'blue' : 'gray',
-    };
+    switch (step) {
+      case 'generating': {
+        const chunkInfo = stepDetails?.chunks_total ? 
+          ` (${stepDetails.chunks_completed || 0}/${stepDetails.chunks_total} chunks)` : '';
+        return {
+          icon: <IconBrain size={16} />,
+          label: `Generating Questions${chunkInfo}`,
+          description: stepDetails?.chunks_total ? 
+            `Processing document chunks and creating questions (${stepDetails.questions_generated || 0} questions so far)` :
+            'Creating flashcard questions from your content',
+          color: isCompleted ? 'green' : (isFailed ? 'red' : 'blue')
+        };
+      }
+      default:
+        return {
+          ...stepInfo,
+          color: isCompleted ? 'green' : (isFailed ? 'red' : 'blue')
+        };
+    }
   };
 
   if (loading && !taskStatus) {
@@ -305,15 +321,46 @@ const AnkiProcessingStatus = () => {
                 />
               )}
 
+              {/* Enhanced chunk processing progress */}
+              {taskStatus?.step_details && taskStatus.step_details.chunks_total && (
+                <Stack spacing="xs">
+                  <Group position="apart">
+                    <Text size="sm">Processing chunks</Text>
+                    <Text size="sm" color="dimmed">
+                      {taskStatus.step_details.chunks_completed || 0} / {taskStatus.step_details.chunks_total}
+                    </Text>
+                  </Group>
+                  <Progress 
+                    value={Math.min(100, (taskStatus.step_details.chunks_completed / taskStatus.step_details.chunks_total) * 100)}
+                    size="sm"
+                    color="blue"
+                  />
+                  
+                  <Group position="apart">
+                    <Text size="sm">Questions generated</Text>
+                    <Text size="sm" color="dimmed">
+                      {taskStatus.step_details.questions_generated || 0} / {taskStatus.step_details.estimated_questions || 0}
+                    </Text>
+                  </Group>
+                  
+                  {taskStatus.estimated_time_remaining && (
+                    <Text size="xs" color="dimmed" align="center">
+                      Estimated time remaining: {taskStatus.estimated_time_remaining}
+                    </Text>
+                  )}
+                </Stack>
+              )}
+
+
               {taskStatus?.current_step && (
                 <Alert
-                  icon={getStepInfo(taskStatus.current_step, true).icon}
+                  icon={getStepInfo(taskStatus.current_step, true, false, taskStatus.step_details).icon}
                   color="blue"
                   variant="light"
                 >
-                  <Text weight={500}>{getStepInfo(taskStatus.current_step, true).label}</Text>
+                  <Text weight={500}>{getStepInfo(taskStatus.current_step, true, false, taskStatus.step_details).label}</Text>
                   <Text size="sm" color="dimmed">
-                    {getStepInfo(taskStatus.current_step, true).description}
+                    {getStepInfo(taskStatus.current_step, true, false, taskStatus.step_details).description}
                   </Text>
                 </Alert>
               )}
@@ -324,7 +371,7 @@ const AnkiProcessingStatus = () => {
           <Paper withBorder p="lg" mb="lg">
             <Text weight={600} size="lg" mb="md">Processing Steps</Text>
             <Timeline active={taskStatus?.completed_steps?.length || 0} bulletSize={24} lineWidth={2}>
-              {['analyzing', 'extracting', 'generating', 'packaging'].map((step, index) => {
+              {['analyzing', 'extracting', 'generating', 'packaging'].map((step) => {
                 const stepInfo = getStepInfo(
                   step,
                   taskStatus?.current_step === step,
@@ -353,6 +400,31 @@ const AnkiProcessingStatus = () => {
                 );
               })}
             </Timeline>
+
+            {/* Activity Feed */}
+            {taskStatus?.activity_log && taskStatus.activity_log.length > 0 && (
+              <Paper p="md" withBorder>
+                <Group position="apart" mb="sm">
+                  <Text weight={500} size="sm">Processing Activity</Text>
+                  <Badge size="xs" variant="light">
+                    {taskStatus.activity_log.length} events
+                  </Badge>
+                </Group>
+                
+                <ScrollArea h={150}>
+                  <Stack spacing={4}>
+                    {taskStatus.activity_log.slice().reverse().map((activity, index) => (
+                      <Group key={index} spacing="xs" noWrap>
+                        <Text size="xs" color="dimmed" style={{ minWidth: '50px' }}>
+                          {activity.timestamp}
+                        </Text>
+                        <Text size="xs">{activity.message}</Text>
+                      </Group>
+                    ))}
+                  </Stack>
+                </ScrollArea>
+              </Paper>
+            )}
           </Paper>
 
           {/* Error details */}
@@ -398,6 +470,35 @@ const AnkiProcessingStatus = () => {
                   <Text size="sm" color="dimmed">Est. Cards</Text>
                   <Text size="sm">{taskStatus.estimated_cards}</Text>
                 </Group>
+              )}
+              
+              {/* Processing Statistics */}
+              {taskStatus?.stats && (
+                <>
+                  <Divider />
+                  <Text size="sm" weight={500} color="dimmed">Processing Stats</Text>
+                  
+                  {taskStatus.stats.processing_speed && (
+                    <Group position="apart">
+                      <Text size="sm" color="dimmed">Speed</Text>
+                      <Text size="sm">{taskStatus.stats.processing_speed}</Text>
+                    </Group>
+                  )}
+                  
+                  {taskStatus.stats.questions_generated && (
+                    <Group position="apart">
+                      <Text size="sm" color="dimmed">Generated</Text>
+                      <Text size="sm">{taskStatus.stats.questions_generated} questions</Text>
+                    </Group>
+                  )}
+                  
+                  {taskStatus.stats.chunks_total && (
+                    <Group position="apart">
+                      <Text size="sm" color="dimmed">Text Chunks</Text>
+                      <Text size="sm">{taskStatus.stats.chunks_completed || 0}/{taskStatus.stats.chunks_total}</Text>
+                    </Group>
+                  )}
+                </>
               )}
             </Stack>
           </Paper>

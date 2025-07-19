@@ -158,53 +158,270 @@ class TestingFlashcardAgent(StandardAgent):
             session_service=self.session_service,
         )
     
-    async def generate_questions(self, text_content: str, difficulty: str, num_questions: int = 20) -> List[MultipleChoiceQuestion]:
+    async def generate_questions(self, text_content: str, difficulty: str, num_questions: int = 20, progress_callback=None) -> List[MultipleChoiceQuestion]:
         """Generate multiple choice questions from text content."""
-        
-        prompt = f"""
-        Generate {num_questions} multiple choice questions from the following text content.
-        Difficulty level: {difficulty}
-        
-        Text content:
-        {text_content[:3000]}  # Limit text to avoid token limits
-        
-        For each question, provide:
-        1. A clear, well-formed question
-        2. Four answer choices (without A), B), C), D) prefixes - just the choice text)
-        3. The correct answer letter (A, B, C, or D)
-        4. A brief explanation of why the correct answer is right
-        
-        Format your response as JSON with this structure:
-        {{
-            "questions": [
-                {{
-                    "question": "Question text here?",
-                    "choices": ["Choice 1 text", "Choice 2 text", "Choice 3 text", "Choice 4 text"],
-                    "correct_answer": "A",
-                    "explanation": "Brief explanation of why this answer is correct."
-                }}
-            ]
-        }}
-        
-        Make sure:
-        - Questions are clear and unambiguous
-        - All four choices are plausible but only one is correct
-        - Choices don't include A), B), C), D) prefixes
-        - Explanations are concise but informative
-        - Questions test understanding, not just memorization
-        """
-        
         try:
-            # Use the inherited run method from StandardAgent
+            # For large texts, use chunking approach
+            if len(text_content) > 8000:  # Threshold for chunking
+                return await self._generate_questions_from_chunks(
+                    text_content, difficulty, num_questions, progress_callback
+                )
+            
+            # For smaller texts, generate directly
+            if progress_callback:
+                progress_callback(TaskStatus.GENERATING, 45, {
+                    "activity": "Analyzing text content for question generation",
+                    "estimated_questions": num_questions,
+                    "text_length": len(text_content),
+                    "difficulty": difficulty
+                })
+            
+            prompt = f"""
+You are an expert educator creating multiple choice questions.
+
+Generate {num_questions} multiple choice questions from the following text.
+Difficulty level: {difficulty}
+
+Requirements:
+- Each question should have exactly 4 choices (A, B, C, D)
+- Only one choice should be correct
+- Questions should test understanding, not just memorization
+- Include brief explanations for the correct answers
+- Focus on key concepts and important details
+- Vary question types (factual, conceptual, analytical)
+
+Text content:
+{text_content[:4000]}...
+
+Format your response as a JSON array of objects with this structure:
+{{
+    "question": "Your question here?",
+    "choices": ["Choice A", "Choice B", "Choice C", "Choice D"],
+    "correct_answer": "Choice A",
+    "explanation": "Brief explanation of why this is correct"
+}}
+
+Generate exactly {num_questions} questions:
+"""
+            
+            if progress_callback:
+                progress_callback(TaskStatus.GENERATING, 55, {
+                    "activity": "Requesting question generation from AI model",
+                    "processing_speed": "Processing single batch"
+                })
+
             response = await self.run(
                 user_id="system",
                 state={},
                 content=create_text_query(prompt)
             )
             
-            # Parse the JSON response
+            if progress_callback:
+                progress_callback(TaskStatus.GENERATING, 75, {
+                    "activity": "Parsing and validating generated questions"
+                })
+            
+            questions = self._parse_questions_response(response)
+            
+            if progress_callback:
+                progress_callback(TaskStatus.GENERATING, 85, {
+                    "activity": f"Question generation complete - {len(questions)} questions created",
+                    "questions_generated": len(questions),
+                    "success_rate": f"{(len(questions)/num_questions)*100:.1f}%" if num_questions > 0 else "100%"
+                })
+            
+            return questions[:num_questions]  # Ensure we don't exceed requested number
+            
+        except Exception as e:
+            print(f"Error generating questions: {e}")
+            if progress_callback:
+                progress_callback(TaskStatus.FAILED, 0, {
+                    "activity": f"Error occurred: {str(e)}",
+                    "error": str(e)
+                })
+            return []
+    
+    async def _generate_questions_from_chunks(self, text_content: str, difficulty: str, num_questions: int, progress_callback=None) -> List[MultipleChoiceQuestion]:
+        """Generate questions from large text by processing it in chunks."""
+        import time
+        start_time = time.time()
+        
+        try:
+            # Split text into chunks of ~2500 characters with overlap
+            chunk_size = 2500
+            overlap = 250
+            chunks = self._split_text_into_chunks(text_content, chunk_size, overlap)
+            
+            if progress_callback:
+                progress_callback(TaskStatus.GENERATING, 45, {
+                    "activity": f"Text divided into {len(chunks)} processing chunks",
+                    "chunks_total": len(chunks),
+                    "chunks_completed": 0,
+                    "text_length": len(text_content),
+                    "chunk_size": chunk_size
+                })
+            
+            # Calculate questions per chunk
+            questions_per_chunk = max(1, num_questions // len(chunks))
+            remaining_questions = num_questions % len(chunks)
+            
+            all_questions = []
+            
+            # Report initial chunk processing details
+            if progress_callback:
+                progress_callback(TaskStatus.GENERATING, 60, {
+                    "current_step": "generating",
+                    "chunks_total": len(chunks),
+                    "chunks_completed": 0,
+                    "current_chunk": 1,
+                    "questions_generated": 0,
+                    "estimated_questions": num_questions,
+                    "processing_speed": 0,
+                    "activity": f"Starting question generation from {len(chunks)} text chunks"
+                })
+            
+            for i, chunk in enumerate(chunks):
+                # Distribute remaining questions across first few chunks
+                chunk_questions = questions_per_chunk + (1 if i < remaining_questions else 0)
+                
+                if chunk_questions > 0:
+                    # Report progress before processing chunk
+                    if progress_callback:
+                        elapsed_time = time.time() - start_time
+                        processing_speed = i / elapsed_time if elapsed_time > 0 else 0
+                        estimated_remaining = (len(chunks) - i) / processing_speed if processing_speed > 0 else 0
+                        
+                        progress_callback(TaskStatus.GENERATING, int(60 + (i / len(chunks)) * 25), {
+                            "current_step": "generating",
+                            "chunks_total": len(chunks),
+                            "chunks_completed": i,
+                            "current_chunk": i + 1,
+                            "questions_generated": len(all_questions),
+                            "estimated_questions": num_questions,
+                            "processing_speed": round(processing_speed * 60, 1),  # chunks per minute
+                            "estimated_time_remaining": f"{int(estimated_remaining / 60)}m {int(estimated_remaining % 60)}s" if estimated_remaining > 0 else "Calculating...",
+                            "activity": f"Processing chunk {i + 1}/{len(chunks)} - generating {chunk_questions} questions"
+                        })
+                    
+                    chunk_prompt = f"""
+                    Generate {chunk_questions} multiple choice questions from the following text content.
+                    Difficulty level: {difficulty}
+                    
+                    Text content:
+                    {chunk}
+                    
+                    For each question, provide:
+                    1. A clear, well-formed question
+                    2. Four answer choices (without A), B), C), D) prefixes - just the choice text)
+                    3. The correct answer letter (A, B, C, or D)
+                    4. A brief explanation of why the correct answer is right
+                    
+                    Format your response as JSON with this structure:
+                    {{
+                        "questions": [
+                            {{
+                                "question": "Question text here?",
+                                "choices": ["Choice 1 text", "Choice 2 text", "Choice 3 text", "Choice 4 text"],
+                                "correct_answer": "A",
+                                "explanation": "Brief explanation of why this answer is correct."
+                            }}
+                        ]
+                    }}
+                    
+                    Make sure:
+                    - Questions are clear and unambiguous
+                    - All four choices are plausible but only one is correct
+                    - Choices don't include A), B), C), D) prefixes
+                    - Explanations are concise but informative
+                    - Questions test understanding, not just memorization
+                    """
+                    
+                    try:
+                        # Generate questions for this chunk
+                        response = await self.run(
+                            user_id="system",
+                            state={},
+                            content=create_text_query(chunk_prompt)
+                        )
+                        
+                        # Parse response (same logic as original method)
+                        questions_data = self._parse_questions_response(response)
+                        
+                        # Convert to MultipleChoiceQuestion objects
+                        chunk_questions_generated = 0
+                        for q_data in questions_data:
+                            all_questions.append(MultipleChoiceQuestion(
+                                question=q_data['question'],
+                                choices=q_data['choices'],
+                                correct_answer=q_data['correct_answer'],
+                                explanation=q_data.get('explanation', '')
+                            ))
+                            chunk_questions_generated += 1
+                        
+                        # Report progress after processing chunk
+                        if progress_callback:
+                            elapsed_time = time.time() - start_time
+                            processing_speed = (i + 1) / elapsed_time if elapsed_time > 0 else 0
+                            estimated_remaining = (len(chunks) - i - 1) / processing_speed if processing_speed > 0 else 0
+                            
+                            progress_callback(TaskStatus.GENERATING, int(60 + ((i + 1) / len(chunks)) * 25), {
+                                "activity": f"Completed chunk {i + 1}/{len(chunks)} - generated {chunk_questions_generated} questions",
+                                "chunks_total": len(chunks),
+                                "chunks_completed": i + 1,
+                                "questions_generated": len(all_questions),
+                                "estimated_questions": num_questions,
+                                "processing_speed": f"{round(processing_speed * 60, 1)} chunks/min",
+                                "estimated_time_remaining": f"{int(estimated_remaining / 60)}m {int(estimated_remaining % 60)}s" if estimated_remaining > 0 else "Almost done!"
+                            })
+                    
+                    except Exception as chunk_error:
+                        print(f"Error processing chunk {i + 1}: {chunk_error}")
+                        if progress_callback:
+                            progress_callback(TaskStatus.GENERATING, int(60 + ((i + 1) / len(chunks)) * 25), {
+                                "activity": f"Error in chunk {i + 1}: {str(chunk_error)}, continuing with next chunk",
+                                "error": str(chunk_error)
+                            })
+                        continue
+            
+            return all_questions[:num_questions]  # Ensure we don't exceed requested number
+            
+        except Exception as e:
+            print(f"Error generating questions from chunks: {e}")
+            return []
+    
+    def _split_text_into_chunks(self, text: str, chunk_size: int, overlap: int) -> List[str]:
+        """Split text into overlapping chunks."""
+        chunks = []
+        start = 0
+        
+        while start < len(text):
+            end = start + chunk_size
+            chunk = text[start:end]
+            
+            # Try to break at sentence boundaries to avoid cutting mid-sentence
+            if end < len(text):
+                last_period = chunk.rfind('.')
+                last_newline = chunk.rfind('\n')
+                break_point = max(last_period, last_newline)
+                
+                if break_point > start + chunk_size // 2:  # Only break if it's not too early
+                    chunk = text[start:start + break_point + 1]
+                    end = start + break_point + 1
+            
+            chunks.append(chunk.strip())
+            
+            # Move start position with overlap
+            start = end - overlap
+            if start >= len(text):
+                break
+        
+        return [chunk for chunk in chunks if len(chunk.strip()) > 100]  # Filter out tiny chunks
+    
+    def _parse_questions_response(self, response) -> List[dict]:
+        """Parse the AI response to extract questions data."""
+        try:
             if isinstance(response, dict) and 'questions' in response:
-                questions_data = response['questions']
+                return response['questions']
             elif isinstance(response, dict) and 'explanation' in response:
                 # Extract from StandardAgent response format
                 import json
@@ -228,26 +445,11 @@ class TestingFlashcardAgent(StandardAgent):
                 if start >= 0 and end > start:
                     json_str = response_text[start:end]
                     parsed = json.loads(json_str)
-                    questions_data = parsed.get('questions', [])
-                else:
-                    questions_data = []
-            else:
-                questions_data = []
+                    return parsed.get('questions', [])
             
-            # Convert to MultipleChoiceQuestion objects
-            questions = []
-            for q_data in questions_data:
-                questions.append(MultipleChoiceQuestion(
-                    question=q_data['question'],
-                    choices=q_data['choices'],
-                    correct_answer=q_data['correct_answer'],
-                    explanation=q_data.get('explanation', '')
-                ))
-            
-            return questions
-            
+            return []
         except Exception as e:
-            print(f"Error generating questions: {e}")
+            print(f"Error parsing questions response: {e}")
             return []
 
 
@@ -410,20 +612,37 @@ class AnkiDeckGenerator:
             while len(choices) < 4:  # Ensure we have 4 choices
                 choices.append("")
             
-            # Find correct answer index
-            correct_index = 0
+            # Find the original correct answer index
+            original_correct_index = 0
             if question.correct_answer.upper() in ['A', 'B', 'C', 'D']:
-                correct_index = ord(question.correct_answer.upper()) - ord('A')
+                original_correct_index = ord(question.correct_answer.upper()) - ord('A')
+            
+            # Get the correct answer text
+            correct_answer_text = choices[original_correct_index] if original_correct_index < len(choices) else ""
+            
+            # Randomize the order of choices
+            choice_pairs = list(enumerate(choices))
+            random.shuffle(choice_pairs)
+            
+            # Create shuffled choices and find new correct answer position
+            shuffled_choices = ["", "", "", ""]
+            new_correct_index = 0
+            
+            for new_pos, (old_pos, choice_text) in enumerate(choice_pairs):
+                if new_pos < 4:  # Only fill first 4 positions
+                    shuffled_choices[new_pos] = choice_text
+                    if choice_text == correct_answer_text:
+                        new_correct_index = new_pos
             
             note = genanki.Note(
                 model=model,
                 fields=[
                     question.question,
-                    choices[0] if len(choices) > 0 else "",
-                    choices[1] if len(choices) > 1 else "",
-                    choices[2] if len(choices) > 2 else "",
-                    choices[3] if len(choices) > 3 else "",
-                    chr(65 + correct_index),  # A, B, C, or D
+                    shuffled_choices[0],
+                    shuffled_choices[1], 
+                    shuffled_choices[2],
+                    shuffled_choices[3],
+                    chr(65 + new_correct_index),  # A, B, C, or D based on new position
                     question.explanation or ""
                 ]
             )
@@ -887,7 +1106,7 @@ class FlashcardAgent(StandardAgent):
         
         # Estimate number of cards
         if config.type == FlashcardType.TESTING:
-            estimated_cards = min(50, max(10, len(pdf_data["pages"]) * 2))
+            estimated_cards = min(1000, max(10, len(pdf_data["pages"]) * 2))
         else:
             estimated_cards = len(chapters) * 4  # ~4 cards per chapter
         
@@ -919,31 +1138,70 @@ class FlashcardAgent(StandardAgent):
     
     async def generate_flashcards(self, pdf_path: str, config: FlashcardConfig, progress_callback=None) -> str:
         """Generate flashcards and return path to .apkg file."""
+        import time
+        start_time = time.time()
+        
         try:
             # Step 1: Analyze PDF
             if progress_callback:
-                progress_callback(TaskStatus.ANALYZING, 10)
+                progress_callback(TaskStatus.ANALYZING, 5, {
+                    "activity": "Initializing PDF analysis and metadata extraction"
+                })
             
             pdf_data = self.pdf_parser.extract_text_and_metadata(pdf_path)
+            
+            if progress_callback:
+                progress_callback(TaskStatus.ANALYZING, 15, {
+                    "activity": f"Extracted {len(pdf_data['pages'])} pages, {len(pdf_data['total_text'])} characters",
+                    "pages_count": len(pdf_data['pages']),
+                    "text_length": len(pdf_data['total_text'])
+                })
+            
             chapters = self.pdf_parser.identify_chapters(pdf_data, config.chapter_mode.value, config.slides_per_chapter)
+            
+            if progress_callback:
+                progress_callback(TaskStatus.ANALYZING, 25, {
+                    "activity": f"Identified {len(chapters)} chapters using {config.chapter_mode.value} mode",
+                    "chapters_count": len(chapters),
+                    "chapter_mode": config.chapter_mode.value
+                })
             
             # Step 2: Extract content
             if progress_callback:
-                progress_callback(TaskStatus.EXTRACTING, 30)
+                progress_callback(TaskStatus.EXTRACTING, 35, {
+                    "activity": "Setting up content extraction for flashcard generation"
+                })
             
             if config.type == FlashcardType.TESTING:
-                # Step 3: Generate questions
+                # Calculate number of questions based on PDF content
+                total_pages = pdf_data["metadata"]["page_count"]
+                total_text_length = len(pdf_data["total_text"])
+                
+                # Dynamic calculation: base on pages and text length
+                questions_per_page = 2 if total_text_length / total_pages > 1000 else 1
+                calculated_questions = min(1000, max(5, total_pages * questions_per_page))
+                
                 if progress_callback:
-                    progress_callback(TaskStatus.GENERATING, 60)
+                    progress_callback(TaskStatus.GENERATING, 40, {
+                        "activity": f"Generating {calculated_questions} questions from {total_pages} pages",
+                        "estimated_questions": calculated_questions,
+                        "pages_count": total_pages,
+                        "difficulty": config.difficulty.value
+                    })
                 
                 questions = await self.testing_agent.generate_questions(
                     pdf_data["total_text"], 
-                    config.difficulty.value
+                    config.difficulty.value,
+                    calculated_questions,
+                    progress_callback
                 )
                 
                 # Step 4: Package
                 if progress_callback:
-                    progress_callback(TaskStatus.PACKAGING, 90)
+                    progress_callback(TaskStatus.PACKAGING, 90, {
+                        "activity": f"Packaging {len(questions)} questions into .apkg file",
+                        "questions_generated": len(questions)
+                    })
                 
                 apkg_path = self.anki_generator.create_testing_deck(questions, config.title)
             
@@ -956,22 +1214,34 @@ class FlashcardAgent(StandardAgent):
                 
                 # Step 3: Generate learning cards
                 if progress_callback:
-                    progress_callback(TaskStatus.GENERATING, 60)
+                    progress_callback(TaskStatus.GENERATING, 60, {
+                        "activity": f"Generating learning cards from {len(chapters)} chapters",
+                        "chapters_count": len(chapters),
+                        "images_extracted": len(image_paths)
+                    })
                 
                 cards = await self.learning_agent.generate_learning_cards(chapters, image_paths, pdf_data)
                 
                 # Step 4: Package
                 if progress_callback:
-                    progress_callback(TaskStatus.PACKAGING, 90)
+                    progress_callback(TaskStatus.PACKAGING, 90, {
+                        "activity": f"Packaging {len(cards)} learning cards into .apkg file",
+                        "cards_generated": len(cards)
+                    })
                 
                 apkg_path = self.anki_generator.create_learning_deck(cards, config.title)
             
             if progress_callback:
-                progress_callback(TaskStatus.COMPLETED, 100)
+                progress_callback(TaskStatus.COMPLETED, 100, {
+                    "activity": "Flashcard generation completed successfully"
+                })
             
             return apkg_path
         
         except Exception as e:
             if progress_callback:
-                progress_callback(TaskStatus.FAILED, 0, str(e))
+                progress_callback(TaskStatus.FAILED, 0, {
+                    "activity": f"Flashcard generation failed: {str(e)}",
+                    "error": str(e)
+                })
             raise e
