@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from sqlalchemy.orm import Session
 from pathlib import Path
+import os
 
 from .api.routers import auth as auth_router
 from .api.routers import courses, files, users, statistics, questions
@@ -33,7 +34,7 @@ from .core.lifespan import lifespan
 user_model.Base.metadata.create_all(bind=engine)
 
 # Create output directory for flashcard files
-output_dir = Path("/tmp/anki_output")
+output_dir = Path("/tmp/anki_output") if os.path.exists("/tmp") else Path("./anki_output")
 output_dir.mkdir(exist_ok=True)
 
 # Create the main app instance

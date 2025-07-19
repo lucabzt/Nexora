@@ -24,7 +24,7 @@ class PDFParser:
     """Handles PDF parsing and content extraction."""
     
     def __init__(self):
-        self.output_dir = Path("/tmp/flashcard_images")
+        self.output_dir = Path("/tmp/flashcard_images") if os.path.exists("/tmp") else Path("./flashcard_images")
         self.output_dir.mkdir(exist_ok=True)
     
     def extract_text_and_metadata(self, pdf_path: str) -> Dict[str, Any]:
@@ -371,7 +371,7 @@ class AnkiDeckGenerator:
     """Generates Anki .apkg files from flashcard data."""
     
     def __init__(self):
-        self.output_dir = Path("/tmp/anki_output")
+        self.output_dir = Path("/tmp/anki_output") if os.path.exists("/tmp") else Path("./anki_output")
         self.output_dir.mkdir(exist_ok=True)
     
     def create_testing_deck(self, questions: List[MultipleChoiceQuestion], deck_name: str) -> str:
@@ -435,45 +435,159 @@ class AnkiDeckGenerator:
         
         return str(output_path)
     
+    def _get_persistence_script(self) -> str:
+        """Get the persistence script for storing user selections."""
+        return '''
+<script>
+// Anki Persistence - Simplified version of https://github.com/SimonLammer/anki-persistence
+if (void 0 === window.Persistence) {
+    var _persistenceKey = "github.com/SimonLammer/anki-persistence/";
+    window.Persistence_sessionStorage = function() {
+        var e = !1;
+        try {
+            "object" == typeof window.sessionStorage && (e = !0, 
+                this.clear = function() {
+                    for (var e = 0; e < sessionStorage.length; e++) {
+                        var t = sessionStorage.key(e);
+                        0 == t.indexOf(_persistenceKey) && (sessionStorage.removeItem(t), e--)
+                    }
+                }, 
+                this.setItem = function(e, t) {
+                    sessionStorage.setItem(_persistenceKey + e, JSON.stringify(t));
+                }, 
+                this.getItem = function(e) {
+                    var t = sessionStorage.getItem(_persistenceKey + e);
+                    return t ? JSON.parse(t) : null;
+                },
+                this.removeItem = function(e) {
+                    sessionStorage.removeItem(_persistenceKey + e);
+                });
+        } catch (e) {}
+        this.isAvailable = function() { return e; };
+    };
+    
+    window.Persistence = new Persistence_sessionStorage();
+    
+    // Fallback to window object if sessionStorage not available
+    if (!Persistence.isAvailable()) {
+        window.Persistence = {
+            _data: {},
+            isAvailable: function() { return true; },
+            clear: function() { this._data = {}; },
+            setItem: function(key, value) { this._data[key] = value; },
+            getItem: function(key) { return this._data[key] || null; },
+            removeItem: function(key) { delete this._data[key]; }
+        };
+    }
+}
+</script>
+'''
+
     def _get_front_template(self) -> str:
         """Get the front template for interactive multiple choice cards."""
-        return '''
+        return self._get_persistence_script() + '''
 <div class="mcq-container">
     <div class="question">{{Question}}</div>
     <div class="choices">
-        {{#ChoiceA}}<div class="choice" data-choice="A" onclick="selectChoice(this)">A. {{ChoiceA}}</div>{{/ChoiceA}}
-        {{#ChoiceB}}<div class="choice" data-choice="B" onclick="selectChoice(this)">B. {{ChoiceB}}</div>{{/ChoiceB}}
-        {{#ChoiceC}}<div class="choice" data-choice="C" onclick="selectChoice(this)">C. {{ChoiceC}}</div>{{/ChoiceC}}
-        {{#ChoiceD}}<div class="choice" data-choice="D" onclick="selectChoice(this)">D. {{ChoiceD}}</div>{{/ChoiceD}}
+        {{#ChoiceA}}
+        <div class="choice" data-choice="A" 
+             onmousedown="this.style.transform='scale(0.98)';" 
+             onmouseup="this.style.transform='';" 
+             onmouseout="this.style.transform='';"
+             onclick="selectChoice(this, 'A');">
+            <span class="choice-letter">A.</span> {{ChoiceA}}
+        </div>
+        {{/ChoiceA}}
+        
+        {{#ChoiceB}}
+        <div class="choice" data-choice="B" 
+             onmousedown="this.style.transform='scale(0.98)';" 
+             onmouseup="this.style.transform='';" 
+             onmouseout="this.style.transform='';"
+             onclick="selectChoice(this, 'B');">
+            <span class="choice-letter">B.</span> {{ChoiceB}}
+        </div>
+        {{/ChoiceB}}
+        
+        {{#ChoiceC}}
+        <div class="choice" data-choice="C" 
+             onmousedown="this.style.transform='scale(0.98)';" 
+             onmouseup="this.style.transform='';" 
+             onmouseout="this.style.transform='';"
+             onclick="selectChoice(this, 'C');">
+            <span class="choice-letter">C.</span> {{ChoiceC}}
+        </div>
+        {{/ChoiceC}}
+        
+        {{#ChoiceD}}
+        <div class="choice" data-choice="D" 
+             onmousedown="this.style.transform='scale(0.98)';" 
+             onmouseup="this.style.transform='';" 
+             onmouseout="this.style.transform='';"
+             onclick="selectChoice(this, 'D');">
+            <span class="choice-letter">D.</span> {{ChoiceD}}
+        </div>
+        {{/ChoiceD}}
     </div>
 </div>
 
 <script>
-function selectChoice(element) {
+// Store the correct answer for later comparison
+const correctAnswer = '{{CorrectAnswer}}';
+
+function selectChoice(element, choice) {
     // Remove previous selections
-    document.querySelectorAll('.choice').forEach(choice => {
-        choice.classList.remove('selected');
-    });
+    const choices = document.querySelectorAll('.choice');
+    for (let i = 0; i < choices.length; i++) {
+        choices[i].classList.remove('selected');
+    }
     
     // Mark this choice as selected
     element.classList.add('selected');
     
-    // Store the selected answer
-    window.selectedAnswer = element.getAttribute('data-choice');
+    // Store the selection
+    if (Persistence.isAvailable()) {
+        Persistence.setItem('selected_choice', choice);
+        Persistence.setItem('correct_answer', correctAnswer);
+    } else {
+        // Fallback to data attribute
+        const card = document.querySelector('.card');
+        if (card) {
+            card.setAttribute('data-selected-choice', choice);
+            card.setAttribute('data-correct-answer', correctAnswer);
+        }
+    }
+    
+    // Show the answer (flip the card)
+    py.link('showQuestion:answer');
 }
+
+// Add keyboard navigation
+document.addEventListener('keydown', function(event) {
+    // Only handle number keys 1-4
+    if (event.key >= '1' && event.key <= '4') {
+        const index = parseInt(event.key) - 1;
+        const choices = document.querySelectorAll('.choice');
+        if (index < choices.length) {
+            const choice = choices[index];
+            const choiceLetter = choice.getAttribute('data-choice');
+            selectChoice(choice, choiceLetter);
+        }
+    }
+});
 </script>
 '''
     
     def _get_back_template(self) -> str:
         """Get the back template for interactive multiple choice cards."""
-        return '''
+        return self._get_persistence_script() + '''
 <div class="mcq-container">
     <div class="question">{{Question}}</div>
     <div class="choices">
-        {{#ChoiceA}}<div class="choice" data-choice="A" onclick="selectChoice(this)">A. {{ChoiceA}}</div>{{/ChoiceA}}
-        {{#ChoiceB}}<div class="choice" data-choice="B" onclick="selectChoice(this)">B. {{ChoiceB}}</div>{{/ChoiceB}}
-        {{#ChoiceC}}<div class="choice" data-choice="C" onclick="selectChoice(this)">C. {{ChoiceC}}</div>{{/ChoiceC}}
-        {{#ChoiceD}}<div class="choice" data-choice="D" onclick="selectChoice(this)">D. {{ChoiceD}}</div>{{/ChoiceD}}
+        {{#ChoiceA}}<div class="choice" data-choice="A"><span class="choice-letter">A.</span> {{ChoiceA}}</div>{{/ChoiceA}}
+        {{#ChoiceB}}<div class="choice" data-choice="B"><span class="choice-letter">B.</span> {{ChoiceB}}</div>{{/ChoiceB}}
+        {{#ChoiceC}}<div class="choice" data-choice="C"><span class="choice-letter">C.</span> {{ChoiceC}}</div>{{/ChoiceC}}
+        {{#ChoiceD}}<div class="choice" data-choice="D"><span class="choice-letter">D.</span> {{ChoiceD}}</div>{{/ChoiceD}}
     </div>
     
     <div class="answer-section">
@@ -483,36 +597,46 @@ function selectChoice(element) {
 </div>
 
 <script>
-function selectChoice(element) {
-    // Remove previous selections
-    document.querySelectorAll('.choice').forEach(choice => {
-        choice.classList.remove('selected', 'correct', 'incorrect');
-    });
+// Get the correct answer from template variables or persistence
+let correctAnswer = '{{CorrectAnswer}}';
+let selectedAnswer = null;
+
+// Try to get the selected answer from persistence
+if (Persistence.isAvailable()) {
+    selectedAnswer = Persistence.getItem('selected_choice');
+    // If we don't have a selected answer in persistence, check the card data attribute
+    if (!selectedAnswer) {
+        const card = document.querySelector('.card');
+        selectedAnswer = card ? card.getAttribute('data-selected-choice') : null;
+    }
     
-    // Mark this choice as selected
-    element.classList.add('selected');
-    
-    // Get the correct answer
-    const correctAnswer = '{{CorrectAnswer}}';
-    const selectedChoice = element.getAttribute('data-choice');
-    
-    // Show feedback
-    document.querySelectorAll('.choice').forEach(choice => {
-        const choiceValue = choice.getAttribute('data-choice');
-        if (choiceValue === correctAnswer) {
-            choice.classList.add('correct');
-        } else if (choiceValue === selectedChoice && selectedChoice !== correctAnswer) {
-            choice.classList.add('incorrect');
-        }
-    });
+    // Make sure we have the correct answer from persistence
+    const persistedCorrectAnswer = Persistence.getItem('correct_answer');
+    if (persistedCorrectAnswer) {
+        correctAnswer = persistedCorrectAnswer;
+    }
 }
 
-// Auto-highlight correct answer on back
+// Highlight the selected and correct answers when the back is shown
 document.addEventListener('DOMContentLoaded', function() {
-    const correctAnswer = '{{CorrectAnswer}}';
+    // If we still don't have a selected answer, check the card's data attribute
+    if (!selectedAnswer) {
+        const card = document.querySelector('.card');
+        selectedAnswer = card ? card.getAttribute('data-selected-choice') : null;
+    }
+    
+    // Highlight answers
     document.querySelectorAll('.choice').forEach(choice => {
-        if (choice.getAttribute('data-choice') === correctAnswer) {
+        const choiceValue = choice.getAttribute('data-choice');
+        
+        // Always highlight the correct answer in green
+        if (choiceValue === correctAnswer) {
             choice.classList.add('correct');
+        }
+        
+        // If this choice was selected and is incorrect, highlight it in red
+        if (selectedAnswer && choiceValue === selectedAnswer && selectedAnswer !== correctAnswer) {
+            choice.classList.add('incorrect');
         }
     });
 });
@@ -523,18 +647,19 @@ document.addEventListener('DOMContentLoaded', function() {
         """Get the CSS styles for multiple choice cards."""
         return '''
 .mcq-container {
-    font-family: Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     max-width: 600px;
     margin: 0 auto;
     padding: 20px;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .question {
     font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    line-height: 1.4;
-    color: white;
+    font-weight: 600;
+    margin-bottom: 24px;
+    line-height: 1.5;
+    color: #212529;
 }
 
 .choices {
@@ -542,44 +667,120 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .choice {
-    background: #f8f9fa;
+    background: #ffffff;
     border: 2px solid #e9ecef;
-    border-radius: 8px;
-    padding: 12px 16px;
-    margin: 8px 0;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 10px 0;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     font-size: 16px;
-    line-height: 1.4;
-    color: black;
+    line-height: 1.5;
+    color: #212529;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .choice:hover {
-    background: #e9ecef;
-    border-color: #6c757d;
+    background: #f8f9fa;
+    border-color: #ced4da;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.choice:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .choice.selected {
-    background: #cce5ff;
-    border-color: #007bff;
+    background: #e7f1ff;
+    border-color: #0d6efd;
+    color: #0a58ca;
 }
 
 .choice.correct {
-    background: #d4edda;
-    border-color: #28a745;
-    color: #155724;
+    background: #d1e7dd;
+    border-color: #198754;
+    color: #0f5132;
 }
 
 .choice.incorrect {
     background: #f8d7da;
     border-color: #dc3545;
-    color: #721c24;
+    color: #842029;
+}
+
+.choice-letter {
+    font-weight: 600;
+    margin-right: 8px;
+    color: inherit;
 }
 
 .answer-section {
-    margin-top: 20px;
+    margin-top: 24px;
     padding-top: 20px;
-    border-top: 2px solid #e9ecef;
+    border-top: 1px solid #e9ecef;
+}
+
+.correct-answer {
+    font-weight: 600;
+    color: #198754;
+    margin-bottom: 12px;
+}
+
+.explanation {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 12px;
+    color: #495057;
+    line-height: 1.5;
+}
+
+/* Better touch targets for mobile */
+@media (max-width: 480px) {
+    .choice {
+        padding: 16px 20px;
+        margin: 12px 0;
+    }
+    
+    .question {
+        font-size: 20px;
+    }
+}
+
+/* Dark mode support */
+.nightMode .question {
+    color: #f8f9fa;
+}
+
+.nightMode .choice {
+    background: #2d3035;
+    border-color: #3d4046;
+    color: #e9ecef;
+}
+
+.nightMode .choice:hover {
+    background: #343a40;
+    border-color: #495057;
+}
+
+.nightMode .explanation {
+    background: #2d3035;
+    color: #e9ecef;
+}
+
+.nightMode .choice.correct {
+    background: #0f5132;
+    border-color: #198754;
+    color: #d1e7dd;
+}
+
+.nightMode .choice.incorrect {
+    background: #842029;
+    border-color: #dc3545;
+    color: #f8d7da;
 }
 
 .correct-answer {

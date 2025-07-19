@@ -84,7 +84,7 @@ class DocumentManager:
     """Manages uploaded PDF documents."""
     
     def __init__(self):
-        self.upload_dir = Path("/tmp/flashcard_uploads")
+        self.upload_dir = Path("/tmp/flashcard_uploads") if os.path.exists("/tmp") else Path("./flashcard_uploads")
         self.upload_dir.mkdir(exist_ok=True)
         self.documents: Dict[str, Dict[str, Any]] = {}
     
@@ -125,7 +125,7 @@ class FlashcardService:
         self.flashcard_agent = FlashcardAgent(app_name, session_service)
         self.task_manager = TaskManager()
         self.document_manager = DocumentManager()
-        self.output_dir = Path("/tmp/anki_output")
+        self.output_dir = Path("/tmp/anki_output") if os.path.exists("/tmp") else Path("./anki_output")
         self.output_dir.mkdir(exist_ok=True)
     
     def upload_document(self, file_content: bytes, filename: str) -> Dict[str, Any]:
