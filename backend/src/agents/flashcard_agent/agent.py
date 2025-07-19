@@ -145,7 +145,7 @@ class TestingFlashcardAgent(StandardAgent):
         
         self.llm_agent = LlmAgent(
             name="testing_flashcard_agent",
-            model="gemini-2.5-flash",
+            model="gemini-2.5-pro",
             description="Agent for generating multiple choice questions from PDF content",
             global_instruction=lambda _: instructions,
             instruction="Generate multiple choice questions from the provided text content. Focus on key concepts and create plausible distractors."
@@ -248,9 +248,9 @@ Generate exactly {num_questions} questions:
         start_time = time.time()
         
         try:
-            # Split text into chunks of ~4000 characters with overlap for better context
-            chunk_size = 4000
-            overlap = 400
+            # Split text into chunks of ~6000 characters with overlap for better context
+            chunk_size = 6000
+            overlap = 600
             chunks = self._split_text_into_chunks(text_content, chunk_size, overlap)
             
             if progress_callback:
@@ -497,7 +497,7 @@ class LearningFlashcardAgent(StandardAgent):
         
         self.llm_agent = LlmAgent(
             name="learning_flashcard_agent",
-            model="gemini-2.5-flash",
+            model="gemini-2.5-pro",
             description="Agent for generating learning flashcards from PDF content",
             global_instruction=lambda _: instructions,
             instruction="Generate front/back learning flashcards from the provided content. Focus on key concepts and understanding."
@@ -515,7 +515,7 @@ class LearningFlashcardAgent(StandardAgent):
         """Generate learning flashcards from chapter content with parallel processing."""
         
         # Create semaphore to limit concurrent API calls
-        max_concurrent = min(5, len(chapters))  # Limit to 5 concurrent requests for learning cards (Flash has higher limits)
+        max_concurrent = min(8, len(chapters))  # Limit to 8 concurrent requests for learning cards (Flash has higher limits)
         semaphore = asyncio.Semaphore(max_concurrent)
         
         # Create tasks for parallel processing
