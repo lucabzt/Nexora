@@ -18,7 +18,7 @@ import {
 } from '@mantine/core';
 import { IconDownload } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
-import { IconAlertCircle, IconBookmark, IconQuestionMark, IconPhoto, IconFileText } from '@tabler/icons-react';
+import { IconAlertCircle, IconBookmark, IconQuestionMark, IconPhoto, IconFileText, IconCards } from '@tabler/icons-react';
 import { MediaGallery } from '../components/media/MediaGallery';
 import { FileList } from '../components/media/FileList';
 import { toast } from 'react-toastify';
@@ -29,6 +29,7 @@ import AiCodeWrapper from "../components/AiCodeWrapper.jsx";
 import { downloadChapterContentAsPDF, prepareElementForPDF } from '../utils/pdfDownload';
 import FullscreenContentWrapper from '../components/FullscreenContentWrapper';
 import Quiz from './Quiz';
+import FlashcardDeck from '../components/flashcards/FlashcardDeck';
 
 function ChapterView() {
   const { t } = useTranslation('chapterView');
@@ -582,6 +583,7 @@ function ChapterView() {
             <Tabs value={activeTab} onTabChange={handleTabChange} mb="xl">
               <Tabs.List>
                 <Tabs.Tab value="content" icon={<IconBookmark size={14} />}>{t('tabs.content')}</Tabs.Tab>
+                <Tabs.Tab value="flashcards" icon={<IconCards size={14} />}>Flashcards</Tabs.Tab>
                 {images.length > 0 && (
                   <Tabs.Tab value="images" icon={<IconPhoto size={14} />}>{t('tabs.images')}</Tabs.Tab>
                 )}
@@ -607,6 +609,12 @@ function ChapterView() {
                     </div>
                   </Paper>
                 </FullscreenContentWrapper>
+              </Tabs.Panel>
+
+              <Tabs.Panel value="flashcards" pt="xs" style={{ width: '100%' }}>
+                <Paper shadow="xs" p="md" withBorder style={{ width: '100%' }}>
+                  <FlashcardDeck courseId={courseId} chapterId={chapterId} />
+                </Paper>
               </Tabs.Panel>
 
               <Tabs.Panel value="images" pt="xs" style={{ width: '100%' }}>
