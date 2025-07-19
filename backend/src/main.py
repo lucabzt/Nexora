@@ -6,8 +6,10 @@ from typing import Optional
 
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from sqlalchemy.orm import Session
+from pathlib import Path
 
 from .api.routers import auth as auth_router
 from .api.routers import courses, files, users, statistics, questions
@@ -15,6 +17,7 @@ from .api.routers import notes
 #from .api.routers import notifications
 from .api.routers import chat
 from .api.routers import search as search_router
+from .api.routers import flashcard
 from .api.schemas import user as user_schema
 from .db.database import engine, SessionLocal
 from .db.models import db_user as user_model
@@ -28,6 +31,10 @@ from .core.lifespan import lifespan
 
 # Create database tables
 user_model.Base.metadata.create_all(bind=engine)
+
+# Create output directory for flashcard files
+output_dir = Path("/tmp/anki_output")
+output_dir.mkdir(exist_ok=True)
 
 # Create the main app instance
 app = FastAPI(
@@ -73,8 +80,10 @@ app.include_router(notes.router)
 #app.include_router(notifications.router)
 app.include_router(questions.router)
 app.include_router(chat.router)
+app.include_router(flashcard.router)
 
-
+# Mount static files for flashcard downloads
+app.mount("/output", StaticFiles(directory=str(output_dir)), name="output")
 
 
 # The root path "/" is now outside the /api prefix
