@@ -132,7 +132,7 @@ function About() {
       name: 'Jonas Hörter',
       role: t('team.members.jonasHoerter.role'),
       bio: t('team.members.jonasHoerter.bio'),
-      avatar: 'TODO',
+      avatar: 'https://poker-spade.de/static/media/Jonas.2327447cc8a67b962465.jpeg',
       linkedin: 'https://www.linkedin.com/in/jonas-hörter-4b22562bb/',
     },
   ];
