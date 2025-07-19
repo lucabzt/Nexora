@@ -2,7 +2,7 @@ import asyncio
 import uuid
 import os
 import tempfile
-from typing import Dict, Any, Optional, Callable
+from typing import Dict, Any, Optional, Callable, List
 from pathlib import Path
 import shutil
 
@@ -18,6 +18,7 @@ class TaskManager:
     def __init__(self):
         self.tasks: Dict[str, TaskProgress] = {}
         self.running_tasks: Dict[str, asyncio.Task] = {}
+        self.task_configs: Dict[str, tuple] = {}  # Store (document_id, config) for retries
     
     def create_task(self, document_id: str, config: FlashcardConfig) -> str:
         """Create a new flashcard generation task."""
@@ -30,6 +31,9 @@ class TaskManager:
             current_step="Initializing",
             completed_steps=[]
         )
+        
+        # Store config for retry functionality
+        self.task_configs[task_id] = (document_id, config)
         
         return task_id
     
@@ -171,7 +175,7 @@ class FlashcardService:
         
         try:
             # Create progress callback
-            async def progress_callback(status: TaskStatus, progress: int, error: str = None):
+            def progress_callback(status: TaskStatus, progress: int, error: str = None):
                 step_name = status.value.title()
                 self.task_manager.update_task_progress(task_id, status, progress, step_name, error)
             
@@ -211,6 +215,12 @@ class FlashcardService:
         if not task or task.status != TaskStatus.FAILED:
             return None
         
+        # Get stored configuration
+        if task_id not in self.task_manager.task_configs:
+            return None
+        
+        document_id, config = self.task_manager.task_configs[task_id]
+        
         # Reset task status
         task.status = TaskStatus.PENDING
         task.progress_percentage = 0
@@ -218,8 +228,12 @@ class FlashcardService:
         task.completed_steps = []
         task.error_message = None
         
-        # Note: In a real implementation, you'd need to store the original
-        # document_id and config to restart the task
+        # Start the async task again
+        async_task = asyncio.create_task(
+            self._run_generation_task(task_id, document_id, config)
+        )
+        self.task_manager.running_tasks[task_id] = async_task
+        
         return task_id
     
     def get_download_path(self, task_id: str) -> Optional[str]:
@@ -229,3 +243,75 @@ class FlashcardService:
             filename = task.download_url.split("/")[-1]
             return str(self.output_dir / filename)
         return None
+    
+    def get_processing_history(self, user_id: str, limit: int = 10) -> List[Dict[str, Any]]:
+        """Get user's processing history."""
+        # In a real implementation, this would query a database
+        # For now, return recent tasks from memory
+        tasks = list(self.task_manager.tasks.values())
+        tasks.sort(key=lambda x: x.task_id, reverse=True)  # Sort by creation time (task_id is UUID)
+        return [{
+            "task_id": task.task_id,
+            "status": task.status.value,
+            "progress_percentage": task.progress_percentage,
+            "current_step": task.current_step,
+            "completed_steps": task.completed_steps,
+            "error_message": task.error_message,
+            "download_url": task.download_url
+        } for task in tasks[:limit]]
+    
+    def get_user_stats(self, user_id: str) -> Dict[str, Any]:
+        """Get processing statistics for the user."""
+        tasks = list(self.task_manager.tasks.values())
+        total_tasks = len(tasks)
+        completed_tasks = len([t for t in tasks if t.status == TaskStatus.COMPLETED])
+        failed_tasks = len([t for t in tasks if t.status == TaskStatus.FAILED])
+        
+        return {
+            "total_tasks": total_tasks,
+            "completed_tasks": completed_tasks,
+            "failed_tasks": failed_tasks,
+            "success_rate": (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0
+        }
+    
+    def get_task_details(self, task_id: str) -> Optional[Dict[str, Any]]:
+        """Get detailed information about a completed task."""
+        task = self.task_manager.get_task_status(task_id)
+        if not task:
+            return None
+        
+        return {
+            "task_id": task.task_id,
+            "status": task.status.value,
+            "progress_percentage": task.progress_percentage,
+            "current_step": task.current_step,
+            "completed_steps": task.completed_steps,
+            "error_message": task.error_message,
+            "download_url": task.download_url,
+            "created_at": task.task_id,  # Using task_id as timestamp placeholder
+        }
+    
+    def delete_task(self, task_id: str) -> bool:
+        """Delete a processing task and its files."""
+        if task_id not in self.task_manager.tasks:
+            return False
+        
+        # Cancel if running
+        self.task_manager.cancel_task(task_id)
+        
+        # Delete files if they exist
+        task = self.task_manager.tasks[task_id]
+        if task.download_url:
+            filename = task.download_url.split("/")[-1]
+            file_path = self.output_dir / filename
+            if file_path.exists():
+                file_path.unlink()
+        
+        # Remove from memory
+        del self.task_manager.tasks[task_id]
+        
+        # Remove stored config
+        if task_id in self.task_manager.task_configs:
+            del self.task_manager.task_configs[task_id]
+        
+        return True

@@ -29,12 +29,13 @@ export const ankiService = {
   generateSummary: async (config) =>
     (await apiWithCookies.post('/anki/analyze', {
       document_id: config.document_id,
-      type: config.type,
-      title: config.title,
-      description: config.description,
-      difficulty: config.difficulty,
-      chapter_mode: config.chapter_mode,
-      slides_per_chapter: config.slides_per_chapter,
+      config: {
+        type: config.type,
+        title: config.title,
+        difficulty: config.difficulty,
+        chapter_mode: config.chapter_mode,
+        slides_per_chapter: config.slides_per_chapter,
+      }
     })).data,
 
   /**
@@ -45,12 +46,13 @@ export const ankiService = {
   generateAnkiDeck: async (config) =>
     (await apiWithCookies.post('/anki/generate', {
       document_id: config.document_id,
-      type: config.type,
-      title: config.title,
-      description: config.description,
-      difficulty: config.difficulty,
-      chapter_mode: config.chapter_mode,
-      slides_per_chapter: config.slides_per_chapter,
+      config: {
+        type: config.type,
+        title: config.title,
+        difficulty: config.difficulty,
+        chapter_mode: config.chapter_mode,
+        slides_per_chapter: config.slides_per_chapter,
+      }
     })).data,
 
   /**

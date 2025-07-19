@@ -1,28 +1,23 @@
 import json
 import os
-import uuid
-import tempfile
-import asyncio
 import random
-from typing import Dict, Any, List, Optional, Tuple
+import uuid
 from pathlib import Path
+from typing import Dict, Any, List, Optional
 
 import fitz  # PyMuPDF
 import genanki
-from pdf2image import convert_from_path
-from PIL import Image
-
 from google.adk.agents import LlmAgent
 from google.adk.runners import Runner
 from google.genai import types
+from pdf2image import convert_from_path
 
-from ..agent import StandardAgent
-from ..utils import load_instructions_from_files, create_text_query
 from .instructions_txt import instructions
 from .schema import (
-    FlashcardConfig, FlashcardType, TaskStatus, TaskProgress,
-    MultipleChoiceQuestion, LearningCard, FlashcardPreview
+    FlashcardConfig, FlashcardType, TaskStatus, MultipleChoiceQuestion, LearningCard, FlashcardPreview
 )
+from ..agent import StandardAgent
+from ..utils import create_text_query
 
 
 class PDFParser:
@@ -144,14 +139,17 @@ class TestingFlashcardAgent(StandardAgent):
     """Generates multiple choice questions for testing."""
     
     def __init__(self, app_name: str, session_service):
+        # Call parent constructor to properly initialize StandardAgent
+        super().__init__(app_name, session_service)
+        
         self.llm_agent = LlmAgent(
             name="testing_flashcard_agent",
-            model="gemini-2.5-flash",
+            model="gemini-2.5-pro",
             description="Agent for generating multiple choice questions from PDF content",
             global_instruction=lambda _: instructions,
             instruction="Generate multiple choice questions from the provided text content. Focus on key concepts and create plausible distractors."
         )
-        
+
         self.app_name = app_name
         self.session_service = session_service
         self.runner = Runner(
@@ -162,46 +160,82 @@ class TestingFlashcardAgent(StandardAgent):
     
     async def generate_questions(self, text_content: str, difficulty: str, num_questions: int = 20) -> List[MultipleChoiceQuestion]:
         """Generate multiple choice questions from text content."""
+        
         prompt = f"""
         Generate {num_questions} multiple choice questions from the following text content.
         Difficulty level: {difficulty}
         
-        For each question, provide:
-        1. A clear, specific question
-        2. Four answer choices (A, B, C, D)
-        3. The correct answer
-        4. A brief explanation
-        
-        Format your response as a JSON array of objects with this structure:
-        {{
-            "question": "Your question here?",
-            "choices": ["Option A", "Option B", "Option C", "Option D"],
-            "correct_answer": "Option A",
-            "explanation": "Brief explanation of why this is correct"
-        }}
-        
         Text content:
-        {text_content[:4000]}  # Limit content to avoid token limits
+        {text_content[:3000]}  # Limit text to avoid token limits
+        
+        For each question, provide:
+        1. A clear question
+        2. Four answer choices (A, B, C, D)
+        3. The correct answer letter
+        
+        Format your response as JSON with this structure:
+        {{
+            "questions": [
+                {{
+                    "question": "Question text here?",
+                    "choices": ["A) Choice 1", "B) Choice 2", "C) Choice 3", "D) Choice 4"],
+                    "correct_answer": "A"
+                }}
+            ]
+        }}
         """
         
         try:
-            content = create_text_query(prompt)
-            result = await self.runner.run(user_id="system", state={}, content=content)
+            # Use the inherited run method from StandardAgent
+            response = await self.run(
+                user_id="system",
+                state={},
+                content=create_text_query(prompt)
+            )
             
             # Parse the JSON response
-            questions_data = json.loads(result.get("response", "[]"))
+            if isinstance(response, dict) and 'questions' in response:
+                questions_data = response['questions']
+            elif isinstance(response, dict) and 'explanation' in response:
+                # Extract from StandardAgent response format
+                import json
+                response_text = response['explanation']
+                
+                # Remove markdown code block formatting if present
+                if '```json' in response_text:
+                    start = response_text.find('```json') + 7
+                    end = response_text.rfind('```')
+                    if end > start:
+                        response_text = response_text[start:end].strip()
+                elif '```' in response_text:
+                    start = response_text.find('```') + 3
+                    end = response_text.rfind('```')
+                    if end > start:
+                        response_text = response_text[start:end].strip()
+                
+                # Find JSON in response
+                start = response_text.find('{')
+                end = response_text.rfind('}') + 1
+                if start >= 0 and end > start:
+                    json_str = response_text[start:end]
+                    parsed = json.loads(json_str)
+                    questions_data = parsed.get('questions', [])
+                else:
+                    questions_data = []
+            else:
+                questions_data = []
             
+            # Convert to MultipleChoiceQuestion objects
             questions = []
             for q_data in questions_data:
                 questions.append(MultipleChoiceQuestion(
-                    question=q_data["question"],
-                    choices=q_data["choices"],
-                    correct_answer=q_data["correct_answer"],
-                    explanation=q_data.get("explanation")
+                    question=q_data['question'],
+                    choices=q_data['choices'],
+                    correct_answer=q_data['correct_answer']
                 ))
             
             return questions
-        
+            
         except Exception as e:
             print(f"Error generating questions: {e}")
             return []
@@ -211,14 +245,17 @@ class LearningFlashcardAgent(StandardAgent):
     """Generates learning flashcards with images."""
     
     def __init__(self, app_name: str, session_service):
+        # Call parent constructor to properly initialize StandardAgent
+        super().__init__(app_name, session_service)
+        
         self.llm_agent = LlmAgent(
             name="learning_flashcard_agent",
-            model="gemini-2.5-flash",
+            model="gemini-2.5-pro",
             description="Agent for generating learning flashcards from PDF content",
             global_instruction=lambda _: instructions,
             instruction="Generate front/back learning flashcards from the provided content. Focus on key concepts and understanding."
         )
-        
+
         self.app_name = app_name
         self.session_service = session_service
         self.runner = Runner(
@@ -227,47 +264,95 @@ class LearningFlashcardAgent(StandardAgent):
             session_service=self.session_service,
         )
     
-    async def generate_learning_cards(self, chapters: List[Dict[str, Any]], image_paths: List[str]) -> List[LearningCard]:
+    async def generate_learning_cards(self, chapters: List[Dict[str, Any]], image_paths: List[str], pdf_data: Dict[str, Any] = None) -> List[LearningCard]:
         """Generate learning flashcards from chapter content."""
+        
         cards = []
         
         for i, chapter in enumerate(chapters):
-            chapter_text = " ".join([page["text"] for page in chapter.get("pages", [])])
-            image_path = image_paths[i] if i < len(image_paths) else None
+            # Get chapter text
+            chapter_text = ""
+            if pdf_data and "pages" in pdf_data:
+                for page_num in chapter.get("pages", []):
+                    if page_num < len(pdf_data["pages"]):
+                        chapter_text += pdf_data["pages"][page_num]["text"] + "\n"
             
+            # Generate cards for this chapter
             prompt = f"""
-            Generate 3-5 learning flashcards from this chapter content.
+            Create learning flashcards from this chapter content.
             Chapter: {chapter.get('title', f'Chapter {i+1}')}
             
-            For each flashcard, provide:
-            1. A clear front (question/prompt)
-            2. A comprehensive back (answer/explanation)
+            Content:
+            {chapter_text[:2000]}  # Limit to avoid token limits
             
-            Format as JSON array:
+            Generate 3-5 flashcards with:
+            - Front: A concept, term, or question
+            - Back: Detailed explanation or answer
+            
+            Format as JSON:
             {{
-                "front": "Question or prompt",
-                "back": "Detailed answer or explanation"
+                "cards": [
+                    {{
+                        "front": "Concept or question",
+                        "back": "Detailed explanation"
+                    }}
+                ]
             }}
-            
-            Chapter content:
-            {chapter_text[:3000]}
             """
             
             try:
-                content = create_text_query(prompt)
-                result = await self.runner.run(user_id="system", state={}, content=content)
+                # Use the inherited run method from StandardAgent
+                response = await self.run(
+                    user_id="system",
+                    state={},
+                    content=create_text_query(prompt)
+                )
                 
-                cards_data = json.loads(result.get("response", "[]"))
+                # Parse the JSON response
+                if isinstance(response, dict) and 'cards' in response:
+                    chapter_cards = response['cards']
+                elif isinstance(response, dict) and 'explanation' in response:
+                    # Extract from StandardAgent response format
+                    import json
+                    response_text = response['explanation']
+                    
+                    # Remove markdown code block formatting if present
+                    if '```json' in response_text:
+                        start = response_text.find('```json') + 7
+                        end = response_text.rfind('```')
+                        if end > start:
+                            response_text = response_text[start:end].strip()
+                    elif '```' in response_text:
+                        start = response_text.find('```') + 3
+                        end = response_text.rfind('```')
+                        if end > start:
+                            response_text = response_text[start:end].strip()
+                    
+                    # Find JSON in response
+                    start = response_text.find('{')
+                    end = response_text.rfind('}') + 1
+                    if start >= 0 and end > start:
+                        json_str = response_text[start:end]
+                        parsed = json.loads(json_str)
+                        chapter_cards = parsed.get('cards', [])
+                    else:
+                        chapter_cards = []
+                else:
+                    chapter_cards = []
                 
-                for card_data in cards_data:
+                for card_data in chapter_cards:
+                    # Use image if available
+                    image_path = image_paths[i] if i < len(image_paths) else None
+                    
                     cards.append(LearningCard(
                         front=card_data["front"],
                         back=card_data["back"],
                         image_path=image_path
                     ))
-            
+                        
             except Exception as e:
-                print(f"Error generating learning cards for chapter {i}: {e}")
+                print(f"Error generating cards for chapter {i}: {e}")
+                continue
         
         return cards
 
@@ -413,7 +498,7 @@ class FlashcardAgent(StandardAgent):
         else:
             # Generate one sample learning card
             if chapters:
-                sample_cards = await self.learning_agent.generate_learning_cards([chapters[0]], [])
+                sample_cards = await self.learning_agent.generate_learning_cards([chapters[0]], [], pdf_data)
                 if sample_cards:
                     sample_learning_card = sample_cards[0]
         
@@ -430,19 +515,19 @@ class FlashcardAgent(StandardAgent):
         try:
             # Step 1: Analyze PDF
             if progress_callback:
-                await progress_callback(TaskStatus.ANALYZING, 10)
+                progress_callback(TaskStatus.ANALYZING, 10)
             
             pdf_data = self.pdf_parser.extract_text_and_metadata(pdf_path)
             chapters = self.pdf_parser.identify_chapters(pdf_data, config.chapter_mode.value, config.slides_per_chapter)
             
             # Step 2: Extract content
             if progress_callback:
-                await progress_callback(TaskStatus.EXTRACTING, 30)
+                progress_callback(TaskStatus.EXTRACTING, 30)
             
             if config.type == FlashcardType.TESTING:
                 # Step 3: Generate questions
                 if progress_callback:
-                    await progress_callback(TaskStatus.GENERATING, 60)
+                    progress_callback(TaskStatus.GENERATING, 60)
                 
                 questions = await self.testing_agent.generate_questions(
                     pdf_data["total_text"], 
@@ -451,7 +536,7 @@ class FlashcardAgent(StandardAgent):
                 
                 # Step 4: Package
                 if progress_callback:
-                    await progress_callback(TaskStatus.PACKAGING, 90)
+                    progress_callback(TaskStatus.PACKAGING, 90)
                 
                 apkg_path = self.anki_generator.create_testing_deck(questions, config.title)
             
@@ -464,22 +549,22 @@ class FlashcardAgent(StandardAgent):
                 
                 # Step 3: Generate learning cards
                 if progress_callback:
-                    await progress_callback(TaskStatus.GENERATING, 60)
+                    progress_callback(TaskStatus.GENERATING, 60)
                 
-                cards = await self.learning_agent.generate_learning_cards(chapters, image_paths)
+                cards = await self.learning_agent.generate_learning_cards(chapters, image_paths, pdf_data)
                 
                 # Step 4: Package
                 if progress_callback:
-                    await progress_callback(TaskStatus.PACKAGING, 90)
+                    progress_callback(TaskStatus.PACKAGING, 90)
                 
                 apkg_path = self.anki_generator.create_learning_deck(cards, config.title)
             
             if progress_callback:
-                await progress_callback(TaskStatus.COMPLETED, 100)
+                progress_callback(TaskStatus.COMPLETED, 100)
             
             return apkg_path
         
         except Exception as e:
             if progress_callback:
-                await progress_callback(TaskStatus.FAILED, 0, str(e))
+                progress_callback(TaskStatus.FAILED, 0, str(e))
             raise e

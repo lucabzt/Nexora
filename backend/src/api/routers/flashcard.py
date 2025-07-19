@@ -12,6 +12,7 @@ from ...services.flashcard_service import FlashcardService
 from ...agents.flashcard_agent.schema import FlashcardConfig, FlashcardType
 from ...utils.auth import get_current_active_user
 from ...db.models.db_user import User
+from google.adk.sessions import InMemorySessionService
 
 router = APIRouter(prefix="/anki", tags=["flashcard"])
 
@@ -23,8 +24,9 @@ def get_flashcard_service() -> FlashcardService:
     """Get the flashcard service instance."""
     global flashcard_service
     if flashcard_service is None:
-        # Initialize with default values - you may want to inject these
-        flashcard_service = FlashcardService("nexora", None)
+        # Initialize with proper session service like other agents
+        session_service = InMemorySessionService()
+        flashcard_service = FlashcardService("nexora", session_service)
     return flashcard_service
 
 
@@ -202,3 +204,76 @@ async def retry_task(
         status="pending",
         message="Task retry initiated"
     )
+
+
+@router.get("/history")
+async def get_processing_history(
+    limit: int = 10,
+    current_user: User = Depends(get_current_active_user),
+    service: FlashcardService = Depends(get_flashcard_service)
+):
+    """Get user's processing history."""
+    return service.get_processing_history(current_user.id, limit)
+
+
+@router.get("/config")
+async def get_upload_config(
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get supported file types and limits."""
+    return {
+        "max_file_size": 50 * 1024 * 1024,  # 50MB
+        "supported_types": [".pdf"],
+        "max_pages": 500
+    }
+
+
+@router.post("/validate")
+async def validate_pdf(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Validate PDF before upload."""
+    if not file.filename.lower().endswith('.pdf'):
+        return {"valid": False, "error": "Only PDF files are allowed"}
+    
+    content = await file.read()
+    if len(content) > 50 * 1024 * 1024:
+        return {"valid": False, "error": "File size too large (max 50MB)"}
+    
+    return {"valid": True, "message": "File is valid"}
+
+
+@router.get("/stats")
+async def get_user_stats(
+    current_user: User = Depends(get_current_active_user),
+    service: FlashcardService = Depends(get_flashcard_service)
+):
+    """Get processing statistics for the user."""
+    return service.get_user_stats(current_user.id)
+
+
+@router.get("/tasks/{task_id}/details")
+async def get_task_details(
+    task_id: str,
+    current_user: User = Depends(get_current_active_user),
+    service: FlashcardService = Depends(get_flashcard_service)
+):
+    """Get detailed information about a completed task."""
+    details = service.get_task_details(task_id)
+    if details is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return details
+
+
+@router.delete("/tasks/{task_id}")
+async def delete_task(
+    task_id: str,
+    current_user: User = Depends(get_current_active_user),
+    service: FlashcardService = Depends(get_flashcard_service)
+):
+    """Delete a processing task and its files."""
+    success = service.delete_task(task_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return {"message": "Task deleted successfully"}
