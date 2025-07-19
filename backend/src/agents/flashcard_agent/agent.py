@@ -248,9 +248,9 @@ Generate exactly {num_questions} questions:
         start_time = time.time()
         
         try:
-            # Split text into chunks of ~4000 characters with overlap for better context
-            chunk_size = 4000
-            overlap = 400
+            # Split text into chunks of ~6000 characters with overlap for better context
+            chunk_size = 6000
+            overlap = 600
             chunks = self._split_text_into_chunks(text_content, chunk_size, overlap)
             
             if progress_callback:
@@ -268,7 +268,7 @@ Generate exactly {num_questions} questions:
             remaining_questions = num_questions % len(chunks)
             
             # Create semaphore to limit concurrent API calls (prevent rate limiting)
-            max_concurrent = min(4, len(chunks))  # Limit to 4 concurrent requests (Flash has higher limits)
+            max_concurrent = min(8, len(chunks))  # Limit to 8 concurrent requests (Flash has higher limits)
             semaphore = asyncio.Semaphore(max_concurrent)
             
             # Report initial chunk processing details
@@ -515,7 +515,7 @@ class LearningFlashcardAgent(StandardAgent):
         """Generate learning flashcards from chapter content with parallel processing."""
         
         # Create semaphore to limit concurrent API calls
-        max_concurrent = min(5, len(chapters))  # Limit to 5 concurrent requests for learning cards (Flash has higher limits)
+        max_concurrent = min(8, len(chapters))  # Limit to 8 concurrent requests for learning cards (Flash has higher limits)
         semaphore = asyncio.Semaphore(max_concurrent)
         
         # Create tasks for parallel processing
