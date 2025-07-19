@@ -108,7 +108,7 @@ function About() {
       name: 'Markus Huber',
       role: t('team.members.markusHuber.role'),
       bio: t('team.members.markusHuber.bio'),
-      avatar: 'assets/members/markusHuber.png',
+      avatar: 'https://media.licdn.com/dms/image/v2/D4D03AQF_IhR6_2lmPQ/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1729876564052?e=1755734400&v=beta&t=FXUgK9ZXR68YOA9rsVHc-mOsoMer-ddfoUod4OVgZDU',
       linkedin: 'https://www.linkedin.com/in/markus-huber-0132282bb/',
       github: 'https://github.com/M4RKUS28'
     },
@@ -116,15 +116,22 @@ function About() {
       name: 'Luca Bozzetti',
       role: t('team.members.lucaBozzetti.role'),
       bio: t('team.members.lucaBozzetti.bio'),
-      avatar: 'assets/members/lucaBozzetti.png',
+      avatar: 'https://avatars.githubusercontent.com/u/141845727?v=4',
       linkedin: 'https://www.linkedin.com/in/luca-bozzetti-371379282/',
       github: 'https://github.com/lucabzt'
+    },
+    {
+      name: 'Sebastian Rogg',
+      role: t('team.members.sebastianRogg.role'),
+      bio: t('team.members.sebastianRogg.bio'),
+      avatar: 'https://avatars.githubusercontent.com/u/144535689?v=4',
+      linkedin: 'https://www.linkedin.com/in/sebastian-rogg/',
     },
     {
       name: 'Matthias Meierlohr',
       role: t('team.members.matthiasMeierlohr.role'),
       bio: t('team.members.matthiasMeierlohr.bio'),
-      avatar: 'assets/members/matthiasMeierlohr.jpg',
+      avatar: 'TODO',
       linkedin: 'https://www.linkedin.com/in/matthias-meierlohr',
       github: 'https://github.com/Maths24'
     },
@@ -132,15 +139,8 @@ function About() {
       name: 'Jonas Hörter',
       role: t('team.members.jonasHoerter.role'),
       bio: t('team.members.jonasHoerter.bio'),
-      avatar: 'assets/members/jonasHoerter.jpg',
+      avatar: 'TODO',
       linkedin: 'https://www.linkedin.com/in/jonas-hörter-4b22562bb/',
-    },
-    {
-    name: 'Sebastian Rogg',
-    role: t('team.members.sebastianRogg.role'),
-    bio: t('team.members.sebastianRogg.bio'),
-    avatar: 'assets/members/sebastianRogg.jpg',
-    linkedin: 'https://www.linkedin.com/in/sebastian-rogg/',
     },
   ];
 
