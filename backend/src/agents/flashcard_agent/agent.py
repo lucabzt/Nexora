@@ -25,7 +25,7 @@ class PDFParser:
     """Handles PDF parsing and content extraction."""
     
     def __init__(self):
-        self.output_dir = Path("/tmp/flashcard_images") if os.path.exists("/tmp") else Path("./flashcard_images")
+        self.output_dir = Path("/tmp/flashcard_images")
         self.output_dir.mkdir(exist_ok=True)
     
     def extract_text_and_metadata(self, pdf_path: str) -> Dict[str, Any]:
@@ -51,33 +51,33 @@ class PDFParser:
                 "text": text,
                 "char_count": len(text)
             })
-        
+
         doc.close()
-        
+
         return {
             "metadata": metadata,
             "pages": pages,
             "toc": toc,
             "total_text": " ".join([p["text"] for p in pages])
         }
-    
+
     def extract_images_for_learning(self, pdf_path: str, chapter_pages: List[int]) -> List[str]:
         """Convert specific PDF pages to images for learning flashcards."""
         try:
             # Convert specified pages to images
             images = convert_from_path(
-                pdf_path, 
+                pdf_path,
                 first_page=min(chapter_pages),
                 last_page=max(chapter_pages),
                 dpi=150
             )
-            
+
             image_paths = []
             for i, img in enumerate(images):
                 img_path = self.output_dir / f"chapter_{uuid.uuid4().hex[:8]}.png"
                 img.save(img_path, "PNG")
                 image_paths.append(str(img_path))
-            
+
             return image_paths
         except Exception as e:
             print(f"Error converting PDF pages to images: {e}")
@@ -89,7 +89,7 @@ class PDFParser:
             # Manual chapter division
             total_pages = pdf_data["metadata"]["page_count"]
             chapters = []
-            
+
             for i in range(0, total_pages, slides_per_chapter):
                 end_page = min(i + slides_per_chapter, total_pages)
                 chapters.append({
@@ -98,13 +98,13 @@ class PDFParser:
                     "end_page": end_page,
                     "pages": list(range(i, end_page))
                 })
-            
+
             return chapters
-        
+
         else:
             # Auto chapter detection using TOC or heuristics
             toc = pdf_data.get("toc", [])
-            
+
             if toc:
                 chapters = []
                 for i, (level, title, page_num) in enumerate(toc):
@@ -117,13 +117,13 @@ class PDFParser:
                             "pages": list(range(page_num - 1, next_page - 1))
                         })
                 return chapters
-            
+
             else:
                 # Fallback: divide into equal chunks
                 total_pages = pdf_data["metadata"]["page_count"]
                 chunk_size = max(5, total_pages // 5)  # Aim for ~5 chapters
                 chapters = []
-                
+
                 for i in range(0, total_pages, chunk_size):
                     end_page = min(i + chunk_size, total_pages)
                     chapters.append({
@@ -132,17 +132,17 @@ class PDFParser:
                         "end_page": end_page,
                         "pages": list(range(i, end_page))
                     })
-                
+
                 return chapters
 
 
 class TestingFlashcardAgent(StandardAgent):
     """Generates multiple choice questions for testing."""
-    
+
     def __init__(self, app_name: str, session_service):
         # Call parent constructor to properly initialize StandardAgent
         super().__init__(app_name, session_service)
-        
+
         self.llm_agent = LlmAgent(
             name="testing_flashcard_agent",
             model="gemini-2.5-pro",
@@ -167,7 +167,7 @@ class TestingFlashcardAgent(StandardAgent):
                 return await self._generate_questions_from_chunks(
                     text_content, difficulty, num_questions, progress_callback
                 )
-            
+
             # For smaller texts, generate directly
             if progress_callback:
                 progress_callback(TaskStatus.GENERATING, 45, {
@@ -176,7 +176,7 @@ class TestingFlashcardAgent(StandardAgent):
                     "text_length": len(text_content),
                     "difficulty": difficulty
                 })
-            
+
             prompt = f"""
 You are an expert educator creating multiple choice questions.
 
@@ -204,7 +204,7 @@ Format your response as a JSON array of objects with this structure:
 
 Generate exactly {num_questions} questions:
 """
-            
+
             if progress_callback:
                 progress_callback(TaskStatus.GENERATING, 55, {
                     "activity": "Requesting question generation from AI model",
@@ -216,23 +216,23 @@ Generate exactly {num_questions} questions:
                 state={},
                 content=create_text_query(prompt)
             )
-            
+
             if progress_callback:
                 progress_callback(TaskStatus.GENERATING, 75, {
                     "activity": "Parsing and validating generated questions"
                 })
-            
+
             questions = self._parse_questions_response(response)
-            
+
             if progress_callback:
                 progress_callback(TaskStatus.GENERATING, 85, {
                     "activity": f"Question generation complete - {len(questions)} questions created",
                     "questions_generated": len(questions),
-                    "success_rate": f"{(len(questions)/num_questions)*100:.1f}%" if num_questions > 0 else "100%"
+                    "success_rate": f"{(len(questions) / num_questions) * 100:.1f}%" if num_questions > 0 else "100%"
                 })
-            
+
             return questions[:num_questions]  # Ensure we don't exceed requested number
-            
+
         except Exception as e:
             print(f"Error generating questions: {e}")
             if progress_callback:
@@ -246,13 +246,13 @@ Generate exactly {num_questions} questions:
         """Generate questions from large text by processing it in chunks with parallel processing."""
         import time
         start_time = time.time()
-        
+
         try:
             # Split text into chunks of ~6000 characters with overlap for better context
             chunk_size = 6000
             overlap = 600
             chunks = self._split_text_into_chunks(text_content, chunk_size, overlap)
-            
+
             if progress_callback:
                 progress_callback(TaskStatus.GENERATING, 45, {
                     "activity": f"Text divided into {len(chunks)} processing chunks for parallel processing",
@@ -262,7 +262,7 @@ Generate exactly {num_questions} questions:
                     "chunk_size": chunk_size,
                     "parallel_processing": True
                 })
-            
+
             # Calculate questions per chunk
             questions_per_chunk = max(1, num_questions // len(chunks))
             remaining_questions = num_questions % len(chunks)
@@ -288,7 +288,7 @@ Generate exactly {num_questions} questions:
             for i, chunk in enumerate(chunks):
                 # Distribute remaining questions across first few chunks
                 chunk_questions = questions_per_chunk + (1 if i < remaining_questions else 0)
-                
+
                 if chunk_questions > 0:
                     task = self._process_chunk_parallel(
                         chunk, difficulty, chunk_questions, i, len(chunks), 
@@ -428,30 +428,30 @@ Generate exactly {num_questions} questions:
         """Split text into overlapping chunks."""
         chunks = []
         start = 0
-        
+
         while start < len(text):
             end = start + chunk_size
             chunk = text[start:end]
-            
+
             # Try to break at sentence boundaries to avoid cutting mid-sentence
             if end < len(text):
                 last_period = chunk.rfind('.')
                 last_newline = chunk.rfind('\n')
                 break_point = max(last_period, last_newline)
-                
+
                 if break_point > start + chunk_size // 2:  # Only break if it's not too early
                     chunk = text[start:start + break_point + 1]
                     end = start + break_point + 1
-            
+
             chunks.append(chunk.strip())
-            
+
             # Move start position with overlap
             start = end - overlap
             if start >= len(text):
                 break
-        
+
         return [chunk for chunk in chunks if len(chunk.strip()) > 100]  # Filter out tiny chunks
-    
+
     def _parse_questions_response(self, response) -> List[dict]:
         """Parse the AI response to extract questions data."""
         try:
@@ -461,7 +461,7 @@ Generate exactly {num_questions} questions:
                 # Extract from StandardAgent response format
                 import json
                 response_text = response['explanation']
-                
+
                 # Remove markdown code block formatting if present
                 if '```json' in response_text:
                     start = response_text.find('```json') + 7
@@ -473,7 +473,7 @@ Generate exactly {num_questions} questions:
                     end = response_text.rfind('```')
                     if end > start:
                         response_text = response_text[start:end].strip()
-                
+
                 # Find JSON in response
                 start = response_text.find('{')
                 end = response_text.rfind('}') + 1
@@ -481,7 +481,7 @@ Generate exactly {num_questions} questions:
                     json_str = response_text[start:end]
                     parsed = json.loads(json_str)
                     return parsed.get('questions', [])
-            
+
             return []
         except Exception as e:
             print(f"Error parsing questions response: {e}")
@@ -490,11 +490,11 @@ Generate exactly {num_questions} questions:
 
 class LearningFlashcardAgent(StandardAgent):
     """Generates learning flashcards with images."""
-    
+
     def __init__(self, app_name: str, session_service):
         # Call parent constructor to properly initialize StandardAgent
         super().__init__(app_name, session_service)
-        
+
         self.llm_agent = LlmAgent(
             name="learning_flashcard_agent",
             model="gemini-2.5-pro",
@@ -594,7 +594,7 @@ class LearningFlashcardAgent(StandardAgent):
                     state={},
                     content=create_text_query(prompt)
                 )
-                
+
                 # Parse the JSON response
                 if isinstance(response, dict) and 'cards' in response:
                     chapter_cards = response['cards']
@@ -602,7 +602,7 @@ class LearningFlashcardAgent(StandardAgent):
                     # Extract from StandardAgent response format
                     import json
                     response_text = response['explanation']
-                    
+
                     # Remove markdown code block formatting if present
                     if '```json' in response_text:
                         start = response_text.find('```json') + 7
@@ -614,7 +614,7 @@ class LearningFlashcardAgent(StandardAgent):
                         end = response_text.rfind('```')
                         if end > start:
                             response_text = response_text[start:end].strip()
-                    
+
                     # Find JSON in response
                     start = response_text.find('{')
                     end = response_text.rfind('}') + 1
@@ -648,16 +648,16 @@ class LearningFlashcardAgent(StandardAgent):
 
 class AnkiDeckGenerator:
     """Generates Anki .apkg files from flashcard data."""
-    
+
     def __init__(self):
-        self.output_dir = Path("/tmp/anki_output") if os.path.exists("/tmp") else Path("./anki_output")
+        self.output_dir = Path("/tmp/anki_output")
         self.output_dir.mkdir(exist_ok=True)
-    
+
     def create_testing_deck(self, questions: List[MultipleChoiceQuestion], deck_name: str) -> str:
         """Create Anki deck for multiple choice questions with clickable options."""
         deck_id = random.randrange(1 << 30, 1 << 31)
         deck = genanki.Deck(deck_id, deck_name)
-        
+
         # Define note model for interactive multiple choice
         model_id = random.randrange(1 << 30, 1 << 31)
         model = genanki.Model(
@@ -681,42 +681,42 @@ class AnkiDeckGenerator:
             ],
             css=self._get_mcq_css()
         )
-        
+
         # Add notes to deck
         for question in questions:
             # Parse choices to individual fields
             choices = [choice.strip() for choice in question.choices]
             while len(choices) < 4:  # Ensure we have 4 choices
                 choices.append("")
-            
+
             # Find the original correct answer index
             original_correct_index = 0
             if question.correct_answer.upper() in ['A', 'B', 'C', 'D']:
                 original_correct_index = ord(question.correct_answer.upper()) - ord('A')
-            
+
             # Get the correct answer text
             correct_answer_text = choices[original_correct_index] if original_correct_index < len(choices) else ""
-            
+
             # Randomize the order of choices
             choice_pairs = list(enumerate(choices))
             random.shuffle(choice_pairs)
-            
+
             # Create shuffled choices and find new correct answer position
             shuffled_choices = ["", "", "", ""]
             new_correct_index = 0
-            
+
             for new_pos, (old_pos, choice_text) in enumerate(choice_pairs):
                 if new_pos < 4:  # Only fill first 4 positions
                     shuffled_choices[new_pos] = choice_text
                     if choice_text == correct_answer_text:
                         new_correct_index = new_pos
-            
+
             note = genanki.Note(
                 model=model,
                 fields=[
                     question.question,
                     shuffled_choices[0],
-                    shuffled_choices[1], 
+                    shuffled_choices[1],
                     shuffled_choices[2],
                     shuffled_choices[3],
                     chr(65 + new_correct_index),  # A, B, C, or D based on new position
@@ -724,11 +724,11 @@ class AnkiDeckGenerator:
                 ]
             )
             deck.add_note(note)
-        
+
         # Generate package
         output_path = self.output_dir / f"{uuid.uuid4().hex}.apkg"
         genanki.Package(deck).write_to_file(str(output_path))
-        
+
         return str(output_path)
     
     def _get_persistence_script(self) -> str:
@@ -785,76 +785,41 @@ if (void 0 === window.Persistence) {
 <div class="mcq-container">
     <div class="question">{{Question}}</div>
     <div class="choices">
-        {{#ChoiceA}}
-        <div class="choice" data-choice="A">
-            <input type="radio" name="mcq-choice" id="choiceA">
-            <label for="choiceA"><span class="choice-letter">A.</span> {{ChoiceA}}</label>
-        </div>
-        {{/ChoiceA}}
-        
-        {{#ChoiceB}}
-        <div class="choice" data-choice="B">
-            <input type="radio" name="mcq-choice" id="choiceB">
-            <label for="choiceB"><span class="choice-letter">B.</span> {{ChoiceB}}</label>
-        </div>
-        {{/ChoiceB}}
-        
-        {{#ChoiceC}}
-        <div class="choice" data-choice="C">
-            <input type="radio" name="mcq-choice" id="choiceC">
-            <label for="choiceC"><span class="choice-letter">C.</span> {{ChoiceC}}</label>
-        </div>
-        {{/ChoiceC}}
-        
-        {{#ChoiceD}}
-        <div class="choice" data-choice="D">
-            <input type="radio" name="mcq-choice" id="choiceD">
-            <label for="choiceD"><span class="choice-letter">D.</span> {{ChoiceD}}</label>
-        </div>
-        {{/ChoiceD}}
+        {{#ChoiceA}}<div class="choice" data-choice="A" onclick="selectChoice(this)">A. {{ChoiceA}}</div>{{/ChoiceA}}
+        {{#ChoiceB}}<div class="choice" data-choice="B" onclick="selectChoice(this)">B. {{ChoiceB}}</div>{{/ChoiceB}}
+        {{#ChoiceC}}<div class="choice" data-choice="C" onclick="selectChoice(this)">C. {{ChoiceC}}</div>{{/ChoiceC}}
+        {{#ChoiceD}}<div class="choice" data-choice="D" onclick="selectChoice(this)">D. {{ChoiceD}}</div>{{/ChoiceD}}
     </div>
 </div>
 
 <script>
-setupMCQ(false);
+function selectChoice(element) {
+    // Remove previous selections
+    document.querySelectorAll('.choice').forEach(choice => {
+        choice.classList.remove('selected');
+    });
+
+    // Mark this choice as selected
+    element.classList.add('selected');
+
+    // Store the selected answer
+    window.selectedAnswer = element.getAttribute('data-choice');
+}
 </script>
 '''
-    
+
     def _get_back_template(self) -> str:
         """Get the back template for interactive multiple choice cards."""
         return self._get_persistence_script() + '''
 <div class="mcq-container">
     <div class="question">{{Question}}</div>
     <div class="choices">
-        {{#ChoiceA}}
-        <div class="choice" data-choice="A">
-            <input type="radio" name="mcq-choice" id="choiceA" disabled>
-            <label for="choiceA"><span class="choice-letter">A.</span> {{ChoiceA}}</label>
-        </div>
-        {{/ChoiceA}}
-        
-        {{#ChoiceB}}
-        <div class="choice" data-choice="B">
-            <input type="radio" name="mcq-choice" id="choiceB" disabled>
-            <label for="choiceB"><span class="choice-letter">B.</span> {{ChoiceB}}</label>
-        </div>
-        {{/ChoiceB}}
-        
-        {{#ChoiceC}}
-        <div class="choice" data-choice="C">
-            <input type="radio" name="mcq-choice" id="choiceC" disabled>
-            <label for="choiceC"><span class="choice-letter">C.</span> {{ChoiceC}}</label>
-        </div>
-        {{/ChoiceC}}
-        
-        {{#ChoiceD}}
-        <div class="choice" data-choice="D">
-            <input type="radio" name="mcq-choice" id="choiceD" disabled>
-            <label for="choiceD"><span class="choice-letter">D.</span> {{ChoiceD}}</label>
-        </div>
-        {{/ChoiceD}}
+        {{#ChoiceA}}<div class="choice" data-choice="A" onclick="selectChoice(this)">A. {{ChoiceA}}</div>{{/ChoiceA}}
+        {{#ChoiceB}}<div class="choice" data-choice="B" onclick="selectChoice(this)">B. {{ChoiceB}}</div>{{/ChoiceB}}
+        {{#ChoiceC}}<div class="choice" data-choice="C" onclick="selectChoice(this)">C. {{ChoiceC}}</div>{{/ChoiceC}}
+        {{#ChoiceD}}<div class="choice" data-choice="D" onclick="selectChoice(this)">D. {{ChoiceD}}</div>{{/ChoiceD}}
     </div>
-    
+
     <div class="answer-section">
         <div class="correct-answer">Correct Answer: {{CorrectAnswer}}</div>
         {{#Explanation}}<div class="explanation">{{Explanation}}</div>{{/Explanation}}
@@ -862,27 +827,58 @@ setupMCQ(false);
 </div>
 
 <script>
-setupMCQ(true);
+function selectChoice(element) {
+    // Remove previous selections
+    document.querySelectorAll('.choice').forEach(choice => {
+        choice.classList.remove('selected', 'correct', 'incorrect');
+    });
+
+    // Mark this choice as selected
+    element.classList.add('selected');
+
+    // Get the correct answer
+    const correctAnswer = '{{CorrectAnswer}}';
+    const selectedChoice = element.getAttribute('data-choice');
+
+    // Show feedback
+    document.querySelectorAll('.choice').forEach(choice => {
+        const choiceValue = choice.getAttribute('data-choice');
+        if (choiceValue === correctAnswer) {
+            choice.classList.add('correct');
+        } else if (choiceValue === selectedChoice && selectedChoice !== correctAnswer) {
+            choice.classList.add('incorrect');
+        }
+    });
+}
+
+// Auto-highlight correct answer on back
+document.addEventListener('DOMContentLoaded', function() {
+    const correctAnswer = '{{CorrectAnswer}}';
+    document.querySelectorAll('.choice').forEach(choice => {
+        if (choice.getAttribute('data-choice') === correctAnswer) {
+            choice.classList.add('correct');
+        }
+    });
+});
 </script>
 '''
-    
+
     def _get_mcq_css(self) -> str:
         """Get the CSS styles for multiple choice cards."""
         return '''
 .mcq-container {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: Arial, sans-serif;
     max-width: 600px;
     margin: 0 auto;
     padding: 20px;
-    -webkit-tap-highlight-color: transparent;
 }
 
 .question {
     font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 24px;
-    line-height: 1.5;
-    color: #212529;
+    font-weight: bold;
+    margin-bottom: 20px;
+    line-height: 1.4;
+    color: white;
 }
 
 .choices {
@@ -890,120 +886,44 @@ setupMCQ(true);
 }
 
 .choice {
-    background: #ffffff;
+    background: #f8f9fa;
     border: 2px solid #e9ecef;
-    border-radius: 10px;
-    padding: 14px 18px;
-    margin: 10px 0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 8px 0;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     font-size: 16px;
-    line-height: 1.5;
-    color: #212529;
-    position: relative;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    line-height: 1.4;
+    color: black;
 }
 
 .choice:hover {
-    background: #f8f9fa;
-    border-color: #ced4da;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-.choice:active {
-    transform: translateY(0);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    background: #e9ecef;
+    border-color: #6c757d;
 }
 
 .choice.selected {
-    background: #e7f1ff;
-    border-color: #0d6efd;
-    color: #0a58ca;
+    background: #cce5ff;
+    border-color: #007bff;
 }
 
 .choice.correct {
-    background: #d1e7dd;
-    border-color: #198754;
-    color: #0f5132;
+    background: #d4edda;
+    border-color: #28a745;
+    color: #155724;
 }
 
 .choice.incorrect {
     background: #f8d7da;
     border-color: #dc3545;
-    color: #842029;
-}
-
-.choice-letter {
-    font-weight: 600;
-    margin-right: 8px;
-    color: inherit;
+    color: #721c24;
 }
 
 .answer-section {
-    margin-top: 24px;
+    margin-top: 20px;
     padding-top: 20px;
-    border-top: 1px solid #e9ecef;
-}
-
-.correct-answer {
-    font-weight: 600;
-    color: #198754;
-    margin-bottom: 12px;
-}
-
-.explanation {
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 12px 16px;
-    margin-top: 12px;
-    color: #495057;
-    line-height: 1.5;
-}
-
-/* Better touch targets for mobile */
-@media (max-width: 480px) {
-    .choice {
-        padding: 16px 20px;
-        margin: 12px 0;
-    }
-    
-    .question {
-        font-size: 20px;
-    }
-}
-
-/* Dark mode support */
-.nightMode .question {
-    color: #f8f9fa;
-}
-
-.nightMode .choice {
-    background: #2d3035;
-    border-color: #3d4046;
-    color: #e9ecef;
-}
-
-.nightMode .choice:hover {
-    background: #343a40;
-    border-color: #495057;
-}
-
-.nightMode .explanation {
-    background: #2d3035;
-    color: #e9ecef;
-}
-
-.nightMode .choice.correct {
-    background: #0f5132;
-    border-color: #198754;
-    color: #d1e7dd;
-}
-
-.nightMode .choice.incorrect {
-    background: #842029;
-    border-color: #dc3545;
-    color: #f8d7da;
+    border-top: 2px solid #e9ecef;
 }
 
 .correct-answer {
@@ -1028,76 +948,23 @@ setupMCQ(true);
     .mcq-container {
         padding: 15px;
     }
-    
+
     .question {
         font-size: 16px;
     }
-    
+
     .choice {
         font-size: 14px;
         padding: 10px 12px;
     }
 }
-</style>
-
-<script>
-function setupMCQ(isBackSide) {
-    const correctAnswer = '{{CorrectAnswer}}';
-    let selectedAnswer = null;
-
-    if (Persistence.isAvailable()) {
-        selectedAnswer = Persistence.getItem('selected_choice');
-    }
-
-    document.querySelectorAll('.choice').forEach(choice => {
-        const radio = choice.querySelector('input[type="radio"]');
-        const choiceValue = choice.getAttribute('data-choice');
-
-        // --- FRONT SIDE LOGIC ---
-        if (!isBackSide) {
-            choice.onclick = () => {
-                document.querySelectorAll('.choice').forEach(c => c.classList.remove('selected'));
-                choice.classList.add('selected');
-                radio.checked = true;
-                if (Persistence.isAvailable()) {
-                    Persistence.clear();
-                    Persistence.setItem('selected_choice', choiceValue);
-                }
-            };
-        }
-    });
-
-    // --- BACK SIDE LOGIC ---
-    if (isBackSide) {
-        const correctChoice = document.querySelector(`.choice[data-choice="${correctAnswer}"]`);
-        const selectedChoice = selectedAnswer ? document.querySelector(`.choice[data-choice="${selectedAnswer}"]`) : null;
-
-        document.querySelectorAll('.choice input[type="radio"]').forEach(r => r.disabled = true);
-        document.querySelectorAll('.choice').forEach(c => c.classList.remove('selected'));
-
-        if (selectedChoice) {
-            selectedChoice.querySelector('input[type="radio"]').checked = true;
-            if (selectedAnswer === correctAnswer) {
-                selectedChoice.classList.add('correct');
-            } else {
-                selectedChoice.classList.add('incorrect');
-                if (correctChoice) correctChoice.classList.add('correct');
-            }
-        } else if (correctChoice) {
-            correctChoice.classList.add('correct');
-        }
-    }
-}
-</script>
-
-<style>
 '''
-    
+
     def create_learning_deck(self, cards: List[LearningCard], deck_name: str) -> str:
         """Create Anki deck for learning flashcards."""
         deck_id = random.randrange(1 << 30, 1 << 31)
         deck = genanki.Deck(deck_id, deck_name)
-        
+
         # Define note model for learning cards
         model_id = random.randrange(1 << 30, 1 << 31)
         model = genanki.Model(
@@ -1116,7 +983,7 @@ function setupMCQ(isBackSide) {
                 },
             ]
         )
-        
+
         # Add notes to deck
         media_files = []
         for card in cards:
@@ -1125,7 +992,7 @@ function setupMCQ(isBackSide) {
                 image_filename = os.path.basename(card.image_path)
                 image_html = f'<img src="{image_filename}" style="max-width: 100%; height: auto;">'
                 media_files.append(card.image_path)
-            
+
             note = genanki.Note(
                 model=model,
                 fields=[
@@ -1135,19 +1002,19 @@ function setupMCQ(isBackSide) {
                 ]
             )
             deck.add_note(note)
-        
+
         # Generate package
         output_path = self.output_dir / f"{uuid.uuid4().hex}.apkg"
         package = genanki.Package(deck)
         package.media_files = media_files
         package.write_to_file(str(output_path))
-        
+
         return str(output_path)
 
 
 class FlashcardAgent(StandardAgent):
     """Main flashcard generation coordinator."""
-    
+
     def __init__(self, app_name: str, session_service):
         self.app_name = app_name
         self.session_service = session_service
@@ -1155,36 +1022,36 @@ class FlashcardAgent(StandardAgent):
         self.testing_agent = TestingFlashcardAgent(app_name, session_service)
         self.learning_agent = LearningFlashcardAgent(app_name, session_service)
         self.anki_generator = AnkiDeckGenerator()
-    
+
     async def analyze_pdf(self, pdf_path: str, config: FlashcardConfig) -> FlashcardPreview:
         """Analyze PDF and provide preview of flashcard generation."""
         pdf_data = self.pdf_parser.extract_text_and_metadata(pdf_path)
         chapters = self.pdf_parser.identify_chapters(pdf_data, config.chapter_mode.value, config.slides_per_chapter)
-        
+
         # Estimate number of cards
         if config.type == FlashcardType.TESTING:
             estimated_cards = min(1000, max(10, len(pdf_data["pages"]) * 2))
         else:
             estimated_cards = len(chapters) * 4  # ~4 cards per chapter
-        
+
         # Generate sample content
         sample_question = None
         sample_learning_card = None
-        
+
         if config.type == FlashcardType.TESTING:
             # Generate one sample question
             sample_text = pdf_data["total_text"][:2000]
             questions = await self.testing_agent.generate_questions(sample_text, config.difficulty.value, 1)
             if questions:
                 sample_question = questions[0]
-        
+
         else:
             # Generate one sample learning card
             if chapters:
                 sample_cards = await self.learning_agent.generate_learning_cards([chapters[0]], [], pdf_data)
                 if sample_cards:
                     sample_learning_card = sample_cards[0]
-        
+
         return FlashcardPreview(
             type=config.type,
             estimated_cards=estimated_cards,
@@ -1192,21 +1059,21 @@ class FlashcardAgent(StandardAgent):
             sample_learning_card=sample_learning_card,
             chapters=[ch["title"] for ch in chapters]
         )
-    
+
     async def generate_flashcards(self, pdf_path: str, config: FlashcardConfig, progress_callback=None) -> str:
         """Generate flashcards and return path to .apkg file."""
         import time
         start_time = time.time()
-        
+
         try:
             # Step 1: Analyze PDF
             if progress_callback:
                 progress_callback(TaskStatus.ANALYZING, 5, {
                     "activity": "Initializing PDF analysis and metadata extraction"
                 })
-            
+
             pdf_data = self.pdf_parser.extract_text_and_metadata(pdf_path)
-            
+
             if progress_callback:
                 progress_callback(TaskStatus.ANALYZING, 15, {
                     "activity": f"Extracted {len(pdf_data['pages'])} pages, {len(pdf_data['total_text'])} characters",
@@ -1276,9 +1143,9 @@ class FlashcardAgent(StandardAgent):
                         "chapters_count": len(chapters),
                         "images_extracted": len(image_paths)
                     })
-                
+
                 cards = await self.learning_agent.generate_learning_cards(chapters, image_paths, pdf_data)
-                
+
                 # Step 4: Package
                 if progress_callback:
                     progress_callback(TaskStatus.PACKAGING, 90, {
