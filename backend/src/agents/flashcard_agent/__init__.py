@@ -1,3 +1,3 @@
 from .agent import FlashcardAgent
-from .agent import TestingFlashcardAgent
-from .agent import LearningFlashcardAgent
+from .testing_agent import TestingFlashcardAgent
+from .learning_agent import LearningFlashcardAgent
