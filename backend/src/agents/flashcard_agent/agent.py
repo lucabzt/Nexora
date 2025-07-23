@@ -1,4 +1,4 @@
-from backend.src.agents.flashcard_agent.pdf_parser import PDFParser
+from .pdf_parser import PDFParser
 from .testing_agent import TestingFlashcardAgent
 from .learning_agent import LearningFlashcardAgent
 from .anki_generator import AnkiDeckGenerator
