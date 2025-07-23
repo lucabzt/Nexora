@@ -121,6 +121,13 @@ function About() {
       github: 'https://github.com/lucabzt'
     },
     {
+      name: 'Sebastian Rogg',
+      role: t('team.members.sebastianRogg.role'),
+      bio: t('team.members.sebastianRogg.bio'),
+      avatar: 'https://avatars.githubusercontent.com/u/144535689?v=4',
+      linkedin: 'https://www.linkedin.com/in/sebastian-rogg/',
+    },
+    {
       name: 'Matthias Meierlohr',
       role: t('team.members.matthiasMeierlohr.role'),
       bio: t('team.members.matthiasMeierlohr.bio'),
