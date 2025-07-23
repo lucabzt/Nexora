@@ -1,7 +1,7 @@
-from backend.src.agents.flashcard_agent.utils.pdf_parser import PDFParser
+from backend.src.agents.flashcard_agent.pdf_parser import PDFParser
 from .testing_agent import TestingFlashcardAgent
 from .learning_agent import LearningFlashcardAgent
-from backend.src.agents.flashcard_agent.utils.anki_generator import AnkiDeckGenerator
+from backend.src.agents.flashcard_agent.anki_generator import AnkiDeckGenerator
 from .schema import FlashcardConfig, FlashcardType, TaskStatus, FlashcardPreview
 from ..agent import StandardAgent
 
