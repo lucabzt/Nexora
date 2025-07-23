@@ -4,7 +4,7 @@ from typing import List
 
 import genanki
 
-from schema import MultipleChoiceQuestion, LearningCard
+from .schema import MultipleChoiceQuestion, LearningCard
 
 
 class AnkiDeckGenerator:
