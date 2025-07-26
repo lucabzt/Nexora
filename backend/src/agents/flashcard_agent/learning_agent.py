@@ -105,8 +105,14 @@ class LearningFlashcardAgent(StandardAgent):
                 ]
                 """
 
-                response = await self.runner.run(create_text_query(prompt))
-                cards_data = self._parse_cards_response(response)
+                response = await self.run(
+                    user_id="system",
+                    state={},
+                    content=create_text_query(prompt)
+                )
+
+                response_text = response.get("explanation", "")
+                cards_data = self._parse_cards_response(response_text)
                 
                 cards = []
                 for card_data in cards_data:

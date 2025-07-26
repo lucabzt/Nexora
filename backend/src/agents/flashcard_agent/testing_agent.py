@@ -74,8 +74,15 @@ class TestingFlashcardAgent(StandardAgent):
         """
 
         try:
-            response = await self.runner.run(create_text_query(prompt))
-            questions_data = self._parse_questions_response(response)
+            # Use the inherited run method from StandardAgent
+            response = await self.run(
+                user_id="system",
+                state={},
+                content=create_text_query(prompt)
+            )
+
+            response_text = response.get("explanation", "")
+            questions_data = self._parse_questions_response(response_text)
             
             questions = []
             for q_data in questions_data:
@@ -174,8 +181,18 @@ class TestingFlashcardAgent(StandardAgent):
                 ]
                 """
 
-                response = await self.runner.run(create_text_query(prompt))
-                questions_data = self._parse_questions_response(response)
+                response = await self.run(
+                    user_id="system",
+                    state={},
+                    content=create_text_query(prompt)
+                )
+                
+                if response.get("status") != "success":
+                    print(f"Error in agent response: {response}")
+                    return []
+                
+                response_text = response.get("explanation", "")
+                questions_data = self._parse_questions_response(response_text)
                 
                 questions = []
                 for q_data in questions_data:

@@ -121,7 +121,7 @@ class FlashcardAgent(StandardAgent):
                         "questions_generated": len(questions)
                     })
                 
-                apkg_path = self.anki_generator.create_testing_deck(questions, config.title)
+                apkg_path = self.anki_generator.create_testing_deck(questions, config.title, pdf_path)
             
             else:  # LEARNING type
                 # Extract images for chapters
@@ -147,7 +147,7 @@ class FlashcardAgent(StandardAgent):
                         "cards_generated": len(cards)
                     })
                 
-                apkg_path = self.anki_generator.create_learning_deck(cards, config.title)
+                apkg_path = self.anki_generator.create_learning_deck(cards, config.title, pdf_path)
             
             if progress_callback:
                 progress_callback(TaskStatus.COMPLETED, 100, {

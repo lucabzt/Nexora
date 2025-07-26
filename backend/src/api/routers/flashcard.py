@@ -85,7 +85,7 @@ async def analyze_pdf(
         if preview.sample_question:
             response.sample_question = MultipleChoicePreview(
                 question=preview.sample_question.question,
-                choices=preview.sample_question.choices,
+                choices=list(preview.sample_question.options.values()),
                 correct=preview.sample_question.correct_answer
             )
         

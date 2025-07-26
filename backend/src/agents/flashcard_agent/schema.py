@@ -40,7 +40,7 @@ class FlashcardConfig(BaseModel):
 
 class MultipleChoiceQuestion(BaseModel):
     question: str
-    choices: List[str]
+    options: Dict[str, str]
     correct_answer: str
     explanation: Optional[str] = None
 
@@ -48,6 +48,7 @@ class MultipleChoiceQuestion(BaseModel):
 class LearningCard(BaseModel):
     front: str
     back: str
+    chapter: str
     image_path: Optional[str] = None
 
 

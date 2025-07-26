@@ -14,7 +14,7 @@ class AnkiDeckGenerator:
         self.output_dir = Path("/tmp/anki_output")
         self.output_dir.mkdir(exist_ok=True)
 
-    def create_testing_deck(self, questions: List[MultipleChoiceQuestion], deck_name: str) -> str:
+    def create_testing_deck(self, questions: List[MultipleChoiceQuestion], deck_name: str, pdf_filename: str = None) -> str:
         """Create Anki deck for multiple choice questions with clickable options."""
         # Create model for interactive multiple choice
         model = genanki.Model(
@@ -62,13 +62,19 @@ class AnkiDeckGenerator:
             deck.add_note(note)
 
         # Generate package
-        output_path = self.output_dir / f"{uuid.uuid4().hex}.apkg"
+        if pdf_filename:
+            # Extract filename without extension and add .apkg
+            base_name = Path(pdf_filename).stem
+            output_path = self.output_dir / f"{base_name}.apkg"
+        else:
+            # Fallback to UUID if no filename provided
+            output_path = self.output_dir / f"{uuid.uuid4().hex}.apkg"
         package = genanki.Package(deck)
         package.write_to_file(str(output_path))
 
         return str(output_path)
 
-    def create_learning_deck(self, cards: List[LearningCard], deck_name: str) -> str:
+    def create_learning_deck(self, cards: List[LearningCard], deck_name: str, pdf_filename: str = None) -> str:
         """Create Anki deck for learning flashcards."""
         # Create model for basic front/back cards
         model = genanki.Model(
@@ -185,7 +191,13 @@ class AnkiDeckGenerator:
             deck.add_note(note)
 
         # Generate package
-        output_path = self.output_dir / f"{uuid.uuid4().hex}.apkg"
+        if pdf_filename:
+            # Extract filename without extension and add .apkg
+            base_name = Path(pdf_filename).stem
+            output_path = self.output_dir / f"{base_name}.apkg"
+        else:
+            # Fallback to UUID if no filename provided
+            output_path = self.output_dir / f"{uuid.uuid4().hex}.apkg"
         package = genanki.Package(deck)
         package.media_files = media_files
         package.write_to_file(str(output_path))
