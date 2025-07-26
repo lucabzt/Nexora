@@ -86,11 +86,18 @@ class TestingFlashcardAgent(StandardAgent):
             
             questions = []
             for q_data in questions_data:
+                # Add credit note to explanation
+                explanation = q_data.get("explanation", "")
+                if explanation:
+                    explanation += "\n\n---\n*Created with Nexora-AI* - [nexora-ai.de](https://nexora-ai.de)"
+                else:
+                    explanation = "---\n*Created with Nexora-AI* - [nexora-ai.de](https://nexora-ai.de)"
+                
                 question = MultipleChoiceQuestion(
                     question=q_data["question"],
                     options=q_data["options"],
                     correct_answer=q_data["correct_answer"],
-                    explanation=q_data.get("explanation", "")
+                    explanation=explanation
                 )
                 questions.append(question)
             
@@ -196,11 +203,18 @@ class TestingFlashcardAgent(StandardAgent):
                 
                 questions = []
                 for q_data in questions_data:
+                    # Add credit note to explanation
+                    explanation = q_data.get("explanation", "")
+                    if explanation:
+                        explanation += "\n\n---\n*Created with Nexora-AI* - [nexora-ai.de](https://nexora-ai.de)"
+                    else:
+                        explanation = "---\n*Created with Nexora-AI* - [nexora-ai.de](https://nexora-ai.de)"
+                    
                     question = MultipleChoiceQuestion(
                         question=q_data["question"],
                         options=q_data["options"],
                         correct_answer=q_data["correct_answer"],
-                        explanation=q_data.get("explanation", "")
+                        explanation=explanation
                     )
                     questions.append(question)
                 

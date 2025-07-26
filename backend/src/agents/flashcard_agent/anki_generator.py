@@ -22,10 +22,10 @@ class AnkiDeckGenerator:
             'Interactive Multiple Choice',
             fields=[
                 {'name': 'Question'},
-                {'name': 'OptionA'},
-                {'name': 'OptionB'},
-                {'name': 'OptionC'},
-                {'name': 'OptionD'},
+                {'name': 'ChoiceA'},
+                {'name': 'ChoiceB'},
+                {'name': 'ChoiceC'},
+                {'name': 'ChoiceD'},
                 {'name': 'CorrectAnswer'},
                 {'name': 'Explanation'},
             ],
@@ -206,165 +206,229 @@ class AnkiDeckGenerator:
 
     def _get_persistence_script(self) -> str:
         """Get the persistence script for storing user selections."""
-        return """
-        <script>
-        // Store user selection in card data
-        function selectOption(option, button) {
-            // Remove previous selections
-            var buttons = document.querySelectorAll('.option-btn');
-            buttons.forEach(btn => btn.classList.remove('selected'));
-
-            // Mark current selection
-            button.classList.add('selected');
-
-            // Store selection (this persists across card reviews)
-            if (typeof pycmd !== 'undefined') {
-                pycmd('ans');
-            }
-        }
-
-        // Auto-show answer after selection
-        function showAnswer() {
-            if (typeof pycmd !== 'undefined') {
-                pycmd('ans');
-            }
-        }
-        </script>
-        """
+        return '''
+<script>
+// Anki Persistence - Simplified version of https://github.com/SimonLammer/anki-persistence
+if (void 0 === window.Persistence) {
+    var _persistenceKey = "github.com/SimonLammer/anki-persistence/";
+    window.Persistence_sessionStorage = function() {
+        var e = !1;
+        try {
+            "object" == typeof window.sessionStorage && (e = !0, 
+                this.clear = function() {
+                    for (var e = 0; e < sessionStorage.length; e++) {
+                        var t = sessionStorage.key(e);
+                        0 == t.indexOf(_persistenceKey) && (sessionStorage.removeItem(t), e--)
+                    }
+                }, 
+                this.setItem = function(e, t) {
+                    sessionStorage.setItem(_persistenceKey + e, JSON.stringify(t));
+                }, 
+                this.getItem = function(e) {
+                    var t = sessionStorage.getItem(_persistenceKey + e);
+                    return t ? JSON.parse(t) : null;
+                },
+                this.removeItem = function(e) {
+                    sessionStorage.removeItem(_persistenceKey + e);
+                });
+        } catch (e) {}
+        this.isAvailable = function() { return e; };
+    };
+    
+    window.Persistence = new Persistence_sessionStorage();
+    
+    // Fallback to window object if sessionStorage not available
+    if (!Persistence.isAvailable()) {
+        window.Persistence = {
+            _data: {},
+            isAvailable: function() { return true; },
+            clear: function() { this._data = {}; },
+            setItem: function(key, value) { this._data[key] = value; },
+            getItem: function(key) { return this._data[key] || null; },
+            removeItem: function(key) { delete this._data[key]; }
+        };
+    }
+}
+</script>
+'''
 
     def _get_front_template(self) -> str:
         """Get the front template for interactive multiple choice cards."""
-        return """
-        <div class="question-container">
-            <div class="question">{{Question}}</div>
-            <div class="options">
-                <button class="option-btn" onclick="selectOption('A', this)">
-                    <span class="option-letter">A)</span> {{OptionA}}
-                </button>
-                <button class="option-btn" onclick="selectOption('B', this)">
-                    <span class="option-letter">B)</span> {{OptionB}}
-                </button>
-                <button class="option-btn" onclick="selectOption('C', this)">
-                    <span class="option-letter">C)</span> {{OptionC}}
-                </button>
-                <button class="option-btn" onclick="selectOption('D', this)">
-                    <span class="option-letter">D)</span> {{OptionD}}
-                </button>
-            </div>
-        </div>
-        """ + self._get_persistence_script()
+        return self._get_persistence_script() + '''
+<div class="mcq-container">
+    <div class="question">{{Question}}</div>
+    <div class="choices">
+        {{#ChoiceA}}<div class="choice" data-choice="A" onclick="selectChoice(this)">A. {{ChoiceA}}</div>{{/ChoiceA}}
+        {{#ChoiceB}}<div class="choice" data-choice="B" onclick="selectChoice(this)">B. {{ChoiceB}}</div>{{/ChoiceB}}
+        {{#ChoiceC}}<div class="choice" data-choice="C" onclick="selectChoice(this)">C. {{ChoiceC}}</div>{{/ChoiceC}}
+        {{#ChoiceD}}<div class="choice" data-choice="D" onclick="selectChoice(this)">D. {{ChoiceD}}</div>{{/ChoiceD}}
+    </div>
+</div>
+
+<script>
+function selectChoice(element) {
+    // Remove previous selections
+    document.querySelectorAll('.choice').forEach(choice => {
+        choice.classList.remove('selected');
+    });
+
+    // Mark this choice as selected
+    element.classList.add('selected');
+
+    // Store the selected answer
+    window.selectedAnswer = element.getAttribute('data-choice');
+}
+</script>
+'''
 
     def _get_back_template(self) -> str:
         """Get the back template for interactive multiple choice cards."""
-        return """
-        <div class="question-container">
-            <div class="question">{{Question}}</div>
-            <div class="options">
-                <button class="option-btn {{#CorrectAnswer}}{{#eq CorrectAnswer "A"}}correct{{/eq}}{{/CorrectAnswer}}" disabled>
-                    <span class="option-letter">A)</span> {{OptionA}}
-                    {{#CorrectAnswer}}{{#eq CorrectAnswer "A"}}<span class="checkmark">✓</span>{{/eq}}{{/CorrectAnswer}}
-                </button>
-                <button class="option-btn {{#CorrectAnswer}}{{#eq CorrectAnswer "B"}}correct{{/eq}}{{/CorrectAnswer}}" disabled>
-                    <span class="option-letter">B)</span> {{OptionB}}
-                    {{#CorrectAnswer}}{{#eq CorrectAnswer "B"}}<span class="checkmark">✓</span>{{/eq}}{{/CorrectAnswer}}
-                </button>
-                <button class="option-btn {{#CorrectAnswer}}{{#eq CorrectAnswer "C"}}correct{{/eq}}{{/CorrectAnswer}}" disabled>
-                    <span class="option-letter">C)</span> {{OptionC}}
-                    {{#CorrectAnswer}}{{#eq CorrectAnswer "C"}}<span class="checkmark">✓</span>{{/eq}}{{/CorrectAnswer}}
-                </button>
-                <button class="option-btn {{#CorrectAnswer}}{{#eq CorrectAnswer "D"}}correct{{/eq}}{{/CorrectAnswer}}" disabled>
-                    <span class="option-letter">D)</span> {{OptionD}}
-                    {{#CorrectAnswer}}{{#eq CorrectAnswer "D"}}<span class="checkmark">✓</span>{{/eq}}{{/CorrectAnswer}}
-                </button>
-            </div>
-            <div class="explanation">
-                <strong>Explanation:</strong> {{Explanation}}
-            </div>
-        </div>
-        """
+        return self._get_persistence_script() + '''
+<div class="mcq-container">
+    <div class="question">{{Question}}</div>
+    <div class="choices">
+        {{#ChoiceA}}<div class="choice" data-choice="A" onclick="selectChoice(this)">A. {{ChoiceA}}</div>{{/ChoiceA}}
+        {{#ChoiceB}}<div class="choice" data-choice="B" onclick="selectChoice(this)">B. {{ChoiceB}}</div>{{/ChoiceB}}
+        {{#ChoiceC}}<div class="choice" data-choice="C" onclick="selectChoice(this)">C. {{ChoiceC}}</div>{{/ChoiceC}}
+        {{#ChoiceD}}<div class="choice" data-choice="D" onclick="selectChoice(this)">D. {{ChoiceD}}</div>{{/ChoiceD}}
+    </div>
+
+    <div class="answer-section">
+        <div class="correct-answer">Correct Answer: {{CorrectAnswer}}</div>
+        {{#Explanation}}<div class="explanation">{{Explanation}}</div>{{/Explanation}}
+    </div>
+</div>
+
+<script>
+function selectChoice(element) {
+    // Remove previous selections
+    document.querySelectorAll('.choice').forEach(choice => {
+        choice.classList.remove('selected', 'correct', 'incorrect');
+    });
+
+    // Mark this choice as selected
+    element.classList.add('selected');
+
+    // Get the correct answer
+    const correctAnswer = '{{CorrectAnswer}}';
+    const selectedChoice = element.getAttribute('data-choice');
+
+    // Show feedback
+    document.querySelectorAll('.choice').forEach(choice => {
+        const choiceValue = choice.getAttribute('data-choice');
+        if (choiceValue === correctAnswer) {
+            choice.classList.add('correct');
+        } else if (choiceValue === selectedChoice && selectedChoice !== correctAnswer) {
+            choice.classList.add('incorrect');
+        }
+    });
+}
+
+// Auto-highlight correct answer on back
+document.addEventListener('DOMContentLoaded', function() {
+    const correctAnswer = '{{CorrectAnswer}}';
+    document.querySelectorAll('.choice').forEach(choice => {
+        if (choice.getAttribute('data-choice') === correctAnswer) {
+            choice.classList.add('correct');
+        }
+    });
+});
+</script>
+'''
 
     def _get_mcq_css(self) -> str:
         """Get the CSS styles for multiple choice cards."""
-        return """
-        .question-container {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+        return '''
+.mcq-container {
+    font-family: Arial, sans-serif;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
 
-        .question {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            line-height: 1.4;
-            color: #333;
-        }
+.question {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    line-height: 1.4;
+    color: white;
+}
 
-        .options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+.choices {
+    margin-bottom: 20px;
+}
 
-        .option-btn {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            font-size: 16px;
-            text-align: left;
-            transition: all 0.2s ease;
-            min-height: 50px;
-        }
+.choice {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 8px 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    line-height: 1.4;
+    color: black;
+}
 
-        .option-btn:hover:not(:disabled) {
-            border-color: #007bff;
-            background-color: #f8f9fa;
-        }
+.choice:hover {
+    background: #e9ecef;
+    border-color: #6c757d;
+}
 
-        .option-btn.selected {
-            border-color: #007bff;
-            background-color: #e3f2fd;
-        }
+.choice.selected {
+    background: #cce5ff;
+    border-color: #007bff;
+}
 
-        .option-btn.correct {
-            border-color: #28a745;
-            background-color: #d4edda;
-        }
+.choice.correct {
+    background: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+}
 
-        .option-btn:disabled {
-            cursor: not-allowed;
-            opacity: 0.8;
-        }
+.choice.incorrect {
+    background: #f8d7da;
+    border-color: #dc3545;
+    color: #721c24;
+}
 
-        .option-letter {
-            font-weight: bold;
-            margin-right: 8px;
-            color: #666;
-        }
+.answer-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid #e9ecef;
+}
 
-        .checkmark {
-            color: #28a745;
-            font-weight: bold;
-            font-size: 18px;
-        }
+.correct-answer {
+    font-weight: bold;
+    color: #28a745;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
 
-        .explanation {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-left: 4px solid #007bff;
-            border-radius: 4px;
-            font-size: 14px;
-            line-height: 1.5;
-        }
+.explanation {
+    background: #f8f9fa;
+    border-left: 4px solid #007bff;
+    padding: 12px 16px;
+    margin-top: 10px;
+    font-style: italic;
+    line-height: 1.4;
+    color: black;
+}
 
-        .explanation strong {
-            color: #007bff;
-        }
-        """
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .mcq-container {
+        padding: 15px;
+    }
+
+    .question {
+        font-size: 16px;
+    }
+
+    .choice {
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+}
+'''
