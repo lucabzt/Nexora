@@ -94,7 +94,7 @@ async def chat_with_agent(
             chapter = chapters_crud.get_chapter_by_id(db, chapter_id)
             if not chapter:
                 raise HTTPException(status_code=404, detail="Chapter not found")
-            if chapter.course.user_id != current_user.id:
+            if not chapter.course.is_public and chapter.course.user_id != current_user.id:
                 raise HTTPException(status_code=403, detail="You do not have access to this chapter")
 
         # Validate the request

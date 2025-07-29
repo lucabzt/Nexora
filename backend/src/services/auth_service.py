@@ -96,7 +96,7 @@ async def admin_login_as(current_user_id: str, user_id: str, db: Session, respon
     # Get the target user
     user = users_crud.get_user_by_id(db, user_id)
     if not user:
-        logger.warning(f"Attempted to log in as non-existent user ID: {user_id}")
+        logger.warning("Attempted to log in as non-existent user ID: %s", user_id)
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
@@ -104,7 +104,7 @@ async def admin_login_as(current_user_id: str, user_id: str, db: Session, respon
         
     # Check if the target user is active
     if user.is_admin:
-        logger.warning(f"Attempted to log in as admin user: {user.username} (ID: {user.id})")
+        logger.warning("Attempted to log in as admin user: %s (ID: %s)", user.username, user.id)
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Cannot log in as another admin user"
@@ -112,8 +112,8 @@ async def admin_login_as(current_user_id: str, user_id: str, db: Session, respon
         
     # Log the admin action
     logger.info(
-        f"Admin login-as action: "
-        f"Admin ID: {current_user_id} is logging in as user: {user.username} (ID: {user.id})"
+        "Admin login-as action: Admin ID: %s is logging in as user: %s (ID: %s)",
+        current_user_id, user.username, user.id
     )
 
     # Generate access token with user details
