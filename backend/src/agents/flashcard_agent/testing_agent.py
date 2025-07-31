@@ -146,7 +146,7 @@ class TestingFlashcardAgent(StandardAgent):
         
         # Shuffle and limit to requested number
         random.shuffle(all_questions)
-        return all_questions[:num_questions]
+        return all_questions
 
     async def _process_chunk_parallel(self, chunk: str, difficulty: str, chunk_questions: int, 
                                     chunk_index: int, total_chunks: int, semaphore: asyncio.Semaphore, 
