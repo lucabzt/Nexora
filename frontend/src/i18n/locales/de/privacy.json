@@ -1,71 +1,98 @@
 {
   "mainTitle": "Datenschutzerklärung",
+  "introduction": "Wir möchten Ihnen mit den folgenden Informationen einen Überblick über die Verarbeitung, Speicherung und Nutzung Ihrer personenbezogenen Daten durch uns sowie Ihre daraus abgeleiteten Rechte im Hinblick auf den Datenschutz geben.\n\nWelche Daten wir im Einzelnen verarbeiten und in welcher Weise wir diese nutzen, hängt von den von Ihnen genutzten Funktionen unserer Plattform ab.",
   "sections": {
     "responsibleParty": {
-      "title": "1. Verantwortliche Stelle",
+      "title": "a) Name und Anschrift des Verantwortlichen",
       "content": [
-        "Verantwortlich für die Verarbeitung personenbezogener Daten auf dieser Website ist:",
         "Nexora",
         "E-Mail: nexora-ai+markus@obermui.de"
       ]
     },
-    "dataCollection": {
-      "title": "2. Erhebung und Speicherung personenbezogener Daten",
+    "dataProtectionOfficer": {
+      "title": "b) Name und Anschrift des Datenschutzbeauftragten",
       "content": [
-        "Wir verarbeiten personenbezogene Daten, die Sie uns im Rahmen der Nutzung unserer Website freiwillig zur Verfügung stellen. Dazu gehören insbesondere:",
-        "- Hochgeladene Dateien (z. B. PDF-Dokumente)",
-        "- Texteingaben",
-        "- Registrierungs- und Kontodaten (z. B. E-Mail-Adresse, Benutzername)",
-        "Diese Daten werden ausschließlich zur Erstellung und Bereitstellung Ihres personalisierten Benutzerkontos sowie zur Nutzung der angebotenen Funktionen verarbeitet."
+        "Bei Fragen zum Datenschutz erreichen Sie uns unter folgender Adresse:",
+        "",
+        "Datenschutzbeauftragter",
+        "E-Mail: nexora-ai+markus@obermui.de"
       ]
     },
-    "purpose": {
-      "title": "3. Zweck und Rechtsgrundlage der Verarbeitung",
+    "processingPurposes": {
+      "title": "c) Zwecke der Verarbeitung",
       "content": [
-        "Die Verarbeitung Ihrer personenbezogenen Daten erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung) sowie Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer sicherer und nutzerfreundlichen Bereitstellung unserer Dienste).",
-        "Eine darüberhinausgehende Verarbeitung erfolgt nur mit Ihrer ausdrücklichen Einwilligung (Art. 6 Abs. 1 lit. a DSGVO)."
+        "Wir verarbeiten personenbezogene Daten, um Ihnen unsere Dienste bereitzustellen, unsere Plattform zu verbessern und gesetzliche Verpflichtungen zu erfüllen.",
+        "",
+        "Die Verarbeitung erfolgt insbesondere zu folgenden Zwecken:",
+        "- Bereitstellung und Betrieb der Webanwendung/App",
+        "- Benutzerregistrierung und -authentifizierung",
+        "- Kommunikation mit Nutzern (Support, Benachrichtigungen)",
+        "- Verbesserung der Benutzerfreundlichkeit durch Analyse anonymisierter Daten",
+        "- Erfüllung gesetzlicher Vorgaben"
       ]
     },
-    "storage": {
-      "title": "4. Speicherung und Löschung der Daten",
+    "legalBasis": {
+      "title": "d) Rechtsgrundlagen der Verarbeitung",
       "content": [
-        "Ihre Daten werden nur so lange gespeichert, wie dies für die Erfüllung der genannten Zwecke erforderlich ist oder wir gesetzlich dazu verpflichtet sind.",
-        "Auf Wunsch löschen wir Ihre Daten jederzeit, sofern keine gesetzlichen Aufbewahrungsfristen entgegenstehen."
+        "Die Verarbeitung erfolgt auf folgenden Rechtsgrundlagen:",
+        "",
+        "- Einwilligung (Art. 6 Abs. 1 lit. a DSGVO) - z.B. für Newsletter oder optionale Tracking-Tools.",
+        "- Vertragserfüllung (Art. 6 Abs. 1 lit. b DSGVO) - z.B. für die Bereitstellung unserer Dienste.",
+        "- Berechtigte Interessen (Art. 6 Abs. 1 lit. f DSGVO) - z.B. für die IT-Sicherheit oder Optimierung unserer Dienste.",
+        "- Rechtliche Verpflichtung (Art. 6 Abs. 1 lit. c DSGVO) - z.B. Aufbewahrungsfristen nach Handels- und Steuerrecht."
       ]
     },
-    "dataSharing": {
-      "title": "5. Weitergabe der Daten",
+    "dataRecipients": {
+      "title": "e) Empfänger personenbezogener Daten",
       "content": [
-        "Eine Weitergabe Ihrer Daten an Dritte erfolgt grundsätzlich nicht, es sei denn, dies ist zur Vertragserfüllung erforderlich, gesetzlich vorgeschrieben oder Sie haben ausdrücklich eingewilligt."
+        "- Innerhalb unseres Unternehmens: Zugriff haben nur diejenigen Mitarbeiter, die diese Daten zur Erfüllung ihrer Aufgaben benötigen.",
+        "- Dienstleister (Auftragsverarbeiter): z.B. Hosting-Anbieter, IT-Dienstleister, Zahlungsdienstleister.",
+        "- Externe Stellen: Nur, soweit dies gesetzlich vorgeschrieben ist oder Sie ausdrücklich eingewilligt haben."
       ]
     },
-    "dataSecurity": {
-      "title": "6. Datensicherheit",
+    "storagePeriod": {
+      "title": "f) Speicherdauer",
       "content": [
-        "Wir treffen geeignete technische und organisatorische Maßnahmen gemäß Art. 32 DSGVO, um ein dem Risiko angemessenes Schutzniveau Ihrer Daten zu gewährleisten. Dazu zählen insbesondere Verschlüsselung, Zugriffsbeschränkungen und regelmäßige Überprüfung unserer Sicherheitsmaßnahmen."
+        "Wir speichern Ihre personenbezogenen Daten nur so lange, wie dies für die jeweiligen Zwecke erforderlich ist oder wie es die gesetzlichen Aufbewahrungsfristen vorsehen. Nach Ablauf dieser Frist werden die Daten gelöscht oder anonymisiert."
       ]
     },
     "yourRights": {
-      "title": "7. Ihre Rechte",
+      "title": "g) Ihre Datenschutzrechte",
       "content": [
-        "Sie haben das Recht,",
-        "- Auskunft über die bei uns gespeicherten personenbezogenen Daten zu verlangen,",
-        "- Berichtigung unrichtiger Daten zu verlangen,",
-        "- die Löschung Ihrer Daten zu verlangen,",
-        "- die Einschränkung der Verarbeitung zu verlangen,",
-        "- der Verarbeitung zu widersprechen,",
-        "- Ihre Einwilligung jederzeit mit Wirkung für die Zukunft zu widerrufen,",
-        "- sich bei einer Aufsichtsbehörde zu beschweren (Art. 77 DSGVO).",
-        "Zur Ausübung dieser Rechte können Sie uns jederzeit unter der oben angegebenen Kontaktadresse kontaktieren."
+        "Sie haben das Recht auf:",
+        "- Auskunft (Art. 15 DSGVO)",
+        "- Berichtigung (Art. 16 DSGVO)",
+        "- Löschung (Art. 17 DSGVO)",
+        "- Einschränkung der Verarbeitung (Art. 18 DSGVO)",
+        "- Datenübertragbarkeit (Art. 20 DSGVO)",
+        "- Widerspruch gegen bestimmte Verarbeitungen (Art. 21 DSGVO)",
+        "",
+        "Zudem können Sie Ihre Einwilligung jederzeit mit Wirkung für die Zukunft widerrufen, ohne dass die Rechtmäßigkeit der aufgrund der Einwilligung bis zum Widerruf erfolgten Verarbeitung berührt wird."
       ]
     },
-    "changes": {
-      "title": "8. Änderungen dieser Datenschutzerklärung",
+    "supervisoryAuthority": {
+      "title": "h) Aufsichtsbehörde",
       "content": [
-        "Wir behalten uns vor, diese Datenschutzerklärung bei Bedarf zu aktualisieren, um sie an geänderte rechtliche Anforderungen oder Änderungen unserer Dienste anzupassen.",
-        "Letzte Aktualisierung: August 2025"
+        "Sie haben das Recht, sich jederzeit an die zuständige Datenschutz-Aufsichtsbehörde zu wenden.",
+        "",
+        "Bayerisches Landesamt für Datenschutzaufsicht",
+        "Postfach 606, 91511 Ansbach",
+        "E-Mail: poststelle@lda.bayern.de"
+      ]
+    },
+    "dataProvisionRequirement": {
+      "title": "i) Pflicht zur Bereitstellung der Daten",
+      "content": [
+        "Die Bereitstellung bestimmter personenbezogener Daten ist für die Nutzung unserer Dienste erforderlich. Ohne diese Daten können wir Ihnen unsere Dienste möglicherweise nicht in vollem Umfang zur Verfügung stellen."
+      ]
+    },
+    "automatedDecisionMaking": {
+      "title": "j) Automatisierte Entscheidungsfindung / Profiling",
+      "content": [
+        "Wir setzen keine automatisierte Entscheidungsfindung im Sinne von Art. 22 DSGVO ein.",
+        "Profiling findet nur in anonymisierter Form zu statistischen Zwecken statt."
       ]
     }
   },
-  "lastUpdated": "Diese Datenschutzerklärung wurde zuletzt aktualisiert: August 2025"
+  "lastUpdated": "Letzte Aktualisierung: August 2025"
 }

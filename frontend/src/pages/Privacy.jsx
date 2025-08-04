@@ -2,135 +2,102 @@ import {
   Container, 
   Title, 
   Text, 
-  Stack, 
   Paper, 
   Divider, 
   Box, 
-  createStyles,
   List,
-  ThemeIcon
+  Space,
+  ThemeIcon,
+  useMantineTheme
 } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import { 
   IconShieldLock,
-  IconDatabase,
-  IconGavel,
+  IconUser,
+  IconListDetails,
+  IconScale,
+  IconUsers,
   IconClock,
-  IconShare,
-  IconShieldCheck,
-  IconUserCheck,
-  IconAlertCircle
+  IconShield,
+  IconAlertCircle,
+  IconFileAnalytics,
+  IconBuilding
 } from '@tabler/icons-react';
 
-const useStyles = createStyles((theme) => ({
-  wrapper: {
-    padding: theme.spacing.xl * 2,
-    background: theme.colorScheme === 'dark' 
-      ? theme.fn.linearGradient(45, theme.colors.dark[6], theme.colors.dark[8])
-      : theme.fn.linearGradient(45, theme.colors.gray[0], theme.colors.gray[1]),
-    borderRadius: theme.radius.md,
-    minHeight: 'calc(100vh - 60px)',
-    paddingTop: '100px',
-  },
-  title: {
-    fontFamily: `'Roboto', ${theme.fontFamily}`,
-    fontWeight: 900,
-    color: theme.colorScheme === 'dark' ? theme.white : theme.black,
-    lineHeight: 1.2,
-    fontSize: theme.fontSizes.xl * 2,
-    marginBottom: 30,
-  },
-  section: {
-    borderRadius: theme.radius.md,
-    padding: theme.spacing.lg,
-    marginBottom: theme.spacing.xl,
-    backgroundColor: theme.colorScheme === 'dark' 
-      ? theme.fn.rgba(theme.colors.dark[8], 0.5)
-      : theme.fn.rgba(theme.colors.gray[0], 0.7),
-    boxShadow: theme.shadows.md,
-    transition: 'transform 0.3s ease',
-    '&:hover': {
-      transform: 'translateY(-5px)',
-    }
-  },
-  list: {
-    listStyle: 'none',
-    padding: 0,
-    marginTop: theme.spacing.sm,
-  },
-  listItem: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    marginBottom: theme.spacing.xs,
-    '&:last-child': {
-      marginBottom: 0,
-    },
-  },
-  listIcon: {
-    marginRight: theme.spacing.sm,
-    marginTop: 2,
-  },
-  lastUpdated: {
-    textAlign: 'center',
-    marginTop: theme.spacing.xl,
-    color: theme.colorScheme === 'dark' ? theme.colors.gray[5] : theme.colors.gray[7],
-    fontSize: theme.fontSizes.sm,
-  },
-}));
-
-const sectionIcons = {
-  responsibleParty: <IconShieldLock size={24} />,
-  dataCollection: <IconDatabase size={24} />,
-  purpose: <IconGavel size={24} />,
-  storage: <IconClock size={24} />,
-  dataSharing: <IconShare size={24} />,
-  dataSecurity: <IconShieldCheck size={24} />,
-  yourRights: <IconUserCheck size={24} />,
-  changes: <IconAlertCircle size={24} />,
-};
-
-function Privacy() {
-  const { classes } = useStyles();
+const Privacy = () => {
   const { t } = useTranslation('privacy');
+  const theme = useMantineTheme();
+
+  const sectionIcons = {
+    responsibleParty: <IconBuilding size={20} />,
+    dataProtectionOfficer: <IconUser size={20} />,
+    processingPurposes: <IconListDetails size={20} />,
+    legalBasis: <IconScale size={20} />,
+    dataRecipients: <IconUsers size={20} />,
+    storagePeriod: <IconClock size={20} />,
+    yourRights: <IconShield size={20} />,
+    supervisoryAuthority: <IconShieldLock size={20} />,
+    dataProvisionRequirement: <IconAlertCircle size={20} />,
+    automatedDecisionMaking: <IconFileAnalytics size={20} />
+  };
+
+  const renderContent = (content) => {
+    if (Array.isArray(content)) {
+      return (
+        <List spacing="xs" size="md" mb="xl">
+          {content.map((item, index) => (
+            <List.Item key={index}>
+              {item}
+            </List.Item>
+          ))}
+        </List>
+      );
+    }
+    return <Text mb="xl">{content}</Text>;
+  };
 
   return (
-    <Box className={classes.wrapper}>
-      <Container size="md">
-        <Title className={classes.title} align="center">
-          {t('mainTitle')}
-        </Title>
-
-        <Paper className={classes.section}>
-          {Object.entries(t('sections', { returnObjects: true })).map(([key, section]) => (
-            <div key={key} style={{ marginBottom: '2rem' }}>
-              <Title order={2} size="h3" mb="md" style={{ display: 'flex', alignItems: 'center' }}>
-                <ThemeIcon mr="sm" size="lg" variant="light">
-                  {sectionIcons[key]}
-                </ThemeIcon>
-                {section.title}
-              </Title>
-              <Divider mb="md" />
-              <List spacing="xs" className={classes.list}>
-                {Array.isArray(section.content) ? (
-                  section.content.map((item, index) => (
-                    <List.Item key={index} className={classes.listItem}>
-                      {item}
-                    </List.Item>
-                  ))
-                ) : (
-                  <Text>{section.content}</Text>
-                )}
-              </List>
+    <Container size="md" py="xl">
+      <Title order={1} mb="md" ta="center">
+        {t('mainTitle')}
+      </Title>
+      
+      <Paper p="md" shadow="sm" radius="md">
+        {/* Introduction */}
+        <Text mb="xl" style={{ whiteSpace: 'pre-line' }}>
+          {t('introduction')}
+        </Text>
+        
+        <Space h="md" />
+        
+        {/* Sections */}
+        {Object.entries(t('sections', { returnObjects: true })).map(([key, section]) => (
+          <Box key={key} mb="xl">
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
+              <ThemeIcon
+                size={36}
+                radius="md"
+                variant="light"
+                color={theme.primaryColor}
+                mr="sm"
+              >
+                {sectionIcons[key] || <IconListDetails size={20} stroke={1.5} />}
+              </ThemeIcon>
+              <Title order={3} style={{ margin: 0 }}>{section.title}</Title>
             </div>
-          ))}
-        </Paper>
-
-        <Text className={classes.lastUpdated}>
+            
+            {renderContent(section.content)}
+            
+            <Divider my="xl" />
+          </Box>
+        ))}
+        
+        <Text size="sm" c="dimmed" mt="md" ta="right">
           {t('lastUpdated')}
         </Text>
-      </Container>
-    </Box>
+      </Paper>
+    </Container>
   );
-}
+};
 
 export default Privacy;
