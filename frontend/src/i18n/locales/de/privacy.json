@@ -1,0 +1,71 @@
+{
+  "mainTitle": "Datenschutzerklärung",
+  "sections": {
+    "responsibleParty": {
+      "title": "1. Verantwortliche Stelle",
+      "content": [
+        "Verantwortlich für die Verarbeitung personenbezogener Daten auf dieser Website ist:",
+        "Nexora",
+        "E-Mail: nexora-ai+markus@obermui.de"
+      ]
+    },
+    "dataCollection": {
+      "title": "2. Erhebung und Speicherung personenbezogener Daten",
+      "content": [
+        "Wir verarbeiten personenbezogene Daten, die Sie uns im Rahmen der Nutzung unserer Website freiwillig zur Verfügung stellen. Dazu gehören insbesondere:",
+        "- Hochgeladene Dateien (z. B. PDF-Dokumente)",
+        "- Texteingaben",
+        "- Registrierungs- und Kontodaten (z. B. E-Mail-Adresse, Benutzername)",
+        "Diese Daten werden ausschließlich zur Erstellung und Bereitstellung Ihres personalisierten Benutzerkontos sowie zur Nutzung der angebotenen Funktionen verarbeitet."
+      ]
+    },
+    "purpose": {
+      "title": "3. Zweck und Rechtsgrundlage der Verarbeitung",
+      "content": [
+        "Die Verarbeitung Ihrer personenbezogenen Daten erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung) sowie Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer sicherer und nutzerfreundlichen Bereitstellung unserer Dienste).",
+        "Eine darüberhinausgehende Verarbeitung erfolgt nur mit Ihrer ausdrücklichen Einwilligung (Art. 6 Abs. 1 lit. a DSGVO)."
+      ]
+    },
+    "storage": {
+      "title": "4. Speicherung und Löschung der Daten",
+      "content": [
+        "Ihre Daten werden nur so lange gespeichert, wie dies für die Erfüllung der genannten Zwecke erforderlich ist oder wir gesetzlich dazu verpflichtet sind.",
+        "Auf Wunsch löschen wir Ihre Daten jederzeit, sofern keine gesetzlichen Aufbewahrungsfristen entgegenstehen."
+      ]
+    },
+    "dataSharing": {
+      "title": "5. Weitergabe der Daten",
+      "content": [
+        "Eine Weitergabe Ihrer Daten an Dritte erfolgt grundsätzlich nicht, es sei denn, dies ist zur Vertragserfüllung erforderlich, gesetzlich vorgeschrieben oder Sie haben ausdrücklich eingewilligt."
+      ]
+    },
+    "dataSecurity": {
+      "title": "6. Datensicherheit",
+      "content": [
+        "Wir treffen geeignete technische und organisatorische Maßnahmen gemäß Art. 32 DSGVO, um ein dem Risiko angemessenes Schutzniveau Ihrer Daten zu gewährleisten. Dazu zählen insbesondere Verschlüsselung, Zugriffsbeschränkungen und regelmäßige Überprüfung unserer Sicherheitsmaßnahmen."
+      ]
+    },
+    "yourRights": {
+      "title": "7. Ihre Rechte",
+      "content": [
+        "Sie haben das Recht,",
+        "- Auskunft über die bei uns gespeicherten personenbezogenen Daten zu verlangen,",
+        "- Berichtigung unrichtiger Daten zu verlangen,",
+        "- die Löschung Ihrer Daten zu verlangen,",
+        "- die Einschränkung der Verarbeitung zu verlangen,",
+        "- der Verarbeitung zu widersprechen,",
+        "- Ihre Einwilligung jederzeit mit Wirkung für die Zukunft zu widerrufen,",
+        "- sich bei einer Aufsichtsbehörde zu beschweren (Art. 77 DSGVO).",
+        "Zur Ausübung dieser Rechte können Sie uns jederzeit unter der oben angegebenen Kontaktadresse kontaktieren."
+      ]
+    },
+    "changes": {
+      "title": "8. Änderungen dieser Datenschutzerklärung",
+      "content": [
+        "Wir behalten uns vor, diese Datenschutzerklärung bei Bedarf zu aktualisieren, um sie an geänderte rechtliche Anforderungen oder Änderungen unserer Dienste anzupassen.",
+        "Letzte Aktualisierung: August 2025"
+      ]
+    }
+  },
+  "lastUpdated": "Diese Datenschutzerklärung wurde zuletzt aktualisiert: August 2025"
+}

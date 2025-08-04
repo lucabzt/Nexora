@@ -1,0 +1,71 @@
+{
+  "mainTitle": "Privacy Policy",
+  "sections": {
+    "responsibleParty": {
+      "title": "1. Data Controller",
+      "content": [
+        "The controller responsible for the processing of personal data on this website is:",
+        "Nexora",
+        "Email: nexora-ai+markus@obermui.de"
+      ]
+    },
+    "dataCollection": {
+      "title": "2. Collection and Storage of Personal Data",
+      "content": [
+        "We process personal data that you voluntarily provide to us when using our website. This includes in particular:",
+        "- Uploaded files (e.g., PDF documents)",
+        "- Text inputs",
+        "- Registration and account data (e.g., email address, username)",
+        "This data is processed solely for the creation and provision of your personalized user account and for the use of the offered functions."
+      ]
+    },
+    "purpose": {
+      "title": "3. Purpose and Legal Basis of Processing",
+      "content": [
+        "The processing of your personal data is based on Art. 6(1)(b) GDPR (contract performance) and Art. 6(1)(f) GDPR (legitimate interest in providing our services securely and user-friendly).",
+        "Further processing will only take place with your explicit consent (Art. 6(1)(a) GDPR)."
+      ]
+    },
+    "storage": {
+      "title": "4. Storage and Deletion of Data",
+      "content": [
+        "Your data will only be stored for as long as is necessary for the fulfillment of the aforementioned purposes or as required by law.",
+        "Upon request, we will delete your data at any time, unless statutory retention periods prevent this."
+      ]
+    },
+    "dataSharing": {
+      "title": "5. Data Sharing",
+      "content": [
+        "Your data will not be shared with third parties unless this is necessary for the performance of the contract, required by law, or you have given your explicit consent."
+      ]
+    },
+    "dataSecurity": {
+      "title": "6. Data Security",
+      "content": [
+        "We implement appropriate technical and organizational measures in accordance with Art. 32 GDPR to ensure a level of security appropriate to the risk. These include in particular encryption, access restrictions, and regular review of our security measures."
+      ]
+    },
+    "yourRights": {
+      "title": "7. Your Rights",
+      "content": [
+        "You have the right to:",
+        "- Request information about your personal data stored by us,",
+        "- Request rectification of incorrect data,",
+        "- Request erasure of your data,",
+        "- Request restriction of processing,",
+        "- Object to processing,",
+        "- Withdraw your consent at any time with effect for the future,",
+        "- Lodge a complaint with a supervisory authority (Art. 77 GDPR).",
+        "To exercise these rights, you can contact us at any time using the contact details provided above."
+      ]
+    },
+    "changes": {
+      "title": "8. Changes to this Privacy Policy",
+      "content": [
+        "We reserve the right to update this privacy policy as necessary to adapt to changed legal requirements or changes to our services.",
+        "Last updated: August 2025"
+      ]
+    }
+  },
+  "lastUpdated": "This privacy policy was last updated: August 2025"
+}
