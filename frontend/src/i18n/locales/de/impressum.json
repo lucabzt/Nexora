@@ -5,9 +5,19 @@
     "info": "Dieses Projekt befindet sich derzeit in der Entwicklungsphase. Alle Angaben sind vorläufig und können sich ändern.",
     "contact": "Für Anfragen: nexora-ai+markus@obermui.de"
   },
+  "hackathonInfo": {
+    "title": "Hackathon-Projekt",
+    "text": "Dieses Projekt wurde im Rahmen eines Hackathons auf devpost.com entwickelt. Es handelt sich um eine Prototyp-Implementierung, die im Rahmen des Wettbewerbs entstanden ist."
+  },
+  "legalInfo": {
+    "title": "Rechtliche Hinweise",
+    "disclaimer": "Haftungsausschluss: Die Nutzung dieser Anwendung erfolgt auf eigene Gefahr. Die Entwickler übernehmen keinerlei Gewähr für die Aktualität, Richtigkeit, Vollständigkeit oder Qualität der bereitgestellten Informationen. Haftungsansprüche gegen die Entwickler, welche sich auf Schäden materieller oder ideeller Art beziehen, die durch die Nutzung oder Nichtnutzung der dargebotenen Informationen bzw. durch die Nutzung fehlerhafter und unvollständiger Informationen verursacht wurden, sind grundsätzlich ausgeschlossen.",
+    "noWarranty": "Es wird keine Gewährleistung für die Funktionalität, Zuverlässigkeit oder Eignung der Anwendung für bestimmte Zwecke übernommen. Die Entwickler behalten sich das Recht vor, Teile der Seiten oder das gesamte Angebot ohne gesonderte Ankündigung zu verändern, zu ergänzen, zu löschen oder die Veröffentlichung zeitweise oder endgültig einzustellen.",
+    "externalLinks": "Für den Inhalt externer Links übernehmen wir trotz sorgfältiger inhaltlicher Kontrolle keine Haftung. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich."
+  },
   "creativeInfo": {
     "title": "Ein kreativer Hinweis vom Team",
     "text": "Nexora entsteht mit Leidenschaft, Kaffee und einer Vision für intelligenteres, spannenderes Lernen. Bleib gespannt auf kommende Updates!"
   },
-  "lastUpdated": "Diese Impressumsseite wurde zuletzt aktualisiert: Juni 2025"
+  "lastUpdated": "Diese Impressumsseite wurde zuletzt aktualisiert: August 2025"
 }

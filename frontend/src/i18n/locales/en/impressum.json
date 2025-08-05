@@ -5,9 +5,19 @@
     "info": "This project is currently in the development phase. All information is subject to change.",
     "contact": "For inquiries, contact: nexora-ai+markus@obermui.de"
   },
+  "hackathonInfo": {
+    "title": "Hackathon Project",
+    "text": "This project was developed as part of a hackathon on devpost.com. It is a prototype implementation created during the competition."
+  },
+  "legalInfo": {
+    "title": "Legal Information",
+    "disclaimer": "Disclaimer: Use of this application is at your own risk. The developers make no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability, or availability with respect to the application or the information, products, services, or related graphics contained in the application for any purpose. Any reliance you place on such information is therefore strictly at your own risk. In no event will the developers be liable for any loss or damage including without limitation, indirect or consequential loss or damage, or any loss or damage whatsoever arising from loss of data or profits arising out of, or in connection with, the use of this application.",
+    "noWarranty": "No warranty is provided for the functionality, reliability, or fitness for a particular purpose of the application. The developers reserve the right to modify, supplement, delete, or temporarily or permanently discontinue publication of parts of the pages or the entire offering without separate announcement.",
+    "externalLinks": "We have no influence on the current and future design, content, or authorship of the linked pages. We expressly distance ourselves from all content of all linked pages and do not adopt their content as our own. This statement applies to all links and references set within our own website."
+  },
   "creativeInfo": {
     "title": "A Note from the Team",
     "text": "Nexora is being built with passion, coffee, and a vision to make learning smarter and more fun. Stay tuned for exciting updates!"
   },
-  "lastUpdated": "This imprint page was last updated: June 2025"
+  "lastUpdated": "This imprint page was last updated: August 2025"
 }
