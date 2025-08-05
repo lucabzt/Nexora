@@ -14,14 +14,16 @@ import {
   Image,
   useMantineColorScheme,
   useMantineTheme,
-  Group
+  Group,
+  Checkbox
 } from "@mantine/core";
 import { IconSun, IconMoonStars } from "@tabler/icons-react";
 import { useForm } from "@mantine/form";
 import { useAuth } from "../contexts/AuthContext";
 import authService from "../api/authService";
 import { IconBrandGoogleFilled } from "@tabler/icons-react";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
+import { Link as RouterLink } from "react-router-dom";
 
 
 function Register() {
@@ -42,6 +44,7 @@ function Register() {
       email: "",
       password: "",
       confirmPassword: "",
+      acceptPrivacyPolicy: false,
     },
     validate: {
       username: (value) =>
@@ -66,6 +69,8 @@ function Register() {
         value !== values.password
           ? t("passwordsDoNotMatch", "Passwords do not match")
           : null,
+      acceptPrivacyPolicy: (value) =>
+        !value ? t("privacyPolicyRequired") : null,
     },
   });
 
@@ -250,16 +255,27 @@ function Register() {
               {...form.getInputProps("confirmPassword")}
             />
 
-            <Button
-              fullWidth
-              type="submit"
-              size="md"
-              loading={isLoading}
-              style={{ height: 46 }}
-            >
-              {t("signUp")}
-            </Button>
-          </Stack>
+            <Checkbox
+                mt="md"
+                label={
+                  <Trans i18nKey="auth:privacyPolicyAcceptance" components={[<RouterLink to={t('auth:privacyPolicyLink')} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }} />]}/>
+                }
+                required
+                {...form.getInputProps('acceptPrivacyPolicy', { type: 'checkbox' })}
+                style={{ marginTop: '1.5rem' }}
+              />
+
+              <Button 
+                fullWidth 
+                type="submit" 
+                size="md" 
+                loading={isLoading} 
+                style={{ height: 46 }}
+                disabled={!form.values.acceptPrivacyPolicy}
+              >
+                {t("signUp")}
+              </Button>
+            </Stack>
         </form>
 
         <Text align="center" mt="lg">
