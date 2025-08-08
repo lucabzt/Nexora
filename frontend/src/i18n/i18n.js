@@ -24,6 +24,7 @@ import enNotesTool from './locales/en/notesTool.json';
 import enCourseView from './locales/en/courseView.json';
 import enCreateCourse from './locales/en/createCourse.json';
 import enImpressum from './locales/en/impressum.json';
+import enPrivacy from './locales/en/privacy.json';
 import enToolbarContainer from './locales/en/toolbarContainer.json';
 import enStatisticsPage from './locales/en/statisticsPage.json';
 
@@ -47,6 +48,7 @@ import deNotesTool from './locales/de/notesTool.json';
 import deCourseView from './locales/de/courseView.json';
 import deCreateCourse from './locales/de/createCourse.json';
 import deImpressum from './locales/de/impressum.json';
+import dePrivacy from './locales/de/privacy.json';
 import deToolbarContainer from './locales/de/toolbarContainer.json';
 import deStatisticsPage from './locales/de/statisticsPage.json';
 
@@ -78,6 +80,7 @@ i18n
         courseView: enCourseView,
         createCourse: enCreateCourse,
         impressum: enImpressum,
+        privacy: enPrivacy,
         toolbarContainer: enToolbarContainer,
         statisticsPage: enStatisticsPage,
       },
@@ -101,6 +104,7 @@ i18n
         courseView: deCourseView,
         createCourse: deCreateCourse,
         impressum: deImpressum,
+        privacy: dePrivacy,
         toolbarContainer: deToolbarContainer,
         statisticsPage: deStatisticsPage,
       },

@@ -26,6 +26,7 @@ import SettingsPage from './pages/SettingsPage';
 import StatisticsPage from './pages/StatisticsPage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage'; // Import the OAuth callback page
 import Impressum from './pages/Impressum';
+import Privacy from './pages/Privacy';
 import About from './pages/About';
 import PublicCourses from './pages/PublicCourses'; // Import the new Public Courses page
 import NotFoundPage from './pages/NotFoundPage'; // Import the NotFoundPage component
@@ -82,6 +83,7 @@ function App() {
                       <Route path="/register" element={<Register />} />
                       <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
                       <Route path="/impressum" element={<Impressum />} />
+                      <Route path="/privacy" element={<Privacy />} />
                       <Route path="/about" element={<About />} />
                     </Route>
                       {/* Protected routes now based at /dashboard */}

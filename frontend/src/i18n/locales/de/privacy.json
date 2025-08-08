@@ -1,0 +1,98 @@
+{
+  "mainTitle": "Datenschutzerklärung",
+  "introduction": "Wir möchten Ihnen mit den folgenden Informationen einen Überblick über die Verarbeitung, Speicherung und Nutzung Ihrer personenbezogenen Daten durch uns sowie Ihre daraus abgeleiteten Rechte im Hinblick auf den Datenschutz geben.\n\nWelche Daten wir im Einzelnen verarbeiten und in welcher Weise wir diese nutzen, hängt von den von Ihnen genutzten Funktionen unserer Plattform ab.",
+  "sections": {
+    "responsibleParty": {
+      "title": "a) Name und Anschrift des Verantwortlichen",
+      "content": [
+        "Nexora",
+        "E-Mail: nexora-ai+markus@obermui.de"
+      ]
+    },
+    "dataProtectionOfficer": {
+      "title": "b) Name und Anschrift des Datenschutzbeauftragten",
+      "content": [
+        "Bei Fragen zum Datenschutz erreichen Sie uns unter folgender Adresse:",
+        "",
+        "Datenschutzbeauftragter",
+        "E-Mail: nexora-ai+markus@obermui.de"
+      ]
+    },
+    "processingPurposes": {
+      "title": "c) Zwecke der Verarbeitung",
+      "content": [
+        "Wir verarbeiten personenbezogene Daten, um Ihnen unsere Dienste bereitzustellen, unsere Plattform zu verbessern und gesetzliche Verpflichtungen zu erfüllen.",
+        "",
+        "Die Verarbeitung erfolgt insbesondere zu folgenden Zwecken:",
+        "- Bereitstellung und Betrieb der Webanwendung/App",
+        "- Benutzerregistrierung und -authentifizierung",
+        "- Kommunikation mit Nutzern (Support, Benachrichtigungen)",
+        "- Verbesserung der Benutzerfreundlichkeit durch Analyse anonymisierter Daten",
+        "- Erfüllung gesetzlicher Vorgaben"
+      ]
+    },
+    "legalBasis": {
+      "title": "d) Rechtsgrundlagen der Verarbeitung",
+      "content": [
+        "Die Verarbeitung erfolgt auf folgenden Rechtsgrundlagen:",
+        "",
+        "- Einwilligung (Art. 6 Abs. 1 lit. a DSGVO) - z.B. für Newsletter oder optionale Tracking-Tools.",
+        "- Vertragserfüllung (Art. 6 Abs. 1 lit. b DSGVO) - z.B. für die Bereitstellung unserer Dienste.",
+        "- Berechtigte Interessen (Art. 6 Abs. 1 lit. f DSGVO) - z.B. für die IT-Sicherheit oder Optimierung unserer Dienste.",
+        "- Rechtliche Verpflichtung (Art. 6 Abs. 1 lit. c DSGVO) - z.B. Aufbewahrungsfristen nach Handels- und Steuerrecht."
+      ]
+    },
+    "dataRecipients": {
+      "title": "e) Empfänger personenbezogener Daten",
+      "content": [
+        "- Innerhalb unseres Unternehmens: Zugriff haben nur diejenigen Mitarbeiter, die diese Daten zur Erfüllung ihrer Aufgaben benötigen.",
+        "- Dienstleister (Auftragsverarbeiter): z.B. Hosting-Anbieter, IT-Dienstleister, Zahlungsdienstleister.",
+        "- Externe Stellen: Nur, soweit dies gesetzlich vorgeschrieben ist oder Sie ausdrücklich eingewilligt haben."
+      ]
+    },
+    "storagePeriod": {
+      "title": "f) Speicherdauer",
+      "content": [
+        "Wir speichern Ihre personenbezogenen Daten nur so lange, wie dies für die jeweiligen Zwecke erforderlich ist oder wie es die gesetzlichen Aufbewahrungsfristen vorsehen. Nach Ablauf dieser Frist werden die Daten gelöscht oder anonymisiert."
+      ]
+    },
+    "yourRights": {
+      "title": "g) Ihre Datenschutzrechte",
+      "content": [
+        "Sie haben das Recht auf:",
+        "- Auskunft (Art. 15 DSGVO)",
+        "- Berichtigung (Art. 16 DSGVO)",
+        "- Löschung (Art. 17 DSGVO)",
+        "- Einschränkung der Verarbeitung (Art. 18 DSGVO)",
+        "- Datenübertragbarkeit (Art. 20 DSGVO)",
+        "- Widerspruch gegen bestimmte Verarbeitungen (Art. 21 DSGVO)",
+        "",
+        "Zudem können Sie Ihre Einwilligung jederzeit mit Wirkung für die Zukunft widerrufen, ohne dass die Rechtmäßigkeit der aufgrund der Einwilligung bis zum Widerruf erfolgten Verarbeitung berührt wird."
+      ]
+    },
+    "supervisoryAuthority": {
+      "title": "h) Aufsichtsbehörde",
+      "content": [
+        "Sie haben das Recht, sich jederzeit an die zuständige Datenschutz-Aufsichtsbehörde zu wenden.",
+        "",
+        "Bayerisches Landesamt für Datenschutzaufsicht",
+        "Postfach 606, 91511 Ansbach",
+        "E-Mail: poststelle@lda.bayern.de"
+      ]
+    },
+    "dataProvisionRequirement": {
+      "title": "i) Pflicht zur Bereitstellung der Daten",
+      "content": [
+        "Die Bereitstellung bestimmter personenbezogener Daten ist für die Nutzung unserer Dienste erforderlich. Ohne diese Daten können wir Ihnen unsere Dienste möglicherweise nicht in vollem Umfang zur Verfügung stellen."
+      ]
+    },
+    "automatedDecisionMaking": {
+      "title": "j) Automatisierte Entscheidungsfindung / Profiling",
+      "content": [
+        "Wir setzen keine automatisierte Entscheidungsfindung im Sinne von Art. 22 DSGVO ein.",
+        "Profiling findet nur in anonymisierter Form zu statistischen Zwecken statt."
+      ]
+    }
+  },
+  "lastUpdated": "Letzte Aktualisierung: August 2025"
+}

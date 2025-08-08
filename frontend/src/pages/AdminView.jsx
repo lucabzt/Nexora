@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -71,6 +71,7 @@ function AdminView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [sortConfig, setSortConfig] = useState({ key: 'username', direction: 'asc' });
   const [deleteModal, { open: openDelete, close: closeDelete }] = useDisclosure(false);
   const [editModal, { open: openEdit, close: closeEdit }] = useDisclosure(false);
   const [passwordModal, { open: openPassword, close: closePassword }] = useDisclosure(false);
@@ -102,6 +103,83 @@ function AdminView() {
     
     loadUsers();
   }, []);
+
+  const handleSort = (key) => {
+    setSortConfig(prevConfig => ({
+      key,
+      direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  const SortableHeader = ({ children, sortKey }) => {
+    const isActive = sortConfig.key === sortKey;
+    const isAscending = sortConfig.direction === 'asc';
+    
+    return (
+      <th 
+        style={{ cursor: 'pointer', userSelect: 'none' }}
+        onClick={() => handleSort(sortKey)}
+      >
+        <Group spacing={4} noWrap>
+          {children}
+          {isActive && (
+            <span style={{ display: 'inline-flex', flexDirection: 'column' }}>
+              <span style={{ lineHeight: '0.6', opacity: isAscending ? 1 : 0.5 }}>▲</span>
+              <span style={{ lineHeight: '0.6', opacity: !isAscending ? 1 : 0.5 }}>▼</span>
+            </span>
+          )}
+        </Group>
+      </th>
+    );
+  };
+
+  // Sort users based on sort configuration
+  const sortedUsers = useMemo(() => {
+    if (!filteredUsers.length) return [];
+    
+    return [...filteredUsers].sort((a, b) => {
+      let aValue, bValue;
+      
+      // Handle different data types for sorting
+      switch (sortConfig.key) {
+        case 'learningTime':
+          aValue = a.total_learn_time || 0;
+          bValue = b.total_learn_time || 0;
+          break;
+        case 'status':
+          aValue = a.is_active ? 1 : 0;
+          bValue = b.is_active ? 1 : 0;
+          break;
+        case 'role':
+          aValue = a.is_admin ? 1 : 0;
+          bValue = b.is_admin ? 1 : 0;
+          break;
+        case 'createdAt':
+          aValue = new Date(a.created_at || 0).getTime();
+          bValue = new Date(b.created_at || 0).getTime();
+          break;
+        case 'lastLogin':
+          aValue = a.last_login ? new Date(a.last_login).getTime() : 0;
+          bValue = b.last_login ? new Date(b.last_login).getTime() : 0;
+          break;
+        default:
+          aValue = a[sortConfig.key] || '';
+          bValue = b[sortConfig.key] || '';
+      }
+      
+      // Handle string comparison
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortConfig.direction === 'asc' 
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+      
+      // Handle number/date comparison
+      return sortConfig.direction === 'asc' 
+        ? aValue - bValue
+        : bValue - aValue;
+    });
+  }, [filteredUsers, sortConfig]);
 
   // Update filtered users when search term, users, or active tab changes
   useEffect(() => {
@@ -388,7 +466,7 @@ function AdminView() {
           })}
         >
           <TextInput
-            placeholder={t('search.placeholder')}
+            placeholder={t('search for a user')}
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.currentTarget.value)}
             icon={<IconSearch size={16} />}
@@ -446,19 +524,31 @@ function AdminView() {
               <thead>
                 <tr>
                   <th>{t('table.headers.profilePicture')}</th>
-                  <th>{t('table.headers.username')}</th>
+                  <SortableHeader sortKey="username">
+                    {t('table.headers.username')}
+                  </SortableHeader>
                   <th>{t('table.headers.email')}</th>
-                  <th>{t('table.headers.learningTime')}</th>
-                  <th>{t('table.headers.status')}</th>
-                  <th>{t('table.headers.role')}</th>
-                  <th>{t('table.headers.createdAt')}</th>
-                  <th>{t('table.headers.lastLogin')}</th>
+                  <SortableHeader sortKey="learningTime">
+                    {t('table.headers.learningTime')}
+                  </SortableHeader>
+                  <SortableHeader sortKey="status">
+                    {t('table.headers.status')}
+                  </SortableHeader>
+                  <SortableHeader sortKey="role">
+                    {t('table.headers.role')}
+                  </SortableHeader>
+                  <SortableHeader sortKey="createdAt">
+                    {t('table.headers.createdAt')}
+                  </SortableHeader>
+                  <SortableHeader sortKey="lastLogin">
+                    {t('table.headers.lastLogin')}
+                  </SortableHeader>
                   <th>{t('table.headers.actions')}</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map((user) => (
+                {sortedUsers.length > 0 ? (
+                  sortedUsers.map((user) => (
                     <tr key={user.id}>
                       <td>
                         {user.profile_image_base64 ? (
