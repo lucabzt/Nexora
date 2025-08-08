@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import {
   AppShell,
+  Header,
   Navbar,
   Group,
   Title,
@@ -22,8 +23,10 @@ import {
   ThemeIcon,
   Stack,
   Divider,
+  Drawer,
+  Paper,
 } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
+import { useMediaQuery, useViewportSize } from "@mantine/hooks";
 import {
   IconSettings,
   IconSun,
@@ -171,6 +174,13 @@ function AppLayout() {
   const dark = colorScheme === "dark";
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [opened, setOpened] = useState(!isMobile);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { width: viewportWidth } = useViewportSize();
+  // Scale bottom navigation elements on very small screens (min 80% up to 100%)
+  const scale = Math.min(1, Math.max(0.8, (viewportWidth || 420) / 420));
+  const bottomIconSize = Math.round(28 * scale);
+  const bottomTextSize = Math.max(10, Math.round(12 * scale));
+  const bottomPadding = Math.max(6, Math.round(8 * scale));
 
   const [course, setCourse] = useState(null);
   const [chapters, setChapters] = useState([]);
@@ -307,29 +317,7 @@ function AppLayout() {
 
   return (
     <>
-      {/* Floating menu button for mobile */}
-      {isMobile && !opened && (
-        <ActionIcon
-          onClick={toggleNavbar}
-          size="xl"
-          radius="xl"
-          variant="filled"
-          color={dark ? "blue" : "blue.6"}
-          sx={{
-            position: "fixed",
-            bottom: 20,
-            left: 20,
-            zIndex: 1000,
-            boxShadow: theme.shadows.lg,
-            transition: "transform 0.2s",
-            "&:hover": {
-              transform: "scale(1.1)",
-            },
-          }}
-        >
-          <IconMenu2 size={24} />
-        </ActionIcon>
-      )}
+      {/* Floating menu button removed; 'Mehr' lives in bottom navigation on mobile */}
       <AppShell
         styles={{
           main: {
@@ -340,15 +328,92 @@ function AppLayout() {
             width: "100%",
             paddingRight: 0,
             overflowX: "hidden",
+            // Ensure page content and footer are not covered by the mobile bottom navigation
+            paddingBottom: isMobile ? 'calc(96px + env(safe-area-inset-bottom))' : 0,
           },
         }}
         navbarOffsetBreakpoint="sm"
         asideOffsetBreakpoint="sm"
+        header={
+          isMobile ? (
+            <Header
+              height={{ base: 56, md: 0 }}
+              p="md"
+              sx={(theme) => ({
+                background:
+                  dark
+                    ? `linear-gradient(135deg, ${theme.colors.dark[7]} 0%, ${theme.colors.dark[8]} 100%)`
+                    : `linear-gradient(135deg, ${theme.white} 0%, ${theme.colors.gray[0]} 100%)`,
+                borderBottom: `1px solid ${dark ? theme.colors.dark[6] : theme.colors.gray[2]}`,
+                boxShadow: dark
+                  ? `0 4px 12px ${theme.colors.dark[9]}50`
+                  : `0 4px 12px ${theme.colors.gray[3]}30`,
+                zIndex: 200,
+                position: 'relative',
+              })}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+                <Group spacing="xs">
+                  <img
+                    src={theme.colorScheme === 'dark' ? '/logo_white.png' : '/logo_black.png'}
+                    alt="Logo"
+                    style={{ height: 26, width: 'auto', filter: 'drop-shadow(0 2px 4px rgba(139, 92, 246, 0.3))' }}
+                  />
+                  <Title
+                    order={3}
+                    size="1.4rem"
+                    component={RouterLink}
+                    to="/dashboard"
+                    sx={(theme) => ({
+                      textDecoration: 'none',
+                      background: `linear-gradient(135deg, ${theme.colors.teal[6]}, ${theme.colors.cyan[4]})`,
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      fontWeight: 800,
+                      letterSpacing: '-1px',
+                      display: 'inline-block',
+                      position: 'relative',
+                      padding: theme.spacing.xs,
+                      transition: 'transform 0.2s ease',
+                      '&:hover': { transform: 'scale(1.02)', cursor: 'pointer' },
+                    })}
+                  >
+                    {t('title', { ns: 'app' })}
+                  </Title>
+                </Group>
+                <Box sx={{ flexGrow: 1 }} />
+                <Group spacing="sm">
+                  <ActionIcon
+                    variant="outline"
+                    color={dark ? 'yellow' : 'blue'}
+                    onClick={() => toggleColorScheme()}
+                    size="lg"
+                    radius="md"
+                    sx={{ transition: 'all 0.2s ease', '&:hover': { transform: 'scale(1.05)' } }}
+                    aria-label={t('colorSchemeToggleTitle', { ns: 'app', defaultValue: 'Toggle color scheme' })}
+                  >
+                    {dark ? <IconSun size={20} /> : <IconMoonStars size={20} />}
+                  </ActionIcon>
+                  <ActionIcon
+                    variant="outline"
+                    onClick={() => setMobileMenuOpen((o) => !o)}
+                    size="lg"
+                    radius="md"
+                    aria-label={t('burgerAriaLabel', { ns: 'app', defaultValue: 'Toggle navigation' })}
+                  >
+                    <IconMenu2 size={20} />
+                  </ActionIcon>
+                </Group>
+              </div>
+            </Header>
+          ) : undefined
+        }
         navbar={
           <Navbar
             p={opened ? "md" : "xs"}
             hiddenBreakpoint="sm"
-            hidden={isMobile && !opened}
+            hidden={isMobile || (!isMobile && !opened)}
             width={{
               sm: opened ? 250 : isMobile ? 0 : 80,
               lg: opened ? 300 : isMobile ? 0 : 80,
@@ -364,7 +429,7 @@ function AppLayout() {
                 ? `4px 0 12px ${theme.colors.dark[9]}30`
                 : `4px 0 12px ${theme.colors.gray[3]}20`,
               transition: "width 0.3s ease, padding 0.3s ease",
-              display: isMobile && !opened ? "none" : "flex",
+              display: isMobile ? "none" : "flex",
               flexDirection: "column",
               zIndex: 150,
             })}
@@ -446,7 +511,7 @@ function AppLayout() {
 
               <ActionIcon
                 variant="outline"
-                onClick={() => setOpened((o) => !o)}
+                onClick={() => (isMobile ? setMobileMenuOpen(true) : setOpened((o) => !o))}
                 size="lg"
                 radius="md"
                 sx={{
@@ -460,7 +525,7 @@ function AppLayout() {
                   defaultValue: "Toggle navigation",
                 })}
               >
-                {opened ? <IconX size={18} /> : <IconMenu2 size={18} />}
+                {isMobile ? <IconMenu2 size={18} /> : opened ? <IconX size={18} /> : <IconMenu2 size={18} />}
               </ActionIcon>
             </Box>
 
@@ -757,6 +822,150 @@ function AppLayout() {
           /^\/dashboard\/courses\/.*\/chapters\/.*$/
         ) && <AppFooter />}
       </AppShell>
+
+      {/* Mobile Drawer Menu */}
+      {isMobile && (
+        <Drawer
+          opened={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          position="bottom"
+          size="auto"
+          padding="md"
+          withCloseButton
+          overlayProps={{ opacity: 0.45, blur: 2 }}
+        >
+          <Stack spacing="sm">
+            {/* Navigation Links */}
+            <Box sx={{
+              // Limit height so the bottom navigation remains visible; enable scrolling for long lists
+              maxHeight: 'calc(100vh - 76px - 120px)',
+              overflowY: 'auto',
+              paddingRight: 4,
+              marginRight: -4,
+              paddingBottom: 8,
+              '&::-webkit-scrollbar': { width: 6 },
+              '&::-webkit-scrollbar-track': { background: 'transparent' },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: dark ? theme.colors.dark[5] : theme.colors.gray[4],
+                borderRadius: 3,
+              }
+            }}>
+              <Stack spacing="xs">
+                {mainLinksData.map((link) => (
+                  <MainLink
+                    {...link}
+                    key={`mobile-${link.to}`}
+                    isActive={currentPath === link.to}
+                    collapsed={false}
+                    onNavigate={() => {
+                      setMobileMenuOpen(false);
+                    }}
+                  />
+                ))}
+              </Stack>
+            </Box>
+            <Divider />
+            {/* Quick actions */}
+            <Group grow>
+              <UnstyledButton onClick={() => { toggleColorScheme(); }}>
+                <Group position="center" spacing="xs">
+                  {dark ? <IconSun size={16} /> : <IconMoonStars size={16} />}
+                  <Text size="sm">{t("theme", { ns: "settings" })}</Text>
+                </Group>
+              </UnstyledButton>
+              <UnstyledButton onClick={() => { setMobileMenuOpen(false); navigate("/about"); }}>
+                <Group position="center" spacing="xs">
+                  <IconInfoCircle size={16} />
+                  <Text size="sm">{t("about", { ns: "navigation" })}</Text>
+                </Group>
+              </UnstyledButton>
+              <UnstyledButton onClick={() => { setMobileMenuOpen(false); handleLogout(); }}>
+                <Group position="center" spacing="xs">
+                  <IconLogout size={16} />
+                  <Text size="sm" color="red">{t("logout", { ns: "navigation" })}</Text>
+                </Group>
+              </UnstyledButton>
+            </Group>
+          </Stack>
+        </Drawer>
+      )}
+
+      {/* Mobile Bottom Navigation */}
+      {isMobile && (
+        <Paper
+          shadow={dark ? "xl" : "sm"}
+          radius={0}
+          withBorder
+          sx={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 999,
+            borderTop: `1px solid ${dark ? theme.colors.dark[5] : theme.colors.gray[3]}`,
+            background: dark ? theme.colors.dark[7] : theme.white,
+          }}
+        >
+          <Group position="apart" px="md" py="xs">
+            {[
+              "/dashboard",
+              "/dashboard/create-course",
+              "/dashboard/public-courses",
+            ].map((path) => {
+              const item = mainLinksData.find((l) => l.to === path);
+              if (!item) return null;
+              const active = currentPath === item.to;
+              return (
+                <UnstyledButton
+                  key={`bottom-${item.to}`}
+                  onClick={() => navigate(item.to)}
+                  sx={{
+                    padding: bottomPadding,
+                    borderRadius: 8,
+                    color: active
+                      ? theme.colors.blue[6]
+                      : dark
+                        ? theme.colors.dark[0]
+                        : theme.colors.gray[7],
+                  }}
+                >
+                  <Stack spacing={2} align="center">
+                    <ThemeIcon
+                      variant={active ? "filled" : "light"}
+                      size={bottomIconSize}
+                      color={active ? "blue" : "gray"}
+                    >
+                      {item.icon}
+                    </ThemeIcon>
+                    <Text weight={500} sx={{ whiteSpace: "nowrap", fontSize: `${bottomTextSize}px` }}>
+                      {item.label}
+                    </Text>
+                  </Stack>
+                </UnstyledButton>
+              );
+            })}
+            {/* Mehr button opens the drawer */}
+            <UnstyledButton
+              key="bottom-more"
+              onClick={() => setMobileMenuOpen((o) => !o)}
+              sx={{
+                padding: bottomPadding,
+                borderRadius: 8,
+                color: dark ? theme.colors.dark[0] : theme.colors.gray[7],
+              }}
+            >
+              <Stack spacing={2} align="center">
+                <ThemeIcon variant="light" size={bottomIconSize} color="gray">
+                  <IconMenu2 size={Math.round(16 * scale)} />
+                </ThemeIcon>
+                <Text weight={500} sx={{ whiteSpace: "nowrap", fontSize: `${bottomTextSize}px` }}>
+                  {t('more', { ns: 'navigation', defaultValue: 'Mehr' })}
+                </Text>
+              </Stack>
+            </UnstyledButton>
+          </Group>
+        </Paper>
+      )}
     </>
   );
 }
