@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMediaQuery } from '@mantine/hooks';
+import { useMediaQuery, useViewportSize } from '@mantine/hooks';
+import { motion, AnimatePresence } from 'framer-motion';
+import { fadeIn, slideUp, scaleIn, buttonHover, pageTransition } from '../utils/animations';
 import {
   Container,
   Title,
@@ -48,6 +50,10 @@ import EnhancedSearch from '../components/EnhancedSearch';
 const useStyles = createStyles((theme) => ({
   continueSection: {
     marginBottom: theme.spacing.xl,
+    '&:hover': {
+      transform: 'translateY(-2px)',
+      transition: 'all 0.2s ease',
+    },
     width: '100%',
     '& .mantine-Card-root': {
       overflow: 'visible',
@@ -135,6 +141,22 @@ const useStyles = createStyles((theme) => ({
     WebkitBoxOrient: 'vertical',
     paddingRight: '4px',
   },
+  cardImage: {
+    height: 160,
+    objectFit: 'cover',
+    transition: 'transform 0.5s ease',
+    willChange: 'transform',
+  },
+  cardBadge: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 2,
+    transform: 'translateY(-10px)',
+    opacity: 0,
+    transition: 'all 0.3s ease',
+    boxShadow: theme.shadows.sm,
+  },
 }));
 
 function Dashboard() {
@@ -158,6 +180,33 @@ function Dashboard() {
   const [totalLearnTime, setTotalLearnTime] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const isMobile = useMediaQuery('(max-width: 768px)');
+  const { width } = useViewportSize();
+  const isSmallScreen = useMediaQuery('(max-width: 768px)');
+
+  // Animation variants
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        type: 'spring',
+        stiffness: 100,
+        damping: 10
+      }
+    }
+  };
 
   // Calculate user stats
   const userStats = useMemo(() => ({
@@ -415,7 +464,7 @@ function Dashboard() {
               <Button 
                 fullWidth
                 variant="light" 
-color="teal" 
+                color="teal" 
                 mt="md"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -433,7 +482,11 @@ color="teal"
   };
 
   return (
-    <Container size="lg" py="xl">
+    <Container size="lg" py="xl" component={motion.div}
+      initial="hidden"
+      animate="show"
+      variants={container}
+    >
       {/* Delete Confirmation Modal */}
       <Modal
         opened={deleteModalOpen}
@@ -441,77 +494,105 @@ color="teal"
           setDeleteModalOpen(false);
           setCourseToDeleteId(null);
         }}
-        title={t('deleteModal.title')}
+        title={
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {t('deleteModal.title')}
+          </motion.div>
+        }
         centered
       >
-        <Text>{t('deleteModal.message', { 
-          title: courses.find(c => c.course_id === courseToDeleteId)?.title || '' 
-        })}</Text>
-        <Group position="right" mt="md">
-          <Button 
-            variant="default" 
-            onClick={() => setDeleteModalOpen(false)}
-          >
-            {t('deleteModal.cancelButton')}
-          </Button>
-          <Button 
-            color="red" 
-            onClick={confirmDeleteHandler}
-            leftIcon={<IconTrash size={16} />}
-          >
-            {t('deleteModal.confirmButton')}
-          </Button>
-        </Group>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Text>{t('deleteModal.message', { 
+            title: courses.find(c => c.course_id === courseToDeleteId)?.title || '' 
+          })}</Text>
+          <Group position="right" mt="md">
+            <Button 
+              variant="default" 
+              onClick={() => setDeleteModalOpen(false)}
+            >
+              {t('deleteModal.cancelButton')}
+            </Button>
+            <Button 
+              color="red" 
+              onClick={confirmDeleteHandler}
+              leftIcon={<IconTrash size={16} />}
+            >
+              {t('deleteModal.confirmButton')}
+            </Button>
+          </Group>
+        </motion.div>
       </Modal>
 
       {/* Rename Modal */}
       <Modal
         opened={renameModalOpen}
         onClose={() => setRenameModalOpen(false)}
-        title={t('renameModal.title')}
+        title={
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {t('renameModal.title')}
+          </motion.div>
+        }
         centered
       >
-        <Stack spacing="md">
-          <TextInput
-            label={t('renameModal.titleLabel')}
-            placeholder={t('renameModal.titlePlaceholder')}
-            value={newTitle}
-            onChange={(event) => setNewTitle(event.currentTarget.value)}
-          />
-          <Textarea
-            label={t('renameModal.descriptionLabel')}
-            value={newDescription}
-            onChange={(event) => setNewDescription(event.currentTarget.value)}
-            autosize
-            minRows={3}
-            maxRows={6}
-            mt="md"
-          />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Stack spacing="md">
+            <TextInput
+              label={t('renameModal.titleLabel')}
+              placeholder={t('renameModal.titlePlaceholder')}
+              value={newTitle}
+              onChange={(event) => setNewTitle(event.currentTarget.value)}
+            />
+            <Textarea
+              label={t('renameModal.descriptionLabel')}
+              value={newDescription}
+              onChange={(event) => setNewDescription(event.currentTarget.value)}
+              autosize
+              minRows={3}
+              maxRows={6}
+              mt="md"
+            />
 
-          <Switch
-            mt="lg"
-            checked={isPublic}
-            onChange={(event) => setIsPublic(event.currentTarget.checked)}
-            label={t('renameModal.publicLabel', { defaultValue: 'Make course public' })}
-            description={t('renameModal.publicDescription', { defaultValue: 'Public courses can be viewed by anyone.' })}
-            thumbIcon={
-              isPublic ? (
-                <IconWorld size={12} color={theme.colors.teal[6]} stroke={3} />
-              ) : (
-                <IconX size={12} color={theme.colors.red[6]} stroke={3} />
-              )
-            }
-          />
+            <Switch
+              mt="lg"
+              checked={isPublic}
+              onChange={(event) => setIsPublic(event.currentTarget.checked)}
+              label={t('renameModal.publicLabel', { defaultValue: 'Make course public' })}
+              description={t('renameModal.publicDescription', { defaultValue: 'Public courses can be viewed by anyone.' })}
+              thumbIcon={
+                isPublic ? (
+                  <IconWorld size={12} color={theme.colors.teal[6]} stroke={3} />
+                ) : (
+                  <IconX size={12} color={theme.colors.red[6]} stroke={3} />
+                )
+              }
+            />
 
-          <Group position="right" mt="md">
-            <Button variant="default" onClick={() => setRenameModalOpen(false)}>
-              {t('renameModal.cancelButton')}
-            </Button>
-            <Button color="teal" onClick={confirmRenameHandler}>
-              {t('renameModal.saveButton')}
-            </Button>
-          </Group>
-        </Stack>
+            <Group position="right" mt="md">
+              <Button variant="default" onClick={() => setRenameModalOpen(false)}>
+                {t('renameModal.cancelButton')}
+              </Button>
+              <Button color="teal" onClick={confirmRenameHandler}>
+                {t('renameModal.saveButton')}
+              </Button>
+            </Group>
+          </Stack>
+        </motion.div>
       </Modal>
 
       {/* Main content container */}
@@ -542,16 +623,36 @@ color="teal"
 
         {/* Statistics Section */}
         <Box className={classes.statsContainer} mb="xl">
-          <DashboardStats stats={userStats} theme={theme} />
+          <motion.div variants={item}>
+            <DashboardStats stats={userStats} theme={theme} />
+          </motion.div>
         </Box>
 
         {/* Continue Where You Left Off Section */}
         {courses.length > 0 && (
-          <Box mb="xl" className={classes.continueSection}>
-            <Title order={3} mb="md">
-              {t('continueLearningTitle')}
-            </Title>
-            <Card withBorder radius="md" p="lg">
+          <motion.div variants={item} className={classes.continueSection}>
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Group position="apart" mb="md">
+                <Title order={3}>
+                  <motion.span
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    {t('continueLearningTitle')}
+                  </motion.span>
+                </Title>
+                <motion.div
+                  whileHover={{ x: 5 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  
+                </motion.div>
+              </Group>
               <div className={classes.continueCard}>
                 <div className={classes.continueContent}>
                   <Text weight={600} size="lg" lineClamp={1}>
@@ -591,7 +692,7 @@ color="teal"
                         variant="light"
                         color="teal"
                         rightIcon={<IconChevronRight size={16} />}
-                        onClick={() => navigate(`/course/${courses[0].course_id}`)}
+                        onClick={() => navigate(`/dashboard/courses/${courses[0].course_id}`)}
                       >
                         {t('continueButton')}
                       </Button>
@@ -609,8 +710,8 @@ color="teal"
                   )}
                 </div>
               </div>
-            </Card>
-          </Box>
+            </motion.div>
+          </motion.div>
         )}
 
         {/* Enhanced Search - Full width */}
@@ -681,32 +782,34 @@ color="teal"
               )}
             </>
           ) : (
-            <Paper 
-              radius="md" 
-              p="xl" 
-              withBorder 
-              sx={{
-                background: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
-                textAlign: 'center',
-              }}
-            >
-              <Box mb="md">
-                <IconBook size={48} color={theme.colors.gray[5]} />
-              </Box>
-              <Title order={3} mb="sm">
-                {t('noCoursesTitle')}
-              </Title>
-              <Text color="dimmed" mb="xl">
-                {t('noCoursesDescription')}
-              </Text>
-              <Button 
-                leftIcon={<IconPlus size={16} />}
-                onClick={() => navigate('/dashboard/create-course')}
-color="teal"
+            <motion.div variants={item}>
+              <Paper 
+                radius="md" 
+                p="xl" 
+                withBorder 
+                sx={{
+                  background: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
+                  textAlign: 'center',
+                }}
               >
-                {t('createFirstCourse')}
-              </Button>
-            </Paper>
+                <Box mb="md">
+                  <IconBook size={48} color={theme.colors.gray[5]} />
+                </Box>
+                <Title order={3} mb="sm">
+                  {t('noCoursesTitle')}
+                </Title>
+                <Text color="dimmed" mb="xl">
+                  {t('noCoursesDescription')}
+                </Text>
+                <Button 
+                  leftIcon={<IconPlus size={16} />}
+                  onClick={() => navigate('/dashboard/create-course')}
+                  color="teal"
+                >
+                  {t('createFirstCourse')}
+                </Button>
+              </Paper>
+            </motion.div>
           )}
         </Stack>
       )}

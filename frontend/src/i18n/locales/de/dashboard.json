@@ -99,6 +99,8 @@
   "viewAllCourses": "Alle Kurse anzeigen",
   "totalLearnTime": "Gesamte Lernzeit",
   "loadingCourses": "Kurse werden geladen...",
+  "loadingPublicCourses": "Öffentliche Kurse werden geladen...",
+  "loadingMyCourses": "Deine Kurse werden geladen...",
   "searchCourses": "Kurse durchsuchen",
   "continueButton": "Weiterlernen",
   "lastAccessed": "Zuletzt aufgerufen"

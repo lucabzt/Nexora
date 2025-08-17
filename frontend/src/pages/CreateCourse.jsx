@@ -780,11 +780,17 @@ function CreateCourse() {
             position: 'relative'
           }}
         >
+          <Group position="apart" align="flex-start" mb="md">
+            <Box>
+              <Title order={2} mb={5} style={{ color: 'white' }}>{t('mainTitle') || 'Create a New Learning Course'}</Title>
+              <Text color="white">{t('subtitle') || 'Design your personalized learning experience'}</Text>
+            </Box>
+          </Group>
 
           {/* Progress indicator */}
           <Progress 
             value={(activeStep + 1) / steps.length * 100} 
-            color={theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7]}
+            color="white"
             mt="md"
             size="sm"
             radius="xl"

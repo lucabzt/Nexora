@@ -123,7 +123,24 @@ function PublicCourses() {
   });
 
   if (loading) {
-    return <Container style={{ textAlign: 'center', paddingTop: '50px' }}><Loader size="xl" /></Container>;
+    return (
+      <Container 
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '50vh',
+          textAlign: 'center',
+          gap: '1rem'
+        }}
+      >
+        <Loader size="xl" variant="dots" />
+        <Text size="lg" color="dimmed">
+          {t('loadingPublicCourses', { ns: 'dashboard', defaultValue: 'Loading public courses...' })}
+        </Text>
+      </Container>
+    );
   }
 
   if (error) {

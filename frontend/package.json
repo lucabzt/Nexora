@@ -16,7 +16,7 @@
     "@lightenna/react-mermaid-diagram": "^1.0.20",
     "@mantine/core": "^6.0.20",
     "@mantine/form": "^6.0.20",
-    "@mantine/hooks": "^6.0.20",
+    "@mantine/hooks": "^6.0.22",
     "@mantine/notifications": "^6.0.20",
     "@tabler/icons-react": "^2.42.0",
     "@tailwindcss/vite": "^4.1.8",

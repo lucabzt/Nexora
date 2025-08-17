@@ -99,6 +99,8 @@
   "viewAllCourses": "View All Courses",
   "totalLearnTime": "Total Learn Time",
   "loadingCourses": "Loading courses...",
+  "loadingPublicCourses": "Loading public courses...",
+  "loadingMyCourses": "Loading your courses...",
   "searchCourses": "Search Courses",
   "continueButton": "Continue",
   "lastAccessed": "Last accessed"

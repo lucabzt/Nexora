@@ -226,10 +226,21 @@ function CourseView() {
 
   if (loading && !course) {
     return (
-      <Container size="lg" py="xl">
-        <Box sx={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
-          <Loader size="lg" title={t('loadingCourseDetails')} />
-        </Box>
+      <Container 
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '50vh',
+          textAlign: 'center',
+          gap: '1rem'
+        }}
+      >
+        <Loader size="xl" variant="dots" />
+        <Text size="lg" color="dimmed">
+          {t('loadingCourseDetails')}
+        </Text>
       </Container>
     );
   }
