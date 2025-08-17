@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'; // Added useEffect
+import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -8,9 +8,7 @@ import { ToolbarProvider } from './contexts/ToolbarContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { PomodoroProvider } from './contexts/PomodoroContext';
 
-
-//import { NotificationProvider } from './contexts/NotificationContext';
-import './i18n/i18n'; // Import i18n configuration
+import './i18n/i18n';
 
 // Pages
 import Dashboard from './pages/Dashboard.jsx';
@@ -20,22 +18,23 @@ import ChapterView from './pages/ChapterView';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import LandingPage from './pages/LandingPage';
+import PricingPage from './pages/PricingPage';
 import AppLayout from './layouts/AppLayout';
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './components/ProtectedRoute';
-import AdminProtectedRoute from './components/AdminProtectedRoute'; // Import AdminProtectedRoute
+import AdminProtectedRoute from './components/AdminProtectedRoute';
 import SettingsPage from './pages/SettingsPage';
 import StatisticsPage from './pages/StatisticsPage';
-import OAuthCallbackPage from './pages/OAuthCallbackPage'; // Import the OAuth callback page
+import OAuthCallbackPage from './pages/OAuthCallbackPage';
 import Impressum from './pages/Impressum';
 import Privacy from './pages/Privacy';
 import About from './pages/About';
-import PublicCourses from './pages/PublicCourses'; // Import the new Public Courses page
-import MyCourses from './pages/MyCourses'; // Import the My Courses page
-import NotFoundPage from './pages/NotFoundPage'; // Import the NotFoundPage component
-import AdminView from './pages/AdminView'; // Import AdminView component
+import PublicCourses from './pages/PublicCourses';
+import MyCourses from './pages/MyCourses';
+import NotFoundPage from './pages/NotFoundPage';
+import AdminView from './pages/AdminView';
 import AnkiGeneratorDashboard from "./pages/AnkiGenerator/AnkiGeneratorDashboard.jsx";
-import AnkiProcessingStatus from "./pages/AnkiGenerator/AnkiProcessingStatus.jsx"; // Import CourseLayout
+import AnkiProcessingStatus from "./pages/AnkiGenerator/AnkiProcessingStatus.jsx";
 
 function App() {
   const [colorScheme, setColorScheme] = useState(() => {
@@ -85,9 +84,10 @@ function App() {
                       <Route path="/auth/login" element={<Login />} />
                       <Route path="/auth/signup" element={<Register />} />
                       <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
+                      <Route path="/about" element={<About />} />
+                      <Route path="/pricing" element={<PricingPage />} />
                       <Route path="/impressum" element={<Impressum />} />
                       <Route path="/privacy" element={<Privacy />} />
-                      <Route path="/about" element={<About />} />
                     </Route>
                       {/* Protected routes now based at /dashboard */}
                     <Route element={<ProtectedRoute />}>

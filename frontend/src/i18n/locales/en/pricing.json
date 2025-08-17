@@ -1,0 +1,41 @@
+{
+  "pageTitle": "Pricing Plans - TeachAI",
+  "title": "Simple, transparent pricing",
+  "subtitle": "Choose the perfect plan for your learning needs. No hidden fees, cancel anytime.",
+  "popular": "POPULAR",
+  "getStarted": "Get Started",
+  "upgradeNow": "Upgrade Now",
+  "contactUs": "Contact Us",
+  "unlimited": "Unlimited",
+  
+  "free": {
+    "planName": "Free",
+    "price": "€0",
+    "description": "Perfect for trying out our platform",
+    "limited": "Limited"
+  },
+  
+  "premium": {
+    "planName": "Premium",
+    "price": "€9.99",
+    "description": "Billed monthly. 7-day free trial"
+  },
+  
+  "enterprise": {
+    "planName": "Enterprise",
+    "price": "Custom",
+    "description": "For organizations with custom needs"
+  },
+  
+  "features": {
+    "unlimitedCourses": "Create courses",
+    "testCourses": "10 test courses",
+    "limitedChatRequests": "Limited chat requests",
+    "activeCourses": "Up to {{count}} active courses",
+    "advancedAI": "Advanced AI features",
+    "higherUploads": "Higher document upload limits",
+    "prioritySupport": "Priority support",
+    "dedicatedSupport": "Dedicated account manager",
+    "customFeatures": "Custom features and integrations"
+  }
+}

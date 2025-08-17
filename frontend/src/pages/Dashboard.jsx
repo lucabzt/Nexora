@@ -604,23 +604,43 @@ function Dashboard() {
             <Title order={1} mb={5}>{t('myLearningJourney')}</Title>
             <Text color="dimmed" size="lg">{t('welcomeMessage')}</Text>
           </Box>
-          <Button 
-            size="md"
-            color="teal" 
-            onClick={() => navigate('/dashboard/create-course')}
-            leftIcon={<IconPlus size={20} />}
-            sx={(theme) => ({
-              background: theme.colorScheme === 'dark'
-                ? `linear-gradient(45deg, ${theme.colors.teal[9]}, ${theme.colors.cyan[7]})`
-                : `linear-gradient(45deg, ${theme.colors.teal[6]}, ${theme.colors.cyan[4]})`,
-              transition: 'transform 0.2s ease',
-              '&:hover': {
-                transform: 'translateY(-3px)',
-              },
-            })}
-          >
-            {t('createNewCourse')}
-          </Button>
+          <Group spacing="md">
+            <Button 
+              variant="outline"
+              color="yellow" 
+              onClick={() => navigate('/pricing')}
+              sx={(theme) => ({
+                background: theme.colorScheme === 'dark'
+                  ? `linear-gradient(45deg, ${theme.colors.yellow[9]}, ${theme.colors.orange[7]})`
+                  : `linear-gradient(45deg, ${theme.colors.yellow[6]}, ${theme.colors.orange[4]})`,
+                color: theme.colorScheme === 'dark' ? theme.white : theme.black,
+                border: 'none',
+                transition: 'transform 0.2s ease',
+                '&:hover': {
+                  transform: 'translateY(-3px)',
+                },
+              })}
+            >
+              {t('upgradeToPro', 'Upgrade to Pro')}
+            </Button>
+            <Button 
+              size="md"
+              color="teal" 
+              onClick={() => navigate('/dashboard/create-course')}
+              leftIcon={<IconPlus size={20} />}
+              sx={(theme) => ({
+                background: theme.colorScheme === 'dark'
+                  ? `linear-gradient(45deg, ${theme.colors.teal[9]}, ${theme.colors.cyan[7]})`
+                  : `linear-gradient(45deg, ${theme.colors.teal[6]}, ${theme.colors.cyan[4]})`,
+                transition: 'transform 0.2s ease',
+                '&:hover': {
+                  transform: 'translateY(-3px)',
+                },
+              })}
+            >
+              {t('createNewCourse')}
+            </Button>
+          </Group>
         </Group>
 
         {/* Statistics Section */}

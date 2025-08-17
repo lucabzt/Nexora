@@ -1,32 +1,39 @@
-import { useState, forwardRef } from 'react';
+import { useState, forwardRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Paper, 
-  Container,
+  Container, 
   Title, 
   Text, 
+  Paper, 
+  Stepper, 
+  Button, 
   Group, 
+  TextInput, 
   Textarea, 
-  Slider, 
   Select, 
-  FileButton,
-  SimpleGrid,
-  Stack,
-  Box,
-  ThemeIcon,
-  Progress,
-  Badge,
-  Card,
-  Image,
-  ActionIcon,
+  NumberInput, 
+  Box, 
+  FileInput, 
+  Image, 
+  List, 
+  ThemeIcon, 
+  Progress, 
+  Stack, 
   useMantineTheme,
+  LoadingOverlay,
   Center,
   RingProgress,
   Divider,
   Alert,
-  List,
-  Button
+  Modal,
+  Anchor,
+  SimpleGrid,
+  FileButton,
+  Card,
+  Slider,
+  ActionIcon,
+
 } from '@mantine/core';
 import { 
   IconBook, 
@@ -45,12 +52,14 @@ import {
   IconEdit,
   IconAlertCircle,
   IconFileText,
-  IconSchool
+  IconSchool,
+  IconRocket
 } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import { toast } from 'react-toastify';
 import { courseService } from '../api/courseService';
 import ReactCountryFlag from 'react-country-flag';
+import PremiumModal from '../components/PremiumModal';
 
 const LanguageSelectItem = forwardRef(({ label, countryCode, ...others }, ref) => (
   <div ref={ref} {...others}>
@@ -75,7 +84,8 @@ function CreateCourse() {
   
   const [activeStep, setActiveStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
   const [uploadedImages, setUploadedImages] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -230,54 +240,44 @@ function CreateCourse() {
       
     } catch (err) { 
       console.error('Error initiating course creation:', err);
-      
       // Handle specific error cases
-      if (err.response?.data?.code === 'MAX_COURSE_CREATIONS_REACHED') {
-        const limit = err.response?.data?.limit || 0;
-        toast.error(
-          <div>
-            <div>{t('errors.courseLimitReached')}</div>
-            <div>{t('errors.maxCoursesCreated', { limit })}</div>
-            <Button 
-              variant="text" 
-              color="primary" 
-              size="sm"
-              onClick={() => navigate('/pricing')}
-              style={{ marginTop: '0.5rem', padding: 0, minWidth: 'auto', textTransform: 'none' }}
-            >
-              {t('errors.upgradeToPremium')}
-            </Button>
-          </div>,
-          { autoClose: 10000 }
-        );
-      } else if (err.response?.data?.code === 'MAX_PRESENT_COURSES_REACHED') {
-        const limit = err.response?.data?.limit || 0;
-        toast.error(
-          <div>
-            <div>{t('errors.courseLimitReached')}</div>
-            <div>{t('errors.maxActiveCourses', { limit })}</div>
-            <Button 
-              variant="text" 
-              color="primary" 
-              size="sm"
-              onClick={() => navigate('/pricing')}
-              style={{ marginTop: '0.5rem', padding: 0, minWidth: 'auto', textTransform: 'none' }}
-            >
-              {t('errors.upgradeToPremium')}
-            </Button>
-          </div>,
-          { autoClose: 10000 }
-        );
-      } else {
-        // Default error handling
-        const errorMessage = err.response?.data?.detail?.message || err.response?.data?.detail || err.message || t('errors.unknown');
-        setError(errorMessage);
-        toast.error(errorMessage);
-      }
       
-      setIsSubmitting(false);
+      if (err.response?.status === 429) {
+        // Handle rate limiting or course limit errors
+        const errorData = err.response?.data?.detail || {};
+        console.log('Error data:', errorData);
+        
+        if (errorData.code === 'MAX_COURSE_CREATIONS_REACHED' || 
+            errorData.code === 'MAX_PRESENT_COURSES_REACHED') {
+          const errorMessage = t(`errors.${errorData.code === 'MAX_COURSE_CREATIONS_REACHED' ? 'maxCoursesCreated' : 'maxActiveCourses'}`, { limit: errorData.limit });
+          console.log('Showing premium modal for error:', errorMessage);
+          
+          // Show both toast and modal
+          setShowPremiumModal(true);
+          console.log('showPremiumModal set to:', true);
+          
+          // Use setTimeout to ensure state update is processed
+          setTimeout(() => {
+            toast.error(errorMessage, {
+              autoClose: 5000,
+              onClose: () => {
+                console.log('Toast closed');
+                setIsSubmitting(false);
+              }
+            });
+          }, 100);
+          return;
+        }
+      }
+      // Default error handling
+      const errorMessage = err.response?.data?.message || err.response?.data?.detail || err.message || t('errors.unknown');
+      setError(errorMessage);
+      toast.error(errorMessage, {
+        onClose: () => setIsSubmitting(false) // Reset loading state when toast is closed
+      });
     }
   };
+
 
   const isStepValid = (step) => {
     switch (step) {
@@ -417,7 +417,7 @@ function CreateCourse() {
                 <Text weight={600} mb="sm">
                   {t('form.documents.uploadedTitle') || 'Uploaded Files'} ({uploadedDocuments.length + uploadedImages.length})
                 </Text>
-                <Group grow align="start">
+                <Group grow>
                   {uploadedDocuments.length > 0 && (
                     <div>
                      {/* <Text size="sm" weight={500} mb="xs">{t('form.documents.uploadedTitle') || 'Documents'}</Text> */}
@@ -788,18 +788,32 @@ function CreateCourse() {
 
   if (isSubmitting) {
     return (
-      <Container size="lg" py="md">
-        <Paper shadow="md" p="xl" withBorder>
-          <Title order={3} align="center" mb="md">{t('streaming.title') || 'Creating Your Course'}</Title>
-          <Text align="center" mb="md">{t('streaming.description') || 'Please wait while we generate your personalized course...'}</Text>
-          <Progress value={100} animate color="teal" />
-        </Paper>
-      </Container>
+      <>
+        <PremiumModal 
+          opened={showPremiumModal} 
+          onClose={() => setShowPremiumModal(false)} 
+        />
+        <Container size="lg" py="xl">
+          <Paper shadow="md" p="xl" withBorder>
+            <Title order={3} align="center" mb="md">{t('streaming.title') || 'Creating Your Course'}</Title>
+            <Text align="center" mb="md">{t('streaming.description') || 'Please wait while we generate your personalized course...'}</Text>
+            <Progress value={100} animate color="teal" />
+          </Paper>
+        </Container>
+      </>
     );
   }
 
+  // PremiumModal component is now imported and used directly
+
+
   return (
-    <Container size="lg" py="md">
+    <>
+      <PremiumModal 
+        opened={showPremiumModal} 
+        onClose={() => setShowPremiumModal(false)} 
+      />
+      <Container size="lg" py="xl">
       
       <Paper 
         radius="lg" 
@@ -905,7 +919,8 @@ function CreateCourse() {
           </Group>
         </Box>
       </Paper>
-    </Container>
+      </Container>
+    </>
   );
 }
 

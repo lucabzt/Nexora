@@ -39,6 +39,8 @@ function AppFooter() {
         <a href="/privacy" style={{ color: 'inherit', textDecoration: 'underline', margin: '0 8px' }}>{t('privacy', { ns: 'navigation' })}</a>
         {' | '}
         <a href="/about" style={{ color: 'inherit', textDecoration: 'underline', margin: '0 8px' }}>{t('about', { ns: 'navigation' })}</a>
+        {' | '}
+        <a href="/pricing" style={{ color: 'inherit', textDecoration: 'underline', margin: '0 8px' }}>{t('pricing', { ns: 'navigation' })}</a>
         {isAuthenticated && (
               <>
               {' | '}

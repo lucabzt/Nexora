@@ -27,6 +27,11 @@ apiWithCookies.interceptors.response.use(
     return response;
   },
   async (error) => {
+    // Let 429 (Too Many Requests) errors pass through to be handled by the component
+    if (error.response?.status === 429) {
+      return Promise.reject(error);
+    }
+
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {

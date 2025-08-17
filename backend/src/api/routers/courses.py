@@ -159,6 +159,7 @@ async def get_course_by_id(
         image_url= str(course.image_url) if course.image_url else None,
         completed_chapter_count=course_service.get_completed_chapters_count(db, course.id),
         is_public=course.is_public,
+        created_at=course.created_at,
     )
 
 

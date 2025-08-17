@@ -89,6 +89,18 @@
     "maxActiveCourses": "You can have a maximum of {{limit}} active courses at the same time in the free plan.",
     "upgradeToPremium": "Upgrade to Premium"
   },
+  "premiumModal": {
+    "title": "Nexora Pro - Unlock More Possibilities",
+    "subtitle": "Get unlimited access to all premium features and create as many courses as you want!",
+    "featuresTitle": "Premium Features",
+    "feature1": "Create unlimited courses",
+    "feature2": "Up to 100 active courses simultaneously",
+    "feature3": "Advanced AI features",
+    "feature4": "Higher document upload limits",
+    "feature5": "Priority support",
+    "upgradeNote": "Upgrade today and get unlimited access to all premium features for 30 days.",
+    "upgradeButton": "Upgrade Now"
+  },
   "streaming": {
     "title": "Creating Your Course",
     "description": "This may take a few minutes. Our AI is crafting personalized content for your course.",
