@@ -13,7 +13,7 @@ import { PomodoroProvider } from './contexts/PomodoroContext';
 import './i18n/i18n'; // Import i18n configuration
 
 // Pages
-import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/Dashboard.jsx';
 import CreateCourse from './pages/CreateCourse';
 import CourseView from './pages/CourseView';
 import ChapterView from './pages/ChapterView';
@@ -31,6 +31,7 @@ import Impressum from './pages/Impressum';
 import Privacy from './pages/Privacy';
 import About from './pages/About';
 import PublicCourses from './pages/PublicCourses'; // Import the new Public Courses page
+import MyCourses from './pages/MyCourses'; // Import the My Courses page
 import NotFoundPage from './pages/NotFoundPage'; // Import the NotFoundPage component
 import AdminView from './pages/AdminView'; // Import AdminView component
 import AnkiGeneratorDashboard from "./pages/AnkiGenerator/AnkiGeneratorDashboard.jsx";
@@ -93,6 +94,7 @@ function App() {
                       <Route path="/dashboard" element={<AppLayout />}> {/* Base path for dashboard and other protected routes */}
                         <Route index element={<Dashboard />} /> {/* This will be /dashboard */}
                         <Route path="public-courses" element={<PublicCourses />} />
+                        <Route path="my-courses" element={<MyCourses />} />
                         <Route path="create-course" element={<CreateCourse />} /> {/* /dashboard/create-course */}
                         <Route path="courses/:courseId" element={<CourseView />} /> {/* /dashboard/courses/:courseId */}
                         <Route path="courses/:courseId/chapters/:chapterId" element={<ChapterView />} /> {/* /dashboard/courses/:courseId/chapters/:chapterId */}

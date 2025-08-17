@@ -177,9 +177,21 @@ const getStatistics = async () => {
   });
 };
 
+const getTotalLearnTime = async (userId) => {
+  try {
+    const response = await apiWithCookies.get(`/statistics/${userId}/total_learn_time`);
+    console.log("Total Learn Time: ", response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching total learn time:', error);
+    throw error;
+  }
+};
+
 const statisticsService = {
   getStatistics,
   postUsage,
+  getTotalLearnTime,
 };
 
 export default statisticsService;

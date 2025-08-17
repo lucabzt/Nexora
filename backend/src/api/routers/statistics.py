@@ -52,3 +52,15 @@ def post_usage(
     Log a user action on the site.
     """
     return usage_crud.log_site_usage(db, usage)
+
+
+@router.get("/{user_id}/total_learn_time")
+def get_usage(
+    user_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Get the total time spent on chapters by a user.
+    """
+    return usage_crud.get_total_time_spent_on_chapters(db, user_id)

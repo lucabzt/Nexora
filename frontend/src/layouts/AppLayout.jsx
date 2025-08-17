@@ -43,6 +43,7 @@ import {
   IconX,
   IconMenu2,
   IconFileExport,
+  IconBook,
 } from "@tabler/icons-react";
 import AppFooter from "../components/AppFooter";
 import TrackActivity from "../components/TrackActivity";
@@ -246,6 +247,12 @@ function AppLayout() {
       to: "/dashboard",
     },
     {
+      icon: <IconBook size={20} />,
+      color: "violet",
+      label: t("myCourses", { ns: "navigation", defaultValue: "My Courses" }),
+      to: "/dashboard/my-courses",
+    },
+    {
       icon: <IconPlus size={20} />,
       color: "teal",
       label: t("newCourse", { ns: "navigation" }),
@@ -256,18 +263,6 @@ function AppLayout() {
       color: "orange",
       label: t("publicCourses", { ns: "navigation", defaultValue: "Public Courses" }),
       to: "/dashboard/public-courses",
-    },
-    {
-      icon: <IconSettings size={20} />,
-      color: "grape",
-      label: t("settings", { ns: "navigation" }),
-      to: "/dashboard/settings",
-    },
-    {
-      icon: <IconInfoCircle size={20} />,
-      color: "gray",
-      label: t("nexora", { ns: "navigation" }),
-      to: "/",
     },
     // Admin link - only shown to admin users
     ...(user?.is_admin
@@ -694,7 +689,7 @@ function AppLayout() {
                     <Menu.Item
                       icon={<IconInfoCircle size={14} />}
                       onClick={() => {
-                        navigate("/about");
+                        navigate("/");
                       }}
                       sx={{
                         "&:hover": {
@@ -704,7 +699,7 @@ function AppLayout() {
                         },
                       }}
                     >
-                      {t("about", { ns: "navigation" })}
+                      {t("startpage", { ns: "navigation" })}
                     </Menu.Item>
 
                     <Divider />

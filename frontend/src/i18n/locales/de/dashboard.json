@@ -25,6 +25,8 @@
   },
   "continueLearningTitle": "Mach da weiter, wo du aufgehört hast",
   "yourCoursesTitle": "Deine Kurse",
+  "recentCoursesTitle": "Deine letzten Kurse",
+  "recentCoursesSubtitle": "Zeige deine 3 zuletzt besuchten Kurse",
   "viewAllButton": "Alle anzeigen",
   "showLessButton": "Weniger anzeigen",
   "viewLessButton": "Weniger anzeigen",
@@ -43,12 +45,13 @@
   },
   "renameModal": {
     "title": "Kurs bearbeiten",
-    "titleLabel": "Titel",
-    "descriptionLabel": "Beschreibung",
-    "saveButton": "Speichern",
+    "titleLabel": "Kurstitel",
+    "descriptionLabel": "Kursbeschreibung",
+    "descriptionPlaceholder": "Beschreibe den Inhalt deines Kurses...",
+    "saveButton": "Änderungen speichern",
     "cancelButton": "Abbrechen",
     "publicLabel": "Kurs öffentlich machen",
-    "publicDescription": "Öffentliche Kurse können von jedem eingesehen werden."
+    "publicDescription": "Öffentliche Kurse können von allen Benutzern eingesehen werden."
   },
   "status": {
     "inProgress": "In Bearbeitung",
@@ -86,5 +89,11 @@
   "checkBackLater": "Bitte schauen Sie später noch einmal vorbei, um neue Inhalte zu sehen.",
   "publicCourseTooltip": "Dieser Kurs ist öffentlich",
   "publicBadge": "Öffentlich",
-  "searchPlaceholder": "Kurse suchen..."
+  "searchPlaceholder": "Kurse suchen...",
+  "searchSubtitle": "Finde spezifische Kurse nach Titel, Beschreibung oder Inhalt",
+  "openCourse": "Kurs öffnen",
+  "viewAllCourses": "Alle Kurse anzeigen",
+  "totalLearnTime": "Gesamte Lernzeit",
+  "loadingCourses": "Kurse werden geladen...",
+  "searchCourses": "Kurse durchsuchen"
 }

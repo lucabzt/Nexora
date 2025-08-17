@@ -25,6 +25,8 @@
   },
   "continueLearningTitle": "Continue Where You Left Off",
   "yourCoursesTitle": "Your Courses",
+  "recentCoursesTitle": "Your Recent Courses",
+  "recentCoursesSubtitle": "Showing your 3 most recent courses",
   "viewAllButton": "View All",
   "showLessButton": "Show Less",
   "viewLessButton": "View Less",
@@ -43,12 +45,13 @@
   },
   "renameModal": {
     "title": "Edit Course",
-    "titleLabel": "Title",
-    "descriptionLabel": "Description",
-    "saveButton": "Save",
+    "titleLabel": "Course Title",
+    "descriptionLabel": "Course Description",
+    "descriptionPlaceholder": "Describe the content of your course...",
+    "saveButton": "Save Changes",
     "cancelButton": "Cancel",
     "publicLabel": "Make course public",
-    "publicDescription": "Public courses can be viewed by anyone."
+    "publicDescription": "Public courses can be viewed by all users."
   },
   "status": {
     "inProgress": "In Progress",
@@ -86,5 +89,11 @@
   "checkBackLater": "Please check back later for new content.",
   "publicCourseTooltip": "This course is public",
   "publicBadge": "Public",
-  "searchPlaceholder": "Search courses..."
+  "searchPlaceholder": "Search courses...",
+  "searchSubtitle": "Find specific courses by title, description, or content",
+  "openCourse": "Open Course",
+  "viewAllCourses": "View All Courses",
+  "totalLearnTime": "Total Learn Time",
+  "loadingCourses": "Loading courses...",
+  "searchCourses": "Search Courses"
 }
