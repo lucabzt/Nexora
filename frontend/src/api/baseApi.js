@@ -27,6 +27,11 @@ apiWithCookies.interceptors.response.use(
     return response;
   },
   async (error) => {
+    // Let 429 (Too Many Requests) errors pass through to be handled by the component
+    if (error.response?.status === 429) {
+      return Promise.reject(error);
+    }
+
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -56,8 +61,8 @@ apiWithCookies.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError);
         if (typeof window !== 'undefined' && 
-            window.location.pathname !== '/login') {
-          window.location.href = '/login';
+            window.location.pathname !== '/auth/login') {
+          window.location.href = '/auth/login';
         }
         return Promise.reject(refreshError);
       } finally {

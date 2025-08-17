@@ -1,45 +1,23 @@
 {
   "mainTitle": "Impressum",
-  "companyInfo": {
-    "title": "Firmeninformationen",
-    "name": "Nexora GmbH",
-    "tagline": "Innovative KI-gestützte Lernlösungen",
-    "registration": "Registrierung: HRB 123456 B (Amtsgericht Berlin)",
-    "vatId": "USt-IdNr.: DE123456789"
+  "projectPhase": {
+    "title": "Projektstatus",
+    "info": "Dieses Projekt befindet sich derzeit in der Entwicklungsphase. Alle Angaben sind vorläufig und können sich ändern.",
+    "contact": "Für Anfragen: nexora-ai+markus@obermui.de"
   },
-  "legalRepresentative": {
-    "title": "Gesetzlicher Vertreter",
-    "name": "Markus Beispiel",
-    "role": "Geschäftsführer"
+  "hackathonInfo": {
+    "title": "Hackathon-Projekt",
+    "text": "Dieses Projekt wurde im Rahmen eines Hackathons auf devpost.com entwickelt. Es handelt sich um eine Prototyp-Implementierung, die im Rahmen des Wettbewerbs entstanden ist."
   },
-  "address": {
-    "title": "Adresse",
-    "street": "Beispielstraße 1",
-    "city": "12345 Beispielstadt",
-    "country": "Deutschland"
+  "legalInfo": {
+    "title": "Rechtliche Hinweise",
+    "disclaimer": "Haftungsausschluss: Die Nutzung dieser Anwendung erfolgt auf eigene Gefahr. Die Entwickler übernehmen keinerlei Gewähr für die Aktualität, Richtigkeit, Vollständigkeit oder Qualität der bereitgestellten Informationen. Haftungsansprüche gegen die Entwickler, welche sich auf Schäden materieller oder ideeller Art beziehen, die durch die Nutzung oder Nichtnutzung der dargebotenen Informationen bzw. durch die Nutzung fehlerhafter und unvollständiger Informationen verursacht wurden, sind grundsätzlich ausgeschlossen.",
+    "noWarranty": "Es wird keine Gewährleistung für die Funktionalität, Zuverlässigkeit oder Eignung der Anwendung für bestimmte Zwecke übernommen. Die Entwickler behalten sich das Recht vor, Teile der Seiten oder das gesamte Angebot ohne gesonderte Ankündigung zu verändern, zu ergänzen, zu löschen oder die Veröffentlichung zeitweise oder endgültig einzustellen.",
+    "externalLinks": "Für den Inhalt externer Links übernehmen wir trotz sorgfältiger inhaltlicher Kontrolle keine Haftung. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich."
   },
-  "contact": {
-    "title": "Kontakt",
-    "email": "E-Mail: info@nexora.ai",
-    "phone": "Telefon: +49 (0) 30 123 45678"
+  "creativeInfo": {
+    "title": "Ein kreativer Hinweis vom Team",
+    "text": "Nexora entsteht mit Leidenschaft, Kaffee und einer Vision für intelligenteres, spannenderes Lernen. Bleib gespannt auf kommende Updates!"
   },
-  "onlinePresence": {
-    "title": "Online-Präsenz",
-    "website": "Webseite: www.nexora.ai",
-    "socialMedia": "Soziale Medien: @nexoralearning"
-  },
-  "legalDisclaimer": {
-    "title": "Haftungsausschluss",
-    "externalLinks": "Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich.",
-    "copyright": "Alle Inhalte dieser Webseite sind urheberrechtlich geschützt. Eine Vervielfältigung oder Verwendung ohne ausdrückliche Genehmigung ist nicht gestattet."
-  },
-  "contentResponsibility": {
-    "title": "Inhaltsverantwortung",
-    "details": "Verantwortlich für den Inhalt gemäß § 55 Abs. 2 RStV: Markus Beispiel, Beispielstraße 1, 12345 Beispielstadt"
-  },
-  "dataProtection": {
-    "title": "Datenschutz",
-    "info": "Details zur Verarbeitung Ihrer Daten finden Sie in unserer Datenschutzerklärung."
-  },
-  "lastUpdated": "Diese Impressumsseite wurde zuletzt aktualisiert: Juni 2025"
+  "lastUpdated": "Diese Impressumsseite wurde zuletzt aktualisiert: August 2025"
 }

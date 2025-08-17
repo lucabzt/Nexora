@@ -5,10 +5,14 @@ from sqlalchemy.orm import Session
 
 from ...db.database import get_db
 from ...db.models import db_user as user_model
-from ...services import user_service
+from ...services import user_service, auth_service
 from ...utils import auth
 from ...utils.auth import get_current_user_optional # Import the new dependency
 from ..schemas import user as user_schemas  # For Pydantic models
+from ..schemas import auth as auth_schemas  # For Pydantic models
+from fastapi import FastAPI, Response, Cookie
+
+
 
 router = APIRouter(
     prefix="/users",
@@ -90,5 +94,17 @@ async def delete_user(
     Admins cannot delete themselves.
     """
     return user_service.delete_user(db, user_id, current_user)
+
+@router.delete("/me", response_model=user_schemas.User, dependencies=[Depends(auth.get_current_active_user)])
+async def delete_user(
+    response: Response,
+    db: Session = Depends(get_db),
+    current_user: user_model.User = Depends(auth.get_current_active_user)
+):
+    """
+    Delete a user. Only accessible by the user itself.
+    """
+    auth_service.logout_user(current_user, db, response)
+    return user_service.delete_user(db, current_user.id, current_user)
 
 

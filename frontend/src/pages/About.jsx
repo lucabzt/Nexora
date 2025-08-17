@@ -18,6 +18,8 @@ import {
 } from '@mantine/core';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { 
   IconRocket, 
   IconBulb, 
@@ -86,6 +88,16 @@ function About() {
   const { t } = useTranslation('about');
   const { classes } = useStyles();
   const [visible, setVisible] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  
+  const handleButtonClick = () => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    } else {
+      navigate('/auth/login');
+    }
+  };
   
   useEffect(() => {
     setVisible(true);
@@ -96,7 +108,7 @@ function About() {
       name: 'Markus Huber',
       role: t('team.members.markusHuber.role'),
       bio: t('team.members.markusHuber.bio'),
-      avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d',
+      avatar: 'https://d112y698adiu2z.cloudfront.net/photos/production/user_photos/003/508/125/datas/profile.jpg',
       linkedin: 'https://www.linkedin.com/in/markus-huber-0132282bb/',
       github: 'https://github.com/M4RKUS28'
     },
@@ -104,15 +116,22 @@ function About() {
       name: 'Luca Bozzetti',
       role: t('team.members.lucaBozzetti.role'),
       bio: t('team.members.lucaBozzetti.bio'),
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb',
+      avatar: 'https://poker-spade.de/static/media/Luca.658c06336387cd26c193.jpeg',
       linkedin: 'https://www.linkedin.com/in/luca-bozzetti-371379282/',
       github: 'https://github.com/lucabzt'
+    },
+    {
+      name: 'Sebastian Rogg',
+      role: t('team.members.sebastianRogg.role'),
+      bio: t('team.members.sebastianRogg.bio'),
+      avatar: 'https://avatars.githubusercontent.com/u/144535689?v=4',
+      linkedin: 'https://www.linkedin.com/in/sebastian-rogg/',
     },
     {
       name: 'Matthias Meierlohr',
       role: t('team.members.matthiasMeierlohr.role'),
       bio: t('team.members.matthiasMeierlohr.bio'),
-      avatar: 'https://m.media-amazon.com/images/S/pv-target-images/...jpg',
+      avatar: 'TODO',
       linkedin: 'https://www.linkedin.com/in/matthias-meierlohr',
       github: 'https://github.com/Maths24'
     },
@@ -120,7 +139,7 @@ function About() {
       name: 'Jonas Hörter',
       role: t('team.members.jonasHoerter.role'),
       bio: t('team.members.jonasHoerter.bio'),
-      avatar: 'https://m.media-amazon.com/images/S/pv-target-images/...jpg',
+      avatar: 'https://poker-spade.de/static/media/Jonas.2327447cc8a67b962465.jpeg',
       linkedin: 'https://www.linkedin.com/in/jonas-hörter-4b22562bb/',
     },
   ];
@@ -130,7 +149,7 @@ function About() {
       <Transition mounted={visible} transition="fade" duration={800} timingFunction="ease">
         {(styles) => (
           <div style={styles} >
-            <Title 
+            <Title
               className={classes.title}
               variant="gradient"
               gradient={{ from: 'cyan', to: 'teal' }}
@@ -139,34 +158,35 @@ function About() {
             >
               {t('mainTitle.about')} {t('mainTitle.nexora')}
             </Title>
-        
+
             <Grid position="center" align='center' gutter={50} mb={60}>
               <Grid.Col md={6}>
                 <Stack spacing="xl">
                   <Text size="xl">
                     {t('mainDescription')}
                   </Text>
-                  
+
                   <Text>
                     {t('learningApproach')}
                   </Text>
-                  
+
                   <Group>
-                    <Button 
-                      variant="gradient" 
+                    <Button
+                      variant="gradient"
                       gradient={{ from: 'cyan', to: 'teal' }}
                       size="lg"
                       radius="md"
                       leftIcon={<IconRocket size={20} />}
+                      onClick={handleButtonClick}
                     >
                       {t('buttons.startYourJourney')}
                     </Button>
                   </Group>
                 </Stack>
               </Grid.Col>
-              
+
               <Grid.Col md={6}>
-                <Image 
+                <Image
                   src="https://images.unsplash.com/photo-1522881451255-f59ad836fdfb"
                   radius="md"
                   alt={t('imageAlt')}
@@ -174,7 +194,7 @@ function About() {
                 />
               </Grid.Col>
             </Grid>
-            
+
             {/* Our Mission */}
             <Card p="xl" radius="md" mb={60} withBorder>
               <Group position="center" mb="lg">
@@ -182,13 +202,13 @@ function About() {
                   <IconBulb size={34} />
                 </ThemeIcon>
               </Group>
-              
+
               <Title order={2} align="center" mb="md">{t('mission.title')}</Title>
-              
+
               <Text size="lg" align="center" mb="xl">
                 {t('mission.description')}
               </Text>
-              
+
               <Grid>
                 <Grid.Col sm={6} md={3}>
                   <Card shadow="sm" p="md" radius="md" className={classes.card}>
@@ -201,7 +221,7 @@ function About() {
                     </Text>
                   </Card>
                 </Grid.Col>
-                
+
                 <Grid.Col sm={6} md={3}>
                   <Card shadow="sm" p="md" radius="md" className={classes.card}>
                     <ThemeIcon size={40} radius="md" color="cyan">
@@ -213,7 +233,7 @@ function About() {
                     </Text>
                   </Card>
                 </Grid.Col>
-                
+
                 <Grid.Col sm={6} md={3}>
                   <Card shadow="sm" p="md" radius="md" className={classes.card}>
                     <ThemeIcon size={40} radius="md" color="blue">
@@ -225,7 +245,7 @@ function About() {
                     </Text>
                   </Card>
                 </Grid.Col>
-                
+
                 <Grid.Col sm={6} md={3}>
                   <Card shadow="sm" p="md" radius="md" className={classes.card}>
                     <ThemeIcon size={40} radius="md" color="indigo">
@@ -239,12 +259,12 @@ function About() {
                 </Grid.Col>
               </Grid>
             </Card>
-            
+
             {/* Our Story */}
 
             <Grid gutter={50} mx="xl" my="xl">
-              
-                
+
+
                 <Grid>
                   {teamMembers.map((member, index) => (
                     <Grid.Col md={6} key={index}>
@@ -252,7 +272,7 @@ function About() {
                         <Card.Section sx={{ display: 'flex', justifyContent: 'center', padding: '20px 0 0 0' }}>
                           <Avatar src={member.avatar} size={80} radius="xl" />
                         </Card.Section>
-                        
+
                         <Stack spacing={5} mt="md" align="center">
                         <Text weight={700}>{member.name}</Text>
                         <Badge color="teal" variant="light">{member.role}</Badge>
@@ -279,23 +299,23 @@ function About() {
                           </ActionIcon>
                         </Group>
                       </Stack>
-                        
+
                         <Text size="sm" color="dimmed" mt="sm" align="center">
                           {member.bio}
                         </Text>
                       </Card>
                     </Grid.Col>
                   ))}
-                  
-             
+
+
                 </Grid>
 
             </Grid>
 
             {/* Contact CTA */}
-            <Card 
-              p="xl" 
-              radius="lg" 
+            <Card
+              p="xl"
+              radius="lg"
               sx={(theme) => ({
                 backgroundImage: theme.fn.gradient({ from: 'cyan', to: 'teal', deg: 45 }),
               })}
@@ -307,13 +327,14 @@ function About() {
                     {t('cta.subtitle')}
                   </Text>
                 </Grid.Col>
-                
+
                 <Grid.Col md={4} sx={{ display: 'flex', justifyContent: 'center' }}>
-                  <Button 
-                    variant="white" 
-                    color="dark" 
-                    size="lg" 
+                  <Button
+                    variant="white"
+                    color="dark"
+                    size="lg"
                     radius="md"
+                    onClick={handleButtonClick}
                   >
                     {t('cta.button')}
                   </Button>

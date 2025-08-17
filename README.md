@@ -122,7 +122,7 @@ nexora-project/
 - [x] Course Creation from Mixed Media
 - [x] AI Quizzes (MCQs, Fill-in-the-Gap)
 - [x] Chapter-Based AI Chat Assistant
-- [ ] Flashcards Generator
+- [X] Flashcards Generator
 - [ ] Progress/Statistics Dashboard
 - [ ] Offline Mode
 - [ ] Collaborative Course Editing

@@ -1,0 +1,151 @@
+{
+  "title": "Anki Generator",
+  "subtitle": "Transform your PDFs into study-ready Anki flashcards",
+  "description": "Upload a PDF document and generate customized flashcard decks for optimal learning",
+
+  "navigation": {
+    "ankiGenerator": "Anki Generator",
+    "dashboard": "Dashboard",
+    "processing": "Processing",
+    "history": "History"
+  },
+
+  "upload": {
+    "title": "Upload PDF",
+    "subtitle": "Upload your PDF file",
+    "dragDrop": "Drag and drop or click to browse",
+    "clickUpload": "Click to upload or drag and drop",
+    "supportedFormats": "PDF files only • Max 50MB",
+    "chooseFile": "Choose PDF File",
+    "uploading": "Uploading...",
+    "uploadSuccess": "PDF uploaded successfully",
+    "uploadFailed": "Upload failed",
+    "invalidFile": "Please select a PDF file",
+    "fileTooLarge": "Please select a PDF file smaller than 30MB",
+    "dropHere": "Drop your PDF here"
+  },
+
+  "configure": {
+    "title": "Configure",
+    "subtitle": "Set up your flashcards",
+    "deckTitle": "Deck Title",
+    "deckTitlePlaceholder": "Enter a title for your flashcard deck",
+    "flashcardType": "Flashcard Type",
+    "flashcardTypePlaceholder": "Choose flashcard type",
+    "description": "Description (Optional)",
+    "descriptionPlaceholder": "Add a description for your flashcard deck",
+    "difficulty": "Difficulty Level",
+    "chapterDetection": "Chapter Detection",
+    "pagesPerChapter": "Pages per Chapter",
+    "analyze": "Analyze PDF",
+    "reset": "Reset"
+  },
+
+  "types": {
+    "testing": "Testing - Multiple Choice Questions",
+    "learning": "Learning - Image-based Cards",
+    "testingDescription": "Generate multiple-choice questions perfect for exam preparation and knowledge testing",
+    "learningDescription": "Create image-based flashcards organized by chapters for visual learning"
+  },
+
+  "difficulty": {
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard"
+  },
+
+  "chapterMode": {
+    "auto": "Auto-detect chapters",
+    "manual": "Manual division"
+  },
+
+  "review": {
+    "title": "Review",
+    "subtitle": "Review and generate",
+    "analysisComplete": "Analysis Complete!",
+    "analysisDescription": "Your PDF has been analyzed and is ready for flashcard generation",
+    "document": "Document",
+    "type": "Type",
+    "estimatedChapters": "Estimated Chapters",
+    "estimatedCards": "Estimated Cards",
+    "backToConfigure": "Back to Configure",
+    "generateDeck": "Generate Anki Deck"
+  },
+
+  "processing": {
+    "title": "Processing Status",
+    "progress": "Processing Progress",
+    "steps": "Processing Steps",
+    "taskDetails": "Task Details",
+    "actions": "Actions",
+    "analyzing": "Analyzing PDF",
+    "extracting": "Extracting Content",
+    "generating": "Generating Cards",
+    "packaging": "Packaging Deck",
+    "completed": "Completed",
+    "downloadDeck": "Download Anki Deck",
+    "cancelProcessing": "Cancel Processing",
+    "retryProcessing": "Retry Processing",
+    "backToGenerator": "Back to Generator"
+  },
+
+  "status": {
+    "pending": "Pending",
+    "processing": "Processing",
+    "completed": "Completed",
+    "failed": "Failed",
+    "cancelled": "Cancelled"
+  },
+
+  "stepDescriptions": {
+    "analyzing": "Reading and understanding content",
+    "extracting": "Identifying key concepts",
+    "generating": "Creating flashcards",
+    "packaging": "Building Anki file"
+  },
+
+  "download": {
+    "title": "Download Instructions",
+    "description": "Your Anki deck has been generated successfully! Here's how to use it:",
+    "instructions": [
+      "Download the .apkg file",
+      "Open Anki on your computer or mobile device",
+      "Go to File → Import (or use Ctrl+Shift+I)",
+      "Select the downloaded .apkg file",
+      "Start studying your new flashcard deck!"
+    ],
+    "downloadNow": "Download Now",
+    "downloadStarted": "Download Started",
+    "downloadDescription": "Your Anki deck is being downloaded"
+  },
+
+  "help": {
+    "title": "How Anki Generator Works",
+    "step1Title": "Step 1: Upload your PDF",
+    "step1Description": "Upload any PDF document containing educational content. The system supports files up to 30MB.",
+    "step2Title": "Step 2: Choose your mode",
+    "step2Description": "Select between Testing Mode for multiple-choice questions or Learning Mode for image-based cards.",
+    "step3Title": "Step 3: AI Processing",
+    "step3Description": "Our AI analyzes your document, extracts key concepts, and generates high-quality flashcards optimized for learning.",
+    "step4Title": "Step 4: Download & Study",
+    "step4Description": "Download your .apkg file and import it directly into Anki for immediate studying."
+  },
+
+  "errors": {
+    "uploadFailed": "Failed to upload PDF",
+    "analysisFailed": "Failed to analyze PDF",
+    "processingFailed": "Failed to start processing",
+    "downloadFailed": "Failed to download Anki deck",
+    "taskNotFound": "Task not found",
+    "cancelFailed": "Failed to cancel task",
+    "retryFailed": "Failed to retry task",
+    "loadingFailed": "Error Loading Task"
+  },
+
+  "notifications": {
+    "taskCancelled": "Task Cancelled",
+    "taskRestarted": "Task Restarted",
+    "processingCancelled": "Processing has been cancelled",
+    "processingRestarted": "Processing has been restarted"
+  }
+}

@@ -20,8 +20,9 @@ function ToolbarContainer({ courseId, chapterId }) {
 
   useEffect(() => {
     if (toolbarOpen) {
-      if (isMobile && toolbarWidth > window.innerWidth * 0.8) {
-        setToolbarWidth(window.innerWidth * 0.8);
+      if (isMobile) {
+        // On mobile, always use full viewport width for the toolbar
+        setToolbarWidth(window.innerWidth);
       } else if (!isMobile && toolbarWidth < 300) {
         setToolbarWidth(500);
       }
@@ -66,19 +67,24 @@ function ToolbarContainer({ courseId, chapterId }) {
 
   return (
     <Resizable
-      size={{ width: toolbarWidth, height: '100%' }}
+      size={{ width: isMobile ? '100vw' : toolbarWidth, height: '100%' }}
       onResizeStop={(e, direction, ref, d) => {
-        setToolbarWidth(toolbarWidth + d.width);
+        if (!isMobile) {
+          setToolbarWidth(toolbarWidth + d.width);
+        }
       }}
-      minWidth={isMobile ? 280 : 400}
-      maxWidth={isMobile ? '90%' : 800}
+      minWidth={isMobile ? '100vw' : 400}
+      maxWidth={isMobile ? '100vw' : 800}
       enable={{ right: false, left: !isMobile }}
       style={{
         position: 'fixed',
         top: 0,
         right: 0,
-        height: '100vh',
-        zIndex: 1000,
+        // On mobile, end above the bottom navigation bar by pinning bottom offset
+        bottom: isMobile ? 'calc(96px + env(safe-area-inset-bottom))' : 0,
+        height: isMobile ? 'auto' : '100vh',
+        // Keep toolbar below the fixed bottom navigation on mobile
+        zIndex: isMobile ? 900 : 1000,
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.white,
@@ -113,6 +119,8 @@ function ToolbarContainer({ courseId, chapterId }) {
         flex: 1, 
         overflowY: 'auto',
         overscrollBehavior: 'contain',
+        // extra bottom padding on mobile so input areas (e.g., chat composer) are not clipped
+        paddingBottom: isMobile ? '80px' : 0,
 
         scrollbarWidth: 'thin',
         scrollbarColor: `${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[4]} transparent`,

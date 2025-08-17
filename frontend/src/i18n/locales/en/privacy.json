@@ -1,0 +1,98 @@
+{
+  "mainTitle": "Privacy Policy",
+  "introduction": "We would like to provide you with the following information about how we process, store, and use your personal data, as well as your rights regarding data protection.\n\nThe specific data we process and how we use it depends on the features of our platform that you use.",
+  "sections": {
+    "responsibleParty": {
+      "title": "a) Name and Address of the Controller",
+      "content": [
+        "Nexora",
+        "Email: nexora-ai+markus@obermui.de"
+      ]
+    },
+    "dataProtectionOfficer": {
+      "title": "b) Name and Address of the Data Protection Officer",
+      "content": [
+        "If you have any questions regarding data protection, you can reach us at the following address:",
+        "",
+        "Data Protection Officer",
+        "Email: nexora-ai+markus@obermui.de"
+      ]
+    },
+    "processingPurposes": {
+      "title": "c) Purposes of Processing",
+      "content": [
+        "We process personal data to provide you with our services, improve our platform, and fulfill legal obligations.",
+        "",
+        "The processing is carried out in particular for the following purposes:",
+        "- Provision and operation of the web application/app",
+        "- User registration and authentication",
+        "- Communication with users (support, notifications)",
+        "- Improvement of user experience through analysis of anonymized data",
+        "- Fulfillment of legal requirements"
+      ]
+    },
+    "legalBasis": {
+      "title": "d) Legal Basis for Processing",
+      "content": [
+        "The processing is based on the following legal grounds:",
+        "",
+        "- Consent (Art. 6(1)(a) GDPR) - e.g., for newsletters or optional tracking tools.",
+        "- Contract performance (Art. 6(1)(b) GDPR) - e.g., for providing our services.",
+        "- Legitimate interests (Art. 6(1)(f) GDPR) - e.g., for IT security or optimization of our services.",
+        "- Legal obligation (Art. 6(1)(c) GDPR) - e.g., retention periods under commercial and tax law."
+      ]
+    },
+    "dataRecipients": {
+      "title": "e) Recipients of Personal Data",
+      "content": [
+        "- Within our company: Access is limited to employees who need this data to fulfill their tasks.",
+        "- Service providers (processors): e.g., hosting providers, IT service providers, payment providers.",
+        "- External parties: Only if required by law or if you have given your explicit consent."
+      ]
+    },
+    "storagePeriod": {
+      "title": "f) Storage Period",
+      "content": [
+        "We store your personal data only for as long as necessary for the respective purposes or as required by legal retention periods. After this period, the data will be deleted or anonymized."
+      ]
+    },
+    "yourRights": {
+      "title": "g) Your Data Protection Rights",
+      "content": [
+        "You have the right to:",
+        "- Information (Art. 15 GDPR)",
+        "- Rectification (Art. 16 GDPR)",
+        "- Erasure (Art. 17 GDPR)",
+        "- Restriction of processing (Art. 18 GDPR)",
+        "- Data portability (Art. 20 GDPR)",
+        "- Objection to certain processing activities (Art. 21 GDPR)",
+        "",
+        "You may also withdraw your consent at any time, without affecting the lawfulness of processing based on consent before its withdrawal."
+      ]
+    },
+    "supervisoryAuthority": {
+      "title": "h) Supervisory Authority",
+      "content": [
+        "You have the right to lodge a complaint with the relevant data protection supervisory authority at any time.",
+        "",
+        "Bavarian Data Protection Authority",
+        "P.O. Box 606, 91511 Ansbach, Germany",
+        "Email: poststelle@lda.bayern.de"
+      ]
+    },
+    "dataProvisionRequirement": {
+      "title": "i) Obligation to Provide Data",
+      "content": [
+        "The provision of certain personal data is necessary for using our services. Without this data, we may not be able to provide our services in full."
+      ]
+    },
+    "automatedDecisionMaking": {
+      "title": "j) Automated Decision-Making / Profiling",
+      "content": [
+        "We do not use automated decision-making as defined in Art. 22 GDPR.",
+        "Profiling is only carried out in anonymized form for statistical purposes."
+      ]
+    }
+  },
+  "lastUpdated": "Last updated: August 2025"
+}

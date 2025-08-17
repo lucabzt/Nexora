@@ -1,32 +1,39 @@
-import { useState, forwardRef } from 'react';
+import { useState, forwardRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Paper, 
-  Container,
+  Container, 
   Title, 
   Text, 
+  Paper, 
+  Stepper, 
   Button, 
   Group, 
+  TextInput, 
   Textarea, 
-  Slider, 
   Select, 
-  FileButton,
-  SimpleGrid,
-  Stack,
-  Box,
-  ThemeIcon,
-  Progress,
-  Badge,
-  Card,
-  Image,
-  ActionIcon,
+  NumberInput, 
+  Box, 
+  FileInput, 
+  Image, 
+  List, 
+  ThemeIcon, 
+  Progress, 
+  Stack, 
   useMantineTheme,
+  LoadingOverlay,
   Center,
   RingProgress,
   Divider,
   Alert,
-  List
+  Modal,
+  Anchor,
+  SimpleGrid,
+  FileButton,
+  Card,
+  Slider,
+  ActionIcon,
+
 } from '@mantine/core';
 import { 
   IconBook, 
@@ -45,12 +52,14 @@ import {
   IconEdit,
   IconAlertCircle,
   IconFileText,
-  IconSchool
+  IconSchool,
+  IconRocket
 } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import { toast } from 'react-toastify';
 import { courseService } from '../api/courseService';
 import ReactCountryFlag from 'react-country-flag';
+import PremiumModal from '../components/PremiumModal';
 
 const LanguageSelectItem = forwardRef(({ label, countryCode, ...others }, ref) => (
   <div ref={ref} {...others}>
@@ -75,7 +84,9 @@ function CreateCourse() {
   
   const [activeStep, setActiveStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [isLimitReached, setIsLimitReached] = useState(false);
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
   const [uploadedImages, setUploadedImages] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -230,12 +241,45 @@ function CreateCourse() {
       
     } catch (err) { 
       console.error('Error initiating course creation:', err);
-      const errorMessage = err.response?.data?.detail || err.message || t('errors.courseCreationDefault');
+      // Handle specific error cases
+      
+      if (err.response?.status === 429) {
+        // Handle rate limiting or course limit errors
+        const errorData = err.response?.data?.detail || {};
+        console.log('Error data:', errorData);
+        
+        if (errorData.code === 'MAX_COURSE_CREATIONS_REACHED' || 
+            errorData.code === 'MAX_PRESENT_COURSES_REACHED') {
+          const errorMessage = t(`errors.${errorData.code === 'MAX_COURSE_CREATIONS_REACHED' ? 'maxCoursesCreated' : 'maxActiveCourses'}`, { limit: errorData.limit });
+          console.log('Showing premium modal for error:', errorMessage);
+          
+          // Set limit reached state and show premium modal
+          setIsLimitReached(true);
+          setShowPremiumModal(true);
+          console.log('showPremiumModal set to:', true, 'with limitReached: true');
+          
+          // Use setTimeout to ensure state update is processed
+          setTimeout(() => {
+            toast.error(errorMessage, {
+              autoClose: 5000,
+              onClose: () => {
+                console.log('Toast closed');
+                setIsSubmitting(false);
+              }
+            });
+          }, 100);
+          return;
+        }
+      }
+      // Default error handling
+      const errorMessage = err.response?.data?.message || err.response?.data?.detail || err.message || t('errors.unknown');
       setError(errorMessage);
-      toast.error(errorMessage);
-      setIsSubmitting(false);
+      toast.error(errorMessage, {
+        onClose: () => setIsSubmitting(false) // Reset loading state when toast is closed
+      });
     }
   };
+
 
   const isStepValid = (step) => {
     switch (step) {
@@ -375,7 +419,7 @@ function CreateCourse() {
                 <Text weight={600} mb="sm">
                   {t('form.documents.uploadedTitle') || 'Uploaded Files'} ({uploadedDocuments.length + uploadedImages.length})
                 </Text>
-                <Group grow align="start">
+                <Group grow>
                   {uploadedDocuments.length > 0 && (
                     <div>
                      {/* <Text size="sm" weight={500} mb="xs">{t('form.documents.uploadedTitle') || 'Documents'}</Text> */}
@@ -746,18 +790,40 @@ function CreateCourse() {
 
   if (isSubmitting) {
     return (
-      <Container size="lg" py="md">
-        <Paper shadow="md" p="xl" withBorder>
-          <Title order={3} align="center" mb="md">{t('streaming.title') || 'Creating Your Course'}</Title>
-          <Text align="center" mb="md">{t('streaming.description') || 'Please wait while we generate your personalized course...'}</Text>
-          <Progress value={100} animate color="teal" />
-        </Paper>
-      </Container>
+      <>
+        <PremiumModal 
+          opened={showPremiumModal} 
+          onClose={() => {
+            setShowPremiumModal(false);
+            setIsLimitReached(false);
+          }}
+          limitReached={isLimitReached}
+        />
+        <Container size="lg" py="xl">
+          <Paper shadow="md" p="xl" withBorder>
+            <Title order={3} align="center" mb="md">{t('streaming.title') || 'Creating Your Course'}</Title>
+            <Text align="center" mb="md">{t('streaming.description') || 'Please wait while we generate your personalized course...'}</Text>
+            <Progress value={100} animate color="teal" />
+          </Paper>
+        </Container>
+      </>
     );
   }
 
+  // PremiumModal component is now imported and used directly
+
+
   return (
-    <Container size="lg" py="md">
+    <>
+      <PremiumModal 
+        opened={showPremiumModal} 
+        onClose={() => {
+          setShowPremiumModal(false);
+          setIsLimitReached(false);
+        }} 
+        limitReached={isLimitReached}
+      />
+      <Container size="lg" py="xl">
       
       <Paper 
         radius="lg" 
@@ -780,11 +846,17 @@ function CreateCourse() {
             position: 'relative'
           }}
         >
+          <Group position="apart" align="flex-start" mb="md">
+            <Box>
+              <Title order={2} mb={5} style={{ color: 'white' }}>{t('mainTitle') || 'Create a New Learning Course'}</Title>
+              <Text color="white">{t('subtitle') || 'Design your personalized learning experience'}</Text>
+            </Box>
+          </Group>
 
           {/* Progress indicator */}
           <Progress 
             value={(activeStep + 1) / steps.length * 100} 
-            color={theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7]}
+            color="white"
             mt="md"
             size="sm"
             radius="xl"
@@ -857,7 +929,8 @@ function CreateCourse() {
           </Group>
         </Box>
       </Paper>
-    </Container>
+      </Container>
+    </>
   );
 }
 

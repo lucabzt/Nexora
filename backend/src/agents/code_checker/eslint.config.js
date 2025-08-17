@@ -18,6 +18,10 @@ export default [
 
     // 2. Configure language options
     languageOptions: {
+      // Add these missing configuration options:
+      ecmaVersion: 2022,        // Specify ECMAScript version
+      sourceType: "module",     // Enable ES6 imports/exports
+
       parserOptions: {
         ecmaFeatures: {
           jsx: true, // Enable JSX parsing

@@ -55,27 +55,27 @@
     "members": {
       "markusHuber": {
         "role": "Softwarearchitekt & Full-Stack-Entwickler",
-        "bio": "KI-Experte mit über 15 Jahren Erfahrung in maschinellem Lernen und adaptiven Bildungssystemen."
+        "bio": "Wirtschaftsinformatik-Student an der TUM (B.Sc.) mit Expertise in Softwarearchitektur, Full-Stack-Entwicklung und maschinellem Lernen."
       },
       "lucaBozzetti": {
         "role": "KI-Forscher & Agentenentwickler",
-        "bio": "Ehemaliger Professor mit einer Leidenschaft für die Innovation der Bildung durch Technologie."
+        "bio": "Wirtschaftsinformatik-Student an der TUM (B.Sc.) mit großer Leidenschaft für KI, maschinelles Lernen und agentische Anwendungen."
       },
       "sebastianRogg": {
-        "role": "Noch in Arbeit",
-        "bio": "Full-Stack-Ingenieur, spezialisiert auf KI-Integration und responsive Lernsysteme."
+        "role": "Frontend-Entwickler & Datenbankingenieur",
+        "bio": "Wirtschaftsinformatik-Student an der TUM (B.Sc.) mit Erfahrung im Aufbau benutzerfreundlicher Umgebungen"
       },
       "matthiasMeierlohr": {
         "role": "Frontend-Designer & UX-Spezialist",
-        "bio": "Swift UI/React-Designer mit Fokus auf die Erstellung intuitiver, benutzerfreundlicher Oberflächen für KI-Anwendungen."
+        "bio": "Wirtschaftsinformatik-Student an der TUM (B.Sc.) spezialisiert auf sauberes und modernes UX-Design."
       },
       "jonasHoerter": {
-        "role": "Eierlecker & Backend-Entwickler",
-        "bio": "Swift UI-Designer mit Fokus auf die Erstellung intuitiver, benutzerfreundlicher Oberflächen für KI-Anwendungen."
+        "role": "Backend-Entwickler",
+        "bio": "Wirtschaftsinformatik-Student an der TUM (B.Sc.) mit großer Leidenschaft für Business-Anwendungen."
       },
       "paulVorderbruegge": {
         "role": "Bierliebhaber & Backend-Spezialist",
-        "bio": "Swift UI-Designer mit Fokus auf die Erstellung intuitiver, benutzerfreundlicher Oberflächen für KI-Anwendungen."
+        "bio": "Informatik-Student an der TUM (B.Sc.) Fokussiert auf die Erstellung intuitiver, benutzerfreundlicher Oberflächen für KI-Anwendungen."
       }
     }
   },

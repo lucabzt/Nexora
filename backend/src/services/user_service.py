@@ -8,9 +8,20 @@ from ..db.crud import users_crud
 from ..db.models import db_user as user_model
 from ..core.security import get_password_hash, verify_password
 
+from ..db.crud import usage_crud
+
 def get_users(db: Session, skip: int = 0, limit: int = 999):
     """Retrieve a list of users."""
-    return users_crud.get_users(db, skip=skip, limit=limit)
+    users = users_crud.get_users(db, skip=skip, limit=limit)
+
+
+    extended_users = []
+    for user in users:
+        user.total_learn_time = usage_crud.get_total_time_spent_on_chapters(db, user.id)
+        extended_users.append(user)
+
+    return extended_users
+
 
 
 def get_user_by_id(db: Session, user_id: str, current_user: user_model.User):

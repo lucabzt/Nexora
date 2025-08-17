@@ -18,6 +18,11 @@ REQUIRE_DIGIT = False
 REQUIRE_SPECIAL_CHAR = False
 SPECIAL_CHARACTERS_REGEX_PATTERN = r"[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?~`]"
 
+# FREE TEER SETTINGS
+
+MAX_COURSE_CREATIONS = 10
+MAX_CHAT_USAGE = 100
+MAX_PRESENT_COURSES = 5
 
 
 
@@ -80,3 +85,9 @@ DISCORD_REDIRECT_URI = os.getenv("DISCORD_REDIRECT_URI", "https://www.nexora-ai.
 
 UNSPLASH_ACCESS_KEY = os.getenv("UNSPLASH_ACCESS_KEY")
 UNSPLASH_SECRET_KEY = os.getenv("UNSPLASH_SECRET_KEY")
+
+
+CHROMA_DB_URL = os.getenv("CHROMA_DB_URL", "http://localhost:8000")
+
+
+AGENT_DEBUG_MODE = os.getenv("AGENT_DEBUG_MODE", "true").lower() == "true"

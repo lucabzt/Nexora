@@ -15,12 +15,16 @@ from google.genai import types
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 
+from ..config import settings
 from ..agents.chat_agent.agent import ChatAgent
 from ..agents.utils import create_text_query
 from ..api.schemas.chat import ChatRequest
 from ..config.settings import SQLALCHEMY_DATABASE_URL
+from ..db.database import get_db_context
 
 from ..db.crud import chapters_crud
+from ..db.crud import usage_crud
+
 
 logger = logging.getLogger(__name__)
 
@@ -32,50 +36,23 @@ class ChatService:
         
         Sets up database connection pooling and initializes the chat agent.
         """
-        # Configure database engine with connection pooling
-        self._engine = create_engine(
-            SQLALCHEMY_DATABASE_URL,
-            pool_pre_ping=True,
-            pool_recycle=300,  # Recycle connections after 5 minutes
-            pool_size=5,
-            max_overflow=10,
-            pool_timeout=30
-        )
-        
         # Initialize the session service with just the database URL
         # The ADK will create its own engine internally
         self.session_service = DatabaseSessionService(
-            db_url=SQLALCHEMY_DATABASE_URL
+            db_url=SQLALCHEMY_DATABASE_URL,
+            pool_recycle=settings.DB_POOL_RECYCLE,
+            pool_pre_ping=settings.DB_POOL_PRE_PING,
+            pool_size=settings.DB_POOL_SIZE,
+            max_overflow=settings.DB_MAX_OVERFLOW
         )
-        
         self.chat_agent = ChatAgent("Nexora", self.session_service)
-        self._lock = asyncio.Lock()
-        self._initialized = False
-        
-    async def initialize(self):
-        """Initialize the chat service asynchronously."""
-        async with self._lock:
-            if not self._initialized:
-                # Any async initialization would go here
-                self._initialized = True
-    
-    async def close(self):
-        """Clean up resources used by the chat service."""
-        async with self._lock:
-            if hasattr(self, 'chat_agent') and self.chat_agent:
-                await self.chat_agent.close()
-                
-            if hasattr(self, 'session_service') and hasattr(self.session_service, 'db_engine'):
-                self.session_service.db_engine.dispose()
-                
-            self._initialized = False
+
    
     async def process_chat_message(
         self, 
         user_id: str, 
-        chapter_id: str, 
-        request: ChatRequest, 
-        db: Session
+        chapter_id: int, 
+        request: ChatRequest
     ) -> AsyncGenerator[str, None]:
         """Process a chat message and stream the response.
         
@@ -91,7 +68,6 @@ class ChatService:
         Raises:
             HTTPException: If there's an error processing the message
         """
-        await self.initialize()
         
         try:
             # Log the incoming request
@@ -103,17 +79,38 @@ class ChatService:
                     "message_length": len(request.message)
                 }
             )
-            
+
             # Get chapter content for the agent state
-            chapter = chapters_crud.get_chapter_by_id(db, chapter_id)
-            if not chapter:
-                raise HTTPException(status_code=404, detail="Chapter not found")
+            chapter_content = None
+            with get_db_context() as db:
+                chapter = chapters_crud.get_chapter_by_id(db, chapter_id)
+                if not chapter:
+                    raise HTTPException(status_code=404, detail="Chapter not found")
+                
+                chapter_content = chapter.content
+            
+                # Log the chat usage
+                usage_crud.log_chat_usage(
+                    db=db,
+                    user_id=user_id,
+                    message=request.message,
+                    course_id=chapter.course_id,
+                    chapter_id=chapter_id
+                )
+                logger.info(
+                    "Logged chat usage",
+                    extra={
+                        "user_id": user_id,
+                        "chapter_id": chapter_id,
+                        "message_length": len(request.message)
+                    }
+                )
             
             # Process the message through the chat agent and stream responses
             try:
                 async for text_chunk, is_final in self.chat_agent.run(
                     user_id=user_id,
-                    state={"chapter_content": chapter.content},
+                    state={"chapter_content": chapter_content},
                     chapter_id=chapter_id,
                     content=create_text_query(request.message),
                     debug=logger.isEnabledFor(logging.DEBUG)
@@ -132,7 +129,7 @@ class ChatService:
                     else:
                         # Format as SSE data (double newline indicates end of message)
                         yield f"data: {json.dumps({'content': text_chunk})}\n\n"
-                        
+      
             except Exception as e:
                 logger.error(f"Error in chat stream: {str(e)}", exc_info=True)
                 error_msg = json.dumps({"error": "An error occurred while processing your message"})
@@ -159,6 +156,7 @@ class ChatService:
                 status_code=500,
                 detail="An error occurred while processing your message"
             ) from e
+        
 
 
 chat_service = ChatService()

@@ -22,6 +22,9 @@ import {
   Divider,
   RingProgress,
   Overlay,
+  Modal,
+  ActionIcon,
+  Stack,
 } from '@mantine/core';
 import {
   IconAlertCircle,
@@ -32,7 +35,9 @@ import {
   IconTrophy,
   IconArrowBack,
   IconCheck,
-  IconChevronRight
+  IconChevronRight,
+  IconX,
+  IconPlayerPlay,
 } from '@tabler/icons-react';
 import { courseService } from '../api/courseService';
 
@@ -46,12 +51,52 @@ function CourseView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // NEW: State for first-time video popup
+  const [showVideoPopup, setShowVideoPopup] = useState(false);
+  const [hasSeenVideo, setHasSeenVideo] = useState(false);
+  const [contentReady, setContentReady] = useState(false);
+
   const [creationProgressUI, setCreationProgressUI] = useState({
     statusText: t('creation.statusInitializing'),
     percentage: 0,
     chaptersCreated: 0,
     estimatedTotal: 0,
   });
+
+  // NEW: Check localStorage on mount
+  useEffect(() => {
+    const hasSeenVideoFlag = localStorage.getItem('hasSeenFirstCourseVideo');
+    if (hasSeenVideoFlag === 'true') {
+      setHasSeenVideo(true);
+    }
+  }, []);
+
+  // NEW: Monitor when course content becomes ready
+  useEffect(() => {
+    if (course && course.title && course.description && course.image_url &&
+        course.title !== 'None' && course.description !== 'None') {
+      setContentReady(true);
+    }
+  }, [course]);
+
+  // NEW: Show video popup after content is ready (with 2 second delay)
+  useEffect(() => {
+    if (contentReady && !hasSeenVideo && course?.status === 'CourseStatus.CREATING') {
+      const timer = setTimeout(() => {
+        setShowVideoPopup(true);
+        // Mark as seen when popup is shown
+        localStorage.setItem('hasSeenFirstCourseVideo', 'true');
+        setHasSeenVideo(true);
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [contentReady, hasSeenVideo, course?.status]);
+
+  // NEW: Function to close video popup
+  const closeVideoPopup = () => {
+    setShowVideoPopup(false);
+  };
 
   // Initial data fetch
   useEffect(() => {
@@ -78,15 +123,16 @@ function CourseView() {
         // Initialize creationProgressUI if course is in creating state
         if (courseData.status === 'CourseStatus.CREATING') {
           const totalChapters = courseData.chapter_count || 0;
-          const progressPercent = totalChapters > 0 ? Math.round((currentChapters.length / totalChapters) * 100) : 0;
+          const currentChapters_length = currentChapters === null ? 0 : currentChapters.filter(chapter => chapter.id !== null).length;
+          const progressPercent = totalChapters > 0 ? Math.round((currentChapters_length / totalChapters) * 100) : 0;
 
           setCreationProgressUI({
             statusText: t('creation.statusCreatingChapters', {
-              chaptersCreated: currentChapters.length,
+              chaptersCreated: currentChapters_length,
               totalChapters: totalChapters || t('creation.unknownTotal')
             }),
             percentage: progressPercent,
-            chaptersCreated: currentChapters.length,
+            chaptersCreated: currentChapters_length,
             estimatedTotal: totalChapters,
           });
         }
@@ -123,13 +169,15 @@ function CourseView() {
         setChapters(currentChapters);  // ADDED: Update the chapters state on each poll
 
         const totalChapters = polledData.chapter_count || 0;
-        const progressPercent = totalChapters > 0 ? Math.round((currentChapters.length / totalChapters) * 100) : 0;
+
+        const currentChapters_length = currentChapters === null ? 0 : currentChapters.filter(chapter => chapter.id !== null).length;
+        const progressPercent = totalChapters > 0 ? Math.round((currentChapters_length / totalChapters) * 100) : 0;
 
         if (polledData.status === 'CourseStatus.FINISHED') {
           setCreationProgressUI({
             statusText: t('creation.statusComplete'),
             percentage: 100,
-            chaptersCreated: currentChapters.length,
+            chaptersCreated: currentChapters_length,
             estimatedTotal: totalChapters,
           });
           console.log('Course creation completed. Stopping poll.');
@@ -137,11 +185,11 @@ function CourseView() {
         } else if (polledData.status === 'CourseStatus.CREATING') {
           setCreationProgressUI({
             statusText: t('creation.statusCreatingChapters', {
-                chaptersCreated: currentChapters.length,
+                chaptersCreated: currentChapters_length,
                 totalChapters: totalChapters || t('creation.unknownTotal')
             }),
             percentage: progressPercent,
-            chaptersCreated: currentChapters.length,
+            chaptersCreated: currentChapters_length,
             estimatedTotal: totalChapters,
           });
         } else {
@@ -158,9 +206,6 @@ function CourseView() {
       clearInterval(pollInterval);
     };
   }, [course, courseId, t]); // The 'chapters' state is not needed here as it's an outcome, not a trigger for this effect.
-
-  // REMOVED: This useMemo is no longer needed as we have a dedicated `chapters` state
-  // const chapters = useMemo(() => course?.chapters || [], [course]);
 
   // Learning progress calculation
   const { learningPercentage, actualCompletedLearningChapters, totalCourseChaptersForLearning } = useMemo(() => {
@@ -179,16 +224,23 @@ function CourseView() {
     };
   }, [course, chapters]); // CHANGED: Dependency array now includes `chapters`
 
-  // ... THE REST OF THE JSX REMAINS EXACTLY THE SAME ...
-  // No changes are needed in the return() statement because it was already
-  // correctly using the `chapters` variable, which now correctly points to your state.
-
   if (loading && !course) {
     return (
-      <Container size="lg" py="xl">
-        <Box sx={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
-          <Loader size="lg" title={t('loadingCourseDetails')} />
-        </Box>
+      <Container 
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '50vh',
+          textAlign: 'center',
+          gap: '1rem'
+        }}
+      >
+        <Loader size="xl" variant="dots" />
+        <Text size="lg" color="dimmed">
+          {t('loadingCourseDetails')}
+        </Text>
       </Container>
     );
   }
@@ -212,6 +264,114 @@ function CourseView() {
 
   return (
     <Container size="lg" py="xl">
+      {/* NEW: First-time video popup */}
+      <Modal
+        opened={showVideoPopup}
+        onClose={closeVideoPopup}
+        fullScreen
+        padding={0}
+        withCloseButton={false}
+        overlayProps={{
+          color: '#000',
+          opacity: 0.95,
+        }}
+        styles={{
+          content: {
+            background: 'transparent',
+          },
+          body: {
+            padding: 0,
+            height: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+          },
+        }}
+      >
+        <Box
+          sx={{
+            position: 'relative',
+            width: '90%',
+            maxWidth: '1000px',
+            height: '80%',
+            maxHeight: '600px',
+          }}
+        >
+          {/* Close button */}
+          <ActionIcon
+            size="xl"
+            radius="xl"
+            color="white"
+            variant="filled"
+            onClick={closeVideoPopup}
+            sx={{
+              position: 'absolute',
+              top: -60,
+              right: 0,
+              zIndex: 1000,
+              background: 'rgba(255, 255, 255, 0.9)',
+              color: '#000',
+              '&:hover': {
+                background: 'rgba(255, 255, 255, 1)',
+              },
+            }}
+          >
+            <IconX size={24} />
+          </ActionIcon>
+
+          {/* Video container */}
+          <Box
+            sx={{
+              width: '100%',
+              height: '100%',
+              position: 'relative',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+            }}
+          >
+            <iframe
+              width="100%"
+              height="100%"
+              src="https://www.youtube.com/embed/uRXTp_C2jYk?autoplay=1&rel=0"
+              title="Welcome Video"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              style={{
+                borderRadius: '12px',
+              }}
+            />
+          </Box>
+
+          {/* Welcome text above video */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: -120,
+              left: 0,
+              right: 0,
+              textAlign: 'center',
+            }}
+          >
+            <Stack spacing="xs">
+              <Group position="center" spacing="xs">
+                <ThemeIcon size="lg" radius="xl" color="teal" variant="filled">
+                  <IconPlayerPlay size={20} />
+                </ThemeIcon>
+                <Title order={2} color="white" weight={600}>
+                  Welcome to your AI Learning Journey!
+                </Title>
+              </Group>
+              <Text color="rgba(255, 255, 255, 0.8)" size="lg">
+                Watch this quick intro to get the most out of your personalized course
+              </Text>
+            </Stack>
+          </Box>
+        </Box>
+      </Modal>
+
       {showNonCriticalError && (
          <Alert
          icon={<IconAlertCircle size={16} />}
@@ -466,7 +626,7 @@ function CourseView() {
                     </Box>
                   </Group>
 
-                  {course.status !== "CourseStatus.CREATING" && chapters.length > 0 && (
+                  {course.status !== "CourseStatus.CREATING" && chapters.length > 0 && chapters[0]?.id !== null && (
                     <Button
                       size="md"
                       variant="gradient"
@@ -609,7 +769,7 @@ function CourseView() {
 
                   <Card.Section sx={{ position: 'relative' }}>
                     <Image
-                      src={chapter.image_url || "https://cdn.prod.website-files.com/62b5697fd4d1b864ed69a0ac/636b26c56d140b27f7c14c1f_Blogthumbnail%20Kursstruktur%20plain%20(1)%20(1).png"}
+                      src={chapter.image_url || "https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png"}
                       alt={chapter.caption || t('chapters.defaultCaptionText', { chapterNumber: index + 1 })}
                       height={180}
                       sx={{
@@ -668,6 +828,7 @@ function CourseView() {
                       {chapter.caption || t('chapters.defaultTitleText', { chapterNumber: index + 1 })}
                     </Text>
 
+
                     <Text
                       color="dimmed"
                       size="sm"
@@ -696,26 +857,40 @@ function CourseView() {
                     </Text>
                   </Box>
 
-                  <Button
-                    variant={chapter.is_completed ? "light" : "filled"}
-                    color={chapter.is_completed ? "green" : "teal"}
-                    fullWidth
-                    mt="md"
-                    rightIcon={chapter.is_completed ? <IconCircleCheck size={16} /> : <IconChevronRight size={16} />}
-                    onClick={() => navigate(`/dashboard/courses/${courseId}/chapters/${chapter.id}`)}
-                    disabled={course.status === "CourseStatus.CREATING" && index > (chapters.length -1) }
-                    sx={(theme) =>
-                      chapter.is_completed
-                        ? {}
-                        : {
-                          background: theme.colorScheme === 'dark' ?
-                            `linear-gradient(45deg, ${theme.colors.teal[9]}, ${theme.colors.blue[8]})` :
-                            `linear-gradient(45deg, ${theme.colors.teal[6]}, ${theme.colors.cyan[5]})`,
-                        }
-                    }
-                  >
-                    {chapter.is_completed ? t('buttons.reviewChapter') : t('buttons.startChapter')}
-                  </Button>
+                  {chapter.id !== null && (
+                    <Button
+                      variant={chapter.is_completed ? "light" : "filled"}
+                      color={chapter.is_completed ? "green" : "teal"}
+                      fullWidth
+                      mt="md"
+                      rightIcon={chapter.is_completed ? <IconCircleCheck size={16} /> : <IconChevronRight size={16} />}
+                      onClick={() => navigate(`/dashboard/courses/${courseId}/chapters/${chapter.id}`)}
+                      disabled={chapter.id === null}
+                      sx={(theme) =>
+                        chapter.is_completed
+                          ? {}
+                          : {
+                            background: theme.colorScheme === 'dark' ?
+                              `linear-gradient(45deg, ${theme.colors.teal[9]}, ${theme.colors.blue[8]})` :
+                              `linear-gradient(45deg, ${theme.colors.teal[6]}, ${theme.colors.cyan[5]})`,
+                          }
+                      }
+                    >
+                      {chapter.is_completed ? t('buttons.reviewChapter') : t('buttons.startChapter')}
+                    </Button>
+                  )}
+                  {chapter.id === null && (
+                    <Button
+                      variant="light"
+                      color="gray"
+                      fullWidth
+                      mt="md"
+                      rightIcon={<IconCircleCheck size={16} />}
+                      disabled
+                    >
+                      {t('buttons.startChapter')}
+                    </Button>
+                  )}
                 </Card>
               );
             })}

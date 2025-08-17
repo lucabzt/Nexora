@@ -1,6 +1,6 @@
 from typing import List, Dict, Optional
 from pydantic import BaseModel, Field
-
+from datetime import datetime
 
 class CourseRequest(BaseModel):
     """Request schema for creating a course session."""
@@ -23,6 +23,9 @@ class Chapter(BaseModel):
     is_completed: bool = False  # Also useful for the frontend
     image_url: Optional[str] = None  # Optional image URL for the chapter
 
+    class Config:
+        from_attributes = True  # For Pydantic v2 (replaces orm_mode = True)
+
 
 class CourseInfo(BaseModel):
     """Schema for a list of courses."""
@@ -35,3 +38,14 @@ class CourseInfo(BaseModel):
     chapter_count: Optional[int] = None
     image_url: Optional[str] = None
     completed_chapter_count: Optional[int] = None
+    user_name: Optional[str] = None
+    is_public: Optional[bool] = None
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True  # For Pydantic v2 (replaces orm_mode = True)
+
+
+class UpdateCoursePublicStatusRequest(BaseModel):
+    """Schema for updating the public status of a course."""
+    is_public: bool

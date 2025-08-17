@@ -83,7 +83,25 @@
     "courseCreationComplete": "Course (ID: {{courseId}}) created successfully!"
   },
   "errors": {
-    "unknown": "Unknown error"
+    "unknown": "Unknown error",
+    "courseLimitReached": "Free tier usage limit reached!",
+    "maxCoursesCreated": "You can create a maximum of {{limit}} courses in the free plan.",
+    "maxActiveCourses": "You can have a maximum of {{limit}} active courses at the same time in the free plan.",
+    "upgradeToPremium": "Upgrade to Premium"
+  },
+  "premiumModal": {
+    "title": "Nexora Pro - Unlock More Possibilities",
+    "subtitle": "Get unlimited access to all premium features and create as many courses as you want!",
+    "limitReachedTitle": "Limit Reached!",
+    "limitReachedMessage": "You've reached your free course limit. Upgrade to Premium to create unlimited courses.",
+    "featuresTitle": "Premium Features",
+    "feature1": "Create unlimited courses",
+    "feature2": "Up to 100 active courses simultaneously",
+    "feature3": "Advanced AI features",
+    "feature4": "Higher document upload limits",
+    "feature5": "Priority support",
+    "upgradeNote": "Upgrade today and get unlimited access to all premium features for 30 days.",
+    "upgradeButton": "Upgrade Now"
   },
   "streaming": {
     "title": "Creating Your Course",

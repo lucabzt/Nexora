@@ -33,7 +33,8 @@ Style Guidelines:
 - Use concrete examples.
 - Do not include practice questions, that will be handled by the tester agent.
 - Make sure your component occupies 100% of its parent container
-- Please do not create slides but rather one continuous scrollable page
+- Do not create slides but rather one continuous scrollable page
+- font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
 Your explanation will be wrapped into the following background to mimic a scratchbook styling:
 const PaperBackground = ({ children }) => {
   return (
@@ -42,19 +43,6 @@ const PaperBackground = ({ children }) => {
     </div>
   );
 };
-
------
-IMPORTANT JSX RULE: When writing JSX components, never use unescaped apostrophes (') or quotes (") directly in JSX text content.
-Instead:
-1. Use curly braces with template literals: {"plot's data"}
-2. Use HTML entities: plot&apos;s data
-3. Use the preferred HTML entity &apos; for apostrophes
-4. Use &quot; for quotes
-
-Examples:
-❌ Wrong: <p>plot's data</p>
-✅ Correct: <p>plot&apos;s data</p>
-✅ Correct: <p>{"plot's data"}</p>
 
 ## Libraries and Plugins
 You will have access to several libraries and plugins which you will now receive documentation for:

@@ -24,6 +24,8 @@ from ..core import security
 from ..core.security import oauth
 from ..db.crud import users_crud
 from ..db.models.db_user import User as UserModel
+from ..db.crud import usage_crud
+
 
 logger = Logger(__name__)
 
@@ -63,6 +65,8 @@ async def login_user(form_data: OAuth2PasswordRequestForm, db: Session, response
     # Save last login time
     previous_last_login = user.last_login
     users_crud.update_user_last_login(db, user_id=str(user.id))
+    # Log the user login action
+    usage_crud.log_login(db, user_id=str(user.id))
 
 
     # Set the access token in the response cookie
@@ -73,6 +77,79 @@ async def login_user(form_data: OAuth2PasswordRequestForm, db: Session, response
     return auth_schema.APIResponseStatus(status="success",
                                          msg="Successfully logged in",
                                          data={ "last_login": previous_last_login.isoformat()})
+
+async def admin_login_as(current_user_id: str, user_id: str, db: Session, response: Response) -> auth_schema.APIResponseStatus:
+    """
+    Logs in as a specified user (admin only).
+    
+    Args:
+        user_id: The ID of the user to log in as
+        db: Database session
+        response: FastAPI response object for setting cookies
+        
+    Returns:
+        APIResponseStatus with login status
+        
+    Raises:
+        HTTPException: If user not found or not active
+    """
+    # Get the target user
+    user = users_crud.get_user_by_id(db, user_id)
+    if not user:
+        logger.warning("Attempted to log in as non-existent user ID: %s", user_id)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+        
+    # Check if the target user is active
+    if user.is_admin:
+        logger.warning("Attempted to log in as admin user: %s (ID: %s)", user.username, user.id)
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot log in as another admin user"
+        )
+        
+    # Log the admin action
+    logger.info(
+        "Admin login-as action: Admin ID: %s is logging in as user: %s (ID: %s)",
+        current_user_id, user.username, user.id
+    )
+
+    # Generate access token with user details
+    access_token = security.create_access_token(
+        data={
+            "sub": user.username,
+            "user_id": user.id,
+            "is_admin": user.is_admin,
+            "email": user.email
+        }
+    )
+
+    refresh_token = security.create_refresh_token(
+        data={
+            "sub": user.username,
+            "user_id": user.id,
+            "is_admin": user.is_admin,
+            "email": user.email
+        }
+    )
+
+    # Set the access and refresh tokens in the response cookies
+    security.set_access_cookie(response, access_token)
+    security.set_refresh_cookie(response, refresh_token)
+    
+    # Update last login time
+    previous_last_login = user.last_login
+    # No update on last login!
+    usage_crud.log_admin_login_as(db, user_who=current_user_id, user_as=str(user.id))
+
+    return auth_schema.APIResponseStatus(
+        status="success",
+        msg="Successfully logged in as user",
+        data={"last_login": previous_last_login.isoformat() if previous_last_login else None}
+    )
+
 
 
 async def register_user(user_data: user_schema.UserCreate, db: Session, response: Response) -> auth_schema.APIResponseStatus:
@@ -132,7 +209,7 @@ async def register_user(user_data: user_schema.UserCreate, db: Session, response
 
 
 
-async def logout_user(_: user_schema.User, __: Session, response: Response) -> auth_schema.APIResponseStatus:
+async def logout_user(user: user_schema.User, db: Session, response: Response) -> auth_schema.APIResponseStatus:
     """Logs out a user by clearing the access and refresh tokens."""
     
     # Disable the user session in the database if needed
@@ -142,6 +219,10 @@ async def logout_user(_: user_schema.User, __: Session, response: Response) -> a
     security.clear_access_cookie(response)
     # Clear the refresh token cookie
     security.clear_refresh_cookie(response)
+
+    # Log logout
+    
+    usage_crud.log_logout(db, user_id=str(user.id))
 
     return auth_schema.APIResponseStatus(status="success", msg="Successfully logged out")
     
@@ -166,6 +247,8 @@ async def refresh_token(token: Optional[str], db: Session, response: Response) -
               "is_admin": user.is_admin,
               "email": user.email}
     )
+    # Log the user refresh action
+    usage_crud.log_refresh(db, user_id=str(user.id))
 
     # Set the access token in the response cookie
     security.set_access_cookie(response, access_token)
@@ -313,6 +396,8 @@ async def handle_oauth_callback(request: Request, db: Session, website: str = "g
 
     # Update the user's last login time
     users_crud.update_user_last_login(db, user_id=str(db_user.id))
+    # Log the user login action
+    usage_crud.log_login(db, user_id=str(db_user.id))
 
     # Redirect to the frontend
     frontend_base_url = settings.FRONTEND_BASE_URL

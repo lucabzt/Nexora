@@ -1,6 +1,7 @@
 {
   "home": "Startseite",
   "dashboard": "Dashboard",
+  "createCourse": "Kurs erstellen",
   "newCourse": "Neuer Kurs",
   "courses": "Kurse",
   "settings": "Einstellungen",
@@ -8,11 +9,17 @@
   "login": "Anmelden",
   "register": "Registrieren",
   "logout": "Abmelden",
-  "about": "Über uns",
+  "about": "Über",
+  "pricing": "Preise",
   "impressum": "Impressum",
+  "privacy": "Datenschutz",
+  "admin": "Admin",
   "adminArea": "Admin Bereich",
+  "publicCourses": "Öffentliche Kurse",
+  "myCourses": "Meine Kurse",
+  "startpage": "Startseite",
   "title": "Navigation",
   "subtitle": "Wähle dein Ziel",
-  "nexora": "Über Nexora",
+  "nexora": "Nexora",
   "userAvatarFallbackAlt": "Benutzer-Avatar"
 }

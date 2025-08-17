@@ -8,6 +8,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from ..db.crud.courses_crud import search_courses
 from ..db.crud.chapters_crud import search_chapters_no_content, search_chapters_indexed
 from ..api.schemas.search import SearchResult
+from ..db.crud import usage_crud
+
 
 async def search_courses_and_chapters(
     db: Session,
@@ -97,5 +99,12 @@ async def search_courses_and_chapters(
         return 0 if title_match else 1
     
     results.sort(key=sort_key)
+
+    # Log
+    usage_crud.log_search(
+        db=db,
+        user_id=user_id,
+        query=query,
+    )
     
     return results[:limit]

@@ -27,6 +27,7 @@
       "username": "Benutzername",
       "profilePicture": "Profilbild",
       "email": "E-Mail",
+      "learningTime": "Lernzeit",
       "status": "Status",
       "role": "Rolle",
       "createdAt": "Erstellt am",
@@ -46,7 +47,8 @@
     "actions": {
       "editUser": "Benutzer bearbeiten",
       "changePassword": "Passwort ändern",
-      "deleteUser": "Benutzer löschen"
+      "deleteUser": "Benutzer löschen",
+      "loginAsUser": "Als Benutzer anmelden"
     },
     "noUsersFound": "Keine Benutzer gefunden"
   },

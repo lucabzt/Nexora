@@ -14,6 +14,11 @@ def get_chapter_by_id(db: Session, chapter_id: int) -> Optional[Chapter]:
     """Get chapter by ID"""
     return db.query(Chapter).filter(Chapter.id == chapter_id).first()
 
+def get_chapter_by_course_id_and_chapter_id(db: Session, course_id: int, chapter_id: int) -> Optional[Chapter]:
+    """Get chapter by course_id and ID. Unnecessary as chapters are unique per course."""
+    return db.query(Chapter).filter(Chapter.id == chapter_id, Chapter.course_id == course_id).first()
+
+
 
 def get_chapters_by_course_id(db: Session, course_id: int) -> List[Chapter]:
     """Get all chapters for a specific course, ordered by index"""
@@ -131,7 +136,11 @@ def search_chapters_indexed(db: Session, query: str, user_id: str, limit: int = 
     """
 
     stmt = text("""
-        SELECT chapters.*
+        SELECT 
+            chapters.id, chapters.course_id, chapters.index, 
+            chapters.caption, chapters.summary, chapters.content, 
+            chapters.time_minutes, chapters.is_completed, 
+            chapters.created_at, chapters.image_url
         FROM chapters
         JOIN courses ON courses.id = chapters.course_id
         WHERE courses.user_id = :user_id

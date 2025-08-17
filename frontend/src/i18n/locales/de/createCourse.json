@@ -1,6 +1,7 @@
 {
   "title": "Neuen Lernkurs erstellen",
   "mainTitle": "Neuen Lernkurs erstellen",
+  "subtitle": "Gestalten Sie Ihre persönliche Lernerfahrung",
   "form": {
     "language": {
       "label": "Kurssprache",
@@ -83,7 +84,25 @@
     "courseCreationComplete": "Kurs (ID: {{courseId}}) erfolgreich erstellt!"
   },
   "errors": {
-    "unknown": "Unbekannter Fehler"
+    "unknown": "Unbekannter Fehler",
+    "courseLimitReached": "Nutzungslimit der kostenlosen Version erreicht!",
+    "maxCoursesCreated": "Sie können maximal {{limit}} Kurse im kostenlosen Plan erstellen.",
+    "maxActiveCourses": "Sie können maximal {{limit}} aktive Kurse gleichzeitig im kostenlosen Plan haben.",
+    "upgradeToPremium": "Auf Premium upgraden"
+  },
+  "premiumModal": {
+    "title": "Nexora Pro - Erweitern Sie Ihre Möglichkeiten",
+    "subtitle": "Erhalten Sie unbegrenzten Zugriff auf alle Premium-Funktionen und erstellen Sie so viele Kurse wie Sie möchten!",
+    "limitReachedTitle": "Limit erreicht!",
+    "limitReachedMessage": "Sie haben Ihr kostenloses Kontingent an Kursen erreicht. Upgrade auf Premium, um unbegrenzt Kurse zu erstellen.",
+    "featuresTitle": "Premium-Funktionen",
+    "feature1": "Unbegrenzte Kurse erstellen",
+    "feature2": "Bis zu 100 aktive Kurse gleichzeitig",
+    "feature3": "Erweiterte KI-Funktionen",
+    "feature4": "Höhere Upload-Limits für Dokumente",
+    "feature5": "Priorisierter Support",
+    "upgradeNote": "Upgraden Sie noch heute und erhalten Sie 30 Tage lang unbegrenzten Zugriff auf alle Premium-Funktionen.",
+    "upgradeButton": "Jetzt upgraden"
   },
   "streaming": {
     "title": "Dein Kurs wird erstellt",

@@ -26,7 +26,7 @@ function OAuthCallbackPage() {
           message: t('notifications.oauthCallback.messageErrorProvider', { errorMessage }),
           color: 'red',
         });
-        navigate('/login?error=oauth_provider_error');
+        navigate('/auth/login?error=oauth_provider_error');
         return;
       }
 
@@ -61,7 +61,7 @@ function OAuthCallbackPage() {
           message: t('notifications.oauthCallback.messageErrorException'),
           color: 'red',
         });
-        navigate('/login?error=oauth_processing_exception');
+        navigate('/auth/login?error=oauth_processing_exception');
       }
     };
 

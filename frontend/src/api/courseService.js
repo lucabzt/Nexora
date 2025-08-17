@@ -1,6 +1,26 @@
 import { apiWithCookies } from './baseApi';
 
+// Debounce helper function
+const debounce = (func, wait) => {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+};
+
 export const courseService = {
+  // Get all courses for current user
+  getPublicCourses: async () => {
+    const response = await apiWithCookies.get('/courses/public');
+    return response.data;
+  },
+
+  updateCoursePublicStatus: async (courseId, isPublic) => {
+    const response = await apiWithCookies.patch(`/courses/${courseId}/public`, { is_public: isPublic });
+    return response.data;
+  },
+
   // Get all courses for current user
   getUserCourses: async () => {
     const response = await apiWithCookies.get('/courses/');
@@ -13,8 +33,29 @@ export const courseService = {
     (await apiWithCookies.get(`/courses/${courseId}`)).data,
 
   // Get all courses with pagination
-  getCourseChapters: async (courseId) =>
-    (await apiWithCookies.get(`/courses/${courseId}/chapters`)).data,
+  getCourseChapters: async (courseId) => {
+    const chapters = (await apiWithCookies.get(`/courses/${courseId}/chapters`)).data;
+    if (!chapters || chapters.length === 0) return [];
+    
+    // Sort chapters by index to ensure correct order
+    const sortedChapters = chapters.sort((a, b) => a.index - b.index);
+    
+    // Find the first missing index and remove everything from that point onwards
+    const result = [];
+    let expectedIndex = 1;
+    
+    for (const chapter of sortedChapters) {
+      if (chapter.index === expectedIndex) {
+        result.push(chapter);
+        expectedIndex++;
+      } else {
+        // Found a gap, stop here
+        break;
+      }
+    }
+    
+    return result;
+  },
 
   // Get a specific chapter by ID
   getChapter: async (courseId, chapterId) =>
@@ -44,6 +85,7 @@ export const courseService = {
   markChapterComplete: async (courseId, chapterId) =>
       // Use the actual chapter ID, not index
     (await apiWithCookies.patch(`/courses/${courseId}/chapters/${chapterId}/complete`)).data,
+
 
   getFiles: async (courseId) =>
   (await apiWithCookies.get(`/files/documents?course_id=${courseId}`)).data,

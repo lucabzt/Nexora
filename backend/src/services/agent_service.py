@@ -4,9 +4,11 @@ This file defines the service that coordinates the interaction between all the a
 import json
 import asyncio
 import traceback
+from typing import List
+from logging import getLogger
+
 
 from google.adk.sessions import InMemorySessionService
-from sqlalchemy.orm import Session
 
 from ..services import vector_service
 from ..services.course_content_service import CourseContentService
@@ -31,10 +33,17 @@ from ..db.models.db_course import CourseStatus
 from ..api.schemas.course import CourseRequest
 #from ..services.notification_service import WebSocketConnectionManager
 from ..db.models.db_course import Course
+from ..db.database import get_db_context
 from google.genai import types
 
-from .data_processors.pdf_processor import PDFProcessor  
+#from .data_processors.pdf_processor import PDFProcessor
 
+from ..db.models.db_file import Document, Image
+from ..db.crud import usage_crud
+
+
+
+logger = getLogger(__name__)
 
 
 class AgentService:
@@ -56,6 +65,7 @@ class AgentService:
 
         # define Rag service
         self.vector_service = vector_service.VectorService()
+        self.contentService = CourseContentService()
 
 
     @staticmethod
@@ -83,7 +93,7 @@ class AgentService:
                 )
 
 
-    async def create_course(self, user_id: str, course_id: int, request: CourseRequest, db: Session, task_id: str):#, ws_manager: WebSocketConnectionManager):
+    async def create_course(self, user_id: str, course_id: int, request: CourseRequest, task_id: str):#, ws_manager: WebSocketConnectionManager):
         """
         Main function for handling the course creation logic. Uses WebSocket for progress.
 
@@ -96,7 +106,20 @@ class AgentService:
         """
         course_db = None
         try:
-            print(f"[{task_id}] Starting course creation for user {user_id}")
+            logger.info("[%s] Starting course creation for user %s", task_id, user_id)
+
+            # Log at the beginning of the task -> prevent over usage of limit
+            with get_db_context() as db:
+                usage_crud.log_course_creation(
+                    db=db,
+                    user_id=user_id,
+                    course_id=course_id,
+                    detail=json.dumps(request.model_dump())
+                )
+                logger.info("[%s] Usage logged for course creation by user %s", task_id, user_id)
+
+
+
             # Create a memory session for the course creation
             session = await self.session_service.create_session(
                 app_name=self.app_name,
@@ -104,19 +127,19 @@ class AgentService:
                 state={}
             )
             session_id = session.id
-            print(f"[{task_id}] Session created: {session_id}")
+            logger.info("[%s] Session created: %s", task_id, session_id)
 
             # Retrieve documents from database
-            docs = documents_crud.get_documents_by_ids(db, request.document_ids)
-            images = images_crud.get_images_by_ids(db, request.picture_ids)
-            print(f"[{task_id}] Retrieved {len(docs)} documents and {len(images)} images.")
+            with get_db_context() as db:
+                docs: List[Document] = documents_crud.get_documents_by_ids(db, request.document_ids)
+                images: List[Image] = images_crud.get_images_by_ids(db, request.picture_ids)
+            
+            logger.info("[%s] Retrieved %d documents and %d images.", task_id, len(docs), len(images))
 
             #Add Data to ChromaDB for RAG
-            contentService = CourseContentService() 
-            contentService.process_course_documents(
-                course_id=str(course_id),
-                document_ids=request.document_ids,
-                db=db
+            self.contentService.process_course_documents(
+                course_id=course_id,
+                documents=docs
             )
 
             # Get a short course title and description from the info_agent
@@ -125,7 +148,7 @@ class AgentService:
                 state={},
                 content=self.query_service.get_info_query(request, docs, images,)
             )
-            print(f"[{task_id}] InfoAgent response: {info_response['title']}")
+            logger.info("[%s] InfoAgent response: %s", task_id, info_response['title'])
 
             # Get unsplash image url
             image_response = await self.image_agent.run(
@@ -136,17 +159,18 @@ class AgentService:
             )
 
             # Update course in database
-            course_db = courses_crud.update_course(
-                db=db,
-                course_id=course_id,
-                session_id=session_id,
-                title=info_response['title'],
-                description=info_response['description'],
-                image_url=image_response['explanation'],
-                total_time_hours=request.time_hours,
-            )
-            if not course_db:
-                raise ValueError(f"Failed to update course in DB for user {user_id} with course_id {course_id}")
+            with get_db_context() as db:
+                course_db = courses_crud.update_course(
+                    db=db,
+                    course_id=course_id,
+                    session_id=session_id,
+                    title=info_response['title'],
+                    description=info_response['description'],
+                    image_url=image_response['explanation'],
+                    total_time_hours=request.time_hours,
+                )
+                if not course_db:
+                    raise ValueError(f"Failed to update course in DB for user {user_id} with course_id {course_id}")
             print(f"[{task_id}] Course updated in DB with ID: {course_id}")
 
             # Send Notification to WebSocket
@@ -164,10 +188,11 @@ class AgentService:
 
  
             # Bind documents to this course
-            for doc in docs:
-                documents_crud.update_document(db, int(doc.id), course_id=course_id)
-            for img in images:
-                images_crud.update_image(db, int(img.id), course_id=course_id)
+            with get_db_context() as db:
+                for doc in docs:
+                    documents_crud.update_document(db, int(doc.id), course_id=course_id)
+                for img in images:
+                    images_crud.update_image(db, int(img.id), course_id=course_id)
             print(f"[{task_id}] Documents and images bound to course.")
 
             # Notify WebSocket about course info
@@ -186,30 +211,24 @@ class AgentService:
             print(f"[{task_id}] PlannerAgent responded with {len(response_planner.get('chapters', []))} chapters.")
 
             # Update course in database
-            course_db = courses_crud.update_course(
-                db=db,
-                course_id=course_id,
-                chapter_count=len(response_planner["chapters"])
-            )
+            with get_db_context() as db:
+                course_db = courses_crud.update_course(
+                    db=db,
+                    course_id=course_id,
+                    chapter_count=len(response_planner["chapters"])
+                )
             # Send notification to WebSocket that course info is being updated
             ###await ws_manager.send_json_message(task_id, {"type": "course_info", "data": "updating course info"})
 
             # Save chapters to state
             self.state_manager.save_chapters(user_id, course_id, response_planner["chapters"])
 
-            # Process each chapter and stream as it's created
-            for idx, topic in enumerate(response_planner["chapters"]):
-                ragInfos = set()
-                queryRes = self.vector_service.search_by_course_id(course_id, topic['caption'])
-                for doc in queryRes['documents']:
-                    for str_inf in doc:
-                        ragInfos.add(str_inf)
-                for content in topic['content']:
-                    queryRes = self.vector_service.search_by_course_id(course_id, content)
-                    for doc in queryRes['documents']:
-                        for str_inf in doc:
-                            ragInfos.add(str_inf)
-                ragInfos = list(set(ragInfos))
+            async def process_chapter(idx: int, topic: dict):
+
+                logger.info("[%s] Processing chapter %d: %s", task_id, idx + 1, topic['caption'])
+
+                # Get RAG infos for the topic
+                ragInfos = self.contentService.get_rag_infos(course_id, topic)
 
                 # Schedule image and coding agents to run concurrently as they do not depend on each other
                 coding_task = self.coding_agent.run(
@@ -233,29 +252,45 @@ class AgentService:
                 summary = "\n".join(topic['content'][:3])
 
                 # Save the chapter in db first
-                chapter_db = chapters_crud.create_chapter(
-                    db=db,
-                    course_id=course_id,
-                    index=idx + 1,
-                    caption=topic['caption'],
-                    summary=summary,
-                    content=response_code['explanation'] if 'explanation' in response_code else "() => {<p>Something went wrong</p>}",
-                    time_minutes=topic['time'],
-                    image_url=image_response['explanation'],
-                )
+                with get_db_context() as db:
+                    chapter_db = chapters_crud.create_chapter(
+                        db=db,
+                        course_id=course_id,
+                        index=idx + 1,
+                        caption=topic['caption'],
+                        summary=summary,
+                        content=response_code['explanation'] if 'explanation' in response_code else "() => {<p>Something went wrong</p>}",
+                        time_minutes=topic['time'],
+                        image_url=image_response['explanation'],
+                    )
 
                 # Get response from tester agent
                 response_tester = await self.tester_agent.run(
                     user_id=user_id,
                     state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
-                    content=self.query_service.get_tester_query(user_id, course_id, idx, response_code["explanation"], request.language, request.difficulty)
+                    content=self.query_service.get_tester_query(user_id, course_id, idx, response_code["explanation"], request.language, request.difficulty) 
                 )
 
+                logger.info("Finished")
+
                 # Save questions in db
-                await self.save_questions(db, response_tester['questions'], chapter_db.id)
+                with get_db_context() as db:
+                    await self.save_questions(db, response_tester['questions'], chapter_db.id)
+                
+                return chapter_db
+
+            # Process all chapters in parallel
+            chapter_tasks = [
+                process_chapter(idx, topic) 
+                for idx, topic in enumerate(response_planner["chapters"])
+            ]
+            
+            # Wait for all chapters to be processed
+            await asyncio.gather(*chapter_tasks)
 
             # Update course status to finished
-            courses_crud.update_course_status(db, course_id, CourseStatus.FINISHED)
+            with get_db_context() as db:
+                courses_crud.update_course_status(db, course_id, CourseStatus.FINISHED)
 
             # Send completion signal
             #await ws_manager.send_json_message(task_id, {
@@ -271,8 +306,9 @@ class AgentService:
             # Log detailed error traceback here if possible, e.g., import traceback; traceback.print_exc()
             if course_db:
                 try:
-                    courses_crud.update_course_status(db, course_id, CourseStatus.FAILED)
-                    courses_crud.update_course(db, course_id, error_msg=error_message)
+                    with get_db_context() as db:
+                        courses_crud.update_course_status(db, course_id, CourseStatus.FAILED)
+                        courses_crud.update_course(db, course_id, error_msg=error_message)
                     print(f"[{task_id}] Course {course_id} status updated to FAILED due to error.")
                 except Exception as db_error:
                     print(f"[{task_id}] Additionally, failed to update course status to FAILED: {db_error}")
@@ -294,7 +330,8 @@ class AgentService:
             # and not managed by FastAPI's Depends. For now, assuming Depends handles it.
             # db.close() # If db session is task-specific and not managed by Depends.
 
-    async def grade_question(self, user_id: str, course_id: int, question: str, correct_answer: str, users_answer: str):
+    async def grade_question(self, user_id: str, course_id: int, question: str, correct_answer: str, users_answer: str, 
+                             chapter_id: int, db):
         """ Receives an open text question plus answer from the user and returns received points and short feedback """
         query = self.query_service.get_grader_query(question, correct_answer, users_answer)
         grader_response = await self.grader_agent.run(
@@ -302,5 +339,23 @@ class AgentService:
             state=self.state_manager.get_state(user_id=user_id, course_id=course_id),
             content=query
         )
+
+        # Log usage of grading
+        usage_crud.log_usage(
+            db=db,
+            user_id=user_id,
+            action="grade_question",
+            course_id=course_id,
+            chapter_id=chapter_id,
+            details=json.dumps({
+                "course_id": course_id,
+                "question": question,
+                "correct_answer": correct_answer,
+                "users_answer": users_answer,
+                "points": grader_response['points'],
+                "explanation": grader_response['explanation']
+            })
+        )
+
         return grader_response['points'], grader_response['explanation']
 

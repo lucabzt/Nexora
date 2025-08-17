@@ -41,8 +41,9 @@ import userService from '../api/userService';
 import { toast } from 'react-toastify';
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IconLanguage } from '@tabler/icons-react';
+import { IconLanguage, IconSun, IconMoonStars } from '@tabler/icons-react';
 import LanguageSettingsCard from '../components/LanguageSettingsCard';
+import { Switch, useMantineColorScheme } from '@mantine/core';
 
 // Create styles for the SettingsPage components
 const useStyles = createStyles((theme) => ({
@@ -90,6 +91,8 @@ function SettingsPage() {
   const { classes } = useStyles();
   const theme = useMantineTheme();
   const { user, setUser, loading: authLoading } = useAuth();
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const dark = colorScheme === 'dark';
   const { t, i18n } = useTranslation('settings');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -258,6 +261,38 @@ function SettingsPage() {
   if (authLoading) {
     return (
       <Container className={classes.settingsContainer} size="xl" px="xs">
+        <Title order={2} className={classes.sectionTitle}>
+          <Group spacing="sm">
+            <IconSettings size={24} />
+            {t('appearanceSettings', 'Appearance')}
+          </Group>
+        </Title>
+        
+        <Paper withBorder p="md" radius="md" className={classes.cardContainer} mb="xl">
+          <Group position="apart">
+            <div>
+              <Text weight={600}>{t('darkMode', 'Dark Mode')}</Text>
+              <Text size="sm" color="dimmed">
+                {dark ? t('darkModeOn', 'Dark theme is enabled') : t('darkModeOff', 'Light theme is enabled')}
+              </Text>
+            </div>
+            <Switch
+              checked={dark}
+              onChange={() => toggleColorScheme()}
+              size="lg"
+              onLabel={<IconSun size={16} stroke={2.5} color={theme.colors.yellow[4]} />}
+              offLabel={<IconMoonStars size={16} stroke={2.5} color={theme.colors.blue[6]} />}
+            />
+          </Group>
+        </Paper>
+        
+        <Title order={2} className={classes.sectionTitle} mt="xl">
+          <Group spacing="sm">
+            <IconSettings size={24} />
+            {t('generalSettings', 'General Settings')}
+          </Group>
+        </Title>
+        
         <Paper withBorder shadow="md" p="xl" radius="md">
           <Group position="center">
             <Text size="lg" weight={500}>{t('loadingUserSettings', 'Loading user settings...')}</Text>
@@ -304,6 +339,40 @@ function SettingsPage() {
       )}
 
       <SimpleGrid cols={1} spacing="xl" breakpoints={[{ minWidth: 'md', cols: 1 }]}>
+        {/* Appearance Settings Card */}
+        <Card shadow="sm" padding="lg" radius="md" withBorder className={classes.cardContainer}>
+          <Card.Section p="md" bg={theme.colorScheme === 'dark' ? theme.fn.rgba(theme.colors.blue[9], 0.2) : theme.colors.blue[0]}>
+            <Group position="apart">
+              <Group spacing="xs">
+                <IconSettings size={24} stroke={1.5} color={theme.colors.blue[theme.colorScheme === 'dark' ? 4 : 6]} />
+                <Title order={3}>{t('appearance.title', 'Appearance')}</Title>
+              </Group>
+              <Badge color="blue" variant="light">{t('appearance.theme', 'Theme')}</Badge>
+            </Group>
+          </Card.Section>
+          
+          <Box mt="md" p="md">
+            <Group position="apart">
+              <div>
+                <Text weight={600}>{t('appearance.darkMode', 'Dark Mode')}</Text>
+                <Text size="sm" color="dimmed">
+                  {dark 
+                    ? t('appearance.darkModeOn', 'Dark theme is enabled') 
+                    : t('appearance.darkModeOff', 'Light theme is enabled')}
+                </Text>
+              </div>
+              <Switch
+                checked={dark}
+                onChange={() => toggleColorScheme()}
+                size="lg"
+                onLabel={<IconSun size={16} stroke={2.5} color={theme.colors.yellow[4]} />}
+                offLabel={<IconMoonStars size={16} stroke={2.5} color={theme.colors.blue[6]} />}
+              />
+            </Group>
+          </Box>
+        </Card>
+
+        {/* General Information Card */}
         <Card shadow="sm" padding="lg" radius="md" withBorder className={classes.cardContainer}>
           <Card.Section p="md" bg={theme.colorScheme === 'dark' ? theme.fn.rgba(theme.colors[theme.primaryColor][9], 0.2) : theme.colors[theme.primaryColor][0]}>
             <Group position="apart">

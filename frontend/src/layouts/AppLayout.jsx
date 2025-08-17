@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Outlet,
   Link as RouterLink,
   useNavigate,
   useLocation,
+  useMatch,
 } from "react-router-dom";
 import {
   AppShell,
+  Header,
   Navbar,
   Group,
   Title,
@@ -22,8 +25,17 @@ import {
   ThemeIcon,
   Stack,
   Divider,
+  Drawer,
+  Paper,
 } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
+import {
+  fadeIn,
+  slideUp,
+  scaleIn,
+  buttonHover,
+  pageTransition,
+} from "../utils/animations";
+import { useMediaQuery, useViewportSize } from "@mantine/hooks";
 import {
   IconSettings,
   IconSun,
@@ -35,11 +47,15 @@ import {
   IconChartLine,
   IconShieldCheck,
   IconInfoCircle,
+  IconWorld,
   IconChevronRight,
   IconX,
   IconMenu2,
+  IconFileExport,
+  IconBook,
 } from "@tabler/icons-react";
 import AppFooter from "../components/AppFooter";
+import TrackActivity from "../components/TrackActivity";
 import { useAuth } from "../contexts/AuthContext";
 import { useTranslation } from "react-i18next";
 import CourseSidebar from "../components/CourseSidebar"; // Import the new component
@@ -169,6 +185,13 @@ function AppLayout() {
   const dark = colorScheme === "dark";
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [opened, setOpened] = useState(!isMobile);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { width: viewportWidth } = useViewportSize();
+  // Scale bottom navigation elements on very small screens (min 80% up to 100%)
+  const scale = Math.min(1, Math.max(0.8, (viewportWidth || 420) / 580));
+  const bottomIconSize = Math.round(28 * scale);
+  const bottomTextSize = Math.max(10, Math.round(12 * scale));
+  const bottomPadding = Math.max(6, Math.round(6 * scale));
 
   const [course, setCourse] = useState(null);
   const [chapters, setChapters] = useState([]);
@@ -233,23 +256,22 @@ function AppLayout() {
       to: "/dashboard",
     },
     {
+      icon: <IconBook size={20} />,
+      color: "violet",
+      label: t("myCourses", { ns: "navigation", defaultValue: "My Courses" }),
+      to: "/dashboard/my-courses",
+    },
+    {
       icon: <IconPlus size={20} />,
       color: "teal",
       label: t("newCourse", { ns: "navigation" }),
       to: "/dashboard/create-course",
     },
-    //{ icon: <IconChartLine size={20} />, color: 'grape', label: t('statistics', { ns: 'navigation' }), to: '/dashboard/statistics' },
     {
-      icon: <IconSettings size={20} />,
-      color: "grape",
-      label: t("settings", { ns: "navigation" }),
-      to: "/dashboard/settings",
-    },
-    {
-      icon: <IconInfoCircle size={20} />,
-      color: "gray",
-      label: t("nexora", { ns: "navigation" }),
-      to: "/",
+      icon: <IconWorld size={22} />,
+      color: "orange",
+      label: t("publicCourses", { ns: "navigation", defaultValue: "Public Courses" }),
+      to: "/dashboard/public-courses",
     },
     // Admin link - only shown to admin users
     ...(user?.is_admin
@@ -259,6 +281,18 @@ function AppLayout() {
             color: "red",
             label: t("adminArea", { ns: "navigation" }),
             to: "/admin",
+          },
+          {
+            icon: <IconFileExport size={20} />,
+            color: "violet",
+            label: "Anki Generator",
+            to: "/dashboard/anki-generator",
+          },
+          {
+            icon: <IconChartLine size={20} />,
+            color: "grape",
+            label: t("statistics", { ns: "navigation" }),
+            to: "/dashboard/statistics",
           },
         ]
       : []),
@@ -283,53 +317,208 @@ function AppLayout() {
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate("/auth/login");
   };
+
+  const isDashboard = useMatch("/dashboard");
 
   return (
     <>
-      {/* Floating menu button for mobile */}
-      {isMobile && !opened && (
-        <ActionIcon
-          onClick={toggleNavbar}
-          size="xl"
-          radius="xl"
-          variant="filled"
-          color={dark ? "blue" : "blue.6"}
-          sx={{
-            position: "fixed",
-            bottom: 20,
-            left: 20,
-            zIndex: 1000,
-            boxShadow: theme.shadows.lg,
-            transition: "transform 0.2s",
-            "&:hover": {
-              transform: "scale(1.1)",
-            },
-          }}
-        >
-          <IconMenu2 size={24} />
-        </ActionIcon>
-      )}
+      <TrackActivity user={user} />
+      {/* FIX 1: Removed the <AnimatePresence> wrapper from here. It was causing errors by wrapping multiple static children. */}
       <AppShell
         styles={{
           main: {
-            background: dark ? theme.colors.dark[8] : theme.colors.gray[0],
+            background: dark
+              ? `linear-gradient(160deg, ${theme.colors.dark[8]} 0%, ${theme.colors.dark[7]} 100%)`
+              : `linear-gradient(160deg, ${theme.colors.gray[0]} 0%, ${theme.colors.gray[2]} 100%)`,
             display: "flex",
             flexDirection: "column",
             minHeight: "100vh",
             width: "100%",
             paddingRight: 0,
             overflowX: "hidden",
+            // Add subtle pattern overlay
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              opacity: dark ? 0.03 : 0.04,
+              backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
+              backgroundSize: "18px 18px",
+              pointerEvents: "none",
+            },
+            // Ensure page content and footer are not covered by the mobile bottom navigation
+            paddingBottom: isMobile ? 'calc(96px + env(safe-area-inset-bottom))' : 0,
+            position: "relative",
           },
         }}
         navbarOffsetBreakpoint="sm"
         asideOffsetBreakpoint="sm"
+        header={
+          isMobile ? (
+            <Header
+              height={{ base: 56, md: 0 }}
+              p="md"
+              sx={(theme) => ({
+                background:
+                  dark
+                    ? `linear-gradient(135deg, ${theme.colors.dark[7]} 0%, ${theme.colors.dark[8]} 100%)`
+                    : `linear-gradient(135deg, ${theme.white} 0%, ${theme.colors.gray[0]} 100%)`,
+                borderBottom: `1px solid ${
+                  dark ? theme.colors.dark[6] : theme.colors.gray[2]
+                }`,
+                boxShadow: dark
+                  ? `0 4px 12px ${theme.colors.dark[9]}50`
+                  : `0 4px 12px ${theme.colors.gray[3]}30`,
+                zIndex: 200,
+                position: "relative",
+              })}
+            >
+              <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
+                <Group spacing="xs">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
+                  >
+                    <img
+                      src={theme.colorScheme === "dark" ? "/logo_white.png" : "/logo_black.png"}
+                      alt="Logo"
+                      style={{
+                        height: 26,
+                        width: "auto",
+                        filter: "drop-shadow(0 2px 4px rgba(139, 92, 246, 0.3))",
+                        transition: "all 0.3s ease",
+                      }}
+                      className="logo-hover"
+                    />
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1, duration: 0.5 }}
+                  >
+                    <Title
+                      order={3}
+                      size="1.4rem"
+                      component={RouterLink}
+                      to="/dashboard"
+                      sx={(theme) => ({
+                        textDecoration: "none",
+                        background: `linear-gradient(135deg, ${theme.colors.teal[6]}, ${theme.colors.cyan[4]})`,
+                        backgroundClip: "text",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        fontWeight: 800,
+                        letterSpacing: "-1px",
+                        display: "inline-block",
+                        position: "relative",
+                        padding: theme.spacing.xs,
+                        transition: "all 0.3s ease",
+                        "&:hover": {
+                          transform: "scale(1.02)",
+                          cursor: "pointer",
+                          textShadow: "0 0 8px rgba(99, 179, 237, 0.3)",
+                        },
+                      })}
+                    >
+                      {t("title", { ns: "app" })}
+                    </Title>
+                  </motion.div>
+                </Group>
+                <Box sx={{ flexGrow: 1 }} />
+                <Group spacing="sm">
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <ActionIcon
+                      variant="outline"
+                      color={dark ? "yellow" : "blue"}
+                      onClick={() => toggleColorScheme()}
+                      size="lg"
+                      radius="md"
+                      sx={{
+                        transition: "all 0.3s ease",
+                        "&:hover": {
+                          transform: "scale(1.05)",
+                          boxShadow: dark
+                            ? "0 0 15px rgba(255, 212, 59, 0.3)"
+                            : "0 0 15px rgba(34, 139, 230, 0.3)",
+                        },
+                      }}
+                      aria-label={t("colorSchemeToggleTitle", {
+                        ns: "app",
+                        defaultValue: "Toggle color scheme",
+                      })}
+                    >
+                      {dark ? (
+                        <motion.div
+                          key="sun"
+                          initial={{ rotate: -30, opacity: 0 }}
+                          animate={{ rotate: 0, opacity: 1 }}
+                          exit={{ rotate: 30, opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <IconSun size={20} />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="moon"
+                          initial={{ rotate: 30, opacity: 0 }}
+                          animate={{ rotate: 0, opacity: 1 }}
+                          exit={{ rotate: -30, opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <IconMoonStars size={20} />
+                        </motion.div>
+                      )}
+                    </ActionIcon>
+                  </motion.div>
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <ActionIcon
+                      variant="outline"
+                      onClick={() => setMobileMenuOpen((o) => !o)}
+                      size="lg"
+                      radius="md"
+                      sx={{
+                        transition: "all 0.3s ease",
+                        "&:hover": {
+                          backgroundColor: dark
+                            ? theme.colors.dark[5]
+                            : theme.colors.gray[1],
+                        },
+                      }}
+                      aria-label={t("burgerAriaLabel", {
+                        ns: "app",
+                        defaultValue: "Toggle navigation",
+                      })}
+                    >
+                      <motion.div
+                        animate={mobileMenuOpen ? { rotate: 90 } : { rotate: 0 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                      >
+                        <IconMenu2 size={20} />
+                      </motion.div>
+                    </ActionIcon>
+                  </motion.div>
+                </Group>
+              </div>
+            </Header>
+          ) : undefined
+        }
         navbar={
           <Navbar
             p={opened ? "md" : "xs"}
             hiddenBreakpoint="sm"
-            hidden={isMobile && !opened}
+            hidden={isMobile || (!isMobile && !opened)}
             width={{
               sm: opened ? 250 : isMobile ? 0 : 80,
               lg: opened ? 300 : isMobile ? 0 : 80,
@@ -345,7 +534,7 @@ function AppLayout() {
                 ? `4px 0 12px ${theme.colors.dark[9]}30`
                 : `4px 0 12px ${theme.colors.gray[3]}20`,
               transition: "width 0.3s ease, padding 0.3s ease",
-              display: isMobile && !opened ? "none" : "flex",
+              display: isMobile ? "none" : "flex",
               flexDirection: "column",
               zIndex: 150,
             })}
@@ -416,8 +605,6 @@ function AppLayout() {
                         transform: "scale(1.02)",
                         cursor: "pointer",
                       },
-
-                      
                     })}
                   >
                     {t("title", { ns: "app" })}
@@ -427,7 +614,9 @@ function AppLayout() {
 
               <ActionIcon
                 variant="outline"
-                onClick={() => setOpened((o) => !o)}
+                onClick={() =>
+                  isMobile ? setMobileMenuOpen(true) : setOpened((o) => !o)
+                }
                 size="lg"
                 radius="md"
                 sx={{
@@ -441,33 +630,37 @@ function AppLayout() {
                   defaultValue: "Toggle navigation",
                 })}
               >
-                {opened ? <IconX size={18} /> : <IconMenu2 size={18} />}
+                {isMobile ? <IconMenu2 size={18} /> : opened ? <IconX size={18} /> : <IconMenu2 size={18} />}
               </ActionIcon>
             </Box>
 
             {/* Navigation Links - Scrollable Section */}
-            <Navbar.Section 
-              grow 
+            <Navbar.Section
+              grow
               mt="xs"
               sx={{
-                overflowY: 'auto',
-                overflowX: 'hidden',
-                flex: '1 1 auto',
-                '&::-webkit-scrollbar': {
-                  width: '6px',
+                overflowY: "auto",
+                overflowX: "hidden",
+                flex: "1 1 auto",
+                "&::-webkit-scrollbar": {
+                  width: "6px",
                 },
-                '&::-webkit-scrollbar-track': {
-                  background: 'transparent',
+                "&::-webkit-scrollbar-track": {
+                  background: "transparent",
                 },
-                '&::-webkit-scrollbar-thumb': {
-                  backgroundColor: dark ? theme.colors.dark[6] : theme.colors.gray[4],
-                  borderRadius: '3px',
-                  '&:hover': {
-                    backgroundColor: dark ? theme.colors.dark[5] : theme.colors.gray[5],
+                "&::-webkit-scrollbar-thumb": {
+                  backgroundColor: dark
+                    ? theme.colors.dark[6]
+                    : theme.colors.gray[4],
+                  borderRadius: "3px",
+                  "&:hover": {
+                    backgroundColor: dark
+                      ? theme.colors.dark[5]
+                      : theme.colors.gray[5],
                   },
                 },
-                paddingRight: '4px',
-                marginRight: '-4px',
+                paddingRight: "4px",
+                marginRight: "-4px",
               }}
             >
               <Box pb="md">
@@ -486,80 +679,79 @@ function AppLayout() {
                 borderTop: `1px solid ${
                   dark ? theme.colors.dark[5] : theme.colors.gray[2]
                 }`,
-                position: 'sticky',
+                position: "sticky",
                 bottom: 0,
                 zIndex: 100,
                 paddingBottom: theme.spacing.sm,
-                marginTop: 'auto',
+                marginTop: "auto",
               }}
             >
               {opened ? (
                 // Full profile menu when expanded
                 <Menu shadow="md" width={220} withinPortal={true} zIndex={300}>
                   <Menu.Target>
-                    <UnstyledButton
+                    <Box
+                      component={motion.div}
+                      key={location.pathname}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
                       sx={{
-                        padding: theme.spacing.xs,
-                        borderRadius: theme.radius.md,
-                        transition: "all 0.2s ease",
+                        flexGrow: 1,
                         width: "100%",
-                        "&:hover": {
-                          backgroundColor: dark
-                            ? theme.colors.dark[6]
-                            : theme.colors.gray[1],
-                          transform: "scale(1.02)",
-                        },
                       }}
                     >
-                      <Group spacing="xs">
-                        <Avatar
-                          key={
-                            avatarSrc || (user ? user.id : "app-layout-avatar")
-                          }
-                          src={avatarSrc}
-                          radius="xl"
-                          alt={
-                            user.username ||
-                            t("userAvatarAlt", {
-                              ns: "app",
-                              defaultValue: "User avatar",
-                            })
-                          }
-                          color="cyan"
-                          sx={{
-                            cursor: "pointer",
-                            border: `2px solid ${theme.colors.cyan[5]}40`,
-                            transition: "all 0.2s ease",
-                            "&:hover": {
-                              transform: "scale(1.05)",
-                              border: `2px solid ${theme.colors.cyan[5]}`,
-                            },
-                          }}
-                        >
-                          {!avatarSrc && user.username ? (
-                            user.username.substring(0, 2).toUpperCase()
-                          ) : !avatarSrc ? (
-                            <IconUser size={18} />
-                          ) : null}
-                        </Avatar>
-                        <Box>
-                          <Text size="sm" weight={500}>
-                            {user.username}
-                          </Text>
-                          <Badge
-                            size="xs"
-                            variant="light"
+                      <UnstyledButton>
+                        <Group spacing="xs">
+                          <Avatar
+                            key={
+                              avatarSrc || (user ? user.id : "app-layout-avatar")
+                            }
+                            src={avatarSrc}
+                            radius="xl"
+                            alt={
+                              user.username ||
+                              t("userAvatarAlt", {
+                                ns: "app",
+                                defaultValue: "User avatar",
+                              })
+                            }
                             color="cyan"
-                            sx={{ textTransform: "none" }}
+                            sx={{
+                              cursor: "pointer",
+                              border: `2px solid ${theme.colors.cyan[5]}40`,
+                              transition: "all 0.2s ease",
+                              "&:hover": {
+                                transform: "scale(1.05)",
+                                border: `2px solid ${theme.colors.cyan[5]}`,
+                              },
+                            }}
                           >
-                            {t("onlineStatusBadge", {
-                              ns: "app",
-                              defaultValue: "Online",
-                            })}
-                          </Badge>
-                        </Box>
-                      </Group>
-                    </UnstyledButton>
+                            {!avatarSrc && user.username ? (
+                              user.username.substring(0, 2).toUpperCase()
+                            ) : !avatarSrc ? (
+                              <IconUser size={18} />
+                            ) : null}
+                          </Avatar>
+                          <Box>
+                            <Text size="sm" weight={500}>
+                              {user.username}
+                            </Text>
+                            <Badge
+                              size="xs"
+                              variant="light"
+                              color="cyan"
+                              sx={{ textTransform: "none" }}
+                            >
+                              {t("onlineStatusBadge", {
+                                ns: "app",
+                                defaultValue: "Online",
+                              })}
+                            </Badge>
+                          </Box>
+                        </Group>
+                      </UnstyledButton>
+                    </Box>
                   </Menu.Target>
                   <Menu.Dropdown
                     sx={{
@@ -608,7 +800,7 @@ function AppLayout() {
                     <Menu.Item
                       icon={<IconInfoCircle size={14} />}
                       onClick={() => {
-                        navigate("/about");
+                        navigate("/");
                       }}
                       sx={{
                         "&:hover": {
@@ -618,7 +810,7 @@ function AppLayout() {
                         },
                       }}
                     >
-                      {t("about", { ns: "navigation" })}
+                      {t("startpage", { ns: "navigation" })}
                     </Menu.Item>
 
                     <Divider />
@@ -731,15 +923,206 @@ function AppLayout() {
           </Navbar>
         }
       >
-        <Box sx={{ flex: 1 }}>
-          <Outlet />
-        </Box>
-        {!useLocation().pathname.match(
+        {/* FIX 2: Added <AnimatePresence> here, in the correct location around the content that changes. */}
+        <AnimatePresence mode="wait">
+          <Box
+            component={motion.div}
+            key={location.pathname} // This key is what AnimatePresence watches to trigger animations
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            sx={{
+              flex: 1,
+              padding: theme.spacing.md,
+              paddingTop: isMobile ? theme.spacing.xl : theme.spacing.md,
+              paddingBottom: theme.spacing.xl,
+              maxWidth: "100%",
+              overflowX: "hidden",
+              position: "relative",
+            }}
+          >
+            <Outlet />
+          </Box>
+        </AnimatePresence>
+
+        {!location.pathname.match(
           /^\/dashboard\/courses\/.*\/chapters\/.*$/
         ) && <AppFooter />}
       </AppShell>
+      
+
+      {/* Mobile Drawer Menu */}
+      {isMobile && (
+        <Drawer
+          opened={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          position="bottom"
+          size="auto%"
+          padding="md"
+          withCloseButton
+          overlayProps={{ opacity: 0.45, blur: 2 }}
+          styles={{
+            drawer: {
+              // Position above bottom navigation (96px + safe area)
+              maxHeight: 'calc(100% - 96px - env(safe-area-inset-bottom))',
+              // Ensure it's above the bottom navigation
+              zIndex: 1000,
+            },
+            content: {
+              // Ensure content is scrollable
+              display: 'flex',
+              flexDirection: 'column',
+              paddingBottom: 'calc(96px + env(safe-area-inset-bottom))',
+            },
+          }}
+        >
+          <Stack spacing="sm" sx={{ height: '100%', overflow: 'hidden' }}>
+            {/* Navigation Links */}
+            <Box sx={{
+              flex: 1,
+              overflowY: 'auto',
+              paddingRight: 8,
+              marginRight: -8,
+              paddingBottom: 16,
+              '&::-webkit-scrollbar': { width: 6 },
+              '&::-webkit-scrollbar-track': {
+                background: 'transparent',
+                marginTop: 8,
+                marginBottom: 8,
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: dark ? theme.colors.dark[5] : theme.colors.gray[4],
+                borderRadius: 3,
+                '&:hover': {
+                  backgroundColor: dark ? theme.colors.dark[4] : theme.colors.gray[5],
+                },
+              },
+            }}>
+              <Stack spacing="xs">
+                {mainLinksData.map((link) => (
+                  <MainLink
+                    {...link}
+                    key={`mobile-${link.to}`}
+                    isActive={currentPath === link.to}
+                    collapsed={false}
+                    onNavigate={() => {
+                      setMobileMenuOpen(false);
+                    }}
+                  />
+                ))}
+                
+                {/* Settings Link */}
+                <MainLink
+                  icon={<IconSettings size={20} />}
+                  color="gray"
+                  label={t("settings", { ns: "navigation" })}
+                  to="/dashboard/settings"
+                  isActive={currentPath === "/dashboard/settings"}
+                  collapsed={false}
+                  onNavigate={() => {
+                    setMobileMenuOpen(false);
+                    navigate("/dashboard/settings");
+                  }}
+                />
+                
+                {/* Logout Link */}
+                <MainLink
+                  icon={<IconLogout size={20} />}
+                  color="red"
+                  label={t("logout", { ns: "navigation" })}
+                  to="#"
+                  isActive={false}
+                  collapsed={false}
+                  onNavigate={() => {
+                    setMobileMenuOpen(false);
+                    handleLogout();
+                  }}
+                />
+              </Stack>
+            </Box>
+          </Stack>
+        </Drawer>
+      )}
+
+      {/* Mobile Bottom Navigation */}
+      {isMobile && (
+        <Paper
+          shadow={dark ? "xl" : "sm"}
+          radius={0}
+          withBorder
+          sx={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 999,
+            borderTop: `1px solid ${dark ? theme.colors.dark[5] : theme.colors.gray[3]}`,
+            background: dark ? theme.colors.dark[7] : theme.white,
+          }}
+        >
+          <Group position="apart" px="md" py="xs">
+            {[
+              "/dashboard",
+              "/dashboard/my-courses",
+              "/dashboard/create-course",
+            ].map((path) => {
+              const item = mainLinksData.find((l) => l.to === path);
+              if (!item) return null;
+              const active = currentPath === item.to;
+              return (
+                <UnstyledButton
+                  key={`bottom-${item.to}`}
+                  onClick={() => navigate(item.to)}
+                  sx={{
+                    padding: bottomPadding,
+                    borderRadius: 8,
+                    color: active
+                      ? theme.colors.blue[6]
+                      : dark
+                        ? theme.colors.dark[0]
+                        : theme.colors.gray[7],
+                  }}
+                >
+                  <Stack spacing={2} align="center">
+                    <ThemeIcon
+                      variant={active ? "filled" : "light"}
+                      size={bottomIconSize}
+                      color={active ? "blue" : "gray"}
+                    >
+                      {item.icon}
+                    </ThemeIcon>
+                    <Text weight={500} sx={{ whiteSpace: "nowrap", fontSize: `${bottomTextSize}px` }}>
+                      {item.label}
+                    </Text>
+                  </Stack>
+                </UnstyledButton>
+              );
+            })}
+            {/* Mehr button opens the drawer */}
+            <UnstyledButton
+              key="bottom-more"
+              onClick={() => setMobileMenuOpen((o) => !o)}
+              sx={{
+                padding: bottomPadding,
+                borderRadius: 8,
+                color: dark ? theme.colors.dark[0] : theme.colors.gray[7],
+              }}
+            >
+              <Stack spacing={2} align="center">
+                <ThemeIcon variant="light" size={bottomIconSize} color="gray">
+                  <IconMenu2 size={Math.round(16 * scale)} />
+                </ThemeIcon>
+                <Text weight={500} sx={{ whiteSpace: "nowrap", fontSize: `${bottomTextSize}px` }}>
+                  {t('more', { ns: 'navigation', defaultValue: 'Mehr' })}
+                </Text>
+              </Stack>
+            </UnstyledButton>
+          </Group>
+        </Paper>
+      )}
     </>
   );
-}
+};
 
 export default AppLayout;

@@ -23,7 +23,9 @@ import enGeoGebraPlotter from './locales/en/geoGebraPlotter.json';
 import enNotesTool from './locales/en/notesTool.json';
 import enCourseView from './locales/en/courseView.json';
 import enCreateCourse from './locales/en/createCourse.json';
+import enPricing from './locales/en/pricing.json';
 import enImpressum from './locales/en/impressum.json';
+import enPrivacy from './locales/en/privacy.json';
 import enToolbarContainer from './locales/en/toolbarContainer.json';
 import enStatisticsPage from './locales/en/statisticsPage.json';
 
@@ -46,19 +48,34 @@ import deGeoGebraPlotter from './locales/de/geoGebraPlotter.json';
 import deNotesTool from './locales/de/notesTool.json';
 import deCourseView from './locales/de/courseView.json';
 import deCreateCourse from './locales/de/createCourse.json';
+import dePricing from './locales/de/pricing.json';
 import deImpressum from './locales/de/impressum.json';
+import dePrivacy from './locales/de/privacy.json';
 import deToolbarContainer from './locales/de/toolbarContainer.json';
 import deStatisticsPage from './locales/de/statisticsPage.json';
 
-i18n
-  // Detect user language
+// Configure i18n with default namespace
+const i18nInstance = i18n.createInstance();
+
+i18nInstance
   .use(LanguageDetector)
-  // Pass the i18n instance to react-i18next
   .use(initReactI18next)
-  // Init i18next
   .init({
+    // Configure namespaces
+    defaultNS: 'common',
+    ns: ['common', 'pricing'],
+    defaultNS: 'common',
+    fallbackLng: 'en',
+    
+    // Enable debug in development
+    debug: process.env.NODE_ENV === 'development',
+    
+    // Use dot notation for nested keys
+    keySeparator: '.',
+    nsSeparator: ':',
     resources: {
       en: {
+        // Common translations
         common: enCommon,
         language: enLanguage,
         navigation: enNavigation,
@@ -77,11 +94,14 @@ i18n
         notesTool: enNotesTool,
         courseView: enCourseView,
         createCourse: enCreateCourse,
+        pricing: enPricing,
         impressum: enImpressum,
+        privacy: enPrivacy,
         toolbarContainer: enToolbarContainer,
         statisticsPage: enStatisticsPage,
       },
       de: {
+        // Common translations
         common: deCommon,
         language: deLanguage,
         navigation: deNavigation,
@@ -100,7 +120,9 @@ i18n
         notesTool: deNotesTool,
         courseView: deCourseView,
         createCourse: deCreateCourse,
+        pricing: dePricing,
         impressum: deImpressum,
+        privacy: dePrivacy,
         toolbarContainer: deToolbarContainer,
         statisticsPage: deStatisticsPage,
       },
@@ -118,4 +140,5 @@ i18n
     },
   });
 
-export default i18n;
+// Export the configured instance
+export default i18nInstance;

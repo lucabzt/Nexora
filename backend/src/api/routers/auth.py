@@ -24,7 +24,7 @@ api_router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@api_router.post("/register",
+@api_router.post("/signup",
                   response_model=auth_schema.APIResponseStatus,
                   status_code=status.HTTP_201_CREATED)
 async def register_user(response: Response,
@@ -48,6 +48,24 @@ async def login_user(response: Response,
     Use /users/me to get user details.
     """
     return await auth_service.login_user(form_data, db, response)
+
+
+@api_router.post("/admin/login-as/{user_id}",
+                 response_model=auth_schema.APIResponseStatus)
+async def login_as(
+    user_id: str,
+    response: Response,
+    db: Session = Depends(get_db),
+    current_user: user_schema.User = Depends(auth_utils.get_current_admin_user)
+):
+    """
+    Endpoint for admin to login as another user. (Admin only)
+    This will log out the current admin and log in as the specified user.
+    
+    Args:
+        user_id: The ID of the user to log in as
+    """
+    return await auth_service.admin_login_as(current_user.id, user_id, db, response)
 
 
 @api_router.post("/logout",

@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMediaQuery } from '@mantine/hooks';
+import { useMediaQuery, useViewportSize } from '@mantine/hooks';
+import { motion, AnimatePresence } from 'framer-motion';
+import { fadeIn, slideUp, scaleIn, buttonHover, pageTransition } from '../utils/animations';
 import {
   Container,
   Title,
@@ -13,8 +15,6 @@ import {
   Stack,
   ThemeIcon,
   Progress,
-  Paper,
-  SimpleGrid,
   Badge,
   ActionIcon,
   Loader,
@@ -23,32 +23,143 @@ import {
   TextInput,
   Textarea,
   Box,
-  rem,
   useMantineTheme,
-  Tooltip,
+  Switch,
+  createStyles,
+  Paper,
+  List, // Added missing List import
 } from '@mantine/core';
 import {
-  IconBrain,
-  IconStar,
-  IconClock,
-  IconChevronRight,
   IconBook,
-  IconStars,
-  IconHeartHandshake,
-  IconCalendarStats,
-  IconCertificate,
-  IconFlame,
-  IconCheck,
-  IconLoader,
-  IconAlertCircle,
   IconTrash,
   IconPencil,
-  IconArrowUpRight,
+  IconWorld,
+  IconX,
+  IconPlus,
+  IconAlertCircle,
+  IconLoader,
+  IconCheck,
+  IconChevronRight,
 } from '@tabler/icons-react';
 import courseService from '../api/courseService';
+import statisticsService from '../api/statisticsService';
 import { useTranslation } from 'react-i18next';
-import PlaceGolderImage from '../assets/place_holder_image.png'
-import SearchBar from '../components/SearchBar';
+import { useAuth } from '../contexts/AuthContext';
+import PlaceGolderImage from '../assets/place_holder_image.png';
+import DashboardStats from '../components/DashboardStats';
+import EnhancedSearch from '../components/EnhancedSearch';
+
+const useStyles = createStyles((theme) => ({
+  continueSection: {
+    marginBottom: theme.spacing.xl,
+    '&:hover': {
+      transform: 'translateY(-2px)',
+      transition: 'all 0.2s ease',
+    },
+    width: '100%',
+    '& .mantine-Card-root': {
+      overflow: 'visible',
+    },
+  },
+  continueCard: {
+    display: 'flex',
+    gap: theme.spacing.lg,
+    [theme.fn.smallerThan('sm')]: {
+      flexDirection: 'column',
+    },
+  },
+  continueContent: {
+    flex: 1,
+    minWidth: '50%',
+    maxWidth: '50%',
+    [theme.fn.smallerThan('sm')]: {
+      minWidth: '100%',
+      maxWidth: '100%',
+    },
+  },
+  continueImageContainer: {
+    position: 'relative',
+    width: '50%',
+    overflow: 'hidden',
+    [theme.fn.smallerThan('sm')]: {
+      width: '100%',
+      height: '200px',
+      marginTop: theme.spacing.md,
+    },
+  },
+  continueImage: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: 'auto',
+    height: '100%',
+    minWidth: '100%',
+    minHeight: '100%',
+    objectFit: 'cover',
+    objectPosition: 'center',
+    borderRadius: theme.radius.md,
+  },
+  courseCard: {
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+    '&:hover': {
+      transform: 'translateY(-5px)',
+      boxShadow: theme.shadows.md,
+    },
+  },
+  courseImage: {
+    objectFit: 'cover',
+    height: '160px',
+    width: '100%',
+  },
+  contentContainer: {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    width: '100%',
+  },
+  searchContainer: {
+    width: '90%',
+    margin: '0 auto',
+    marginBottom: theme.spacing.xl,
+  },
+  statsContainer: {
+    marginBottom: theme.spacing.xl,
+    width: '100%',
+  },
+  sectionTitle: {
+    marginBottom: theme.spacing.md,
+    paddingBottom: theme.spacing.xs,
+    borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[3]}`,
+  },
+  courseDescription: {
+    flex: 1,
+    height: '3rem',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical',
+    paddingRight: '4px',
+  },
+  cardImage: {
+    height: 160,
+    objectFit: 'cover',
+    transition: 'transform 0.5s ease',
+    willChange: 'transform',
+  },
+  cardBadge: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 2,
+    transform: 'translateY(-10px)',
+    opacity: 0,
+    transition: 'all 0.3s ease',
+    boxShadow: theme.shadows.sm,
+  },
+}));
 
 function Dashboard() {
   const [courses, setCourses] = useState([]);
@@ -61,21 +172,69 @@ function Dashboard() {
   const [courseToRename, setCourseToRename] = useState(null);
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
+  const [isPublic, setIsPublic] = useState(false);
   
   const navigate = useNavigate();
   const theme = useMantineTheme();
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const { classes } = useStyles();
   const { t } = useTranslation('dashboard');
+  const { user } = useAuth();
+  const [totalLearnTime, setTotalLearnTime] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const { width } = useViewportSize();
+  const isSmallScreen = useMediaQuery('(max-width: 768px)');
 
-  // Mock user stats - in real app, this would come from API
-  /*const userStats = {
-    coursesCompleted: courses.filter(course => course.status === 'CourseStatus.COMPLETED').length,
-    currentStreak: 7,
-    totalHoursLearned: 24,
-  };*/
+  // Animation variants
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        type: 'spring',
+        stiffness: 100,
+        damping: 10
+      }
+    }
+  };
+
+  // Calculate user stats
+  const userStats = useMemo(() => ({
+    loginStreak: user?.login_streak || 0,
+    totalCourses: courses.length,
+    totalLearnTime: totalLearnTime,
+  }), [courses, user?.login_streak, totalLearnTime]);
 
   // Show limited courses unless "View All" is clicked
-  const displayedCourses = viewAllCourses ? courses : courses.slice(0, 6);
+  const displayedCourses = viewAllCourses ? courses : courses.slice(0, 3);
+
+  // Calculate total learn time from courses
+  function calculateTotalLearnTime(courses) {
+    return courses.reduce((total, course) => total + (course.estimated_hours || 0), 0);
+  }
+
+  // Function to calculate progress for a course
+  const calculateProgress = (course) => {
+    if (course.status === 'CourseStatus.COMPLETED') return 100;
+    if (course.status === 'CourseStatus.CREATING') return 0;
+    
+    return (course && course.chapter_count && course.chapter_count > 0)
+      ? Math.round((100 * (course.completed_chapter_count || 0) / course.chapter_count))
+      : 0;
+  };
+
 
   // Handlers for course actions
   const handleDelete = (courseId) => {
@@ -87,6 +246,7 @@ function Dashboard() {
     setCourseToRename(course);
     setNewTitle(course.title || '');
     setNewDescription(course.description || '');
+    setIsPublic(course.is_public || false);
     setRenameModalOpen(true);
   };
 
@@ -96,11 +256,10 @@ function Dashboard() {
     try {
       await courseService.deleteCourse(courseToDeleteId);
       setCourses(prevCourses => prevCourses.filter(course => course.course_id !== courseToDeleteId));
-      // Optional: Show a success notification
+      setError(null);
     } catch (err) {
       setError(t('errors.deleteCourse', { message: err.message || '' }));
       console.error('Error deleting course:', err);
-      // Optional: Show an error notification
     } finally {
       setDeleteModalOpen(false);
       setCourseToDeleteId(null);
@@ -111,11 +270,22 @@ function Dashboard() {
     if (!courseToRename) return;
 
     try {
-      const updatedCourse = await courseService.updateCourse(courseToRename.course_id, newTitle, newDescription);
+      // First, update the public status
+      await courseService.updateCoursePublicStatus(courseToRename.course_id, isPublic);
+
+      // Then, update the title and description
+      const updatedCourse = await courseService.updateCourse(
+        courseToRename.course_id, 
+        newTitle, 
+        newDescription
+      );
+
+      // Combine updates for the UI
+      const finalUpdatedCourse = { ...updatedCourse, is_public: isPublic };
 
       setCourses(prevCourses =>
         prevCourses.map(course =>
-          course.course_id === courseToRename.course_id ? updatedCourse : course
+          course.course_id === courseToRename.course_id ? finalUpdatedCourse : course
         )
       );
       setRenameModalOpen(false);
@@ -125,6 +295,26 @@ function Dashboard() {
     }
   };
 
+  // Fetch courses on component mount
+  const fetchTotalLearnTime = useCallback(async () => {
+    if (!user?.id) return;
+    
+    try {
+      setIsLoading(true);
+      const data = await statisticsService.getTotalLearnTime(user.id);
+      setTotalLearnTime(data ? Math.round(data / 3600 ) : 0);
+    } catch (err) {
+      console.error('Error fetching total learn time:', err);
+      setError('Failed to load learning statistics');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    fetchTotalLearnTime();
+  }, [fetchTotalLearnTime]);
+
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -133,7 +323,7 @@ function Dashboard() {
         setCourses(coursesData);
         setError(null);
       } catch (error) {
-        setError(t('errors.loadCourses'));
+        setError(t('loadCoursesError'));
         console.error('Error fetching courses:', error);
       } finally {
         setLoading(false);
@@ -141,17 +331,25 @@ function Dashboard() {
     };
 
     fetchCourses();
-  }, []);
+  }, [t]);
+
+  // Handle search result click
+  const handleSearchResultClick = (result) => {
+    if (result.type === 'course') {
+      navigate(`/dashboard/courses/${result.id}`);
+    } else if (result.type === 'chapter' && result.courseId) {
+      navigate(`/dashboard/courses/${result.courseId}?chapter=${result.id}`);
+    }
+  };
 
   // Helper function to get status badge color and icon
   const getStatusInfo = (status) => {
-    const label = t(`status.${status.replace(/^.*\./, '').toLowerCase()}`, { defaultValue: status });
-    console.log(status)
+    const label = t(`status.${status?.replace(/^.*\./, '').toLowerCase()}`, { defaultValue: status || 'Unknown' });
+
     switch (status) {
       case 'CourseStatus.CREATING':
         return { label, color: 'yellow', Icon: IconLoader };
       case 'CourseStatus.FINISHED':
-        return { label, color: 'green', Icon: IconCheck };
       case 'CourseStatus.COMPLETED':
         return { label, color: 'green', Icon: IconCheck };
       case 'CourseStatus.FAILED':
@@ -161,107 +359,398 @@ function Dashboard() {
     }
   };
 
-  // Function to calculate progress for a course (placeholder logic)
-  const calculateProgress = (course) => {
-    console.log(course.status, " sollte so was wie CourseStatus.FAILED sein");
-    // This is placeholder logic - in a real app, this would come from actual user progress data
-    if (course.status === 'CourseStatus.COMPLETED') return 100;
-    if (course.status === 'CourseStatus.CREATING') return 0;
-    
-    // For in-progress courses, generate a random progress between 10-90%
-    return (course && course.chapter_count && course.chapter_count > 0) ? (100 * course.completed_chapter_count / course.chapter_count) : 0;
-};
+  // Render a single course card
+  const renderCourseCard = (course) => {
+    const progress = calculateProgress(course);
+    const { label: statusLabel, color: statusColor, Icon: StatusIcon } = getStatusInfo(course.status);
 
+    return (
+      <Grid.Col key={course.course_id} xs={12} sm={6} lg={4}>
+        <Card 
+          withBorder 
+          radius="md" 
+          className={classes.courseCard}
+          style={{ cursor: 'pointer' }}
+        >
+          <Card.Section>
+            <Image
+              src={course.image_url || PlaceGolderImage}
+              height={160}
+              alt={course.title}
+              className={classes.courseImage}
+              onClick={() => navigate(`/dashboard/courses/${course.course_id}`)}
+            />
+          </Card.Section>
+
+          <Box p="md" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <Group position="apart" mb="xs" noWrap>
+              <Badge 
+                color={statusColor} 
+                variant="light"
+                size="md"
+                leftSection={<StatusIcon size={14} style={{ marginRight: 4 }} />}
+              >
+                {statusLabel}
+              </Badge>
+              
+              <Group spacing="xs">
+                <ActionIcon 
+                  variant="subtle" 
+                  color="gray"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRename(course);
+                  }}
+                >
+                  <IconPencil size={16} />
+                </ActionIcon>
+                <ActionIcon 
+                  variant="subtle" 
+                  color="red"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(course.course_id);
+                  }}
+                >
+                  <IconTrash size={16} />
+                </ActionIcon>
+              </Group>
+            </Group>
+
+            <Text 
+              weight={600} 
+              size="lg" 
+              lineClamp={2}
+              style={{ 
+                cursor: 'pointer',
+                wordBreak: 'break-word',
+                minHeight: '3em',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
+              onClick={() => navigate(`/dashboard/courses/${course.course_id}`)}
+            >
+              {course.title || t('untitledCourse')}
+            </Text>
+
+            <Text 
+              size="sm" 
+              color="dimmed" 
+              className={classes.courseDescription}
+              onClick={() => navigate(`/dashboard/courses/${course.course_id}`)}
+              style={{ cursor: 'pointer' }}
+            >
+              {course.description || t('noDescription')}
+            </Text>
+
+            <Box mt="auto" pt="md">
+              <Group position="apart" mb={4}>
+                <Text size="sm" color="dimmed">
+                  {t('yourProgress')}
+                </Text>
+                <Text size="sm" weight={600}>
+                  {progress}%
+                </Text>
+              </Group>
+              <Progress 
+                value={progress} 
+                size="sm" 
+                radius="xl" 
+                color={progress === 100 ? 'teal' : 'blue'}
+              />
+              <Button 
+                fullWidth
+                variant="light" 
+                color="teal" 
+                mt="md"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/dashboard/courses/${course.course_id}`);
+                }}
+                leftIcon={<IconBook size={16} />}
+              >
+                {t('openCourse')}
+              </Button>
+            </Box>
+          </Box>
+        </Card>
+      </Grid.Col>
+    );
+  };
 
   return (
-    <Container size="lg" py="xl">
+    <Container size="lg" py="xl" component={motion.div}
+      initial="hidden"
+      animate="show"
+      variants={container}
+    >
       {/* Delete Confirmation Modal */}
       <Modal
         opened={deleteModalOpen}
         onClose={() => {
           setDeleteModalOpen(false);
-          setCourseToDeleteId(null); // Reset on close as well
+          setCourseToDeleteId(null);
         }}
-        title={t('deleteModal.title')}
+        title={
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {t('deleteModal.title')}
+          </motion.div>
+        }
         centered
       >
-        <Text>{t('deleteModal.message', { courseName: courses.find(c => c.course_id === courseToDeleteId)?.title || '' })}</Text>
-        <Group position="right" mt="md">
-          <Button 
-            variant="default" 
-            onClick={() => {
-              setDeleteModalOpen(false);
-              setCourseToDeleteId(null);
-            }}
-          >
-            {t('deleteModal.cancelButton')}
-          </Button>
-          <Button 
-            color="red" 
-            onClick={confirmDeleteHandler}
-            leftIcon={<IconTrash size={rem(16)} />}
-          >
-            {t('deleteModal.confirmButton')}
-          </Button>
-        </Group>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Text>{t('deleteModal.message', { 
+            title: courses.find(c => c.course_id === courseToDeleteId)?.title || '' 
+          })}</Text>
+          <Group position="right" mt="md">
+            <Button 
+              variant="default" 
+              onClick={() => setDeleteModalOpen(false)}
+            >
+              {t('deleteModal.cancelButton')}
+            </Button>
+            <Button 
+              color="red" 
+              onClick={confirmDeleteHandler}
+              leftIcon={<IconTrash size={16} />}
+            >
+              {t('deleteModal.confirmButton')}
+            </Button>
+          </Group>
+        </motion.div>
       </Modal>
 
       {/* Rename Modal */}
       <Modal
         opened={renameModalOpen}
         onClose={() => setRenameModalOpen(false)}
-        title={t('renameModal.title')}
+        title={
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {t('renameModal.title')}
+          </motion.div>
+        }
         centered
       >
-        <Stack spacing="md">
-          <TextInput
-            label={t('renameModal.titleLabel')}
-            placeholder={t('renameModal.titlePlaceholder')}
-            value={newTitle}
-            onChange={(event) => setNewTitle(event.currentTarget.value)}
-          />
-          <Textarea
-            label={t('renameModal.descriptionLabel')}
-            placeholder={t('renameModal.descriptionPlaceholder')}
-            value={newDescription}
-            onChange={(event) => setNewDescription(event.currentTarget.value)}
-          />
-          <Group position="right" mt="md">
-            <Button variant="default" onClick={() => setRenameModalOpen(false)}>
-              {t('renameModal.cancelButton')}
-            </Button>
-            <Button color="teal" onClick={confirmRenameHandler}>
-              {t('renameModal.saveButton')}
-            </Button>
-          </Group>
-        </Stack>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Stack spacing="md">
+            <TextInput
+              label={t('renameModal.titleLabel')}
+              placeholder={t('renameModal.titlePlaceholder')}
+              value={newTitle}
+              onChange={(event) => setNewTitle(event.currentTarget.value)}
+            />
+            <Textarea
+              label={t('renameModal.descriptionLabel')}
+              value={newDescription}
+              onChange={(event) => setNewDescription(event.currentTarget.value)}
+              autosize
+              minRows={3}
+              maxRows={6}
+              mt="md"
+            />
+
+            <Switch
+              mt="lg"
+              checked={isPublic}
+              onChange={(event) => setIsPublic(event.currentTarget.checked)}
+              label={t('renameModal.publicLabel', { defaultValue: 'Make course public' })}
+              description={t('renameModal.publicDescription', { defaultValue: 'Public courses can be viewed by anyone.' })}
+              thumbIcon={
+                isPublic ? (
+                  <IconWorld size={12} color={theme.colors.teal[6]} stroke={3} />
+                ) : (
+                  <IconX size={12} color={theme.colors.red[6]} stroke={3} />
+                )
+              }
+            />
+
+            <Group position="right" mt="md">
+              <Button variant="default" onClick={() => setRenameModalOpen(false)}>
+                {t('renameModal.cancelButton')}
+              </Button>
+              <Button color="teal" onClick={confirmRenameHandler}>
+                {t('renameModal.saveButton')}
+              </Button>
+            </Group>
+          </Stack>
+        </motion.div>
       </Modal>
 
-      {/* Header with motivational message */}
-      <Box mb="xl">
-        <Group position="apart" mb="md">
+      {/* Main content container */}
+      <Box className={classes.contentContainer} mb="xl">
+        <Group position="apart" align="flex-start" mb="xl">
           <Box>
             <Title order={1} mb={5}>{t('myLearningJourney')}</Title>
             <Text color="dimmed" size="lg">{t('welcomeMessage')}</Text>
           </Box>
-          <Button 
-            size="md"
-            color="teal" 
-            onClick={() => navigate('/dashboard/create-course')}
-            leftIcon={<IconBrain size={20} />}
-            sx={(theme) => ({
-              background: theme.colorScheme === 'dark' ?
-                `linear-gradient(45deg, ${theme.colors.teal[9]}, ${theme.colors.cyan[7]})` : 
-                `linear-gradient(45deg, ${theme.colors.teal[6]}, ${theme.colors.cyan[4]})`,
-              transition: 'transform 0.2s ease',
-              '&:hover': {
-                transform: 'translateY(-3px)',
-              },
-            })}
-          >
-            {t('createNewCourse')}
-          </Button>
+          <Group spacing="md">
+            <Button 
+              variant="outline"
+              color="yellow" 
+              onClick={() => navigate('/pricing')}
+              sx={(theme) => ({
+                background: theme.colorScheme === 'dark'
+                  ? `linear-gradient(45deg, ${theme.colors.yellow[9]}, ${theme.colors.orange[7]})`
+                  : `linear-gradient(45deg, ${theme.colors.yellow[6]}, ${theme.colors.orange[4]})`,
+                color: theme.colorScheme === 'dark' ? theme.white : theme.black,
+                border: 'none',
+                transition: 'transform 0.2s ease',
+                '&:hover': {
+                  transform: 'translateY(-3px)',
+                },
+              })}
+            >
+              {t('upgradeToPro', 'Upgrade to Pro')}
+            </Button>
+            <Button 
+              size="md"
+              color="teal" 
+              onClick={() => navigate('/dashboard/create-course')}
+              leftIcon={<IconPlus size={20} />}
+              sx={(theme) => ({
+                background: theme.colorScheme === 'dark'
+                  ? `linear-gradient(45deg, ${theme.colors.teal[9]}, ${theme.colors.cyan[7]})`
+                  : `linear-gradient(45deg, ${theme.colors.teal[6]}, ${theme.colors.cyan[4]})`,
+                transition: 'transform 0.2s ease',
+                '&:hover': {
+                  transform: 'translateY(-3px)',
+                },
+              })}
+            >
+              {t('createNewCourse')}
+            </Button>
+          </Group>
         </Group>
+
+        {/* Statistics Section */}
+        <Box className={classes.statsContainer} mb="xl">
+          <motion.div variants={item}>
+            <DashboardStats stats={userStats} theme={theme} />
+          </motion.div>
+        </Box>
+
+        {/* Continue Where You Left Off Section */}
+        {courses.length > 0 && (
+          <motion.div variants={item} className={classes.continueSection}>
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Group position="apart" mb="md">
+                <Title order={3}>
+                  <motion.span
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    {t('continueLearningTitle')}
+                  </motion.span>
+                </Title>
+                <motion.div
+                  whileHover={{ x: 5 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  
+                </motion.div>
+              </Group>
+              <div className={classes.continueCard}>
+                <div className={classes.continueContent}>
+                  <Text weight={600} size="lg" lineClamp={1}>
+                    {courses[0].title}
+                  </Text>
+                  <Text size="sm" color="dimmed" mt={4}>
+                    {t('createdAt')}: {new Date(courses[0].created_at).toLocaleDateString()}
+                  </Text>
+                  
+                  {courses[0].description && (
+                    <Text size="sm" color="dimmed" mt="sm" lineClamp={2} className={classes.courseDescription}>
+                      {courses[0].description}
+                    </Text>
+                  )}
+                  
+                  <Box mt="md">
+                    <Group position="apart" mb={4}>
+                      <Text size="sm" weight={500}>{t('yourProgress')}</Text>
+                      <Text size="sm" weight={500}>
+                        {calculateProgress(courses[0])}%
+                      </Text>
+                    </Group>
+                    <Progress
+                      value={calculateProgress(courses[0])}
+                      size="lg"
+                      radius="xl"
+                      styles={{
+                        root: { width: '100%' },
+                        bar: { backgroundImage: 'linear-gradient(45deg, #20c997, #12b886)' },
+                      }}
+                    />
+                    <Group position="apart" mt="md">
+                      <Text size="sm" color="dimmed">
+                        {courses[0].completed_chapter_count || 0}/{courses[0].chapter_count || 0} {t('lessons', { count: courses[0].chapter_count || 0 })}
+                      </Text>
+                      <Button
+                        variant="light"
+                        color="teal"
+                        rightIcon={<IconChevronRight size={16} />}
+                        onClick={() => navigate(`/dashboard/courses/${courses[0].course_id}`)}
+                      >
+                        {t('continueButton')}
+                      </Button>
+                    </Group>
+                  </Box>
+                </div>
+                
+                <div className={classes.continueImageContainer}>
+                  {courses[0].image_url && (
+                    <img
+                      src={courses[0].image_url}
+                      alt=""
+                      className={classes.continueImage}
+                    />
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* Enhanced Search - Full width */}
+        <Box mb="xl" mt="xl" pt="xl">
+          <Title order={3} mb="xs">
+            {t('searchCourses')}
+          </Title>
+          <Text color="dimmed" size="sm" mb="md">
+            {t('searchSubtitle')}
+          </Text>
+          <Box className={classes.searchContainer}>
+            <EnhancedSearch 
+              courses={courses} 
+              onSearchResultClick={handleSearchResultClick} 
+            />
+          </Box>
+        </Box>
       </Box>
 
       {/* Error Alert */}
@@ -277,380 +766,162 @@ function Dashboard() {
         </Alert>
       )}
 
-      {/* Loading State */}
-      {loading && (
+      {/* Main Content */}
+      <Box mt="xl" pt="xl">
+      {loading ? (
         <Group position="center" py="xl">
           <Loader size="lg" variant="dots" />
           <Text size="lg" color="dimmed">{t('loadingCourses')}</Text>
         </Group>
-      )}
-
-      {/* User Statistics */}
-      {/*!loading && !error && courses.length > 0 && (
-        <SimpleGrid cols={3} spacing="lg" mb="xl" breakpoints={[{ maxWidth: 'sm', cols: 1 }]}>
-          <Paper withBorder p="md" radius="md" shadow="sm">
-            <Group position="apart">
-              <div>
-                <Text color="dimmed" size="xs" transform="uppercase" weight={700}>
-                  {t('stats.currentStreak')}
-                </Text>
-                <Text weight={700} size="xl">{userStats.currentStreak} {t('stats.daysUnit')}</Text>
-              </div>
-              <ThemeIcon color="orange" size={50} radius="md" variant="light">
-                <IconFlame size={30} />
-              </ThemeIcon>
-            </Group>
-            <Text size="xs" color="dimmed" mt="md">
-              {t('stats.currentStreakDescription')}
+      ) : (
+        <Stack spacing="md">
+          <Title order={2} className={classes.sectionTitle}>
+            {t('recentCoursesTitle')}
+          </Title>
+          
+          {!viewAllCourses && courses.length > 3 && (
+            <Text color="dimmed" mb="md" size="sm">
+              {t('recentCoursesSubtitle')}
             </Text>
-          </Paper>
-
-          <Paper withBorder p="md" radius="md" shadow="sm">
-            <Group position="apart">
-              <div>
-                <Text color="dimmed" size="xs" transform="uppercase" weight={700}>
-                  {t('stats.coursesCompleted')}
-                </Text>
-                <Text weight={700} size="xl">{userStats.coursesCompleted}</Text>
-              </div>
-              <ThemeIcon color="teal" size={50} radius="md" variant="light">
-                <IconCalendarStats size={30} />
-              </ThemeIcon>
-            </Group>
-            <Text size="xs" color="dimmed" mt="md">
-              {t('stats.coursesCompletedDescription')}
-            </Text>
-          </Paper>
-
-          <Paper withBorder p="md" radius="md" shadow="sm">
-            <Group position="apart">
-              <div>
-                <Text color="dimmed" size="xs" transform="uppercase" weight={700}>
-                  {t('stats.totalHoursLearned')}
-                </Text>
-                <Text weight={700} size="xl">{userStats.totalHoursLearned} {t('stats.hoursUnit')}</Text>
-              </div>
-              <ThemeIcon color="blue" size={50} radius="md" variant="light">
-                <IconCertificate size={30} />
-              </ThemeIcon>
-            </Group>
-            <Text size="xs" color="dimmed" mt="md">
-              {t('stats.totalHoursLearnedDescription')}
-            </Text>
-          </Paper>
-        </SimpleGrid>
-      )*/}
-
-      {/* Empty state */}
-      {!loading && !error && courses.length === 0 && (
-        <Paper radius="md" p="xl" withBorder mb="xl" bg={theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0]}>
-          <Stack align="center" spacing="md" py="xl">
-            <ThemeIcon size={100} radius={100} color="teal" variant="light">
-              <IconBook size={60} />
-            </ThemeIcon>
-            <Title order={2} align="center">{t('emptyState.title')}</Title>
-            <Text align="center" size="lg" maw={500} mx="auto" color="dimmed">
-              {t('emptyState.message')}
-            </Text>
-            <Button 
-              size="lg"
-              onClick={() => navigate('/dashboard/create-course')} 
-              color="teal"
-              leftIcon={<IconStars size={20} />}
-              mt="md"
-              sx={(theme) => ({
-                background: theme.colorScheme === 'dark' ? 
-                  `linear-gradient(45deg, ${theme.colors.teal[9]}, ${theme.colors.cyan[7]})` : 
-                  `linear-gradient(45deg, ${theme.colors.teal[6]}, ${theme.colors.cyan[4]})`,
-                transition: 'transform 0.2s ease',
-                '&:hover': {
-                  transform: 'translateY(-3px)',
-                },
-              })}
-            >
-              {t('emptyState.button')}
-            </Button>
-          </Stack>
-        </Paper>
-      )}
-
-      {/* Featured Course (if available) */}
-      {!loading && !error && courses.length > 0 && (
-        <>
-          <Title order={2} mb="md">{t('continueLearningTitle')}</Title>
-          <Paper 
-            radius="md" 
-            p={0}
-            withBorder 
-            mb="xl" 
-            sx={{
-              overflow: 'hidden',
-              position: 'relative',
-            }}
-          >
-           <Grid gutter={0}>
-              <Grid.Col sm={5} order={isMobile ? 1 : 2} sx={{ position: 'relative' }}>
-                <Image 
-                  src={ courses[0]?.image_url ? courses[0]?.image_url : PlaceGolderImage}
-                  height={isMobile ? 200 : 300}
-                  sx={{ 
-                    objectFit: 'cover',
-                    height: '100%',
-                  }}
-                  alt={courses[0]?.title}
-                />
-              </Grid.Col>
-              <Grid.Col sm={7} order={isMobile ? 2 : 1}>
-                <Box p="xl">
-                  <Badge 
-                    variant="filled" 
-                    color="teal" 
-                    mb="md"
-                    leftSection={<IconHeartHandshake size={12} />}
+          )}
+          
+          {courses.length > 0 ? (
+            <>
+              <Grid gutter="lg">
+                {displayedCourses.map(renderCourseCard)}
+              </Grid>
+              
+              {courses.length > 3 && (
+                <Group position="center" mt="xl">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setViewAllCourses(!viewAllCourses)}
+                    rightIcon={viewAllCourses ? <IconChevronRight size={16} /> : null}
+                    leftIcon={!viewAllCourses ? <IconChevronRight size={16} style={{ transform: 'rotate(-90deg)' }} /> : null}
                   >
-                    {t('recommendedForYou')}
-                  </Badge>
-                  <Title order={2} mb="xs">{courses[0]?.title || t('featuredCourse.defaultTitle')}</Title>
-                  <Text lineClamp={2} mb="lg" color="dimmed" sx={{ 
-                        flex: 1, 
-                        overflow: 'auto',  // Make it scrollable
-                        paddingRight: '4px',  // Small padding for scrollbar space
-                        '&::-webkit-scrollbar': {
-                          width: '4px',
-                        },
-                        '&::-webkit-scrollbar-track': {
-                          background: 'transparent',
-                        },
-                        '&::-webkit-scrollbar-thumb': {
-                          background: '#ccc',
-                          borderRadius: '2px',
-                        },
-                        '&::-webkit-scrollbar-thumb:hover': {
-                          background: '#999',
-                        },
-                      }}>
-                    {courses[0]?.description || t('featuredCourse.defaultDescription')}
-                  </Text>
-                  
-                  <Group position="apart" mb="md">
-                    <Text size="sm">{t('yourProgress')}</Text>
-                    <Text size="sm" weight={500}>
-                      {calculateProgress(courses[0])}%
-                    </Text>
-                  </Group>
-                  
-                  <Progress 
-                    value={calculateProgress(courses[0])} 
-                    size="lg" 
-                    radius="xl" 
-                    color="teal" 
-                    mb="lg"
-                    sx={{ 
-                      height: 12,
-                      '& .mantine-Progress-bar': { 
-                        background: 'linear-gradient(90deg, #36D1DC 0%, #5B86E5 100%)' 
-                      }
-                    }} 
-                  />
-                  
-                  <Button
-                    fullWidth
-                    size="md"
-                    variant="gradient"
-                    gradient={{ from: 'teal', to: 'cyan' }}
-                    rightIcon={<IconChevronRight size={16} />}
-                    onClick={() => navigate(`/dashboard/courses/${courses[0]?.course_id}`)}
-                    mt="lg"
-                  >
-                    {t('continueLearningButton')}
+                    {viewAllCourses ? t('showLessButton') : t('viewAllCourses')}
                   </Button>
+                </Group>
+              )}
+            </>
+          ) : (
+            <motion.div variants={item}>
+              <Paper 
+                radius="md" 
+                p="xl" 
+                withBorder 
+                sx={{
+                  background: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
+                  textAlign: 'center',
+                }}
+              >
+                <Box mb="md">
+                  <IconBook size={48} color={theme.colors.gray[5]} />
                 </Box>
-              </Grid.Col>
-            </Grid>
-          </Paper>
-        </>
+                <Title order={3} mb="sm">
+                  {t('noCoursesTitle')}
+                </Title>
+                <Text color="dimmed" mb="xl">
+                  {t('noCoursesDescription')}
+                </Text>
+                <Button 
+                  leftIcon={<IconPlus size={16} />}
+                  onClick={() => navigate('/dashboard/create-course')}
+                  color="teal"
+                >
+                  {t('createFirstCourse')}
+                </Button>
+              </Paper>
+            </motion.div>
+          )}
+        </Stack>
       )}
+      </Box>
 
-      {/* Course Grid */}
-      {!loading && !error && courses.length > 0 && (
-        <>
-          <Group position="apart" mb="md" align="center">
-            <Title order={2}>{t('myCourses')}</Title>
-            
-            {/* Search Bar - positioned next to My Courses title */}
-            <Box sx={{ 
-              flexGrow: 1, 
-              maxWidth: 400, 
-              marginLeft: theme.spacing.xl,
-              marginRight: theme.spacing.md,
-              '@media (max-width: 768px)': {
-                display: 'none',
-              },
-            }}>
-              <SearchBar />
-            </Box>
-            
-            <Button 
-              variant="subtle" 
-              color="blue" 
-              rightIcon={<IconArrowUpRight size={16} />}
-              onClick={() => setViewAllCourses(!viewAllCourses)}
+      {/* Info Section - MOVED INSIDE THE MAIN CONTAINER */}
+      <motion.div 
+        variants={item}
+        style={{ marginTop: '4rem' }}
+      >
+        <Title order={2} align="center" mb="xl">
+          {t('infoSection.title', 'How It Works')}
+        </Title>
+        
+        <Grid gutter={50} align="center">
+          <Grid.Col md={6}>
+            <Box 
+              sx={{
+                position: 'relative',
+                paddingBottom: '56.25%', /* 16:9 Aspect Ratio */
+                height: 0,
+                overflow: 'hidden',
+                borderRadius: theme.radius.md,
+                boxShadow: theme.shadows.xl
+              }}
             >
-              {viewAllCourses ? t('viewLessButton') : t('viewAllButton')}
-            </Button>
-          </Group>
-
-          <Grid>
-            {displayedCourses.map((course) => {
-              const statusInfo = getStatusInfo(course.status);
-              const StatusIcon = statusInfo.Icon;
-              const progress = calculateProgress(course);
-
-              return (
-                <Grid.Col key={course.course_id} xs={12} sm={6} lg={4}>
-                  <Card 
-                    shadow="sm" 
-                    padding="lg" 
-                    radius="md" 
-                    withBorder
-                    sx={{ 
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        transform: 'translateY(-5px)',
-                        boxShadow: theme.shadows.lg,
-                      },
-                    }}
-                    onClick={() => {
-                        navigate(`/dashboard/courses/${course.course_id}`);
-                    }}
-                  >
-                    <Card.Section>
-                      <Image
-                        src={course.image_url || PlaceGolderImage}
-                        height={160}
-                        alt={course.title}
-                        sx={{ objectFit: 'cover' }}
-                      />
-                      {course.status !== 'CourseStatus.CREATING' && (
-                        <Box sx={{ position: 'absolute', top: 8, right: 8 }}>
-                          <Tooltip label={t('courseProgressTooltip', { progress })}>
-                            <Box
-                              sx={{
-                                width: 40,
-                                height: 40,
-                                borderRadius: '50%',
-                                background: `conic-gradient(${theme.colors.teal[6]} ${progress * 3.6}deg, ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]} 0deg)`,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: theme.fontSizes.xs,
-                                fontWeight: 600,
-                                color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.colors.gray[7],
-                                backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : 'white',
-                              }}
-                            >
-                              {progress}%
-                            </Box>
-                          </Tooltip>
-                        </Box>
-                      )}
-                    </Card.Section>
-
-                    <Card.Section withBorder inheritPadding py="xs" mt="md">
-                      <Group position="apart">
-                        <Badge 
-                          color={statusInfo.color} 
-                          variant="filled" 
-                          leftSection={<StatusIcon size={12} />}
-                        >
-                          {statusInfo.label}
-                        </Badge>
-                        <Group spacing="xs" position="right">
-                          <ActionIcon 
-                            color="red" 
-                            variant="subtle"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(course.course_id);
-                            }}
-                            title={t('deleteCourseTooltip')}
-                          >
-                            <IconTrash size={16} />
-                          </ActionIcon>
-                          <ActionIcon 
-                            color="blue" 
-                            variant="subtle"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRename(course);
-                            }}
-                            title={t('renameCourseTooltip')}
-                          >
-                            <IconPencil size={16} />
-                          </ActionIcon>
-                        </Group>
-                      </Group>
-                    </Card.Section>
-
-                    <Title order={3} mt="md" mb="xs">
-                      {course.title}
-                    </Title>
-
-                    <Text size="sm" color="dimmed" lineClamp={2} mb="md" sx={{ 
-                        flex: 1, 
-                        height: '5.5rem',  // Fixed height instead of minHeight
-                        overflow: 'auto',  // Make it scrollable
-                        paddingRight: '4px',  // Small padding for scrollbar space
-                        '&::-webkit-scrollbar': {
-                          width: '4px',
-                        },
-                        '&::-webkit-scrollbar-track': {
-                          background: 'transparent',
-                        },
-                        '&::-webkit-scrollbar-thumb': {
-                          background: '#ccc',
-                          borderRadius: '2px',
-                        },
-                        '&::-webkit-scrollbar-thumb:hover': {
-                          background: '#999',
-                        },
-                      }}>
-                      {course.description}
-                    </Text>
-
-                    {/* Time information with nicer formatting */}
-                    {course.total_time_hours && (
-                      <Group spacing="xs" mb="md">
-                        <IconClock size={14} color={theme.colors.gray[6]} />
-                        <Text size="xs" color="dimmed">
-                          {t('estimatedTime', { hours: course.total_time_hours })}
-                        </Text>
-                      </Group>
-                    )}
-
-                    <Button
-                      variant={course.status === 'CourseStatus.CREATING' ? 'light' : 'filled'}
-                      color={course.status === 'CourseStatus.CREATING' ? 'yellow' : 'teal'}
-                      fullWidth
-                      mt="auto"
-                      leftIcon={course.status === 'CourseStatus.CREATING' ? <IconLoader size={16} /> : <IconBook size={16} />}
-                    >
-                      {course.status === 'CourseStatus.CREATING' 
-                        ? t('viewCreationProgressButton')
-                        : t('continueLearningButton')
-                      }
-                    </Button>
-                  </Card>
-                </Grid.Col>
-              );
-            })}
-          </Grid>
-        </>
-      )}
+              <iframe
+                width="100%"
+                height="100%"
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  border: 'none'
+                }}
+                src="https://www.youtube.com/embed/JImJJ9RcCog"
+                title={t('infoSection.videoTitle', 'Introduction to Our Platform')}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </Box>
+          </Grid.Col>
+          
+          <Grid.Col md={6}>
+            <Stack spacing="md">
+              <Title order={3}>
+                {t('infoSection.subtitle', 'Create Engaging Courses with Ease')}
+              </Title>
+              
+              <Text size="lg">
+                {t('infoSection.description', 'Our platform makes it simple to create, manage, and deliver beautiful online courses. Whether you\'re an educator, trainer, or subject matter expert, you can easily build interactive learning experiences.')}
+              </Text>
+              
+              <List
+                spacing="md"
+                size="lg"
+                center
+                icon={
+                  <ThemeIcon color="teal" size={24} radius="xl">
+                    <IconCheck size={16} />
+                  </ThemeIcon>
+                }
+              >
+                <List.Item>
+                  {t('infoSection.feature1', 'Create courses with rich multimedia content')}
+                </List.Item>
+                <List.Item>
+                  {t('infoSection.feature2', 'Engage students with interactive elements')}
+                </List.Item>
+                <List.Item>
+                  {t('infoSection.feature3', 'Track progress and performance')}
+                </List.Item>
+              </List>
+              
+              <Button 
+                variant="outline" 
+                color="teal" 
+                size="md" 
+                mt="md"
+                onClick={() => navigate('/dashboard/create-course')}
+              >
+                {t('infoSection.createCourseButton', 'Create Your First Course')}
+              </Button>
+            </Stack>
+          </Grid.Col>
+        </Grid>
+      </motion.div>
     </Container>
   );
 }

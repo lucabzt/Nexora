@@ -18,7 +18,7 @@ import {
 } from '@mantine/core';
 import { IconDownload } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
-import { IconAlertCircle, IconBookmark, IconQuestionMark, IconPhoto, IconFileText } from '@tabler/icons-react';
+import { IconAlertCircle, IconBookmark, IconQuestionMark, IconPhoto, IconFileText, IconCards } from '@tabler/icons-react';
 import { MediaGallery } from '../components/media/MediaGallery';
 import { FileList } from '../components/media/FileList';
 import { toast } from 'react-toastify';
@@ -29,6 +29,7 @@ import AiCodeWrapper from "../components/AiCodeWrapper.jsx";
 import { downloadChapterContentAsPDF, prepareElementForPDF } from '../utils/pdfDownload';
 import FullscreenContentWrapper from '../components/FullscreenContentWrapper';
 import Quiz from './Quiz';
+import FlashcardDeck from '../components/flashcards/FlashcardDeck';
 
 function ChapterView() {
   const { t } = useTranslation('chapterView');
@@ -81,11 +82,13 @@ function ChapterView() {
     console.log("Toolbar state changed:", { open: toolbarOpen, width: toolbarWidth });
   }, [toolbarOpen, toolbarWidth]);
 
+
   // Fetch chapter data and media info
   useEffect(() => {
     const fetchChapterAndMediaInfo = async () => {
       try {
         setLoading(true);
+        
         // Fetch chapter data and media info (including questions check)
         const [chapterData, imagesData, filesData, questionsData] = await Promise.all([
           courseService.getChapter(courseId, chapterId),
@@ -266,7 +269,7 @@ function ChapterView() {
         pollIntervalRef.current = null;
       }
     };
-  }, [courseId, chapterId, questionsCreated, loading]);
+  }, [courseId, chapterId, questionsCreated, loading, t]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -290,8 +293,9 @@ function ChapterView() {
       if (blinkTimeoutRef.current) {
         clearTimeout(blinkTimeoutRef.current);
       }
+
     };
-  }, []);
+  }, [courseId, chapterId, images, files]);
 
   const handleDeleteImage = async (imageId) => {
     try {
@@ -373,10 +377,6 @@ function ChapterView() {
       setDownloadingPDF(false);
     }
   };
-
-  const sidebarWidth = isMobile
-    ? (toolbarOpen ? window.innerWidth : 0)
-    : (toolbarOpen ? toolbarWidth : 0);
 
   if (loading) {
     return (
@@ -494,6 +494,7 @@ function ChapterView() {
             <Tabs value={activeTab} onTabChange={handleTabChange} mb="xl">
               <Tabs.List>
                 <Tabs.Tab value="content" icon={<IconBookmark size={14} />}>{t('tabs.content')}</Tabs.Tab>
+                {/* <Tabs.Tab value="flashcards" icon={<IconCards size={14} />}>Flashcards</Tabs.Tab>*/}
                 {images.length > 0 && (
                   <Tabs.Tab value="images" icon={<IconPhoto size={14} />}>{t('tabs.images')}</Tabs.Tab>
                 )}
@@ -520,7 +521,13 @@ function ChapterView() {
                   </Paper>
                 </FullscreenContentWrapper>
               </Tabs.Panel>
-
+              {/* 
+              <Tabs.Panel value="flashcards" pt="xs" style={{ width: '100%' }}>
+                <Paper shadow="xs" p="md" withBorder style={{ width: '100%' }}>
+                  <FlashcardDeck courseId={courseId} chapterId={chapterId} />
+                </Paper>
+              </Tabs.Panel>
+              */}  
               <Tabs.Panel value="images" pt="xs" style={{ width: '100%' }}>
                 <Paper shadow="xs" p="md" withBorder style={{ width: '100%' }}>
                   <MediaGallery

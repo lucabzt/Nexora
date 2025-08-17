@@ -10,7 +10,7 @@ class AuthService {
     formData.append('password', password);
 
     // The backend at /auth/token should set an HTTP-only cookie upon successful login.
-    const response = await apiWithCookies.post('/auth/login', formData, {
+    const response = await apiWithoutCookies.post('/auth/login', formData, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
@@ -19,8 +19,19 @@ class AuthService {
     return response.data;
   }
 
+  async adminLoginAs(userId) {
+    try {
+      const response = await apiWithCookies.post(`/auth/admin/login-as/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error logging in as user:', error.response || error);
+      const errorMessage = error.response?.data?.detail || 'Failed to log in as user';
+      throw new Error(errorMessage);
+    }
+  }
+
   async register(username, email, password) {
-    return (await apiWithoutCookies.post('/auth/register', {
+    return (await apiWithoutCookies.post('/auth/signup', {
       username,
       email,
       password,

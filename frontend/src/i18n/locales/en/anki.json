@@ -1,0 +1,151 @@
+{
+  "title": "Anki Generator",
+  "subtitle": "Verwandeln Sie Ihre PDFs in lernbereite Anki-Karteikarten",
+  "description": "Laden Sie ein PDF-Dokument hoch und erstellen Sie angepasste Karteikarten-Decks für optimales Lernen",
+
+  "navigation": {
+    "ankiGenerator": "Anki Generator",
+    "dashboard": "Dashboard",
+    "processing": "Verarbeitung",
+    "history": "Verlauf"
+  },
+
+  "upload": {
+    "title": "PDF hochladen",
+    "subtitle": "Laden Sie Ihre PDF-Datei hoch",
+    "dragDrop": "Ziehen und ablegen oder klicken zum Durchsuchen",
+    "clickUpload": "Zum Hochladen klicken oder ziehen und ablegen",
+    "supportedFormats": "Nur PDF-Dateien • Max 50MB",
+    "chooseFile": "PDF-Datei wählen",
+    "uploading": "Wird hochgeladen...",
+    "uploadSuccess": "PDF erfolgreich hochgeladen",
+    "uploadFailed": "Upload fehlgeschlagen",
+    "invalidFile": "Bitte wählen Sie eine PDF-Datei",
+    "fileTooLarge": "Bitte wählen Sie eine PDF-Datei kleiner als 30MB",
+    "dropHere": "PDF hier ablegen"
+  },
+
+  "configure": {
+    "title": "Konfigurieren",
+    "subtitle": "Richten Sie Ihre Karteikarten ein",
+    "deckTitle": "Deck-Titel",
+    "deckTitlePlaceholder": "Geben Sie einen Titel für Ihr Karteikarten-Deck ein",
+    "flashcardType": "Karteikarten-Typ",
+    "flashcardTypePlaceholder": "Karteikarten-Typ wählen",
+    "description": "Beschreibung (Optional)",
+    "descriptionPlaceholder": "Fügen Sie eine Beschreibung für Ihr Karteikarten-Deck hinzu",
+    "difficulty": "Schwierigkeitsgrad",
+    "chapterDetection": "Kapitel-Erkennung",
+    "pagesPerChapter": "Seiten pro Kapitel",
+    "analyze": "PDF analysieren",
+    "reset": "Zurücksetzen"
+  },
+
+  "types": {
+    "testing": "Prüfung - Multiple-Choice-Fragen",
+    "learning": "Lernen - Bildbasierte Karten",
+    "testingDescription": "Erstellen Sie Multiple-Choice-Fragen perfekt für Prüfungsvorbereitung und Wissenstests",
+    "learningDescription": "Erstellen Sie bildbasierte Karteikarten organisiert nach Kapiteln für visuelles Lernen"
+  },
+
+  "difficulty": {
+    "easy": "Einfach",
+    "medium": "Mittel",
+    "hard": "Schwer"
+  },
+
+  "chapterMode": {
+    "auto": "Kapitel automatisch erkennen",
+    "manual": "Manuelle Unterteilung"
+  },
+
+  "review": {
+    "title": "Überprüfen",
+    "subtitle": "Überprüfen und generieren",
+    "analysisComplete": "Analyse abgeschlossen!",
+    "analysisDescription": "Ihr PDF wurde analysiert und ist bereit für die Karteikarten-Generierung",
+    "document": "Dokument",
+    "type": "Typ",
+    "estimatedChapters": "Geschätzte Kapitel",
+    "estimatedCards": "Geschätzte Karten",
+    "backToConfigure": "Zurück zur Konfiguration",
+    "generateDeck": "Anki-Deck generieren"
+  },
+
+  "processing": {
+    "title": "Verarbeitungsstatus",
+    "progress": "Verarbeitungsfortschritt",
+    "steps": "Verarbeitungsschritte",
+    "taskDetails": "Aufgabendetails",
+    "actions": "Aktionen",
+    "analyzing": "PDF analysieren",
+    "extracting": "Inhalt extrahieren",
+    "generating": "Karten generieren",
+    "packaging": "Deck verpacken",
+    "completed": "Abgeschlossen",
+    "downloadDeck": "Anki-Deck herunterladen",
+    "cancelProcessing": "Verarbeitung abbrechen",
+    "retryProcessing": "Verarbeitung wiederholen",
+    "backToGenerator": "Zurück zum Generator"
+  },
+
+  "status": {
+    "pending": "Ausstehend",
+    "processing": "Verarbeitung läuft",
+    "completed": "Abgeschlossen",
+    "failed": "Fehlgeschlagen",
+    "cancelled": "Abgebrochen"
+  },
+
+  "stepDescriptions": {
+    "analyzing": "Inhalt lesen und verstehen",
+    "extracting": "Wichtige Konzepte identifizieren",
+    "generating": "Karteikarten erstellen",
+    "packaging": "Anki-Datei erstellen"
+  },
+
+  "download": {
+    "title": "Download-Anweisungen",
+    "description": "Ihr Anki-Deck wurde erfolgreich generiert! So verwenden Sie es:",
+    "instructions": [
+      "Laden Sie die .apkg-Datei herunter",
+      "Öffnen Sie Anki auf Ihrem Computer oder Mobilgerät",
+      "Gehen Sie zu Datei → Importieren (oder verwenden Sie Strg+Shift+I)",
+      "Wählen Sie die heruntergeladene .apkg-Datei",
+      "Beginnen Sie mit dem Studium Ihres neuen Karteikarten-Decks!"
+    ],
+    "downloadNow": "Jetzt herunterladen",
+    "downloadStarted": "Download gestartet",
+    "downloadDescription": "Ihr Anki-Deck wird heruntergeladen"
+  },
+
+  "help": {
+    "title": "Wie der Anki Generator funktioniert",
+    "step1Title": "Schritt 1: PDF hochladen",
+    "step1Description": "Laden Sie jedes PDF-Dokument mit Bildungsinhalten hoch. Das System unterstützt Dateien bis zu 30MB.",
+    "step2Title": "Schritt 2: Modus wählen",
+    "step2Description": "Wählen Sie zwischen Prüfungsmodus für Multiple-Choice-Fragen oder Lernmodus für bildbasierte Karten.",
+    "step3Title": "Schritt 3: KI-Verarbeitung",
+    "step3Description": "Unsere KI analysiert Ihr Dokument, extrahiert wichtige Konzepte und generiert hochwertige Karteikarten optimiert für das Lernen.",
+    "step4Title": "Schritt 4: Herunterladen & Lernen",
+    "step4Description": "Laden Sie Ihre .apkg-Datei herunter und importieren Sie sie direkt in Anki für sofortiges Lernen."
+  },
+
+  "errors": {
+    "uploadFailed": "PDF-Upload fehlgeschlagen",
+    "analysisFailed": "PDF-Analyse fehlgeschlagen",
+    "processingFailed": "Verarbeitung konnte nicht gestartet werden",
+    "downloadFailed": "Anki-Deck konnte nicht heruntergeladen werden",
+    "taskNotFound": "Aufgabe nicht gefunden",
+    "cancelFailed": "Aufgabe konnte nicht abgebrochen werden",
+    "retryFailed": "Aufgabe konnte nicht wiederholt werden",
+    "loadingFailed": "Fehler beim Laden der Aufgabe"
+  },
+
+  "notifications": {
+    "taskCancelled": "Aufgabe abgebrochen",
+    "taskRestarted": "Aufgabe neu gestartet",
+    "processingCancelled": "Verarbeitung wurde abgebrochen",
+    "processingRestarted": "Verarbeitung wurde neu gestartet"
+  }
+}
