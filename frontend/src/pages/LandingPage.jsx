@@ -299,7 +299,7 @@ function LandingPage() {
   };
 
   return (
-    <Box>
+    <Box style={{ position: 'relative', overflowX: 'hidden' }}>
       {/* Floating shapes for visual interest */}
       <Box className={cx(classes.floatingShape, classes.shape1)} />
       <Box className={cx(classes.floatingShape, classes.shape2)} />
