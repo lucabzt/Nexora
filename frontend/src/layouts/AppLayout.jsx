@@ -178,10 +178,10 @@ function AppLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { width: viewportWidth } = useViewportSize();
   // Scale bottom navigation elements on very small screens (min 80% up to 100%)
-  const scale = Math.min(1, Math.max(0.8, (viewportWidth || 420) / 420));
+  const scale = Math.min(1, Math.max(0.8, (viewportWidth || 420) / 580));
   const bottomIconSize = Math.round(28 * scale);
   const bottomTextSize = Math.max(10, Math.round(12 * scale));
-  const bottomPadding = Math.max(6, Math.round(8 * scale));
+  const bottomPadding = Math.max(6, Math.round(6 * scale));
 
   const [course, setCourse] = useState(null);
   const [chapters, setChapters] = useState([]);
@@ -831,26 +831,46 @@ function AppLayout() {
           opened={mobileMenuOpen}
           onClose={() => setMobileMenuOpen(false)}
           position="bottom"
-          size="auto"
+          size="auto%"
           padding="md"
           withCloseButton
           overlayProps={{ opacity: 0.45, blur: 2 }}
+          styles={{
+            drawer: {
+              // Position above bottom navigation (96px + safe area)
+              maxHeight: 'calc(100% - 96px - env(safe-area-inset-bottom))',
+              // Ensure it's above the bottom navigation
+              zIndex: 1000,
+            },
+            content: {
+              // Ensure content is scrollable
+              display: 'flex',
+              flexDirection: 'column',
+              paddingBottom: 'calc(96px + env(safe-area-inset-bottom))',
+            },
+          }}
         >
-          <Stack spacing="sm">
+          <Stack spacing="sm" sx={{ height: '100%', overflow: 'hidden' }}>
             {/* Navigation Links */}
             <Box sx={{
-              // Limit height so the bottom navigation remains visible; enable scrolling for long lists
-              maxHeight: 'calc(100vh - 76px - 120px)',
+              flex: 1,
               overflowY: 'auto',
-              paddingRight: 4,
-              marginRight: -4,
-              paddingBottom: 8,
+              paddingRight: 8,
+              marginRight: -8,
+              paddingBottom: 16,
               '&::-webkit-scrollbar': { width: 6 },
-              '&::-webkit-scrollbar-track': { background: 'transparent' },
+              '&::-webkit-scrollbar-track': { 
+                background: 'transparent',
+                marginTop: 8,
+                marginBottom: 8,
+              },
               '&::-webkit-scrollbar-thumb': {
                 backgroundColor: dark ? theme.colors.dark[5] : theme.colors.gray[4],
                 borderRadius: 3,
-              }
+                '&:hover': {
+                  backgroundColor: dark ? theme.colors.dark[4] : theme.colors.gray[5],
+                },
+              },
             }}>
               <Stack spacing="xs">
                 {mainLinksData.map((link) => (
@@ -866,28 +886,94 @@ function AppLayout() {
                 ))}
               </Stack>
             </Box>
-            <Divider />
-            {/* Quick actions */}
-            <Group grow>
-              <UnstyledButton onClick={() => { toggleColorScheme(); }}>
-                <Group position="center" spacing="xs">
-                  {dark ? <IconSun size={16} /> : <IconMoonStars size={16} />}
-                  <Text size="sm">{t("theme", { ns: "settings" })}</Text>
-                </Group>
-              </UnstyledButton>
-              <UnstyledButton onClick={() => { setMobileMenuOpen(false); navigate("/about"); }}>
-                <Group position="center" spacing="xs">
-                  <IconInfoCircle size={16} />
-                  <Text size="sm">{t("about", { ns: "navigation" })}</Text>
-                </Group>
-              </UnstyledButton>
-              <UnstyledButton onClick={() => { setMobileMenuOpen(false); handleLogout(); }}>
-                <Group position="center" spacing="xs">
-                  <IconLogout size={16} />
-                  <Text size="sm" color="red">{t("logout", { ns: "navigation" })}</Text>
-                </Group>
-              </UnstyledButton>
-            </Group>
+            <Divider my="sm" sx={{ opacity: 0.6 }} />
+            {/* Quick actions - enhanced styling */}
+            <Paper 
+              withBorder 
+              p="sm" 
+              radius="md"
+              sx={{
+                background: dark ? theme.colors.dark[7] : theme.white,
+                boxShadow: theme.shadows.sm,
+              }}
+            >
+              <Group spacing="sm" grow>
+                <UnstyledButton 
+                  onClick={() => toggleColorScheme()}
+                  sx={{
+                    padding: '8px',
+                    borderRadius: theme.radius.md,
+                    transition: 'all 150ms ease',
+                    '&:hover': {
+                      background: dark ? theme.colors.dark[6] : theme.colors.gray[0],
+                      transform: 'translateY(-2px)',
+                    },
+                    '&:active': {
+                      transform: 'translateY(0)',
+                    }
+                  }}
+                >
+                  <Group position="center" spacing="xs" noWrap>
+                    <ThemeIcon size={34} radius="md" variant="light" color={dark ? 'yellow' : 'blue'}>
+                      {dark ? <IconSun size={18} /> : <IconMoonStars size={18} />}
+                    </ThemeIcon>
+                    <Text size="sm" weight={500} align="center">
+                      {t("theme", { ns: "settings" })}
+                    </Text>
+                  </Group>
+                </UnstyledButton>
+
+                <UnstyledButton 
+                  onClick={() => { setMobileMenuOpen(false); navigate("/about"); }}
+                  sx={{
+                    padding: '8px',
+                    borderRadius: theme.radius.md,
+                    transition: 'all 150ms ease',
+                    '&:hover': {
+                      background: dark ? theme.colors.dark[6] : theme.colors.gray[0],
+                      transform: 'translateY(-2px)',
+                    },
+                    '&:active': {
+                      transform: 'translateY(0)',
+                    }
+                  }}
+                >
+                  <Group position="center" spacing="xs" noWrap>
+                    <ThemeIcon size={34} radius="md" variant="light" color="gray">
+                      <IconInfoCircle size={18} />
+                    </ThemeIcon>
+                    <Text size="sm" weight={500} align="center">
+                      {t("about", { ns: "navigation" })}
+                    </Text>
+                  </Group>
+                </UnstyledButton>
+
+                <UnstyledButton 
+                  onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
+                  sx={{
+                    padding: '8px',
+                    borderRadius: theme.radius.md,
+                    transition: 'all 150ms ease',
+                    '&:hover': {
+                      background: theme.colors.red[0],
+                      transform: 'translateY(-2px)',
+                    },
+                    '&:active': {
+                      transform: 'translateY(0)',
+                    }
+                  }}
+                >
+                  <Group position="center" spacing="xs" noWrap>
+                    <ThemeIcon size={34} radius="md" variant="light" color="red">
+                      <IconLogout size={18} />
+                    </ThemeIcon>
+                    <Text size="sm" weight={600} color="red" align="center">
+                      {t("logout", { ns: "navigation" })}
+                    </Text>
+                  </Group>
+                </UnstyledButton>
+              </Group>
+            </Paper>
           </Stack>
         </Drawer>
       )}

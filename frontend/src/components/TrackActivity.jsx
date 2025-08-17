@@ -52,12 +52,6 @@ export default function TrackActivity({ user: currentUser }) {
     const handleVisibilityChange = () => {
       const isNowVisible = !document.hidden;
       setIsVisible(isNowVisible);
-      
-      // Only report if visibility actually changed
-      if (isNowVisible !== lastVisibilityRef.current) {
-        lastVisibilityRef.current = isNowVisible;
-        reportUsage();
-      }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);

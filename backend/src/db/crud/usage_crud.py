@@ -126,7 +126,56 @@ def get_total_time_spent_on_chapters(db: Session, user_id: str) -> int:
     return usages * 10
 
 
-
+def get_user_with_total_usage_time(db: Session, offset: int = 0, limit: int = 200):
+    """
+    Get users with their total usage time in minutes.
+    
+    :param db: Database session
+    :param offset: Number of records to skip (for pagination)
+    :param limit: Maximum number of records to return (for pagination)
+    :return: List of users with their total usage time in minutes
+    """
+    from sqlalchemy import func
+    from ..models.db_user import User
+    
+    # Subquery to count site_visible actions per user
+    usage_counts = (
+        db.query(
+            Usage.user_id,
+            func.count('*').label('usage_count')
+        )
+        .filter(
+            Usage.action == "site_visible",
+            Usage.course_id != None,
+            Usage.chapter_id != None
+        )
+        .group_by(Usage.user_id)
+        .subquery()
+    )
+    
+    # Main query to join with users and calculate total time
+    user_usages = (
+        db.query(
+            User,
+            (func.coalesce(usage_counts.c.usage_count, 0) * 10).label('total_usage_time')
+        )
+        .outerjoin(
+            usage_counts,
+            User.id == usage_counts.c.user_id
+        )
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+    
+    # Format the result to include user object and total_usage_time
+    return [
+        {
+            'user': user,
+            'total_usage_time': total_usage_time
+        }
+        for user, total_usage_time in user_usages
+    ]
 
 
 def log_site_usage(db: Session, usage: UsagePost ) -> Usage:
