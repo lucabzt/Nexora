@@ -82,8 +82,8 @@ function App() {
                     {/* Public routes with MainLayout */}
                     <Route element={<MainLayout />}>
                       <Route path="/" element={<LandingPage />} /> {/* LandingPage now at root */}
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/register" element={<Register />} />
+                      <Route path="/auth/login" element={<Login />} />
+                      <Route path="/auth/signup" element={<Register />} />
                       <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
                       <Route path="/impressum" element={<Impressum />} />
                       <Route path="/privacy" element={<Privacy />} />

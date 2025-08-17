@@ -58,7 +58,7 @@ function MainLayout() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/auth/login');
   };
 
   return (
@@ -292,11 +292,11 @@ function MainLayout() {
                   </Menu.Dropdown>
                 </Menu>
               ) : (
-                !['/login', '/register'].includes(pathname) && (
+                !['/auth/login', '/auth/signup'].includes(pathname) && (
                   <Group spacing="xs">
                     <Button 
                       component={RouterLink}
-                      to="/login"
+                      to="/auth/login"
                       variant="outline"
                       radius="md"
                       sx={{
@@ -310,7 +310,7 @@ function MainLayout() {
                     </Button>
                     <Button
                       component={RouterLink}
-                      to="/register"
+                      to="/auth/signup"
                       variant="gradient"
                       gradient={{ from: 'violet', to: 'blue' }}
                       radius="md"

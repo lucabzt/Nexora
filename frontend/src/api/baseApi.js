@@ -56,8 +56,8 @@ apiWithCookies.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError);
         if (typeof window !== 'undefined' && 
-            window.location.pathname !== '/login') {
-          window.location.href = '/login';
+            window.location.pathname !== '/auth/login') {
+          window.location.href = '/auth/login';
         }
         return Promise.reject(refreshError);
       } finally {

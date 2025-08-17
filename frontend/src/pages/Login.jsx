@@ -200,7 +200,7 @@ function Login() {
 
         <Text align="center" mt="lg">
           {t("noAccount")}{" "}
-          <Anchor component={Link} to="/register" weight={600}>
+          <Anchor component={Link} to="/auth/signup" weight={600}>
             {t("signUp")}
           </Anchor>
         </Text>

@@ -83,7 +83,7 @@ function CourseLayout() {
   // ----- Handlers -------------------------------------------------------- //
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/auth/login');
   };
 
   const avatarSrc = user?.profile_image_url;

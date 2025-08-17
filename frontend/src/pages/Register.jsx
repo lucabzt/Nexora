@@ -280,7 +280,7 @@ function Register() {
 
         <Text align="center" mt="lg">
           {t("haveAccount")}{" "}
-          <Anchor component={Link} to="/login" weight={600}>
+          <Anchor component={Link} to="/auth/login" weight={600}>
             {t("signIn")}
           </Anchor>
         </Text>

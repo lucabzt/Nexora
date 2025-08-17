@@ -24,7 +24,7 @@ api_router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@api_router.post("/register",
+@api_router.post("/signup",
                   response_model=auth_schema.APIResponseStatus,
                   status_code=status.HTTP_201_CREATED)
 async def register_user(response: Response,

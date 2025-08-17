@@ -1,5 +1,6 @@
 {
   "hero": {
+    "title": "Unlock Your Potential with AI-Powered Learning",
     "titlePart1": "Master Any Skill with",
     "titlePart2": "Your AI Mentor",
     "subtitle": "Stop wasting time on generic courses. Nexora builds a unique learning path just for you, so you can achieve your goals faster.",
@@ -35,6 +36,11 @@
     "step4Text": "Apply your knowledge with confidence",
     "imageAlt": "Diagram showing the three steps to learning with Nexora",
     "cta": "Create Your Custom Course"
+  },
+  "award": {
+    "title": "EMEA Regional Winner",
+    "subtitle": "Google Cloud Agent Development Kit Hackathon",
+    "body": "Out of 10,000+ global participants, our platform was recognized for excellence in building innovative multi-agent AI systems. This award highlights our commitment to pushing the boundaries of automated content creation and data analysis."
   },
   "testimonials": {
     "title": "Trusted by Ambitious Learners",

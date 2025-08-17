@@ -317,7 +317,7 @@ function AppLayout() {
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate("/auth/login");
   };
 
   const isDashboard = useMatch("/dashboard");

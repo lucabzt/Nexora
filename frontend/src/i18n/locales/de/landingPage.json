@@ -1,5 +1,6 @@
 {
   "hero": {
+    "title": "Entfalte dein Potenzial mit KI-gestütztem Lernen",
     "titlePart1": "Meistere jede Fähigkeit mit",
     "titlePart2": "Deinem KI-Mentor",
     "subtitle": "Verschwende keine Zeit mehr mit allgemeinen Kursen. Nexora erstellt einen einzigartigen Lernpfad nur für dich, damit du deine Ziele schneller erreichst.",
@@ -36,6 +37,11 @@
     "imageAlt": "Diagramm, das die drei Schritte zum Lernen mit Nexora zeigt",
     "cta": "Erstelle deinen individuellen Kurs"
   },
+  "award": {
+    "title": "EMEA Regionaler Sieger",
+    "subtitle": "Google Cloud Agent Development Kit Hackathon",
+    "body": "Unter mehr als 10.000 Teilnehmern weltweit wurde unsere Plattform für ihre herausragende Leistung im Aufbau innovativer Multi-Agenten-KI-Systeme ausgezeichnet. Diese Auszeichnung unterstreicht unser Engagement, die Grenzen der automatisierten Inhaltserstellung und Datenanalyse zu erweitern."
+  },
   "testimonials": {
     "title": "Von ambitionierten Lernenden geschätzt",
     "quote1": "\"Ich habe monatelang versucht, Python mit Online-Videos zu lernen. Mit Nexora habe ich in nur drei Wochen meine erste echte Anwendung erstellt. Der personalisierte Pfad hat den Unterschied gemacht.\"",
@@ -47,6 +53,10 @@
     "quote3": "\"Als Gründer ist meine Zeit mein wertvollstes Gut. Nexora hat einen fokussierten Marketingkurs erstellt, der mir genau das beigebracht hat, was ich brauchte, ohne Füllmaterial. Sehr zu empfehlen!\"",
     "name3": "Ben Schmidt",
     "role3": "Startup-Gründer"
+  },
+  "demo": {
+    "title": "Unsere Plattform in Aktion erleben",
+    "subtitle": "Schau dir eine kurze Demo an und entdecke, wie unsere KI-Tools deinen Arbeitsablauf optimieren und das Lernerlebnis verbessern können."
   },
   "cta": {
     "title": "Bereit, dein volles Potenzial zu entfalten?",

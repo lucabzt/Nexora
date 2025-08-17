@@ -95,7 +95,7 @@ function About() {
     if (isAuthenticated) {
       navigate('/dashboard');
     } else {
-      navigate('/login');
+      navigate('/auth/login');
     }
   };
   

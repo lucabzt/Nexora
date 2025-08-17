@@ -19,7 +19,7 @@ TEST_USER = {
 def register_user():
     """Register a test user"""
     print("🔧 Registering test user...")
-    response = requests.post(f"{BASE_URL}/register", json=TEST_USER)
+    response = requests.post(f"{BASE_URL}/auth/signup", json=TEST_USER)
 
     if response.status_code == 201:
         print("✅ User registered successfully")

@@ -12,7 +12,7 @@ function AppFooter() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/auth/login');
   };
 
   return (

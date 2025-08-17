@@ -31,7 +31,7 @@ class AuthService {
   }
 
   async register(username, email, password) {
-    return (await apiWithoutCookies.post('/auth/register', {
+    return (await apiWithoutCookies.post('/auth/signup', {
       username,
       email,
       password,
