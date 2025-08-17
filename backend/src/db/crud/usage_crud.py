@@ -117,31 +117,15 @@ def get_total_time_spent_on_chapters(db: Session, user_id: str) -> int:
     :param user_id: ID of the user
     :return: Total time spent on chapters in minutes
     """
-
-    return int(0)
-
     usages = (
         db.query(Usage)
-        .filter(Usage.user_id == user_id, Usage.action.in_(["open_chapter", "close_chapter"]))
-        .order_by(Usage.timestamp)
-        .all()
+        .filter(Usage.user_id == user_id, Usage.action == "site_visible", Usage.course_id != None, Usage.chapter_id != None)
+        .count()
     )
 
-    total_time = 0
-    open_times = {}
+    return usages * 10
 
-    for usage in usages:
-        key = (usage.course_id, usage.chapter_id)
-        if usage.action == "open_chapter":
-            open_times[key] = usage.timestamp
-        elif usage.action == "close_chapter":
-            if key in open_times:
-                open_time = open_times.pop(key)
-                diff = (usage.timestamp - open_time).total_seconds()
-                if diff > 0:
-                    total_time += diff
 
-    return int(total_time)
 
 
 
@@ -153,7 +137,12 @@ def log_site_usage(db: Session, usage: UsagePost ) -> Usage:
     :param usage: UsagePost object containing user_id, course_id, chapter_id, and url
     :return: The created Usage object
     """
-    return log_usage(db, user_id=usage.user_id, action="site", course_id=usage.course_id, chapter_id=usage.chapter_id, details=usage.url)
+    return log_usage(db,
+        user_id=usage.user_id,
+        action="site" + ("_visible" if usage.visible else "_hidden"),
+        course_id=usage.course_id,
+        chapter_id=usage.chapter_id,
+        details=usage.url)
 
 def log_login(db: Session, user_id: str) -> Usage:
     """

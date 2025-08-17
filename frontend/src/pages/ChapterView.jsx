@@ -294,8 +294,6 @@ function ChapterView() {
         clearTimeout(blinkTimeoutRef.current);
       }
 
-      // Ensure chapter is closed on unmount as a fallback
-      courseService.closeChapter(courseId, chapterId);
     };
   }, [courseId, chapterId, images, files]);
 

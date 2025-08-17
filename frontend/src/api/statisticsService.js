@@ -154,15 +154,32 @@ const generateMockData = () => {
   };
 };
 
-const statisticsService = {
-  async getStatistics() {
-    // For demo, return mock data by simulating an async API call
-    return new Promise(resolve => {
-      setTimeout(() => {
-        resolve(generateMockData());
-      }, 500); // 500ms delay to simulate network latency
+const postUsage = async (url, user_id, courseId = null, chapterId = null, isVisible = true) => {
+  try {
+    await apiWithCookies.post('/statistics/usage', {
+      user_id: user_id,
+      url: url,
+      course_id: courseId,
+      chapter_id: chapterId,
+      visible: isVisible
     });
-  },
+  } catch (error) {
+    console.error('Error posting usage data:', error);
+  }
+};
+
+const getStatistics = async () => {
+  // For demo, return mock data by simulating an async API call
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(generateMockData());
+    }, 500); // 500ms delay to simulate network latency
+  });
+};
+
+const statisticsService = {
+  getStatistics,
+  postUsage,
 };
 
 export default statisticsService;

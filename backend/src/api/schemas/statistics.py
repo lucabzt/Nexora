@@ -7,4 +7,5 @@ class UsagePost(BaseModel):
     course_id: Optional[int] = None
     chapter_id: Optional[int] = None
     visible: Optional[bool] = None
+    timestamp: str = None
 

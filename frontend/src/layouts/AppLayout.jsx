@@ -45,6 +45,7 @@ import {
   IconFileExport,
 } from "@tabler/icons-react";
 import AppFooter from "../components/AppFooter";
+import TrackActivity from "../components/TrackActivity";
 import { useAuth } from "../contexts/AuthContext";
 import { useTranslation } from "react-i18next";
 import CourseSidebar from "../components/CourseSidebar"; // Import the new component
@@ -317,6 +318,7 @@ function AppLayout() {
 
   return (
     <>
+      <TrackActivity user={user} />
       {/* Floating menu button removed; 'Mehr' lives in bottom navigation on mobile */}
       <AppShell
         styles={{
