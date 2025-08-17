@@ -83,7 +83,11 @@
     "courseCreationComplete": "Course (ID: {{courseId}}) created successfully!"
   },
   "errors": {
-    "unknown": "Unknown error"
+    "unknown": "Unknown error",
+    "courseLimitReached": "Free tier usage limit reached!",
+    "maxCoursesCreated": "You can create a maximum of {{limit}} courses in the free plan.",
+    "maxActiveCourses": "You can have a maximum of {{limit}} active courses at the same time in the free plan.",
+    "upgradeToPremium": "Upgrade to Premium"
   },
   "streaming": {
     "title": "Creating Your Course",

@@ -6,7 +6,6 @@ import {
   Container,
   Title, 
   Text, 
-  Button, 
   Group, 
   Textarea, 
   Slider, 
@@ -26,7 +25,8 @@ import {
   RingProgress,
   Divider,
   Alert,
-  List
+  List,
+  Button
 } from '@mantine/core';
 import { 
   IconBook, 
@@ -230,9 +230,51 @@ function CreateCourse() {
       
     } catch (err) { 
       console.error('Error initiating course creation:', err);
-      const errorMessage = err.response?.data?.detail || err.message || t('errors.courseCreationDefault');
-      setError(errorMessage);
-      toast.error(errorMessage);
+      
+      // Handle specific error cases
+      if (err.response?.data?.code === 'MAX_COURSE_CREATIONS_REACHED') {
+        const limit = err.response?.data?.limit || 0;
+        toast.error(
+          <div>
+            <div>{t('errors.courseLimitReached')}</div>
+            <div>{t('errors.maxCoursesCreated', { limit })}</div>
+            <Button 
+              variant="text" 
+              color="primary" 
+              size="sm"
+              onClick={() => navigate('/pricing')}
+              style={{ marginTop: '0.5rem', padding: 0, minWidth: 'auto', textTransform: 'none' }}
+            >
+              {t('errors.upgradeToPremium')}
+            </Button>
+          </div>,
+          { autoClose: 10000 }
+        );
+      } else if (err.response?.data?.code === 'MAX_PRESENT_COURSES_REACHED') {
+        const limit = err.response?.data?.limit || 0;
+        toast.error(
+          <div>
+            <div>{t('errors.courseLimitReached')}</div>
+            <div>{t('errors.maxActiveCourses', { limit })}</div>
+            <Button 
+              variant="text" 
+              color="primary" 
+              size="sm"
+              onClick={() => navigate('/pricing')}
+              style={{ marginTop: '0.5rem', padding: 0, minWidth: 'auto', textTransform: 'none' }}
+            >
+              {t('errors.upgradeToPremium')}
+            </Button>
+          </div>,
+          { autoClose: 10000 }
+        );
+      } else {
+        // Default error handling
+        const errorMessage = err.response?.data?.detail?.message || err.response?.data?.detail || err.message || t('errors.unknown');
+        setError(errorMessage);
+        toast.error(errorMessage);
+      }
+      
       setIsSubmitting(false);
     }
   };

@@ -9,7 +9,7 @@ from ...db.models.db_user import User
 from ...services.agent_service import AgentService
 from ...utils.auth import get_current_active_user
 from ...db.database import get_db, get_db_context, SessionLocal
-from ...db.crud import courses_crud, chapters_crud, users_crud
+from ...db.crud import courses_crud, chapters_crud, users_crud, usage_crud
 from ...services import course_service
 from ...services.course_service import verify_course_ownership
 
@@ -21,6 +21,7 @@ from ..schemas.course import (
     UpdateCoursePublicStatusRequest,
 )
 
+from ...config.settings import ( MAX_COURSE_CREATIONS, MAX_PRESENT_COURSES )
 
 
 
@@ -38,11 +39,40 @@ agent_service = AgentService()
 async def create_course_request(
         course_request: CourseRequest,
         background_tasks: BackgroundTasks,
-        current_user: User = Depends(get_current_active_user)
+        current_user: User = Depends(get_current_active_user),
 ) -> CourseInfo:
     """
     Initiate course creation as a background task and return a task ID for WebSocket progress updates.
     """
+
+    # Limit not admin account to 10 course creastions
+    if not current_user.is_admin:
+        with get_db_context() as db:
+            created_course_count = usage_crud.get_total_created_courses(db, current_user.id)
+            if created_course_count >= MAX_COURSE_CREATIONS:
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail={
+                    "error": "LIMIT_REACHED",
+                    "code": "MAX_COURSE_CREATIONS_REACHED",
+                    "limit": MAX_COURSE_CREATIONS,
+                    "message": "You have reached the maximum number of courses you can create."
+                }
+            )
+        with get_db_context() as db:
+            current_courses = courses_crud.get_course_count_by_user_id(db, current_user.id)
+            if current_courses >= MAX_PRESENT_COURSES:
+                raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail={
+                    "error": "LIMIT_REACHED",
+                    "code": "MAX_PRESENT_COURSES_REACHED",
+                    "limit": MAX_PRESENT_COURSES,
+                    "message": "You have reached the maximum number of courses you can have present at the same time."
+                }
+            )
+    
+
     
     with get_db_context() as db:
         # Create empty course in the database

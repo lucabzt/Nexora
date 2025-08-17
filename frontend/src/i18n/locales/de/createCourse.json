@@ -84,7 +84,11 @@
     "courseCreationComplete": "Kurs (ID: {{courseId}}) erfolgreich erstellt!"
   },
   "errors": {
-    "unknown": "Unbekannter Fehler"
+    "unknown": "Unbekannter Fehler",
+    "courseLimitReached": "Nutzungslimit der kostenlosen Version erreicht!",
+    "maxCoursesCreated": "Sie können maximal {{limit}} Kurse im kostenlosen Plan erstellen.",
+    "maxActiveCourses": "Sie können maximal {{limit}} aktive Kurse gleichzeitig im kostenlosen Plan haben.",
+    "upgradeToPremium": "Auf Premium upgraden"
   },
   "streaming": {
     "title": "Dein Kurs wird erstellt",

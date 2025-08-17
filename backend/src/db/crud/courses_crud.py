@@ -35,6 +35,10 @@ def get_courses_by_status(db: Session, status: CourseStatus) -> List[Course]:
     return db.query(Course).filter(Course.status == status).all()
 
 
+def get_course_count_by_user_id(db: Session, user_id: str) -> int:
+    """Get the count of courses for a specific user"""
+    return db.query(Course).filter(Course.user_id == user_id).count()
+
 def create_new_course(db: Session, user_id: str, total_time_hours: int, query_: str,
                       language: str = "en", difficulty: str = "advanced",
                       status: CourseStatus = CourseStatus.CREATING) -> Course:
