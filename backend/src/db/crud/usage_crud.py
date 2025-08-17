@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from typing import List
 from ..models.db_usage import Usage
-
+from ...api.schemas.statistics import UsagePost
 
 def log_usage(db: Session, user_id: str, action: str, course_id: int = None, chapter_id: int = None, details: str = None) -> Usage:
     """
@@ -40,6 +40,7 @@ def get_user_usages(db: Session, user_id: str) -> List[Usage]:
     """
     return db.query(Usage).filter(Usage.user_id == user_id).all()
 
+
 def get_usage_by_action(db: Session, user_id: str, action: str) -> List[Usage]:
     """
     Get all usage records for a specific user filtered by action.
@@ -50,6 +51,7 @@ def get_usage_by_action(db: Session, user_id: str, action: str) -> List[Usage]:
     :return: List of Usage objects for the user with the specified action
     """
     return db.query(Usage).filter(Usage.user_id == user_id, Usage.action == action).all()
+
 
 def log_chat_usage(db: Session, user_id: str, course_id: int, chapter_id: int, message: str) -> Usage:
     """
@@ -95,19 +97,6 @@ def log_course_creation(db: Session, user_id: str, course_id: int, detail: str) 
     """
     return log_usage(db, user_id, action="create_course", course_id=course_id, details=detail)
 
-
-def log_chapter_open(db: Session, user_id: str, course_id: int, chapter_id: int) -> Usage:
-    """
-    Log the opening of a chapter by a user.
-    
-    :param db: Database session
-    :param user_id: ID of the user opening the chapter
-    :param course_id: ID of the course containing the chapter
-    :param chapter_id: ID of the opened chapter
-    :return: The created Usage object
-    """
-    return log_usage(db, user_id, action="open_chapter", course_id=course_id, chapter_id=chapter_id)
-
 def log_chapter_completion(db: Session, user_id: str, course_id: int, chapter_id: int) -> Usage:
     """
     Log the completion of a chapter by a user.
@@ -120,19 +109,6 @@ def log_chapter_completion(db: Session, user_id: str, course_id: int, chapter_id
     """
     return log_usage(db, user_id, action="complete_chapter", course_id=course_id, chapter_id=chapter_id)
 
-def log_chapter_close(db: Session, user_id: str, course_id: int, chapter_id: int) -> Usage:
-    """
-    Log the closing of a chapter by a user.
-    
-    :param db: Database session
-    :param user_id: ID of the user closing the chapter
-    :param course_id: ID of the course containing the chapter
-    :param chapter_id: ID of the closed chapter
-    :return: The created Usage object
-    """
-    return log_usage(db, user_id, action="close_chapter", course_id=course_id, chapter_id=chapter_id)
-
-
 def get_total_time_spent_on_chapters(db: Session, user_id: str) -> int:
     """
     Get the total time spent by a user on chapters: Calculate total time: every open followed by a close time differences summed up.
@@ -141,6 +117,9 @@ def get_total_time_spent_on_chapters(db: Session, user_id: str) -> int:
     :param user_id: ID of the user
     :return: Total time spent on chapters in minutes
     """
+
+    return int(0)
+
     usages = (
         db.query(Usage)
         .filter(Usage.user_id == user_id, Usage.action.in_(["open_chapter", "close_chapter"]))
@@ -166,7 +145,15 @@ def get_total_time_spent_on_chapters(db: Session, user_id: str) -> int:
 
 
 
-
+def log_site_usage(db: Session, usage: UsagePost ) -> Usage:
+    """
+    Log a user action on the site.
+    
+    :param db: Database session
+    :param usage: UsagePost object containing user_id, course_id, chapter_id, and url
+    :return: The created Usage object
+    """
+    return log_usage(db, user_id=usage.user_id, action="site", course_id=usage.course_id, chapter_id=usage.chapter_id, details=usage.url)
 
 def log_login(db: Session, user_id: str) -> Usage:
     """

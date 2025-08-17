@@ -85,38 +85,3 @@ def get_chapter_by_id(course_id: int, chapter_id: int, db: Session) -> Chapter:
 
     return chapter
 
-
-
-def log_chapter_close(
-    db: Session,
-    user_id: str,
-    course_id: int,
-    chapter_id: int
-) -> None:
-    """
-    Log the closure of a chapter by a user.
-    This function records the action of closing a chapter in the usage logs.
-    """
-    usage_crud.log_chapter_close(
-        db=db,
-        user_id=user_id,
-        course_id=course_id,
-        chapter_id=chapter_id
-    )
-
-def log_chapter_open(
-    db: Session,
-    user_id: str,
-    course_id: int,
-    chapter_id: int
-) -> None:
-    """
-    Log the closure of a chapter by a user.
-    This function records the action of closing a chapter in the usage logs.
-    """
-    usage_crud.log_chapter_open(
-        db=db,
-        user_id=user_id,
-        course_id=course_id,
-        chapter_id=chapter_id
-    )

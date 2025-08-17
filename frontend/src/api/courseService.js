@@ -86,23 +86,6 @@ export const courseService = {
       // Use the actual chapter ID, not index
     (await apiWithCookies.patch(`/courses/${courseId}/chapters/${chapterId}/complete`)).data,
 
-  openChapter: debounce(async (courseId, chapterId) => {
-    try {
-      return (await apiWithCookies.post(`/courses/${courseId}/chapters/${chapterId}/open`)).data;
-    } catch (error) {
-      console.error('Error opening chapter:', error);
-      throw error;
-    }
-  }, 300), // 300ms debounce
-
-  closeChapter: debounce(async (courseId, chapterId) => {
-    try {
-      return (await apiWithCookies.post(`/courses/${courseId}/chapters/${chapterId}/close`)).data;
-    } catch (error) {
-      console.error('Error closing chapter:', error);
-      throw error;
-    }
-  }, 300), // 300ms debounce
 
   getFiles: async (courseId) =>
   (await apiWithCookies.get(`/files/documents?course_id=${courseId}`)).data,

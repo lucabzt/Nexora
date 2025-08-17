@@ -185,59 +185,6 @@ async def get_chapter_by_id(
     )
 
 
-@router.post("/{course_id}/chapters/{chapter_id}/close")
-async def close_chapter(
-        course_id: int,
-        chapter_id: int,
-        current_user: User = Depends(get_current_active_user),
-        db: Session = Depends(get_db)
-):
-    """
-    Close a chapter.
-    Only accessible if the course belongs to the current user.
-    """
-    # First verify course ownership
-    await verify_course_ownership(course_id, str(current_user.id), db)
-    
-    # Log
-    course_service.log_chapter_close(
-        db=db,
-        user_id=str(current_user.id),
-        course_id=course_id,
-        chapter_id=chapter_id
-    )
-
-    return {
-        "message": f"Chapter '{chapter_id}' has been closed",
-    }
-
-
-@router.post("/{course_id}/chapters/{chapter_id}/open")
-async def open_chapter(
-        course_id: int,
-        chapter_id: int,
-        current_user: User = Depends(get_current_active_user),
-        db: Session = Depends(get_db)
-):
-    """
-    Opens a chapter.
-    Only accessible if the course belongs to the current user.
-    """
-    # First verify course ownership
-    await verify_course_ownership(course_id, str(current_user.id), db)
-    
-    # Log
-    course_service.log_chapter_open(
-        db=db,
-        user_id=str(current_user.id),
-        course_id=course_id,
-        chapter_id=chapter_id
-    )
-
-    return {
-        "message": f"Chapter '{chapter_id}' has been closed",
-    }
-
 
 @router.patch("/{course_id}/chapters/{chapter_id}/complete")
 async def mark_chapter_complete(
