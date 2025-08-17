@@ -26,6 +26,8 @@ import {
   useMantineTheme,
   Switch,
   createStyles,
+  Paper,
+  List, // Added missing List import
 } from '@mantine/core';
 import {
   IconBook,
@@ -776,7 +778,7 @@ function Dashboard() {
                     rightIcon={viewAllCourses ? <IconChevronRight size={16} /> : null}
                     leftIcon={!viewAllCourses ? <IconChevronRight size={16} style={{ transform: 'rotate(-90deg)' }} /> : null}
                   >
-                    {viewAllCourses ? t('showLess') : t('viewAllCourses')}
+                    {viewAllCourses ? t('showLessButton') : t('viewAllCourses')}
                   </Button>
                 </Group>
               )}
@@ -813,6 +815,91 @@ function Dashboard() {
           )}
         </Stack>
       )}
+
+      {/* Info Section - MOVED INSIDE THE MAIN CONTAINER */}
+      <motion.div 
+        variants={item}
+        style={{ marginTop: '4rem' }}
+      >
+        <Title order={2} align="center" mb="xl">
+          {t('infoSection.title', 'How It Works')}
+        </Title>
+        
+        <Grid gutter={50} align="center">
+          <Grid.Col md={6}>
+            <Box 
+              sx={{
+                position: 'relative',
+                paddingBottom: '56.25%', /* 16:9 Aspect Ratio */
+                height: 0,
+                overflow: 'hidden',
+                borderRadius: theme.radius.md,
+                boxShadow: theme.shadows.xl
+              }}
+            >
+              <iframe
+                width="100%"
+                height="100%"
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  border: 'none'
+                }}
+                src="https://www.youtube.com/embed/JImJJ9RcCog"
+                title={t('infoSection.videoTitle', 'Introduction to Our Platform')}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </Box>
+          </Grid.Col>
+          
+          <Grid.Col md={6}>
+            <Stack spacing="md">
+              <Title order={3}>
+                {t('infoSection.subtitle', 'Create Engaging Courses with Ease')}
+              </Title>
+              
+              <Text size="lg">
+                {t('infoSection.description', 'Our platform makes it simple to create, manage, and deliver beautiful online courses. Whether you\'re an educator, trainer, or subject matter expert, you can easily build interactive learning experiences.')}
+              </Text>
+              
+              <List
+                spacing="md"
+                size="lg"
+                center
+                icon={
+                  <ThemeIcon color="teal" size={24} radius="xl">
+                    <IconCheck size={16} />
+                  </ThemeIcon>
+                }
+              >
+                <List.Item>
+                  {t('infoSection.feature1', 'Create courses with rich multimedia content')}
+                </List.Item>
+                <List.Item>
+                  {t('infoSection.feature2', 'Engage students with interactive elements')}
+                </List.Item>
+                <List.Item>
+                  {t('infoSection.feature3', 'Track progress and performance')}
+                </List.Item>
+              </List>
+              
+              <Button 
+                variant="outline" 
+                color="teal" 
+                size="md" 
+                mt="md"
+                onClick={() => navigate('/dashboard/create-course')}
+              >
+                {t('infoSection.createCourseButton', 'Create Your First Course')}
+              </Button>
+            </Stack>
+          </Grid.Col>
+        </Grid>
+      </motion.div>
     </Container>
   );
 }

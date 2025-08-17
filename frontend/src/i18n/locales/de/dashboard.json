@@ -101,7 +101,20 @@
   "loadingCourses": "Kurse werden geladen...",
   "loadingPublicCourses": "Öffentliche Kurse werden geladen...",
   "loadingMyCourses": "Deine Kurse werden geladen...",
+  "noCoursesTitle": "Noch keine Kurse",
+  "noCoursesDescription": "Du hast noch keine Kurse erstellt. Erstelle jetzt deinen ersten Kurs und lege los!",
+  "createFirstCourse": "Ersten Kurs erstellen",
   "searchCourses": "Kurse durchsuchen",
   "continueButton": "Weiterlernen",
-  "lastAccessed": "Zuletzt aufgerufen"
+  "lastAccessed": "Zuletzt aufgerufen",
+  "infoSection": {
+    "title": "So funktioniert's",
+    "videoTitle": "Einführung in unsere Plattform",
+    "subtitle": "Erstellen Sie ansprechende Kurse mit Leichtigkeit",
+    "description": "Unsere Plattform macht es einfach, schöne Online-Kurse zu erstellen, zu verwalten und bereitzustellen. Egal, ob Sie Pädagoge, Trainer oder Fachexperte sind, Sie können ganz einfach interaktive Lernerlebnisse gestalten.",
+    "feature1": "Erstellen Sie Kurse mit umfangreichen Multimedia-Inhalten",
+    "feature2": "Binden Sie Lernende mit interaktiven Elementen ein",
+    "feature3": "Verfolgen Sie Fortschritt und Leistung",
+    "createCourseButton": "Erstellen Sie Ihren ersten Kurs"
+  }
 }

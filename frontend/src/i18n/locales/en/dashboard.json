@@ -101,6 +101,9 @@
   "loadingCourses": "Loading courses...",
   "loadingPublicCourses": "Loading public courses...",
   "loadingMyCourses": "Loading your courses...",
+  "noCoursesTitle": "No Courses Yet",
+  "noCoursesDescription": "You haven't created any courses yet. Get started by creating your first course!",
+  "createFirstCourse": "Create First Course",
   "searchCourses": "Search Courses",
   "continueButton": "Continue",
   "lastAccessed": "Last accessed"
