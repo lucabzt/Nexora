@@ -7,7 +7,8 @@
     "delete": "Delete",
     "edit": "Edit",
     "create": "Create",
-    "submit": "Submit"
+    "submit": "Submit",
+    "maybeLater": "Maybe Later"
   },
   "language": {
     "english": "English",

@@ -106,7 +106,7 @@
   "createFirstCourse": "Ersten Kurs erstellen",
   "searchCourses": "Kurse durchsuchen",
   "continueButton": "Weiterlernen",
-  "lastAccessed": "Zuletzt aufgerufen",
+  "createdAt": "Erstellt am",
   "infoSection": {
     "title": "So funktioniert's",
     "videoTitle": "Einführung in unsere Plattform",

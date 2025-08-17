@@ -109,7 +109,7 @@ import {
   };
   
   
-  const PremiumModal = ({ opened, onClose }) => {
+  const PremiumModal = ({ opened, onClose, limitReached = false }) => {
     const { t } = useTranslation('createCourse');
     const navigate = useNavigate();
     const { classes } = useStyles();
@@ -147,10 +147,14 @@ import {
             <motion.div variants={itemVariants} className={classes.header}>
               <Group position="center" spacing="sm">
                 <IconRocket size={36} color="var(--mantine-color-blue-5)" />
-                <Title className={classes.title}>{t('premiumModal.title')}</Title>
+                <Title className={classes.title}>
+                  {limitReached ? t('premiumModal.limitReachedTitle', 'Limit erreicht!') : t('premiumModal.title')}
+                </Title>
               </Group>
-              <Text size="lg" color="dimmed" mt="sm">
-                {t('premiumModal.subtitle')}
+              <Text size="lg" color={limitReached ? 'red' : 'dimmed'} mt="sm">
+                {limitReached 
+                  ? t('premiumModal.limitReachedMessage', 'Sie haben Ihr kostenloses Kontingent an Kursen erreicht.') 
+                  : t('premiumModal.subtitle')}
               </Text>
             </motion.div>
             

@@ -93,6 +93,8 @@
   "premiumModal": {
     "title": "Nexora Pro - Erweitern Sie Ihre Möglichkeiten",
     "subtitle": "Erhalten Sie unbegrenzten Zugriff auf alle Premium-Funktionen und erstellen Sie so viele Kurse wie Sie möchten!",
+    "limitReachedTitle": "Limit erreicht!",
+    "limitReachedMessage": "Sie haben Ihr kostenloses Kontingent an Kursen erreicht. Upgrade auf Premium, um unbegrenzt Kurse zu erstellen.",
     "featuresTitle": "Premium-Funktionen",
     "feature1": "Unbegrenzte Kurse erstellen",
     "feature2": "Bis zu 100 aktive Kurse gleichzeitig",

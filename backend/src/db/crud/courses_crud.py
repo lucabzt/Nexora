@@ -139,6 +139,7 @@ def get_public_courses_infos(db: Session, user_id: str, skip: int = 0, limit: in
             completed_chapter_count=0, # This can be calculated if needed
             user_name=course.user.username if course.user else None,
             is_public=course.is_public,
+            created_at=course.created_at,
         )
         result.append(course_info)
     
@@ -196,6 +197,7 @@ def get_courses_infos(db: Session, user_id: str, skip: int = 0, limit: int = 200
             image_url=course.image_url,
             completed_chapter_count=completed_chapters,
             is_public=course.is_public,
+            created_at=course.created_at,
         )
         result.append(course_info)
     

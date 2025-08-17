@@ -681,7 +681,7 @@ function Dashboard() {
                     {courses[0].title}
                   </Text>
                   <Text size="sm" color="dimmed" mt={4}>
-                    {t('lastAccessed')}: {new Date(courses[0].last_accessed || courses[0].created_at).toLocaleDateString()}
+                    {t('createdAt')}: {new Date(courses[0].created_at).toLocaleDateString()}
                   </Text>
                   
                   {courses[0].description && (
@@ -737,7 +737,7 @@ function Dashboard() {
         )}
 
         {/* Enhanced Search - Full width */}
-        <Box mb="xl">
+        <Box mb="xl" mt="xl" pt="xl">
           <Title order={3} mb="xs">
             {t('searchCourses')}
           </Title>
@@ -767,6 +767,7 @@ function Dashboard() {
       )}
 
       {/* Main Content */}
+      <Box mt="xl" pt="xl">
       {loading ? (
         <Group position="center" py="xl">
           <Loader size="lg" variant="dots" />
@@ -835,6 +836,7 @@ function Dashboard() {
           )}
         </Stack>
       )}
+      </Box>
 
       {/* Info Section - MOVED INSIDE THE MAIN CONTAINER */}
       <motion.div 

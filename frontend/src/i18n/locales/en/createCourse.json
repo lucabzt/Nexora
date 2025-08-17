@@ -92,6 +92,8 @@
   "premiumModal": {
     "title": "Nexora Pro - Unlock More Possibilities",
     "subtitle": "Get unlimited access to all premium features and create as many courses as you want!",
+    "limitReachedTitle": "Limit Reached!",
+    "limitReachedMessage": "You've reached your free course limit. Upgrade to Premium to create unlimited courses.",
     "featuresTitle": "Premium Features",
     "feature1": "Create unlimited courses",
     "feature2": "Up to 100 active courses simultaneously",
