@@ -86,6 +86,7 @@ function CreateCourse() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [isLimitReached, setIsLimitReached] = useState(false);
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
   const [uploadedImages, setUploadedImages] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -252,9 +253,10 @@ function CreateCourse() {
           const errorMessage = t(`errors.${errorData.code === 'MAX_COURSE_CREATIONS_REACHED' ? 'maxCoursesCreated' : 'maxActiveCourses'}`, { limit: errorData.limit });
           console.log('Showing premium modal for error:', errorMessage);
           
-          // Show both toast and modal
+          // Set limit reached state and show premium modal
+          setIsLimitReached(true);
           setShowPremiumModal(true);
-          console.log('showPremiumModal set to:', true);
+          console.log('showPremiumModal set to:', true, 'with limitReached: true');
           
           // Use setTimeout to ensure state update is processed
           setTimeout(() => {
@@ -791,7 +793,11 @@ function CreateCourse() {
       <>
         <PremiumModal 
           opened={showPremiumModal} 
-          onClose={() => setShowPremiumModal(false)} 
+          onClose={() => {
+            setShowPremiumModal(false);
+            setIsLimitReached(false);
+          }}
+          limitReached={isLimitReached}
         />
         <Container size="lg" py="xl">
           <Paper shadow="md" p="xl" withBorder>
@@ -811,7 +817,11 @@ function CreateCourse() {
     <>
       <PremiumModal 
         opened={showPremiumModal} 
-        onClose={() => setShowPremiumModal(false)} 
+        onClose={() => {
+          setShowPremiumModal(false);
+          setIsLimitReached(false);
+        }} 
+        limitReached={isLimitReached}
       />
       <Container size="lg" py="xl">
       
