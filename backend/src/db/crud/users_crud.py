@@ -78,7 +78,7 @@ def update_user_profile_image(db: Session, user: User, profile_image_base64: str
     db.refresh(user)
     return user
 
-def get_users(db: Session, skip: int = 0, limit: int = 100):
+def get_users(db: Session, skip: int = 0, limit: int = 200):
     """Retrieve users with pagination."""
     return db.query(User).offset(skip).limit(limit).all()
 
