@@ -1,10 +1,12 @@
 {
+  "goToDashboard": "Go to Dashboard",
+  "learnMore": "Learn More",
+  "getStarted": "Get Started Free",
   "hero": {
     "title": "Unlock Your Potential with AI-Powered Learning",
     "titlePart1": "Master Any Skill with",
     "titlePart2": "Your AI Mentor",
     "subtitle": "Stop wasting time on generic courses. Nexora builds a unique learning path just for you, so you can achieve your goals faster.",
-    "getStarted": "Start Your Free Trial",
     "login": "Log In",
     "exploreCourses": "See How It Works",
     "createFirstCourse": "Create Your First Course",
