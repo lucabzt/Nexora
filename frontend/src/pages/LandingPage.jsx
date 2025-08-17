@@ -326,7 +326,7 @@ function LandingPage() {
                         size={56} 
                         weight={800} 
                         mb="md"
-                        style={{
+                        sx={{
                           lineHeight: 1.2,
                           background: theme.colorScheme === 'dark' 
                             ? 'linear-gradient(90deg, #fff 0%, #a5d8ff 100%)' 
@@ -334,6 +334,10 @@ function LandingPage() {
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
                           backgroundClip: 'text',
+                          backgroundSize: '100%',
+                          backgroundRepeat: 'no-repeat',
+                          transition: 'background 0.3s ease',
+                          display: 'inline-block' // Ensures the gradient is properly contained
                         }}
                       >
                         {t('hero.title', 'Unlock Your Potential with AI-Powered Learning')}
