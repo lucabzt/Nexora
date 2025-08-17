@@ -1,4 +1,5 @@
 import { Box, createStyles, keyframes, useMantineTheme } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 
 
 
@@ -23,8 +24,10 @@ const pulseGlow = keyframes({
   '50%': { boxShadow: '0 0 35px 12px rgba(0, 199, 181, 0.2)' },
 });
 
+
 // Define the styles for the animation elements
 const useStyles = createStyles((theme) => ({
+
   container: {
     position: 'relative',
     width: 350,
@@ -47,7 +50,7 @@ const useStyles = createStyles((theme) => ({
     height: 70,
     borderRadius: '50%',
     background: theme.fn.linearGradient(45, theme.colors.teal[7], theme.colors.cyan[6]),
-    animation: `${pulseGlow} 4s ease-in-out infinite`,
+    animation: `${pulseGlow} ${useMediaQuery('(max-width: 768px)') ? '12s' : '4s'} ease-in-out infinite`,
     position: 'relative',
     zIndex: 1,
   },
@@ -75,18 +78,19 @@ const useStyles = createStyles((theme) => ({
   
   // Specific animation assignments for each path
   path1: {
-    animation: `${orbit} 10s linear infinite`,
+    animation: `${orbit} ${useMediaQuery('(max-width: 768px)') ? '30s' : '10s'} linear infinite`,
   },
   path2: {
-    animation: `${orbit2} 8s linear infinite`,
+    animation: `${orbit2} ${useMediaQuery('(max-width: 768px)') ? '20s' : '8s'} linear infinite`,
   },
   path3: {
-    animation: `${orbit3} 15s linear infinite`,
+    animation: `${orbit3} ${useMediaQuery('(max-width: 768px)') ? '40s' : '15s'} linear infinite`,
   },
 }));
 
 export function HeroAnimation() {
-  const { classes } = useStyles();
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const { classes } = useStyles({ isMobile });
   const theme = useMantineTheme();
 
 

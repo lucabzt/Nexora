@@ -1,10 +1,13 @@
 import React from 'react';
 import { Group, Paper, Text, ThemeIcon, useMantineTheme } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import { IconFlame, IconBook, IconClock } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 
 function DashboardStats({ stats, theme }) {
   const { t } = useTranslation('dashboard');
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  
   const statItems = [
     {
       label: t('stats.currentStreak'),
@@ -12,12 +15,14 @@ function DashboardStats({ stats, theme }) {
       icon: <IconFlame size={24} />,
       color: 'orange',
       suffix: ` ${t('stats.days')}`,
+      showOnMobile: true,
     },
     {
       label: t('stats.coursesCompleted'),
       value: stats?.totalCourses || 0,
       icon: <IconBook size={24} />,
       color: 'blue',
+      showOnMobile: false,
     },
     {
       label: t('totalLearnTime'),
@@ -25,8 +30,9 @@ function DashboardStats({ stats, theme }) {
       icon: <IconClock size={24} />,
       color: 'teal',
       suffix: ` ${t('stats.hoursUnit')}`,
+      showOnMobile: true,
     },
-  ];
+  ].filter(stat => !isMobile || stat.showOnMobile);
 
   return (
     <Paper p="md" radius="md" withBorder shadow="sm" mb="xl">
@@ -48,10 +54,17 @@ function DashboardStats({ stats, theme }) {
               {stat.icon}
             </ThemeIcon>
             <div>
-              <Text size="sm" color="dimmed" weight={500}>
+              <Text 
+                size={isMobile ? 'xs' : 'sm'} 
+                color="dimmed" 
+                weight={500}
+              >
                 {stat.label}
               </Text>
-              <Text size="lg" weight={700}>
+              <Text 
+                size={isMobile ? 'md' : 'lg'} 
+                weight={700}
+              >
                 {stat.value}
                 {stat.suffix || ''}
               </Text>

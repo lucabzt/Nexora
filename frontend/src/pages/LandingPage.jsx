@@ -30,6 +30,7 @@ import {
 } from "@tabler/icons-react";
 import { useAuth } from "../contexts/AuthContext";
 
+import { useMediaQuery } from '@mantine/hooks';
 
 // ... other imports
 import { HeroAnimation } from "../components/HeroAnimation"; // <-- ADD THIS LINE
@@ -283,6 +284,7 @@ function LandingPage() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   // Animation trigger on mount
   useEffect(() => {
@@ -305,7 +307,13 @@ function LandingPage() {
       <Box className={cx(classes.floatingShape, classes.shape2)} />
       
       {/* Hero Section */}
-      <Box className={classes.hero} id="home">
+      <Box 
+        className={classes.hero} 
+        id="home"
+        sx={{
+          paddingTop: isMobile ? '6rem !important' : undefined,
+        }}
+      >
         <Container size="xl" px="md">
           <Grid gutter={50} align="center">
             <Grid.Col md={6} className={classes.heroContent}>
@@ -352,8 +360,8 @@ function LandingPage() {
                       </Text>
                       <Group spacing="md">
                         <Button
-                          size="lg"
-                          rightIcon={<IconArrowRight size={20} />}
+                          size={isMobile ? "md" : "lg"}
+                          rightIcon={<IconArrowRight size={isMobile ? 16 : 20} />}
                           onClick={() => navigate(isAuthenticated ? '/dashboard' : '/auth/signup')}
                           className={cx(classes.ctaButton, classes.primaryButton)}
                           radius="xl"
@@ -362,7 +370,7 @@ function LandingPage() {
                         </Button>
                         <Button
                           variant="outline"
-                          size="lg"
+                          size={isMobile ? "md" : "lg"}
                           onClick={() => scrollToSection('features')}
                           className={cx(classes.ctaButton, classes.secondaryButton)}
                           radius="xl"
