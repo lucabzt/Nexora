@@ -13,7 +13,7 @@
     "defaultDescription": "Loading..."
   },
   "stats": {
-    "coursesCompleted": "Courses Completed",
+    "coursesCompleted": "Total Courses",
     "currentStreak": "Current Streak",
     "days": "days",
     "daysUnit": "days",
@@ -37,6 +37,10 @@
   },
   "noCourses": "You don't have any courses yet. Create one to get started!",
   "createNewCourseButton": "Create New Course",
+  "search": {
+    "placeholder": "Search courses and chapters...",
+    "noResults": "No results found for \"{{query}}\""
+  },
   "deleteModal": {
     "title": "Confirm Deletion",
     "message": "Are you sure you want to delete the course '{{title}}'? This action cannot be undone.",
@@ -95,5 +99,7 @@
   "viewAllCourses": "View All Courses",
   "totalLearnTime": "Total Learn Time",
   "loadingCourses": "Loading courses...",
-  "searchCourses": "Search Courses"
+  "searchCourses": "Search Courses",
+  "continueButton": "Continue",
+  "lastAccessed": "Last accessed"
 }

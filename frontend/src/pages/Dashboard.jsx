@@ -46,6 +46,51 @@ import DashboardStats from '../components/DashboardStats';
 import EnhancedSearch from '../components/EnhancedSearch';
 
 const useStyles = createStyles((theme) => ({
+  continueSection: {
+    marginBottom: theme.spacing.xl,
+    width: '100%',
+    '& .mantine-Card-root': {
+      overflow: 'visible',
+    },
+  },
+  continueCard: {
+    display: 'flex',
+    gap: theme.spacing.lg,
+    [theme.fn.smallerThan('sm')]: {
+      flexDirection: 'column',
+    },
+  },
+  continueContent: {
+    flex: 1,
+    minWidth: '50%',
+    maxWidth: '50%',
+    [theme.fn.smallerThan('sm')]: {
+      minWidth: '100%',
+      maxWidth: '100%',
+    },
+  },
+  continueImageContainer: {
+    position: 'relative',
+    width: '50%',
+    overflow: 'hidden',
+    [theme.fn.smallerThan('sm')]: {
+      width: '100%',
+      height: '200px',
+      marginTop: theme.spacing.md,
+    },
+  },
+  continueImage: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: 'auto',
+    height: '100%',
+    minWidth: '100%',
+    minHeight: '100%',
+    objectFit: 'cover',
+    objectPosition: 'center',
+    borderRadius: theme.radius.md,
+  },
   courseCard: {
     height: '100%',
     display: 'flex',
@@ -82,19 +127,13 @@ const useStyles = createStyles((theme) => ({
   },
   courseDescription: {
     flex: 1,
-    height: '5.5rem',
-    overflow: 'auto',
+    height: '3rem',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical',
     paddingRight: '4px',
-    '&::-webkit-scrollbar': {
-      width: '4px',
-    },
-    '&::-webkit-scrollbar-track': {
-      background: 'transparent',
-    },
-    '&::-webkit-scrollbar-thumb': {
-      background: theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3],
-      borderRadius: '2px',
-    },
   },
 }));
 
@@ -134,6 +173,17 @@ function Dashboard() {
   function calculateTotalLearnTime(courses) {
     return courses.reduce((total, course) => total + (course.estimated_hours || 0), 0);
   }
+
+  // Function to calculate progress for a course
+  const calculateProgress = (course) => {
+    if (course.status === 'CourseStatus.COMPLETED') return 100;
+    if (course.status === 'CourseStatus.CREATING') return 0;
+    
+    return (course && course.chapter_count && course.chapter_count > 0)
+      ? Math.round((100 * (course.completed_chapter_count || 0) / course.chapter_count))
+      : 0;
+  };
+
 
   // Handlers for course actions
   const handleDelete = (courseId) => {
@@ -256,16 +306,6 @@ function Dashboard() {
       default:
         return { label, color: 'gray', Icon: IconBook };
     }
-  };
-
-  // Function to calculate progress for a course
-  const calculateProgress = (course) => {
-    if (course.status === 'CourseStatus.COMPLETED') return 100;
-    if (course.status === 'CourseStatus.CREATING') return 0;
-    
-    return (course?.chapter_count > 0)
-      ? Math.round((100 * (course.completed_chapter_count || 0)) / course.chapter_count)
-      : 0;
   };
 
   // Render a single course card
@@ -504,6 +544,74 @@ color="teal"
         <Box className={classes.statsContainer} mb="xl">
           <DashboardStats stats={userStats} theme={theme} />
         </Box>
+
+        {/* Continue Where You Left Off Section */}
+        {courses.length > 0 && (
+          <Box mb="xl" className={classes.continueSection}>
+            <Title order={3} mb="md">
+              {t('continueLearningTitle')}
+            </Title>
+            <Card withBorder radius="md" p="lg">
+              <div className={classes.continueCard}>
+                <div className={classes.continueContent}>
+                  <Text weight={600} size="lg" lineClamp={1}>
+                    {courses[0].title}
+                  </Text>
+                  <Text size="sm" color="dimmed" mt={4}>
+                    {t('lastAccessed')}: {new Date(courses[0].last_accessed || courses[0].created_at).toLocaleDateString()}
+                  </Text>
+                  
+                  {courses[0].description && (
+                    <Text size="sm" color="dimmed" mt="sm" lineClamp={2} className={classes.courseDescription}>
+                      {courses[0].description}
+                    </Text>
+                  )}
+                  
+                  <Box mt="md">
+                    <Group position="apart" mb={4}>
+                      <Text size="sm" weight={500}>{t('yourProgress')}</Text>
+                      <Text size="sm" weight={500}>
+                        {calculateProgress(courses[0])}%
+                      </Text>
+                    </Group>
+                    <Progress
+                      value={calculateProgress(courses[0])}
+                      size="lg"
+                      radius="xl"
+                      styles={{
+                        root: { width: '100%' },
+                        bar: { backgroundImage: 'linear-gradient(45deg, #20c997, #12b886)' },
+                      }}
+                    />
+                    <Group position="apart" mt="md">
+                      <Text size="sm" color="dimmed">
+                        {courses[0].completed_chapter_count || 0}/{courses[0].chapter_count || 0} {t('lessons', { count: courses[0].chapter_count || 0 })}
+                      </Text>
+                      <Button
+                        variant="light"
+                        color="teal"
+                        rightIcon={<IconChevronRight size={16} />}
+                        onClick={() => navigate(`/course/${courses[0].course_id}`)}
+                      >
+                        {t('continueButton')}
+                      </Button>
+                    </Group>
+                  </Box>
+                </div>
+                
+                <div className={classes.continueImageContainer}>
+                  {courses[0].image_url && (
+                    <img
+                      src={courses[0].image_url}
+                      alt=""
+                      className={classes.continueImage}
+                    />
+                  )}
+                </div>
+              </div>
+            </Card>
+          </Box>
+        )}
 
         {/* Enhanced Search - Full width */}
         <Box mb="xl">

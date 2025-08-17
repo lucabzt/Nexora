@@ -281,9 +281,6 @@ function MyCourses() {
                   </Card.Section>
 
                   <Group position="apart" mt="md" mb="xs">
-                    <Text weight={500} lineClamp={2} style={{ height: '3em' }}>
-                      {course.title || t('untitledCourse', { defaultValue: 'Unbenannter Kurs' })}
-                    </Text>
                     <Badge 
                       color={statusColor} 
                       variant="light"
@@ -291,7 +288,36 @@ function MyCourses() {
                     >
                       {statusLabel}
                     </Badge>
+                    <Group spacing="xs">
+                      <ActionIcon 
+                        variant="subtle" 
+                        color="gray" 
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRename(course);
+                        }}
+                      >
+                        <IconPencil size={16} />
+                      </ActionIcon>
+                      
+                      <ActionIcon 
+                        variant="subtle" 
+                        color="red" 
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(course.course_id);
+                        }}
+                      >
+                        <IconTrash size={16} />
+                      </ActionIcon>
+                    </Group>
                   </Group>
+                  
+                  <Text weight={500} lineClamp={2} mt="xs" mb="sm" style={{ minHeight: '3em' }}>
+                    {course.title || t('untitledCourse', { defaultValue: 'Unbenannter Kurs' })}
+                  </Text>
 
                   <Text size="sm" color="dimmed" lineClamp={3} style={{ flexGrow: 1, marginBottom: '1rem' }}>
                     {course.description || t('noDescription', { defaultValue: 'Keine Beschreibung' })}
@@ -309,38 +335,16 @@ function MyCourses() {
                     <Progress value={progress} size="sm" radius="xl" />
                   </Box>
 
-                  <Group position="apart" mt="auto">
-                    <Button 
-                      variant="light" 
-                      color="blue" 
-                      fullWidth 
-                      onClick={() => navigate(`/dashboard/courses/${course.course_id}`)}
-                    >
-                      {t('openCourse', { defaultValue: 'Zum Kurs' })} <IconBook size={16} style={{ marginLeft: 8 }} />
-                    </Button>
-                    
-                    <ActionIcon 
-                      variant="subtle" 
-                      color="gray" 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRename(course);
-                      }}
-                    >
-                      <IconPencil size={18} />
-                    </ActionIcon>
-                    
-                    <ActionIcon 
-                      variant="subtle" 
-                      color="red" 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(course.course_id);
-                      }}
-                    >
-                      <IconTrash size={18} />
-                    </ActionIcon>
-                  </Group>
+                  <Button 
+                    fullWidth 
+                    variant="filled"
+                    color="teal" 
+                    mt="md"
+                    onClick={() => navigate(`/dashboard/courses/${course.course_id}`)}
+                    leftIcon={<IconBook size={16} />}
+                  >
+                    {t('openCourse', { defaultValue: 'Open' })}
+                  </Button>
                 </Card>
               </Grid.Col>
             );

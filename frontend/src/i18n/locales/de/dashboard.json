@@ -13,7 +13,7 @@
     "defaultDescription": "Lädt..."
   },
   "stats": {
-    "coursesCompleted": "Abgeschlossene Kurse",
+    "coursesCompleted": "Kurse insgesamt",
     "currentStreak": "Aktuelle Serie",
     "days": "Tage",
     "daysUnit": "Tage",
@@ -26,7 +26,7 @@
   "continueLearningTitle": "Mach da weiter, wo du aufgehört hast",
   "yourCoursesTitle": "Deine Kurse",
   "recentCoursesTitle": "Deine letzten Kurse",
-  "recentCoursesSubtitle": "Zeige deine 3 zuletzt besuchten Kurse",
+  "recentCoursesSubtitle": "Zeige deine 3 zuletzt erstellten Kurse",
   "viewAllButton": "Alle anzeigen",
   "showLessButton": "Weniger anzeigen",
   "viewLessButton": "Weniger anzeigen",
@@ -37,6 +37,10 @@
   },
   "noCourses": "Du hast noch keine Kurse. Erstelle einen, um zu beginnen!",
   "createNewCourseButton": "Neuen Kurs erstellen",
+  "search": {
+    "placeholder": "Kurse und Kapitel durchsuchen...",
+    "noResults": "Keine Ergebnisse gefunden für \"{{query}}\""
+  },
   "deleteModal": {
     "title": "Kurs löschen bestätigen",
     "message": "Bist du sicher, dass du den Kurs '{{title}}' löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
@@ -95,5 +99,7 @@
   "viewAllCourses": "Alle Kurse anzeigen",
   "totalLearnTime": "Gesamte Lernzeit",
   "loadingCourses": "Kurse werden geladen...",
-  "searchCourses": "Kurse durchsuchen"
+  "searchCourses": "Kurse durchsuchen",
+  "continueButton": "Weiterlernen",
+  "lastAccessed": "Zuletzt aufgerufen"
 }

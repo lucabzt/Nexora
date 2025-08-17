@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { Input, Box, Paper, Text, Group, Badge, Loader, useMantineTheme, Progress } from '@mantine/core';
+import { useTranslation } from 'react-i18next';
 import { IconSearch, IconBook, IconFileText } from '@tabler/icons-react';
 import { useDebouncedValue } from '@mantine/hooks';
+import { searchCoursesAndChapters, getResultUrl } from '../api/searchService';
 
 function EnhancedSearch({ courses, onSearchResultClick }) {
+  const { t } = useTranslation('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery] = useDebouncedValue(searchQuery, 300);
   const [results, setResults] = useState([]);
@@ -21,44 +24,25 @@ function EnhancedSearch({ courses, onSearchResultClick }) {
 
       setLoading(true);
       
-      // Simulate API call or implement actual search logic
-      const searchResults = [];
-      
-      // Search in courses
-      courses.forEach(course => {
-        const courseMatch = course.title.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-                          course.description.toLowerCase().includes(debouncedQuery.toLowerCase());
+      try {
+        const searchResults = await searchCoursesAndChapters(debouncedQuery);
+        // Map the API response to the expected format
+        const formattedResults = searchResults.map(result => ({
+          type: result.type,
+          id: result.id,
+          title: result.title,
+          description: result.description || '',
+          courseId: result.course_id,
+          courseTitle: result.course_title || '',
+        }));
         
-        if (courseMatch) {
-          searchResults.push({
-            type: 'course',
-            id: course.course_id,
-            title: course.title,
-            description: course.description,
-            progress: course.progress || 0,
-          });
-        }
-
-        // Search in chapters if available
-        if (course.chapters) {
-          course.chapters.forEach(chapter => {
-            if (chapter.title.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-                chapter.content?.toLowerCase().includes(debouncedQuery.toLowerCase())) {
-              searchResults.push({
-                type: 'chapter',
-                id: chapter.id,
-                courseId: course.course_id,
-                title: chapter.title,
-                courseTitle: course.title,
-                description: chapter.content?.substring(0, 100) + '...',
-              });
-            }
-          });
-        }
-      });
-
-      setResults(searchResults.slice(0, 5)); // Limit to 5 results
-      setLoading(false);
+        setResults(formattedResults);
+      } catch (error) {
+        console.error('Search error:', error);
+        // Keep previous results on error
+      } finally {
+        setLoading(false);
+      }
     };
 
     search();
@@ -67,15 +51,21 @@ function EnhancedSearch({ courses, onSearchResultClick }) {
   const handleResultClick = (result) => {
     if (onSearchResultClick) {
       onSearchResultClick(result);
+    } else {
+      // Default navigation if no handler provided
+      window.location.href = getResultUrl(result);
     }
     setSearchQuery('');
     setResults([]);
   };
 
+  const showNoResults = searchQuery.length >= 2 && results.length === 0 && !loading;
+  const showResults = isFocused && (loading || results.length > 0 || showNoResults);
+
   return (
     <Box style={{ position: 'relative', width: '100%' }} ref={searchRef}>
       <Input
-        placeholder="Search courses and chapters..."
+        placeholder={t('search.placeholder', 'Search courses and chapters...')}
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         icon={<IconSearch size={16} />}
@@ -96,7 +86,7 @@ function EnhancedSearch({ courses, onSearchResultClick }) {
         }}
       />
 
-      {(isFocused && (loading || results.length > 0 || debouncedQuery)) && (
+      {showResults && (
         <Paper
           shadow="md"
           style={{
@@ -161,19 +151,6 @@ function EnhancedSearch({ courses, onSearchResultClick }) {
                       <Text size="xs" color="dimmed" lineClamp={1} mt={2}>
                         {result.description}
                       </Text>
-                      {result.progress !== undefined && (
-                        <Box mt={4}>
-                          <Progress
-                            value={result.progress}
-                            size="xs"
-                            color={result.progress === 100 ? 'teal' : 'blue'}
-                            style={{ maxWidth: '100px' }}
-                          />
-                          <Text size="xs" color="dimmed" mt={2}>
-                            {result.progress}% complete
-                          </Text>
-                        </Box>
-                      )}
                     </div>
                   </Group>
                 </Box>
@@ -182,7 +159,7 @@ function EnhancedSearch({ courses, onSearchResultClick }) {
           ) : (
             <Box p="md" style={{ textAlign: 'center' }}>
               <Text size="sm" color="dimmed">
-                No results found for "{debouncedQuery}"
+                {t('search.noResults', { query: debouncedQuery }, `No results found for "${debouncedQuery}"`)}
               </Text>
             </Box>
           )}
